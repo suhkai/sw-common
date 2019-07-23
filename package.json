@@ -4,7 +4,6 @@
   "description": "a service worker",
   "main": "dist/index.js",
   "scripts": {
-    "start:local": "node server/server.js ./dist",
     "checktypes": "node_modules/.bin/tsc",
     "build": "node_modules/.bin/webpack-cli",
     "test": "echo \"Error: no test specified\" && exit 1"
