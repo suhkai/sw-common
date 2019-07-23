@@ -1,4 +1,5 @@
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebPackPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
@@ -65,6 +66,34 @@ module.exports = function () {
             new ManifestPlugin({}),
             new BundleAnalyzerPlugin({
                 analyzerMode: 'none'
+            }),
+            new HtmlWebPackPlugin({
+				//title: '📖 👨‍🎓 benchmark',
+				/* overrided by the template login , look below, when not using 
+						 webpackHTMLtemplateplgin ->meta: {  viewport: "width=device-width, initial-scale=1, shrink-to-fit=no" },
+				*/
+				appMountHtmlSnippet: '<div class="app-spinner"></div>',
+				excludeChunks: ['sw-notice', 'runtime-sw-notice'],
+				hash: true,
+				showErrors: true,
+				xhtml: true,
+				//template configuration
+				template: require('html-webpack-template'),
+				inject: false, //inject assets into the given template  = false (template has own logic, leave it alone)
+				/*appMountHtmlSnippet: `<div id="custom-insertion-point">
+				This might be any DOM node of your choice which can serve as an insertion point.
+			  </div>`,*/
+				//appMountId: 'app', // create a <div id="app"></div> for app mounting
+				appMountIds: ['app', "zip", "zap"],
+				// baseHref: 'https://www.jacob-bogers.com' // all rels url go here, favicon, bundle.js etc
+				// devServer: 'http://localhost:3000' , will try and load http://localhost:3000/webpack-dev-server.js
+				lang: 'en-US',
+				links: [], // external loadable fonts etc, whatever
+				mobile: true,
+				meta: [{
+					name: 'viewport',
+					content: 'width=device-width, initial-scale=1'
+                }],
             }),
             new CleanWebpackPlugin({
                 verbose: true,

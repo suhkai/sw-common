@@ -1,10 +1,3 @@
-const badge = '/images/badge.png';
-const image = '/images/markets-original.jpg';
-const icon = '/images/superalgos-logov2.png';
-const superalogs = '/images/superalgos-logov2.png';
-const tag = 'some-id-0123';
-const cal = '/images/icon-cal.png';
-const confirm = '/images/icon-confirm.png';
 
 export { };
 declare var self: ServiceWorkerGlobalScope;
@@ -72,8 +65,8 @@ self.addEventListener('message', (e: ExtendableMessageEvent) => {
     });
     // showNotifcation do it here
     const body = 'this is the  body of the text';
-    const actions = [{ action:'confirm-1', title:'WHAT the fuck', icon: confirm}];
-    e.waitUntil(self.registration.showNotification("Shiny", { actions, tag, badge, body, icon, image, renotify: false, requireInteraction: true, timestamp: Date.now() + 24 * 3600 * 1000 }));
+    //const actions = [{ action:'confirm-1', title:'WHAT the fuck', icon: confirm}];
+    //e.waitUntil(self.registration.showNotification("Shiny", { actions, tag, badge, body, icon, image, renotify: false, requireInteraction: true, timestamp: Date.now() + 24 * 3600 * 1000 }));
 });
 
 

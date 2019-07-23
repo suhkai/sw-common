@@ -93,14 +93,7 @@
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-var badge = '/images/badge.png';
-var image = '/images/markets-original.jpg';
-var icon = '/images/superalgos-logov2.png';
-var superalogs = '/images/superalgos-logov2.png';
-var tag = 'some-id-0123';
-var cal = '/images/icon-cal.png';
-var confirm = '/images/icon-confirm.png'; //self.importScripts('/script1.js');
-
+//self.importScripts('/script1.js');
 self.addEventListener('activate', function (e) {
   console.log("%c activate event received", 'color:green');
   e.waitUntil(new Promise(function (resolve) {
@@ -176,23 +169,8 @@ self.addEventListener('message', function (e) {
     }
   }); // showNotifcation do it here
 
-  var body = 'this is the  body of the text';
-  var actions = [{
-    action: 'confirm-1',
-    title: 'WHAT the fuck',
-    icon: confirm
-  }];
-  e.waitUntil(self.registration.showNotification("Shiny", {
-    actions: actions,
-    tag: tag,
-    badge: badge,
-    body: body,
-    icon: icon,
-    image: image,
-    renotify: false,
-    requireInteraction: true,
-    timestamp: Date.now() + 24 * 3600 * 1000
-  }));
+  var body = 'this is the  body of the text'; //const actions = [{ action:'confirm-1', title:'WHAT the fuck', icon: confirm}];
+  //e.waitUntil(self.registration.showNotification("Shiny", { actions, tag, badge, body, icon, image, renotify: false, requireInteraction: true, timestamp: Date.now() + 24 * 3600 * 1000 }));
 });
 self.addEventListener('messageerror', function (e) {
   console.log("%c messageerror event received", 'color:red');
