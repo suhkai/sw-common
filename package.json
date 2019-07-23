@@ -1,7 +1,7 @@
 {
-  "name": "serviceworker",
-  "version": "1.0.0",
-  "description": "a service worker",
+  "name": "sw-common",
+  "version": "1.0.0-alpha",
+  "description": "A Service Worker with configurable caching and boot sequence wich can be customized for each app",
   "main": "dist/index.js",
   "scripts": {
     "checktypes": "node_modules/.bin/tsc",
