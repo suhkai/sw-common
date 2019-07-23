@@ -1,0 +1,6 @@
+{
+  "runtime.js": "runtime.js",
+  "runtime.js.map": "runtime.js.map",
+  "sw-notice.js": "sw-notice.js",
+  "sw-notice.js.map": "sw-notice.js.map"
+}
