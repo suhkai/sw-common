@@ -26,7 +26,7 @@ module.exports = function () {
                 chunks: 'all'
             },
             namedModules: true, //named modules for better debugging
-            runtimeChunk: 'single',// { name: entrypoint => `runtime~${entrypoint.name}` }
+            runtimeChunk: false,// { name: entrypoint => `runtime~${entrypoint.name}` }
             //runtimeChunk: {	name: (entrypoint) => ['runtime-sw-notice','sw-notice'].includes(entrypoint.name)  ? false :`runtime~${entrypoint.name}`
         },
         mode: 'development',
