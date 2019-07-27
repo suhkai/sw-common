@@ -1,3 +1,6 @@
+#distribution dirs
+./dist
+
 # Logs
 logs
 *.log
