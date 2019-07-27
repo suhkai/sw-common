@@ -15,13 +15,14 @@
         // Import non-ES modules as default imports.
         "esModuleInterop": true,
         "lib": [
-            "webworker"
-        ]
+            "webworker",
+            "dom"
+        ] 
     },
     "include": [
         "src"
     ],
     "exclude": [
-       "node_modules"
+        "node_modules"
     ]
 }

@@ -1,5 +1,13 @@
 {
+  "primer.js": "primer.js",
+  "primer.js.map": "primer.js.map",
   "sw-notice.js": "sw-notice.js",
   "sw-notice.js.map": "sw-notice.js.map",
+  "vendors~primer.js": "vendors~primer.js",
+  "vendors~primer.js.map": "vendors~primer.js.map",
+  "vendors~primer~sw-notice.js": "vendors~primer~sw-notice.js",
+  "vendors~primer~sw-notice.js.map": "vendors~primer~sw-notice.js.map",
+  "vendors~sw-notice.js": "vendors~sw-notice.js",
+  "vendors~sw-notice.js.map": "vendors~sw-notice.js.map",
   "index.html": "index.html"
 }
