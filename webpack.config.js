@@ -26,15 +26,21 @@ module.exports = function () {
             mergeDuplicateChunks: true,
             removeEmptyChunks: true,
             removeAvailableModules: true,
+            minimize: true,
             // optimization.nodeEnv: '..', uses DefinePlugin to set process.env.NODE_ENV
             chunkIds: 'named',
             moduleIds: 'hashed',
             splitChunks: {
-                chunks: 'all'
+                chunks(chunk) {
+                    // exclude `sw-notice`
+                    return chunk.name !== 'sw-notice';
+                }
             },
             namedModules: true, //named modules for better debugging
             runtimeChunk: false, // { name: entrypoint => `runtime~${entrypoint.name}` }
-            //runtimeChunk: {	name: (entrypoint) => ['runtime-sw-notice','sw-notice'].includes(entrypoint.name)  ? false :`runtime~${entrypoint.name}`
+            //runtimeChunk: {	
+            //    name: (entrypoint) => ['runtime-sw-notice','sw-notice'].includes(entrypoint.name)  ? 9 :`runtime~${entrypoint.name}`
+            //}
         },
         mode: 'development',
         entry: {
@@ -54,7 +60,10 @@ module.exports = function () {
                             presets: [
                                 ["@babel/env", {
                                     "useBuiltIns": "usage",
-                                    "corejs": { version: 3, proposals: true }
+                                    "corejs": {
+                                        version: 3,
+                                        proposals: true
+                                    }
                                 }],
                                 "@babel/preset-typescript"
                             ],
@@ -82,7 +91,7 @@ module.exports = function () {
                 /* overrided by the template login , look below, when not using 
                 		 webpackHTMLtemplateplgin ->meta: {  viewport: "width=device-width, initial-scale=1, shrink-to-fit=no" },
                 */
-                appMountHtmlSnippet: '<div class="app-spinner"></div>',
+                appMountHtmlSnippet: '<div id="app-spinner"></div>',
                 excludeChunks: ['sw-notice', 'runtime-sw-notice'],
                 hash: true,
                 showErrors: true,
@@ -94,7 +103,7 @@ module.exports = function () {
 				This might be any DOM node of your choice which can serve as an insertion point.
 			  </div>`,*/
                 //appMountId: 'app', // create a <div id="app"></div> for app mounting
-                appMountIds: ['app', "zip", "zap"],
+                //appMountIds: ['app', "zip", "zap"],
                 // baseHref: 'https://www.jacob-bogers.com' // all rels url go here, favicon, bundle.js etc
                 // devServer: 'http://localhost:3000' , will try and load http://localhost:3000/webpack-dev-server.js
                 lang: 'en-US',

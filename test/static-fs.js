@@ -47,7 +47,7 @@ function createHandler(options) {
             } = foundEtag;
             res.setHeader('Expires', expires)
             res.setHeader('Etag', etag);
-            res.setHeader('Cache-Control', `private, max-age=600`); // 10 minutes
+            res.setHeader('Cache-Control', `max-age=0`); // 10 minutes
             res.statusCode = 304;
             res.statusMessage = status[304];
             res.end();
@@ -82,7 +82,7 @@ function createHandler(options) {
 
         const expires = new Date(Date.now() + 3600 * 24).toUTCString(); //24h
         res.setHeader('Expires', expires)
-        res.setHeader('Cache-Control', `private, max-age=600`); // 10 minutes
+        res.setHeader('Cache-Control', `max-age=0`); // 10 minutes
         etagMap.set(etag, { expires });
         res.end(buffer);
     }

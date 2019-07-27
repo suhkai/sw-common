@@ -1,5 +1,5 @@
 #distribution dirs
-./dist
+dist/
 
 # Logs
 logs
