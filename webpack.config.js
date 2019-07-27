@@ -102,7 +102,7 @@ module.exports = function () {
                 /*appMountHtmlSnippet: `<div id="custom-insertion-point">
 				This might be any DOM node of your choice which can serve as an insertion point.
 			  </div>`,*/
-                //appMountId: 'app', // create a <div id="app"></div> for app mounting
+                appMountId: 'app', // create a <div id="app"></div> for app mounting
                 //appMountIds: ['app', "zip", "zap"],
                 // baseHref: 'https://www.jacob-bogers.com' // all rels url go here, favicon, bundle.js etc
                 // devServer: 'http://localhost:3000' , will try and load http://localhost:3000/webpack-dev-server.js
