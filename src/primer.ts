@@ -1,6 +1,6 @@
 // this bootstrap script is injected into the minimalist html page
-export { };
 
+import SALogo from './SALogo';
 
 const isHttpValidResponse = (response: Response) => {
     const { status, statusText } = response;
@@ -28,10 +28,15 @@ function fetchExt(url: string) {
         .catch(errorHandler);
 }
 
-
 async function bootStrap() {
-
     console.log('started');
+    // mount svg element on id
+   
+    const mp = window.document.querySelector<HTMLElement>('#app-spinner');
+    if (mp){
+        const logo = new SALogo(30, 10, 5, 0.8, 0.5);
+        logo.mount(mp);
+    }
     const [manifest, error] = await fetchExt('./manifest.json');
     console.log(manifest, error);
 }

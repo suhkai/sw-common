@@ -33,7 +33,7 @@ module.exports = function () {
             splitChunks: {
                 chunks(chunk) {
                     // exclude `sw-notice`
-                    return chunk.name !== 'sw-notice';
+                    return !['sw-notice'].includes(chunk.name);
                 }
             },
             namedModules: true, //named modules for better debugging

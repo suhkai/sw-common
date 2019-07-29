@@ -10,22 +10,23 @@ const options = {
     cert: fs.readFileSync(require.resolve('./cryptokeys/mobile.superalgos.org.crt'))
 };
 
-const server = https.createServer(options)
+//const server = https.createServer(options)
+const http = require('http');
+const server = http.createServer();
+
 const handler = createHandler();
 server.on('request', handler);
 
-const port = 443
+/*const port = 443
 server.listen(port, () => {
     console.log(`serving files on ${port}`)
-});
+});*/
 
-const http = require('http');
-
-http.createServer().listen(8080,() => { 
+server.listen(8080,() => { 
    console.log('non secure app at 8080');
 });
 
-http.createServer(function (req, res) {
+/*http.createServer(function (req, res) {
         const url = URL.parse(req.url);
         console.log(url);   
         url.protocol = 'https:';
@@ -34,4 +35,4 @@ http.createServer(function (req, res) {
         res.writeHead(301, {Location: URL.format(url) });
         res.end();
 
-}).listen(80, () => console.log('redirect active on port 80 -> 443'));
+}).listen(80, () => console.log('redirect active on port 80 -> 443'));*/
