@@ -1,0 +1,10 @@
+--require ts-node/register
+--require source-map-support/register
+--full-trace
+--recursive
+--sort
+--exit
+--bail
+--timeout 0
+test/validator/test.ts
+

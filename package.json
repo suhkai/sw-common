@@ -1,16 +1,14 @@
 {
-  "name": "sw-common",
-  "version": "1.0.0-alpha",
-  "description": "A Service Worker with configurable caching and boot sequence wich can be customized for each app",
-  "main": "dist/index.js",
-  "scripts": {
-    "checktypes": "node_modules/.bin/tsc",
-    "build": "node_modules/.bin/webpack-cli",
-    "server": "node test/server.js ./dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "jacobbogers <jkfbogers@gmail.com>",
-  "license": "ISC",
+  "dependencies": {
+    "@babel/plugin-transform-async-to-generator": "^7.5.0",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/register": "^7.5.5",
+    "core-js": "^3.1.4",
+    "mocha-clean": "^1.0.0",
+    "nyc": "^14.1.1"
+  },
+  "description": "A Service Worker with configurable caching and boot sequence wich can be customized for each app",
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
@@ -18,12 +16,18 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-typescript": "^7.3.3",
+    "@types/mocha": "^5.2.7",
     "@types/node": "^12.6.8",
     "babel-loader": "^8.0.6",
+    "chai": "^4.2.0",
     "clean-webpack-plugin": "^3.0.0",
+    "cross-env": "^5.2.0",
     "html-webpack-plugin": "^3.2.0",
     "html-webpack-template": "^6.2.0",
+    "mocha": "^6.2.0",
+    "source-map-support": "^0.5.12",
     "ts-loader": "^6.0.4",
+    "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
     "typescript": "^3.5.3",
     "webpack": "^4.36.1",
@@ -31,9 +35,14 @@
     "webpack-cli": "^3.3.6",
     "webpack-manifest-plugin": "^2.0.4"
   },
-  "dependencies": {
-    "@babel/plugin-transform-async-to-generator": "^7.5.0",
-    "@babel/polyfill": "^7.4.4",
-    "core-js": "^3.1.4"
-  }
+  "license": "ISC",
+  "main": "dist/index.js",
+  "name": "sw-common",
+  "scripts": {
+    "build": "node_modules/.bin/webpack-cli",
+    "checktypes": "node_modules/.bin/tsc",
+    "server": "node test/server.js ./dist",
+    "test": "cross-env-shell NODE_ENV=test TS_NODE_DISABLE_WARNINGS=true nyc mocha"
+  },
+  "version": "1.0.0-alpha"
 }

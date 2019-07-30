@@ -43,6 +43,16 @@ async function bootStrap() {
 
 window.onload = bootStrap;
 
+import validator from './validator';
+
+const obj = validator();
+const optional = validator();
+
+obj({
+    a:1,
+    b:2
+}).nonew();
+
 
 
 

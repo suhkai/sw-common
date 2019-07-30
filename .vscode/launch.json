@@ -7,11 +7,9 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "args":[
-                "./dist"
-            ],
-            "program": "${workspaceFolder}\\test\\server.js"
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

@@ -14,10 +14,17 @@
         "isolatedModules": true,
         // Import non-ES modules as default imports.
         "esModuleInterop": true,
+        "module": "commonjs",
         "lib": [
             "webworker",
             "dom"
-        ] 
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "~root/*": [
+                "src/*"
+            ]
+        }
     },
     "include": [
         "src"
