@@ -1,37 +1,28 @@
 'use strict'
 
+import { AssertionError } from "assert";
 
 
-const isString = (s: any) => typeof s === 'string';
+
+// collection of primitive checks
+const isJSString = (s: any): s is string => typeof s === 'string';
+const isJSNumber = (s: any): s is number => typeof s === 'number';
+
+const notANumber = (s: any): [null, TypeError] => ([null, new TypeError(`not a number; [${String(s)}]`)]);
+const NumberNotSmaller = (s: number, limit: number): [null, TypeError] => ([null, new TypeError(`[${String(s)}] not smaller then ${limit}`)]);
+const NumberNotLarger = (s: number, limit: number): [null, TypeError] => ([null, new TypeError(`[${String(s)}] not larger then ${limit}`)]);
 
 const isNumeric = (s: any) => {
-    if (typeof s === 'string') {
+    if (typeof s !== 'number') {
         try {
-            return Number.parseFloat(s) !== NaN
+            const found = Number.parseFloat(String(s));
+            return found !== NaN ? [found, null] : notANumber(s);
         }
         catch (e) {
-            return false;
+            return notANumber(s);
         }
     }
-    return typeof s === 'number';
-}
-
-const toNumber = (s: any) => {
-    if (typeof s === 'string') {
-        switch (s.toLocaleLowerCase()) {
-            case '+infinity':
-            case 'infinity':
-                return Infinity;
-            case '-infinity':
-                return -Infinity;
-            default:
-                return Number.parseFloat(s);
-        }
-    }
-    if (typeof s === 'number') {
-        return s;
-    }
-    return NaN;
+    return [s, null];
 }
 
 const isInteger = Number.isInteger;
@@ -39,7 +30,23 @@ const isFinite = Number.isFinite;
 const isNaN = Number.isNaN;
 
 //max
-const createMax = (max: number) => (s: number) => s < max;
+const createMax = (max: number) => (s: any) => {
+    if (!isJSNumber(s)) {
+        return notANumber(s);
+    }
+    return s < max ? [s, null] : NumberNotSmaller(s, max);
+}
+//min
+const createMin = (min: number) => (s: any) => {
+    if (!isJSNumber(s)) {
+        return notANumber(s);
+    }
+    return s > min ? [s, null] : NumberNotLarger(s, min);
+}
+
+const passThrough = (s: any) => {
+    return [s, null];
+}
 //maxInc
 const createMaxInclusive = (max: number) => (s: number) => s <= max;
 //minInc
@@ -98,11 +105,23 @@ const allowed = (actual: any[], allowed: any[]) => {
     return true;
 };
 
-const tokes = {
-    'obj': {},
-    'nonew': {}
 
-}
+const tokens = {
+    'numeric': {
+        validator: isNumeric,
+        stages: 1
+    },
+    'max': {
+        validator: createMax,
+        stages: 2
+    },
+    'min': {
+        validator: createMin,
+        stages: 2
+    }
+};
+
+type Validator<T, S> = (s: T) => [S | null, TypeError];
 
 function primer() {/* noop primer  */ console.log('function is called'); return { obj: {} }; }
 
@@ -110,61 +129,60 @@ export type Primer = () => ({ obj: {} })
 
 const $start = Symbol('start');
 
-function createValidatorProxy() {
+
+function createValidatorProxy<T, S>(prevProxy: any, validator: Validator<T, S>) {
+    let staged: undefined | {
+        name: string;
+        validator: Validator<T, S>
+    };
     const handler: ProxyHandler<any> = {
-        getPrototypeOf() {
-            console.log('get prototypeof activated');
-            return { a: 1, b: 2 };
+        get(target: Validator<T, S>, prop: string, receiver) {
+            if (!isJSString(prop)) {
+                throw new TypeError(`[${String(prop)}] must be a string`);
+            }
+            if (staged) {
+                throw new TypeError(`[${String(prop)}] validator must be finalized`);
+            }
+            // lookup propName
+            if ((<any>tokens)[prop] === undefined) {
+                throw new TypeError(`[${String(prop)}] validator is unknown`);
+            }
+            const token = (<any>tokens)[prop];
+            if (token.stages === 1) {
+                return createValidatorProxy(receiver, token.validator);
+            }
+            staged = token;
+            return receiver;
         },
-        get(target, prop, receiver) {
-            console.log(`prop:${String(prop)}`);
-            return assembler;
+        set() {
+            throw new TypeError('Using validators it the wrong way, you cannot assign a value to a validation step');
         },
-        set(target, s: string, value: any, receiver){
-            throw new TypeError(`not possible to assign a value to a validation rung [${s}]`);
-        },
-        apply(target, thisArg, argumentList) {
-            //console.log(`thisArg:${thisArg}`)
-            console.log(`argumentList ${Array.from(Object.entries(argumentList)).map(String).join('|')}`);
-            // do nothing
-            return assembler;
+        apply(target, thisArg /* this is the proxy */, argumentList) {
+            // either we are executing the created validator or finalizing the creation of a validator
+            if (staged) {
+                prevProxy;
+                assembler;
+                const createdValidator = (<any>staged.validator)(...argumentList);
+                staged = undefined; // clear it again
+                return createValidatorProxy(thisArg, createdValidator);
+            }
+            // we are actually validating
+            let fnArg = argumentList[0];
+            if (prevProxy !== undefined){
+                const [answer, error] =  prevProxy(fnArg);
+                if (error){
+                    return [answer, error];
+                }
+                fnArg = answer;
+            }
+            return target(fnArg);
         }
     };
-    const assembler = new Proxy(primer.bind(handler), handler);
+    const assembler = new Proxy(validator, handler);
     /* maybe do some tests here */
     return assembler;
 }
 
+const bootStrap = createValidatorProxy(undefined, <any>passThrough);
 
-function rootProxy(){
-    const handler: ProxyHandler<any> = {
-        getPrototypeOf() {
-            console.log('get prototypeof activated');
-            return { a: 1, b: 2 };
-        },
-        get(target, prop: string, receiver) {
-            console.log(`prop:${String(prop)}`);
-            const assembler = createValidatorProxy(); // first prop
-            return assembler[prop];
-        },
-        apply(target, thisArg, argumentList) {
-            // root proxy cannot be called
-            throw new Error('No validator defined');
-        }
-    };
-    const rootAssembly = new Proxy(primer.bind(handler), handler);
-    /* maybe do some tests here */
-    return rootAssembly;
-}
-
-/*
- connectors
- name
- type
- port:
- host:M
- port
-*/
-
-export default rootProxy();
-
+export default bootStrap;
