@@ -1,13 +1,8 @@
 // this bootstrap script is injected into the minimalist html page
 
-
 import createPlugins from './jss-plugins';
 import SALogo from './SALogo';
-
 import { create } from 'jss';
-import camelCase from 'jss-plugin-camel-case';
-
-
 
 const isHttpValidResponse = (response: Response) => {
     const { status, statusText } = response;
@@ -38,8 +33,9 @@ function fetchExt(url: string) {
 async function bootStrap() {
     console.log('started');
     // mount svg element on id
-    const jss = create({ plugins: [...(createPlugins() as any[])] });
-    //jss.use(camelCase());
+    const plugins = createPlugins().map(fn => fn({}));
+    const jss = create({ plugins });
+    // jss.use(camelCase());
     const sheet = jss.createStyleSheet({
         containerLogo: {
             margin: 'auto'
@@ -47,9 +43,7 @@ async function bootStrap() {
     },
         { media: 'screen' }
     ).attach();
-
     console.log(sheet);
-
     const mp = window.document.querySelector<HTMLElement>('#app-spinner');
     if (mp) {
         const logo = new SALogo(30, 10, 5, 0.8, 0.5);
@@ -60,8 +54,3 @@ async function bootStrap() {
 }
 
 window.onload = bootStrap;
-
-
-
-
-
