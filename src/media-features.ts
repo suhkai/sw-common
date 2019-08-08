@@ -1,4 +1,7 @@
 'use strict'
+// referenced: https://www.w3.org/TR/mediaqueries-4/#aspect-ratio
+
+
 // width
 // (min-width: 25cm)
 // (400px <= width <= 700px)  this doesnt work
@@ -31,13 +34,20 @@
 // monochrome
 // range
 //
-
 // Interaction media features (todo)
 
+// pointer or also "any-pointer"
+// none|coarse|fine
+// descrete
 
+// hover or also "any-hover"
+// none|hover
+// descrete
+// @media (hover) // also works
 
+// Summary doesnt seem to be that much, primer can wrap this system wide events sending it to document.body for integration by some toolchain
 
-const mqList = window.matchMedia('(min-color: 8)');
+const mqList = window.matchMedia('(any-pointer)');
 console.log(`matches now?: ${mqList.matches}`);
 console.log(`media key: ${mqList.media}`); // if this is "not all" then the query is invalid
 mqList.addListener( e =>{
