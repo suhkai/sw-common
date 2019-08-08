@@ -1,57 +1,67 @@
 'use strict'
-// referenced: https://www.w3.org/TR/mediaqueries-4/#aspect-ratio
 
+import createErrors, { ColorCodes, LOGFunction } from './error';
 
-// width
-// (min-width: 25cm)
-// (400px <= width <= 700px)  this doesnt work
+// store these errors in the indexDB database, but console will do for now
+const log = createErrors('media-features');
 
-//  height
-//  use min, max same as "width"
+type MQEventMapper = (this: MediaQueryList, ev: MediaQueryListEvent) => CustomEvent | false;
 
-//  ratio, but still a range rule
-//  rational  number m/n , with m ∈ N+, n ∈ N+ 
-//  OR a real number
-//  
+const createMQLEventDispatcher = (trg: EventTarget) => (listener: MQEventMapper) => {
+  return function (this: MediaQueryList, ev: MediaQueryListEvent) {
+    const evt = listener.call(this, ev);
+    if (evt) {
+      trg.dispatchEvent(evt);
+    }
+  }
+}
 
-// orientation
-// descrete
-// portrait or landscape
+window.addEventListener('load', function (this: EventTarget, e) {
 
-// resolution
-// range
-//   infinite (like vector displays)
-//   (resolution > 1000 dpi)
-//   (resolution >= 2dppx) // css/device pixel ratio is 2
-//   (min-resolution: 118dpcm)
+  const body = document.querySelector('body');
+  if (!body) {
+    log.error('mf01', 'body doest exist');
+    return;
+  }
 
-// color
-// range
-// (color)
-// (min-color: 1) // monochrome
-// (color >= 8) // 8 bits of color
+  const mqFeaturSet = (<any>self)['mediaQL'] = new Map();
 
-// monochrome
-// range
-//
-// Interaction media features (todo)
+  const bodyDispatch = createMQLEventDispatcher(body);
 
-// pointer or also "any-pointer"
-// none|coarse|fine
-// descrete
+  function createInterest(requestMQ: string, fn: MQEventMapper): () => ([{ responseMQ: string, matches: boolean }?, Error?]) {
+    const mql = window.matchMedia(requestMQ);
+    if (mql.media === 'not all') {
+      const msg = `invalid mediaQ "${requestMQ}" -> "not all"`;
+      log.error('cri01', msg);
+      return () => [undefined, new TypeError(msg)];
+    }
+    const dispatch = bodyDispatch(fn);
+    mql.addListener(dispatch);
+    return () => [{ responseMQ: mql.media, matches: mql.matches }, undefined];
+  }
 
-// hover or also "any-hover"
-// none|hover
-// descrete
-// @media (hover) // also works
+  function registerMQ(query: string, evtCreator: MQEventMapper) {
+    const fn = createInterest(query, evtCreator);
+    mqFeaturSet.set(query, fn);
+  }
 
-// Summary doesnt seem to be that much, primer can wrap this system wide events sending it to document.body for integration by some toolchain
-
-const mqList = window.matchMedia('(any-pointer)');
-console.log(`matches now?: ${mqList.matches}`);
-console.log(`media key: ${mqList.media}`); // if this is "not all" then the query is invalid
-mqList.addListener( e =>{
-  console.log(e);
+  registerMQ('(orientation: landscape)', ev => new CustomEvent(ev.matches ? 'landscape' : 'portrait'));
+  registerMQ('(max-color: 2)', ev => new CustomEvent(ev.matches ? 'monogrome' : 'color'));
+  registerMQ('(pointer: none)', ev => ev.matches && new CustomEvent('hid-keyboard'));
+  registerMQ('(pointer: coarse) and (hover: none)', ev => ev.matches && new CustomEvent('hid-touch'));
+  registerMQ('(pointer: fine) and (hover: none)', ev => ev.matches && new CustomEvent('hid-stylus'));
+  registerMQ('(pointer: fine) and (hover: hover)', ev => ev.matches && new CustomEvent('hid-terminal'));
+  registerMQ('(pointer: coarse) and (hover: hover)', ev => ev.matches && new CustomEvent('hid-terminal-touch'));
+  // do with accourding to xs, sl etc
 });
 
-export {}
+// referenced: https://www.w3.org/TR/mediaqueries-4/#aspect-ratio
+
+/* interactive testing
+const mqList = window.matchMedia('(any-pointer: fine)');
+console.log(`matches now?: ${mqList.matches}`);
+console.log(`media key: ${mqList.media}`); // if this is "not all" then the query is invalid
+mqList.addListener(e => {
+  console.log(e);
+});
+*/
