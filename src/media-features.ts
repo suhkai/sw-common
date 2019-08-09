@@ -55,10 +55,16 @@ window.addEventListener('load', function (this: EventTarget, e) {
   registerMQ('(max-width: 399.9999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[0:360)' } }));
   registerMQ('(min-width: 360px) and (max-width: 399.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[360:400)' } }));
   registerMQ('(min-width: 400px) and (max-width: 479.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[360:480)' } }));
-  registerMQ('(min-width: 480px) and (max-width: 599.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[480:600)' } }));
-  registerMQ('(min-width: 600px) and (max-width: 719.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[600:720)' } }));
-  registerMQ('(min-width: 720px) and (max-width: 839.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[720:840)' } }));
-  registerMQ('(min-width: 840px) and (max-width: 959.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[840:960)' } }));
+  // this can be both landscape and portrait
+  registerMQ('(min-width: 480px) and (max-width: 599.99999px) and (orientation: portrait)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'P:[480:600)' } }));
+  registerMQ('(min-width: 480px) and (max-width: 599.99999px) and (orientation: landscape)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'L:[480:600)' } }));
+  registerMQ('(min-width: 600px) and (max-width: 719.99999px) and (orientation: portrait)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'P:[600:720)' } }));
+  registerMQ('(min-width: 600px) and (max-width: 719.99999px) and (orientation: landscape)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'L:[600:720)' } }));
+  registerMQ('(min-width: 720px) and (max-width: 839.99999px) and (orientation: portrait)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'P:[720:840)' } }));
+  registerMQ('(min-width: 720px) and (max-width: 839.99999px) and (orientation: landscape)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'L:[720:840)' } }));
+  registerMQ('(min-width: 840px) and (max-width: 959.99999px) and (orientation: portrait)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'P:[840:960)' } }));
+  registerMQ('(min-width: 840px) and (max-width: 959.99999px) and (orientation: landscape)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: 'L:[840:960)' } }));
+  // most likely these are not portrait, but considering the sizes dont really care right?
   registerMQ('(min-width: 960px) and (max-width: 1023.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[960:1024)' } }));
   registerMQ('(min-width: 1024px) and (max-width: 1279.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[1024:1280)' } }));
   registerMQ('(min-width: 1280px) and (max-width: 1439.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[1280:1440)' } }));
