@@ -49,8 +49,8 @@ async function bootStrap() {
         const logo = new SALogo(30, 10, 5, 0.8, 0.5);
         logo.mount(mp);
     }
-    const [manifest, error] = await fetchExt('./manifest.json');
-    console.log(manifest, error);
+    //const [manifest, error] = await fetchExt('./manifest.json');
+    //console.log(manifest, error);
 }
 
-window.onload = bootStrap;
+window.addEventListener('load', bootStrap);

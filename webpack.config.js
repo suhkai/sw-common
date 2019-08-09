@@ -3,6 +3,7 @@ const {
 } = require('clean-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
+
 const {
     BundleAnalyzerPlugin
 } = require('webpack-bundle-analyzer');
@@ -52,33 +53,39 @@ module.exports = function () {
         },
         module: {
             rules: [{
+                test: /\.(html)$/,
+                use: {
+                    loader: 'html-loader'
+                }
+            },
+            {
                 test: /\.(m|j|t)s$/,
                 exclude: /node_modules/,
                 use: [{
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [
-                                ["@babel/env", {
-                                    "useBuiltIns": "usage",
-                                    "corejs": {
-                                        version: 3,
-                                        proposals: true
-                                    }
-                                }],
-                                "@babel/preset-typescript"
-                            ],
-                            plugins: [
-                                "@babel/proposal-class-properties",
-                                "@babel/proposal-object-rest-spread",
-                                "@babel/plugin-transform-async-to-generator"
-                            ]
-                        }
-                    },
-                    {
-                        loader: 'ts-loader'
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [
+                            ["@babel/env", {
+                                "useBuiltIns": "usage",
+                                "corejs": {
+                                    version: 3,
+                                    proposals: true
+                                }
+                            }],
+                            "@babel/preset-typescript"
+                        ],
+                        plugins: [
+                            "@babel/proposal-class-properties",
+                            "@babel/proposal-object-rest-spread",
+                            "@babel/plugin-transform-async-to-generator"
+                        ]
                     }
+                },
+                {
+                    loader: 'ts-loader'
+                }
                 ]
-            }, ]
+            },]
         },
         plugins: [
             //new MyExampleWebpackPlugin(),
@@ -91,28 +98,30 @@ module.exports = function () {
                 /* overrided by the template login , look below, when not using 
                 		 webpackHTMLtemplateplgin ->meta: {  viewport: "width=device-width, initial-scale=1, shrink-to-fit=no" },
                 */
+                filename: 'index.html',
                 appMountHtmlSnippet: '<div id="app-spinner"></div>',
                 excludeChunks: ['sw-notice', 'runtime-sw-notice'],
                 hash: true,
                 showErrors: true,
                 xhtml: true,
+                //inlineManifestWebpackName: 'archon2',
                 //template configuration
-                template: require('html-webpack-template'),
-                inject: false, //inject assets into the given template  = false (template has own logic, leave it alone)
+                template: 'src/template.html',
+                inject: true, //inject assets into the given template  = false (template has own logic, leave it alone)
                 /*appMountHtmlSnippet: `<div id="custom-insertion-point">
 				This might be any DOM node of your choice which can serve as an insertion point.
 			  </div>`,*/
-                appMountId: 'app', // create a <div id="app"></div> for app mounting
+                //appMountId: 'app', // create a <div id="app"></div> for app mounting
                 //appMountIds: ['app', "zip", "zap"],
                 // baseHref: 'https://www.jacob-bogers.com' // all rels url go here, favicon, bundle.js etc
                 // devServer: 'http://localhost:3000' , will try and load http://localhost:3000/webpack-dev-server.js
-                lang: 'en-US',
-                links: [], // external loadable fonts etc, whatever
-                mobile: true,
-                meta: [{
+                //lang: 'en-US',
+                //links: [], // external loadable fonts etc, whatever
+                //mobile: true,
+                /*meta: [{
                     name: 'viewport',
                     content: 'width=device-width, initial-scale=1'
-                }],
+                }],*/
             }),
             new CleanWebpackPlugin({
                 verbose: true,
