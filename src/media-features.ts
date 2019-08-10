@@ -52,7 +52,7 @@ window.addEventListener('load', function (this: EventTarget, e) {
   registerMQ('(pointer: fine) and (hover: hover)', ev => ev.matches && new CustomEvent('hid-terminal'));
   registerMQ('(pointer: coarse) and (hover: hover)', ev => ev.matches && new CustomEvent('hid-terminal-touch'));
   // do with accourding to xs, sl etc
-  registerMQ('(max-width: 399.9999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[0:360)' } }));
+  registerMQ('(max-width: 359.9999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[0:360)' } }));
   registerMQ('(min-width: 360px) and (max-width: 399.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[360:400)' } }));
   registerMQ('(min-width: 400px) and (max-width: 479.99999px)', ev => ev.matches && new CustomEvent('screen-width', { detail: { w: '[360:480)' } }));
   // this can be both landscape and portrait

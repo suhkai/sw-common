@@ -6,6 +6,7 @@
     <meta content="ie=edge" http-equiv="x-ua-compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:600&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -42,12 +43,13 @@
         }
 
         #boot-strap-outer {
-            top:0;
-            left:0;
-            right:0;
-            bottom:0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             position: absolute;
             border: 10px solid green;
+            background: #14191E;
         }
 
         #boot-strap-inner {
@@ -63,11 +65,130 @@
             border: 10px dotted yellow;
         }
 
-        #logo {
-            border: solid grey;
-            width: 50vmin; /* make this dependend on media queries */
+        .saira-extra-condensed {
+            font-family: 'Saira Extra Condensed', sans-serif;
+            /* TODO: change folling 2 via media queries */
+            font-size: 38px;
+            letter-spacing: 5px;
+        }
+        .white {
+            color: white;
+        }
+        .reddish {
+            color: #e3493c;
+        }
+     
+        /* media queries */
+        /* media queries */
+        /* media queries */
+        /* media queries */
+
+        @media (max-width: 359.9999px) {
+            #logo {
+                width: 160px;
+                height: 160px;
+            }
         }
 
+        @media (min-width: 360px) and (max-width: 399.99999px) {
+            #logo {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+        @media (min-width: 400px) and (max-width: 479.99999px) {
+            #logo {
+                width: 240px;
+                height: 240px;
+            }
+        }
+
+        @media (min-width: 480px) and (max-width: 599.99999px) and (orientation: portrait) {
+            #logo {
+                width: 280px;
+                height: 280px;
+            }
+        }
+
+        @media (min-width: 480px) and (max-width: 599.99999px) and (orientation: landscape) {
+            #logo {
+                width: 160px;
+                height: 160px;
+            }
+        }
+
+        @media (min-width: 600px) and (max-width: 719.99999px) and (orientation: portrait) {
+            #logo {
+                width: 320px;
+                height: 320px;
+            }
+        }
+
+        @media (min-width: 600px) and (max-width: 719.99999px) and (orientation: landscape) {
+            #logo {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+        @media (min-width: 720px) and (max-width: 839.99999px) and (orientation: portrait) {
+            #logo {
+                width: 360px;
+                height: 360px;
+            }
+        }
+
+        @media (min-width: 720px) and (max-width: 839.99999px) and (orientation: landscape) {
+            #logo {
+                width: 240px;
+                height: 240px;
+            }
+        }
+
+        /* iphone X*/
+        @media (orientation: landscape) and (min-width: 720px) and (max-width: 839.99999px) and (max-height: 399.99999px) and (min-height: 360px) {
+            #logo {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+
+        @media (min-width: 840px) and (max-width: 959.99999px) and (orientation: portrait) {
+            #logo {
+                width: 400px;
+                height: 400px;
+            }
+        }
+
+        @media (min-width: 840px) and (max-width: 959.99999px) and (orientation: landscape) {
+            #logo {
+                width: 280px;
+                height: 280px;
+            }
+        }
+
+        /* for logo only*/
+        @media (min-width: 960px) {
+            #logo {
+                width: 360px;
+                height: 360px;
+            }
+        }
+
+
+        @media (min-width: 960px) and (max-width: 1023.99999px) {}
+
+        @media (min-width: 1024px) and (max-width: 1279.99999px) {}
+
+        @media (min-width: 1280px) and (max-width: 1439.99999px) {}
+
+        @media (min-width: 1440px) and (max-width: 1599.99999px) {}
+
+        @media (min-width: 1600px) and (max-width: 1919.99999px) {}
+
+        @media (min-width: 1920px) {}
     </style>
 </head>
 
@@ -82,23 +203,17 @@
                     </p>
                 </div>
                 <div id="loader-card">
+                    <div id="logo-label" class="saira-extra-condensed"><span class="white">SUPER</span><span class="reddish">ALGOS</span></div>
                     <div id="logo">
-                        <svg viewBox="-20 -20 40 40"
-                            shapeRendering="geometricPrecision"
-                            xlink="http://www.w3.org/1999/xlink">
+                        <svg viewBox="-20 -20 40 40" preserveAspectRatio="xMidYMid meet" shapeRendering="geometricPrecision" xlink="http://www.w3.org/1999/xlink">
                             <mask id="edges-57-820">
-                                <path fill="white"
-                                    d="m -9.112,5.358 c 1.284,0.08989 8.15,4.1 8.862,5.17 c 2.236,3.365 6.297,6.279 8.962,4.757 c 2.669,-1.518 2.252,-6.065 0.489,-10.09 c -0.5189,-1.209 -0.6737,-9.033 -0.07632,-10.19 c 1.887,-3.655 2.411,-8.718 -0.2574,-10.24 c -2.669,-1.527 -6.905,1.465 -8.922,4.652 c -0.699,1.113 -7.67,5.073 -8.933,5.12 c -4.037,0.2595 -8.55,2.307 -8.524,5.396 c 0.02656,3.088 4.688,5.119 8.396,5.429">
+                                <path fill="white" d="m -9.112,5.358 c 1.284,0.08989 8.15,4.1 8.862,5.17 c 2.236,3.365 6.297,6.279 8.962,4.757 c 2.669,-1.518 2.252,-6.065 0.489,-10.09 c -0.5189,-1.209 -0.6737,-9.033 -0.07632,-10.19 c 1.887,-3.655 2.411,-8.718 -0.2574,-10.24 c -2.669,-1.527 -6.905,1.465 -8.922,4.652 c -0.699,1.113 -7.67,5.073 -8.933,5.12 c -4.037,0.2595 -8.55,2.307 -8.524,5.396 c 0.02656,3.088 4.688,5.119 8.396,5.429">
                                 </path>
-                                <path fill="black"
-                                    d="m -7.923,2.955 c 0.9992,0.2492 5.851,4.362 6.264,5.304 c 1.294,2.962 4.089,5.822 6.4,4.993 c 2.313,-0.8253 2.617,-4.466 1.788,-7.885 c -0.2409,-1.025 0.7241,-7.21 1.355,-8.035 c 1.995,-2.617 3.11,-6.533 1.22,-8.107 c -1.891,-1.574 -5.643,0.195 -7.676,2.426 c -0.7052,0.7794 -6.747,2.931 -7.749,2.793 c -3.216,-0.3563 -7.057,0.6299 -7.465,3.067 c -0.4081,2.437 2.982,4.684 5.861,5.444">
+                                <path fill="black" d="m -7.923,2.955 c 0.9992,0.2492 5.851,4.362 6.264,5.304 c 1.294,2.962 4.089,5.822 6.4,4.993 c 2.313,-0.8253 2.617,-4.466 1.788,-7.885 c -0.2409,-1.025 0.7241,-7.21 1.355,-8.035 c 1.995,-2.617 3.11,-6.533 1.22,-8.107 c -1.891,-1.574 -5.643,0.195 -7.676,2.426 c -0.7052,0.7794 -6.747,2.931 -7.749,2.793 c -3.216,-0.3563 -7.057,0.6299 -7.465,3.067 c -0.4081,2.437 2.982,4.684 5.861,5.444">
                                 </path>
                             </mask>
-                            <rect id="final-0.3366167000392384" x="-20" y="-20"
-                                width="40" height="40" mask="url(#edges-57-820)"
-                                fill="#e3493c"></rect>
-                            <path fill="#e3493c"
-                                d="m -5.094,1.409 c 0.6085,0.2096 3.405,3.035 3.611,3.644 c 0.6445,1.914 2.229,3.847 3.713,3.457 c 1.485,-0.3878 1.873,-2.638 1.543,-4.812 c -0.09415,-0.6511 0.8436,-4.45 1.281,-4.929 c 1.385,-1.521 2.292,-3.898 1.201,-4.981 c -1.091,-1.083 -3.524,-0.186 -4.911,1.092 c -0.4816,0.4469 -4.361,1.457 -4.977,1.317 c -1.983,-0.397 -4.428,0.007778 -4.815,1.503 c -0.3868,1.495 1.602,3.079 3.353,3.709">
+                            <rect id="final-0.3366167000392384" x="-20" y="-20" width="40" height="40" mask="url(#edges-57-820)" fill="#e3493c"></rect>
+                            <path fill="#e3493c" d="m -5.094,1.409 c 0.6085,0.2096 3.405,3.035 3.611,3.644 c 0.6445,1.914 2.229,3.847 3.713,3.457 c 1.485,-0.3878 1.873,-2.638 1.543,-4.812 c -0.09415,-0.6511 0.8436,-4.45 1.281,-4.929 c 1.385,-1.521 2.292,-3.898 1.201,-4.981 c -1.091,-1.083 -3.524,-0.186 -4.911,1.092 c -0.4816,0.4469 -4.361,1.457 -4.977,1.317 c -1.983,-0.397 -4.428,0.007778 -4.815,1.503 c -0.3868,1.495 1.602,3.079 3.353,3.709">
                             </path>
                         </svg>
                     </div>
