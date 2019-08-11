@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@easyfonts/league-junction-typeface@1.0.2/all.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@easyfonts/league-mono-typeface@1.0.3/all.css" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -17,6 +19,9 @@
             margin: 0;
             width: 100%;
             height: 100%;
+            font-family: 'League Mono';
+            font-size: 14px;
+            font-weight: regular;
         }
 
         body {
@@ -58,26 +63,53 @@
             top: 50%;
             width: fit-content;
             transform: translate(-50%, -50%);
-            border: 10px solid palevioletred;
+            border: 0.5px solid palevioletred;
+            color: rgba(255,255, 255, 0.5);
         }
 
         #loader-card {
-            border: 10px dotted yellow;
+           
+        }
+
+        .trace {
+            position: absolute;
+            bottom: calc(100% + 10px);
         }
 
         .saira-extra-condensed {
+            text-align: right;
             font-family: 'Saira Extra Condensed', sans-serif;
+            
             /* TODO: change folling 2 via media queries */
-            font-size: 38px;
-            letter-spacing: 5px;
+            /*font-size: 47.5px;
+            letter-spacing: 6.25px;*/
         }
+
+        .saira-extra-condensed > span {
+            line-height: 0.8em;
+        }
+
         .white {
             color: white;
         }
+
         .reddish {
             color: #e3493c;
         }
-     
+
+        #logo,
+        #logo-label {
+            margin: 0 auto;
+        }
+
+        #logo-label {
+            width: fit-content;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: stretch;
+        }
+
         /* media queries */
         /* media queries */
         /* media queries */
@@ -88,6 +120,13 @@
                 width: 160px;
                 height: 160px;
             }
+
+            .saira-extra-condensed {
+                font-size: 30px;
+                letter-spacing: 3.94px;
+            }
+
+           
         }
 
         @media (min-width: 360px) and (max-width: 399.99999px) {
@@ -95,6 +134,13 @@
                 width: 200px;
                 height: 200px;
             }
+
+            .saira-extra-condensed {
+                font-size: 37.5px;
+                letter-spacing: 4.925px;
+            }
+
+           
         }
 
         @media (min-width: 400px) and (max-width: 479.99999px) {
@@ -102,6 +148,13 @@
                 width: 240px;
                 height: 240px;
             }
+
+            .saira-extra-condensed {
+                font-size: 45px;
+                letter-spacing: 5.91px;
+            }
+
+           
         }
 
         @media (min-width: 480px) and (max-width: 599.99999px) and (orientation: portrait) {
@@ -109,6 +162,12 @@
                 width: 280px;
                 height: 280px;
             }
+            .saira-extra-condensed {
+                font-size: 52.5px;
+                letter-spacing: 6.895px;
+            }
+
+           
         }
 
         @media (min-width: 480px) and (max-width: 599.99999px) and (orientation: landscape) {
@@ -116,6 +175,12 @@
                 width: 160px;
                 height: 160px;
             }
+            .saira-extra-condensed {
+                font-size: 30px;
+                letter-spacing: 3.94px;
+            }
+
+           
         }
 
         @media (min-width: 600px) and (max-width: 719.99999px) and (orientation: portrait) {
@@ -123,6 +188,12 @@
                 width: 320px;
                 height: 320px;
             }
+            .saira-extra-condensed {
+                font-size: 60px;
+                letter-spacing: 7.88px;
+            }
+
+           
         }
 
         @media (min-width: 600px) and (max-width: 719.99999px) and (orientation: landscape) {
@@ -130,12 +201,22 @@
                 width: 200px;
                 height: 200px;
             }
+            .saira-extra-condensed {
+                font-size: 37.5px;
+                letter-spacing: 4.925px;
+            }
+
+           
         }
 
         @media (min-width: 720px) and (max-width: 839.99999px) and (orientation: portrait) {
             #logo {
                 width: 360px;
                 height: 360px;
+            }
+            .saira-extra-condensed {
+                font-size: 67.5px;
+                letter-spacing: 8.865px;
             }
         }
 
@@ -144,6 +225,12 @@
                 width: 240px;
                 height: 240px;
             }
+            .saira-extra-condensed {
+                font-size: 45px;
+                letter-spacing: 5.91px;
+            }
+
+           
         }
 
         /* iphone X*/
@@ -152,6 +239,12 @@
                 width: 200px;
                 height: 200px;
             }
+            .saira-extra-condensed {
+                font-size: 37.5px;
+                letter-spacing: 4.925px;
+            }
+
+           
         }
 
 
@@ -160,6 +253,12 @@
                 width: 400px;
                 height: 400px;
             }
+            .saira-extra-condensed {
+                font-size: 75px;
+                letter-spacing: 9.85px;
+            }
+
+           
         }
 
         @media (min-width: 840px) and (max-width: 959.99999px) and (orientation: landscape) {
@@ -167,6 +266,12 @@
                 width: 280px;
                 height: 280px;
             }
+            .saira-extra-condensed {
+                font-size: 52.5px;
+                letter-spacing: 6.895px;
+            }
+
+           
         }
 
         /* for logo only*/
@@ -175,6 +280,11 @@
                 width: 360px;
                 height: 360px;
             }
+            .saira-extra-condensed {
+                font-size: 67.5px;
+                letter-spacing: 8.865px;
+            }
+           
         }
 
 
@@ -197,12 +307,10 @@
         <div id="app"></div>
         <div id="boot-strap-outer">
             <div id="boot-strap-inner">
-                <div>
-                    <p>
-                        Some text
-                    </p>
-                </div>
                 <div id="loader-card">
+                    <div class="trace">
+                            <span >Installing...</span>
+                    </div>
                     <div id="logo-label" class="saira-extra-condensed"><span class="white">SUPER</span><span class="reddish">ALGOS</span></div>
                     <div id="logo">
                         <svg viewBox="-20 -20 40 40" preserveAspectRatio="xMidYMid meet" shapeRendering="geometricPrecision" xlink="http://www.w3.org/1999/xlink">

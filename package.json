@@ -1,6 +1,7 @@
 {
   "author": "jacobbogers <jkfbogers@gmail.com>",
   "dependencies": {
+    "@easyfonts/league-junction-typeface": "^1.0.1",
     "@easyfonts/saira-typeface": "^1.0.6",
     "jss": "^10.0.0-alpha.23",
     "jss-plugin-camel-case": "^10.0.0-alpha.23",
