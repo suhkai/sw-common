@@ -1,0 +1,73 @@
+#outer-container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow-y: hidden;
+	overflow-x: hidden;
+}
+
+#app {
+	position: relative;
+	border: 10px solid red;
+	width: 100%;
+	height: 45px;
+	top: -45px;
+}
+
+#boot-strap-outer {
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	position: absolute;
+	border: 10px solid green;
+	background: #14191e;
+}
+
+#boot-strap-inner {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: fit-content;
+	transform: translate(-50%, -50%);
+	border: 0.5px solid palevioletred;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+#loader-card {
+}
+
+.trace {
+	position: absolute;
+	bottom: calc(100% + 10px);
+}
+
+.saira-extra-condensed {
+	text-align: right;
+	font-family: 'Saira Extra Condensed', sans-serif;
+}
+
+.saira-extra-condensed > span {
+	line-height: 0.8em;
+}
+
+.white {
+	color: white;
+}
+
+.reddish {
+	color: #e3493c;
+}
+
+#btstrp-logo,
+#btstrp-logo-label {
+	margin: 0 auto;
+}
+
+#btstrp-logo-label {
+	width: fit-content;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: stretch;
+}
