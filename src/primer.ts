@@ -31,8 +31,7 @@ function fetchExt(url: string) {
 }
 
 async function bootStrap() {
-    console.log('started');
-    // mount svg element on id
+    console.log('started: jss');
     const plugins = createPlugins().map(fn => fn({}));
     const jss = create({ plugins });
     // jss.use(camelCase());
@@ -42,13 +41,18 @@ async function bootStrap() {
         }
     },
         { media: 'screen' }
-    ).attach();
+    )
+    
     console.log(sheet);
-    const mp = window.document.querySelector<HTMLElement>('#app-spinner');
+    sheet.attach();
+    
+    const mp = window.document.querySelector<HTMLElement>('#bootstrap');
     if (mp) {
         const logo = new SALogo(30, 10, 5, 0.8, 0.5);
         logo.mount(mp);
     }
+
+
     //const [manifest, error] = await fetchExt('./manifest.json');
     //console.log(manifest, error);
 }
