@@ -53,39 +53,63 @@ module.exports = function () {
         },
         module: {
             rules: [{
-                test: /\.(html)$/,
-                use: {
-                    loader: 'html-loader'
-                }
-            },
-            {
-                test: /\.(m|j|t)s$/,
-                exclude: /node_modules/,
-                use: [{
-                    loader: 'babel-loader',
-                    options: {
-                        presets: [
-                            ["@babel/env", {
-                                "useBuiltIns": "usage",
-                                "corejs": {
-                                    version: 3,
-                                    proposals: true
-                                }
-                            }],
-                            "@babel/preset-typescript"
-                        ],
-                        plugins: [
-                            "@babel/proposal-class-properties",
-                            "@babel/proposal-object-rest-spread",
-                            "@babel/plugin-transform-async-to-generator"
-                        ]
+                    test: /\.css$/,
+                    use: [{
+                            loader: "file-loader",
+                            options: {
+                                name: '[name]-[hash].[ext]',
+                            }
+                        },
+                        "extract-loader",
+                        {
+                            loader: "css-loader",
+
+                            options: {
+                                sourceMap: true,
+
+                            }
+                        }
+                    ]
+                },
+
+                {
+                    test: /\.(html)$/,
+                    use: {
+                        options: {
+                            attrs: ["img:src", "link:href"]
+                        },
+                        loader: 'html-loader'
                     }
                 },
                 {
-                    loader: 'ts-loader'
-                }
-                ]
-            },]
+                    test: /\.(m|j|t)s$/,
+                    exclude: /node_modules/,
+                    use: [{
+                            loader: 'babel-loader',
+                            options: {
+                                presets: [
+                                    ["@babel/env", {
+                                        "useBuiltIns": "usage",
+                                        "corejs": {
+                                            version: 3,
+                                            proposals: true
+                                        }
+                                    }],
+                                    "@babel/preset-typescript"
+                                ],
+                                plugins: [
+                                    "@babel/proposal-class-properties",
+                                    "@babel/proposal-object-rest-spread",
+                                    "@babel/plugin-transform-async-to-generator"
+                                ]
+                            }
+                        },
+                        {
+                            loader: 'ts-loader'
+                        }
+                    ]
+                },
+            ]
         },
         plugins: [
             //new MyExampleWebpackPlugin(),
@@ -99,7 +123,7 @@ module.exports = function () {
                 		 webpackHTMLtemplateplgin ->meta: {  viewport: "width=device-width, initial-scale=1, shrink-to-fit=no" },
                 */
                 filename: 'index.html',
-                appMountHtmlSnippet: '<div id="app-spinner"></div>',
+                //appMountHtmlSnippet: '<div id="app-spinner"></div>',
                 excludeChunks: ['sw-notice', 'runtime-sw-notice'],
                 hash: true,
                 showErrors: true,
