@@ -1,9 +1,5 @@
 'use strict'
 
-import { AssertionError } from "assert";
-
-
-
 // collection of primitive checks
 const isJSString = (s: any): s is string => typeof s === 'string';
 const isJSNumber = (s: any): s is number => typeof s === 'number';

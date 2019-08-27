@@ -1,7 +1,7 @@
 // this bootstrap script is injected into the minimalist html page
 
-import createPlugins from './jss-plugins';
-import SALogo from './SALogo';
+import createPlugins from './utils/jss-plugins';
+import SABootInfo from './bootstrap/components/SABootInfo';
 import { create } from 'jss';
 
 const isHttpValidResponse = (response: Response) => {
@@ -34,7 +34,9 @@ async function bootStrap() {
     console.log('started: jss');
     const plugins = createPlugins().map(fn => fn({}));
     const jss = create({ plugins });
-    // jss.use(camelCase());
+    //
+    // -> jss.use(camelCase());
+    //
     const sheet = jss.createStyleSheet({
         containerLogo: {
             margin: 'auto'
@@ -48,11 +50,11 @@ async function bootStrap() {
     
     const mp = window.document.querySelector<HTMLElement>('#bootstrap');
     if (mp) {
-        const logo = new SALogo(30, 10, 5, 0.8, 0.5);
-        logo.mount(mp);
+        const infoCard = new SABootInfo({});
+        infoCard.createFragment();
+        infoCard.render();
+        infoCard.mount(mp);
     }
-
-
     //const [manifest, error] = await fetchExt('./manifest.json');
     //console.log(manifest, error);
 }
