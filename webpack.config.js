@@ -95,12 +95,13 @@ module.exports = function () {
                                             proposals: true
                                         }
                                     }],
-                                    "@babel/preset-typescript"
+                                    "@babel/preset-typescript",
                                 ],
                                 plugins: [
                                     "@babel/proposal-class-properties",
                                     "@babel/proposal-object-rest-spread",
-                                    "@babel/plugin-transform-async-to-generator"
+                                    "@babel/plugin-transform-async-to-generator",
+                                    "@babel/plugin-transform-block-scoping"
                                 ]
                             }
                         },
