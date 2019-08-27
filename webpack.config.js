@@ -101,6 +101,9 @@ module.exports = function () {
                                     "@babel/proposal-class-properties",
                                     "@babel/proposal-object-rest-spread",
                                     "@babel/plugin-transform-async-to-generator",
+                                    // 😠 😠😠😠
+                                    // below plugin helps resolve this safari issue((
+                                    // see link https://stackoverflow.com/questions/33878586/safari-babel-webpack-const-declarations-are-not-supported-in-strict-mode
                                     "@babel/plugin-transform-block-scoping"
                                 ]
                             }
