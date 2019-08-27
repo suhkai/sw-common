@@ -1,6 +1,6 @@
 'use strict';
 
-export default function(instance: any, stopAtPrototype = 'Object') {
+export default function(instance: any, stopAtPrototype = 'Object'): void {
     function bindRecursive (obj: Object): void {
         const proto = Object.getPrototypeOf(obj);
         if (proto.constructor.name === stopAtPrototype) {

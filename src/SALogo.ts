@@ -1,6 +1,8 @@
 'use strict'
 
 //ugly but put all what is needed in this file
+import bindMethods from './bindMethods';
+import ran from './random';
 
 interface PathElt {
     c: string; // command
@@ -21,7 +23,7 @@ function precision(dec = 0) {
     }
 }
 
-const svgNS =  'http://www.w3.org/2000/svg';
+const svgNS = 'http://www.w3.org/2000/svg';
 const prec4 = precision(4);
 
 export function transformPath(m: Float32Array, p: PathElts) {
@@ -148,38 +150,43 @@ function scale(sx: number, sy: number): Float32Array {
     return m33;
 }
 
-const ran = () => Math.trunc(Math.random() * 1000);
-
 export default class SALogo {
     private angle1: number;
     private angle2: number;
     private angle3: number;
     private scale1: number;
     private scale2: number;
+    private dataAttr?: string;
+    private $maskId: string;
     private $self?: SVGElement;
     private $rect?: SVGRectElement;
     private $pathWhite?: SVGPathElement;
     private $pathBlack?: SVGPathElement;
     private $pathTopLevel?: SVGPathElement;
 
-    constructor(angle1 = 0, angle2 = 0, angle3 = 0, scale1 = 0.8, scale2 = 0.5) {
+    constructor({ dataAttr = '', angle1 = 0, angle2 = 0, angle3 = 0, scale1 = 0.8, scale2 = 0.5, $maskId = `sa-logo-${ran()}-${ran()}`}) {
+        bindMethods(this);
         this.angle1 = angle1;
         this.angle2 = angle2;
         this.angle3 = angle3;
         this.scale1 = scale1;
         this.scale2 = scale2;
+        this.$maskId = $maskId;
+        if (dataAttr) {
+            this.dataAttr = dataAttr;
+        }
         // create svg template
     }
 
     // creates the svg and mounts it
     mount($mp: HTMLElement) {
-      
+
         const svg = this.$self = window.document.createElementNS(svgNS, 'svg');
 
         svg.setAttributeNS(null, 'viewBox', '-20 -20 40 40');
         svg.setAttributeNS(null, 'shapeRendering', 'geometricPrecision');
-        svg.setAttributeNS(null, 'xlink', 'http://www.w3.org/1999/xlink' )
-     
+        svg.setAttributeNS(null, 'xlink', 'http://www.w3.org/1999/xlink');
+
         //mask
         const mask = window.document.createElementNS(svgNS, 'mask');
         const $maskId = `edges-${ran()}-${ran()}`;
@@ -190,6 +197,10 @@ export default class SALogo {
         pathBlack.setAttributeNS(null, 'fill', 'black');
         mask.appendChild(pathWhite);
         mask.appendChild(pathBlack);
+        if (this.dataAttr) {
+            const dataAttr = window.document.createAttribute(`data-${this.dataAttr}`)
+            this.$self.appendChild(dataAttr);
+        }
         //rect
         const $rectId = `final-${Math.random()}`;
         const rect = this.$rect = window.document.createElementNS(svgNS, 'rect');
@@ -211,17 +222,17 @@ export default class SALogo {
         this.$self.appendChild(pathTopLevel);
         $mp.appendChild(this.$self);
         this.render();
-    };
+    }
 
     // removed the svg (does this ever happen?)
     unmount() {
         if (this.$self) {
             this.$self.parentNode && this.$self.parentNode.removeChild(this.$self);
-            // detach any event Listeners
+            // TODO: potentially detach any event Listeners
         }
     }
 
-    calculatePaths() {
+    calculatePaths(angle1 = this.angle1, angle2 = this.angle2, angle3 = this.angle3, scale1 = this.scale1, scale2 = this.scale2) {
         // we want to make this alterable, for now constants
         const scaleI1 = scale(this.scale1, this.scale1);
         const scaleI2 = scale(this.scale2, this.scale2);
