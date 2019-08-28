@@ -4,7 +4,10 @@ const {
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const webpack = require('webpack');
 const {
     BundleAnalyzerPlugin
 } = require('webpack-bundle-analyzer');
@@ -23,28 +26,55 @@ module.exports = function () {
         },
         devtool: 'source-map',
         optimization: {
-            sideEffects: true, // respect the sideEffects flag in package.json
-            flagIncludedChunks: true,
-            mergeDuplicateChunks: true,
-            removeEmptyChunks: true,
-            removeAvailableModules: true,
-            minimize: true,
-            // optimization.nodeEnv: '..', uses DefinePlugin to set process.env.NODE_ENV
-            chunkIds: 'named',
-            moduleIds: 'hashed',
-            splitChunks: {
-                chunks(chunk) {
-                    // exclude `sw-notice`
-                    return !['sw-notice'].includes(chunk.name);
-                }
-            },
-            namedModules: true, //named modules for better debugging
-            runtimeChunk: false, // { name: entrypoint => `runtime~${entrypoint.name}` }
-            //runtimeChunk: {	
-            //    name: (entrypoint) => ['runtime-sw-notice','sw-notice'].includes(entrypoint.name)  ? 9 :`runtime~${entrypoint.name}`
-            //}
+            minimizer: [
+                new TerserPlugin({
+                    cache: true,
+                    sourceMap: true,
+                    extractComments: true,
+                    terserOptions: {
+                        ecma: undefined,
+                        warnings: false,
+                        parse: {},
+                        compress: {
+                            booleans_as_integers: true,
+                        },
+                        mangle: true, // Note `mangle.properties` is `false` by default.
+                        module: false,
+                        output: null,
+                        toplevel: false,
+                        nameCache: null,
+                        ie8: false,
+                        keep_classnames: undefined,
+                        keep_fnames: false,
+                        safari10: false,
+                    },
+                }),
+                new OptimizeCSSAssetsPlugin({})]
         },
-        mode: 'development',
+        /* optimization: {
+             sideEffects: true, // respect the sideEffects flag in package.json
+             flagIncludedChunks: true,
+             mergeDuplicateChunks: true,
+             removeEmptyChunks: true,
+             removeAvailableModules: true,
+             minimize: false,
+             // optimization.nodeEnv: '..', uses DefinePlugin to set process.env.NODE_ENV
+             chunkIds: 'named',
+             moduleIds: 'hashed',
+             splitChunks: {
+                 chunks(chunk) {
+                     // exclude `sw-notice`
+                     return !['sw-notice'].includes(chunk.name);
+                 }
+             },
+             namedModules: true, //named modules for better debugging
+             runtimeChunk: false, // { name: entrypoint => `runtime~${entrypoint.name}` }
+             //runtimeChunk: {	
+             //    name: (entrypoint) => ['runtime-sw-notice','sw-notice'].includes(entrypoint.name)  ? 9 :`runtime~${entrypoint.name}`
+             //}
+             minimizer:[new OptimizeCSSAssetsPlugin({})]
+         },*/
+        mode: 'production',
         entry: {
             'sw-notice': './src/sw.ts',
             'primer': './src/primer.ts'
@@ -89,6 +119,7 @@ module.exports = function () {
                                     }
                                 }],
                                 "@babel/preset-typescript",
+                                // 'minify'
                             ],
                             plugins: [
                                 "@babel/proposal-class-properties",
@@ -144,6 +175,8 @@ module.exports = function () {
                 verbose: true,
                 dry: false
             }),
+            new webpack.optimize.ModuleConcatenationPlugin()
+            //new CompressionPlugin()
         ]
     };
     return [rc0];

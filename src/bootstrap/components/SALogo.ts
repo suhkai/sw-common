@@ -14,7 +14,7 @@ export default class SALogo extends Base<SVGSVGElement> {
     private $pathTopLevel?: SVGPathElement;
 
     constructor({ dataAttr = 'logo-svg', angle1 = 0, angle2 = 0, angle3 = 0, scale1 = 0.8, scale2 = 0.5 }) {
-        super({dataAttr});
+        super({ dataAttr });
         this.angle1 = angle1;
         this.angle2 = angle2;
         this.angle3 = angle3;
@@ -23,14 +23,15 @@ export default class SALogo extends Base<SVGSVGElement> {
         // create svg template
     }
 
-    createFragment(){
+    createFragment() {
         const svg = this.$self = window.document.createElementNS(svgNS, 'svg');
         //svg 
         svg.setAttributeNS(null, 'viewBox', '-20 -20 40 40');
         svg.setAttributeNS(null, 'shapeRendering', 'geometricPrecision');
         svg.setAttributeNS(null, 'xlink', 'http://www.w3.org/1999/xlink');
+        svg.setAttributeNS(null, 'preserveAspectRatio', 'xMidYMid meet');
         const maskId = `${ran()}-${ran()}`;
-       
+
         //svg > mask
         const mask = window.document.createElementNS(svgNS, 'mask');
         mask.setAttribute('id', maskId);
