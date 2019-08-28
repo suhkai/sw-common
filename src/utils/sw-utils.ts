@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+'use strict';
 
 const errors = [
     { id: 100, text: 'No ServiceWorkerContainer Object' }

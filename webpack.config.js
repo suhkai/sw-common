@@ -3,6 +3,7 @@ const {
 } = require('clean-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const {
     BundleAnalyzerPlugin
@@ -52,65 +53,57 @@ module.exports = function () {
             globalObject: 'this'
         },
         module: {
-            rules: [{
+            rules: [
+                ///font files
+                {
+                    test: /\.(ttf|otf|woff|woff2|eot)$/,
+                    loader: 'file-loader',
+                    options: {
+                        name: '/fonts/[name].[ext]'
+                    }
+                },
+                {
                     test: /\.css$/,
-                    use: [{
-                            loader: "file-loader",
-                            options: {
-                                name: '[name]-[hash].[ext]',
-                            }
-                        },
-                        "extract-loader",
+                    use: [
+                        MiniCssExtractPlugin.loader,
                         {
-                            loader: "css-loader",
-
+                            loader: 'css-loader',
                             options: {
                                 sourceMap: true,
-
                             }
                         }
                     ]
-                },
-
-                {
-                    test: /\.(html)$/,
-                    use: {
-                        options: {
-                            attrs: ["img:src", "link:href"]
-                        },
-                        loader: 'html-loader'
-                    }
                 },
                 {
                     test: /\.(m|j|t)s$/,
                     exclude: /node_modules/,
                     use: [{
-                            loader: 'babel-loader',
-                            options: {
-                                presets: [
-                                    ["@babel/env", {
-                                        "useBuiltIns": "usage",
-                                        "corejs": {
-                                            version: 3,
-                                            proposals: true
-                                        }
-                                    }],
-                                    "@babel/preset-typescript",
-                                ],
-                                plugins: [
-                                    "@babel/proposal-class-properties",
-                                    "@babel/proposal-object-rest-spread",
-                                    "@babel/plugin-transform-async-to-generator",
-                                    // 😠 😠😠😠
-                                    // below plugin helps resolve this safari issue((
-                                    // see link https://stackoverflow.com/questions/33878586/safari-babel-webpack-const-declarations-are-not-supported-in-strict-mode
-                                    "@babel/plugin-transform-block-scoping"
-                                ]
-                            }
-                        },
-                        {
-                            loader: 'ts-loader'
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                ["@babel/env", {
+                                    "useBuiltIns": "usage",
+                                    "corejs": {
+                                        version: 3,
+                                        proposals: true
+                                    }
+                                }],
+                                "@babel/preset-typescript",
+                            ],
+                            plugins: [
+                                "@babel/proposal-class-properties",
+                                "@babel/proposal-object-rest-spread",
+                                "@babel/plugin-transform-async-to-generator",
+                                // 😠 😠😠😠
+                                // below plugin helps resolve this safari issue((
+                                // see link https://stackoverflow.com/questions/33878586/safari-babel-webpack-const-declarations-are-not-supported-in-strict-mode
+                                "@babel/plugin-transform-block-scoping"
+                            ]
                         }
+                    },
+                    {
+                        loader: 'ts-loader'
+                    }
                     ]
                 },
             ]
@@ -122,35 +115,31 @@ module.exports = function () {
                 analyzerMode: 'none'
             }),
             new HtmlWebPackPlugin({
-                //title: '📖 👨‍🎓 benchmark',
-                /* overrided by the template login , look below, when not using 
-                		 webpackHTMLtemplateplgin ->meta: {  viewport: "width=device-width, initial-scale=1, shrink-to-fit=no" },
-                */
                 filename: 'index.html',
-                //appMountHtmlSnippet: '<div id="app-spinner"></div>',
                 excludeChunks: ['sw-notice', 'runtime-sw-notice'],
                 hash: true,
                 showErrors: true,
                 xhtml: true,
-                //inlineManifestWebpackName: 'archon2',
-                //template configuration
+                // template config
                 template: 'src/template.html',
                 inject: true, //inject assets into the given template  = false (template has own logic, leave it alone)
-                /*appMountHtmlSnippet: `<div id="custom-insertion-point">
-				This might be any DOM node of your choice which can serve as an insertion point.
-			  </div>`,*/
-                //appMountId: 'app', // create a <div id="app"></div> for app mounting
-                //appMountIds: ['app', "zip", "zap"],
-                // baseHref: 'https://www.jacob-bogers.com' // all rels url go here, favicon, bundle.js etc
-                // devServer: 'http://localhost:3000' , will try and load http://localhost:3000/webpack-dev-server.js
-                //lang: 'en-US',
-                //links: [], // external loadable fonts etc, whatever
-                //mobile: true,
-                /*meta: [{
+                links: [
+                    /* "https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:600&display=swap",
+                     "https://cdn.jsdelivr.net/npm/@easyfonts/league-junction-typeface@1.0.2/all.css",
+                     "https://cdn.jsdelivr.net/npm/@easyfonts/league-mono-typeface@1.0.3/all.css"*/
+                ], // external loadable fonts etc, whatever
+                mobile: true,
+                meta: [{
                     name: 'viewport',
                     content: 'width=device-width, initial-scale=1'
-                }],*/
+                }],
             }),
+            new MiniCssExtractPlugin({
+                filename: 'css/[name].css',
+                chunkFilename: '[id].css',
+                ignoreOrder: false, // Enable to remove warnings about conflicting order
+            }),
+            //new HtmlWebpackTagsPlugin({ tags:['globals.css'], append: true }),
             new CleanWebpackPlugin({
                 verbose: true,
                 dry: false

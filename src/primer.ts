@@ -1,8 +1,14 @@
 // this bootstrap script is injected into the minimalist html page
 
-import createPlugins from './utils/jss-plugins';
+//import createPlugins from './utils/jss-plugins';
 import SABootInfo from './bootstrap/components/SABootInfo';
-import { create } from 'jss';
+//import { create } from 'jss';
+import '@easyfonts/league-mono-typeface/ultralight.css';
+import '@easyfonts/saira-typeface/css/saira-condensed-600.css';
+import './globals.css';
+import './btstrp-general.css';
+import './btstrp-media-qry.css';
+
 
 const isHttpValidResponse = (response: Response) => {
     const { status, statusText } = response;
@@ -17,7 +23,6 @@ const toJSON = (response: Response) => {
 }
 
 const finalHandler = (response: Response) => [response, null];
-
 const errorHandler = (error: Error) => [null, error];
 
 function fetchExt(url: string) {
@@ -32,12 +37,12 @@ function fetchExt(url: string) {
 
 async function bootStrap() {
     console.log('started: jss');
-    const plugins = createPlugins().map(fn => fn({}));
-    const jss = create({ plugins });
+    //const plugins = createPlugins().map(fn => fn({}));
+    //const jss = create({ plugins });
     //
     // -> jss.use(camelCase());
     //
-    const sheet = jss.createStyleSheet({
+    /*const sheet = jss.createStyleSheet({
         containerLogo: {
             margin: 'auto'
         }
@@ -46,7 +51,7 @@ async function bootStrap() {
     )
     
     console.log(sheet);
-    sheet.attach();
+    sheet.attach();*/
     
     const mp = window.document.querySelector<HTMLElement>('#bootstrap');
     if (mp) {

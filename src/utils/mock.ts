@@ -1,6 +1,7 @@
-import fs from 'fs';
+'use strict';
 
 console.log('hello world');
+export {};
 
 //service worker supported by your browser?
 //service worker installed?
