@@ -4,7 +4,7 @@
 import SABootInfo from './bootstrap/components/SABootInfo';
 //import { create } from 'jss';
 import '@easyfonts/league-mono-typeface/ultralight.css';
-import '@easyfonts/saira-typeface/css/saira-condensed-600.css';
+import '@easyfonts/saira-typeface/css/saira-extra-condensed-600.css';
 import './globals.css';
 import './btstrp-general.css';
 import './btstrp-media-qry.css';
