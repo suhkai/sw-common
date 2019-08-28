@@ -13,7 +13,7 @@ export default class LogoContainer extends Base<HTMLDivElement> {
         super({ dataAttr });
         this.svgLogo = new SALogo({});
         this.statusLabel = new SALabel({});
-        this.svgLogoContainer = new Base<HTMLDivElement>({ dataAttr: 'data-logo-container'});
+        this.svgLogoContainer = new Base<HTMLDivElement>({ dataAttr: 'logo-container'});
     }
 
     createFragment(){
