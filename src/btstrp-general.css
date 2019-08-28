@@ -41,3 +41,33 @@
 	bottom: 100%;
 	left: 0px;		
 }
+
+[data-logo-progress] {
+	color: rgba(255,255,255, 0.8);
+	position: absolute;
+	display: flex;
+	font-size: 32px; /* do in media queries */
+	font-weight: bold;
+	border: 3px solid;
+	user-select: none;
+	width: calc(100%- 3px);
+ }
+
+ [data-logo-progress] > span, [data-logo-progress] > div > span {
+	padding:0 1em;
+ } 
+
+ [data-logo-progress] > div {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 0px; /*  aka 95.34%; here is your width progress */
+	z-index: 1;
+	overflow: hidden;
+ }
+
+ [data-logo-progress] > div > span {
+	white-space: nowrap;
+	color: #222222;
+	background: rgba(255,255,255, 0.8);
+}
