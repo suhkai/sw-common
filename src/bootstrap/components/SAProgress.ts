@@ -5,42 +5,51 @@ import bindMethods from '../../utils/bindMethods';
 import Base from './Base';
 
 export default class SALabel extends Base<HTMLDivElement> {
-    private className: string;
-    private textStr: string;
-    private text1?: Text;
-    private text2?: Text;
-    private spanUnder?: HTMLSpanElement;
-    private spanOver?: HTMLSpanElement;
-    constructor({ dataAttr = 'logo-progress', className = 'progress', text = 'installing' }) {
-        super({ dataAttr });
-        bindMethods(this);
-        this.className = className;
-        this.textStr = text;
+  // state vars
+  private textStr: string;
+  private perc: number;
+  // reference to active DOM elts
+  private spanUnder?: HTMLSpanElement;
+  private spanOver?: HTMLSpanElement;
+  private divOver?: HTMLDivElement;
+  // constructor
+  constructor({ dataAttr = 'logo-progress', text = 'install serviceworker' }) {
+    super({ dataAttr });
+    bindMethods(this);
+    this.textStr = text;
+    this.perc = 0;
+  }
+  createFragment() {
+    const divUnder = this.$self = this.$self = document.createElement('div');
+    const divOver = this.divOver = document.createElement('div');
+    const spanUnder = this.spanUnder = document.createElement('span');
+    const spanOver = this.spanOver = document.createElement('span');
+    spanOver.appendChild(document.createTextNode(this.textStr || ''));
+    spanUnder.appendChild(document.createTextNode(this.textStr || ''));
+    if (this.dataAttr) {
+      const attr = document.createAttribute(`data-${this.dataAttr}`);
+      divUnder.setAttributeNode(attr);
     }
-    createFragment(){
-        const divUnder = this.$self = this.$self = document.createElement('div');
-        const divOver = this.$self = this.$self = document.createElement('div');
-        const spanUnder = this.spanUnder = document.createElement('span');
-        const spanOver = this.spanOver = document.createElement('span');
-        const text1 = this.text1 = document.createTextNode(this.textStr||'');
-        const text2 = this.text2 = document.createTextNode(this.textStr||'');
-        spanOver.appendChild(text1);
-        spanOver.appendChild(text2);
-        if (this.dataAttr) {
-            const attr = document.createAttribute(`data-${this.dataAttr}`);
-            divUnder.setAttributeNode(attr);
-        }
-        if (this.className) {
-           divUnder.classList.add(this.className);
-        }
-        divUnder.appendChild(divOver);
-        divUnder.appendChild(spanUnder);
-        divOver.appendChild(spanOver);
-    }
+    divUnder.appendChild(divOver);
+    divUnder.appendChild(spanUnder);
+    divOver.appendChild(spanOver);
+  }
 
-    setProgress(){//TODO
-
+  setProgress(newTextStr = this.textStr, perc = this.perc) {//TODO
+    if (!(this.spanUnder && this.spanOver && this.$self && this.divOver)) {
+      return;
     }
+    if (newTextStr !== this.textStr) {
+      let span = this.spanUnder;
+      span.replaceChild(document.createTextNode(newTextStr), span.childNodes[0]);
+      span = this.spanOver;
+      span.replaceChild(document.createTextNode(newTextStr), span.childNodes[0]);
+    }
+    if (perc !== this.perc){
+      this.divOver.style.width = `${perc}%`;
+      this.perc = this.perc;
+    }
+  }
 }
 /*
 <div id="parent">
@@ -48,7 +57,7 @@ export default class SALabel extends Base<HTMLDivElement> {
   <div class="over"><span>THIS IS A LONG PIECE OF TEXT</span></div>  // we will need this div but get it via spanOVer.parent to set explict width on the style!!
   <span>THIS IS A LONG PIECE OF TEXT</span>
 </div>
-</div>  
+</div>
 
 
 body {

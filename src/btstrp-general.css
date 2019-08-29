@@ -35,26 +35,34 @@
 	color: #e3493c;
 }
 
-#btstrp-logo-label {
-	width: 100%;
-	position: absolute;
-	bottom: 100%;
-	left: 0px;		
+[data-logo-svg] {
+	display: block;
+}
+
+[data-logo-container] {
+	height: fit-content;
+	width: fit-content;
 }
 
 [data-logo-progress] {
 	color: rgba(255,255,255, 0.8);
 	position: absolute;
 	display: flex;
-	font-size: 32px; /* do in media queries */
-	font-weight: bold;
-	border: 3px solid;
+	font-size: 14px; /* font-size for captions */
+	font-weight: 100;
+	border: 0.08em solid; /* do in media queries */
 	user-select: none;
-	width: calc(100%- 3px);
+	width: 100%; /* do in media queries */
+	top: 0;
+	transform: translate(0, -100%);
+	font-family: 'League Mono';
  }
 
  [data-logo-progress] > span, [data-logo-progress] > div > span {
-	padding:0 1em;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	padding:0 0.3em;
+	overflow-x: hidden;
  } 
 
  [data-logo-progress] > div {
@@ -63,11 +71,10 @@
 	left: 0px;
 	width: 0px; /*  aka 95.34%; here is your width progress */
 	z-index: 1;
-	overflow: hidden;
+	overflow-x: hidden;
  }
 
  [data-logo-progress] > div > span {
-	white-space: nowrap;
 	color: #222222;
 	background: rgba(255,255,255, 0.8);
 }

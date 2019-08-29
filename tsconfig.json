@@ -15,6 +15,7 @@
         "isolatedModules": true,
         // Import non-ES modules as default imports.
         "esModuleInterop": true,
+        "module":"ESNext",
         "lib": [
             "webworker",
             "dom"
