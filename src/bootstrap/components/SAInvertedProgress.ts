@@ -4,17 +4,15 @@ import bindMethods from '../../utils/bindMethods';
 
 import Base from './Base';
 
-export default class SALabel extends Base<HTMLDivElement> {
+const { min, max } = Math;
+
+export default class SAInvertedProgress extends Base<HTMLDivElement> {
   // state vars
   private textStr: string;
   private className: string;
   private perc: number;
-  // reference to active DOM elts
-  private spanUnder?: HTMLSpanElement;
-  private spanOver?: HTMLSpanElement;
-  private divOver?: HTMLDivElement;
   // constructor
-  constructor({ dataAttr = 'logo-progress', text = 'install serviceworker', className = '' }) {
+  constructor({ dataAttr = 'inverted-progress', text = 'install serviceworker', className = '' }) {
     super({ dataAttr });
     bindMethods(this);
     this.textStr = text;
@@ -22,37 +20,28 @@ export default class SALabel extends Base<HTMLDivElement> {
     this.perc = 0;
   }
   createFragment() {
-    const divUnder = this.$self = this.$self = document.createElement('div');
-    const divOver = this.divOver = document.createElement('div');
-    const spanUnder = this.spanUnder = document.createElement('span');
-    const spanOver = this.spanOver = document.createElement('span');
-    spanOver.appendChild(document.createTextNode(this.textStr || ''));
-    spanUnder.appendChild(document.createTextNode(this.textStr || ''));
+    const self = this.$self = document.createElement('div');
+    self.setAttribute('data-content', this.textStr);
     if (this.dataAttr) {
       const attr = document.createAttribute(`data-${this.dataAttr}`);
-      divUnder.setAttributeNode(attr);
+      self.setAttributeNode(attr);
     }
     if (this.className) {
-      this.$self.setAttribute('class', this.className);
+      self.setAttribute('class', this.className);
     }
-    divUnder.appendChild(divOver);
-    divUnder.appendChild(spanUnder);
-    divOver.appendChild(spanOver);
   }
 
   setProgress(newTextStr = this.textStr, perc = this.perc) {//TODO
-    if (!(this.spanUnder && this.spanOver && this.$self && this.divOver)) {
+    if (!this.$self) {
       return;
     }
     if (newTextStr !== this.textStr) {
-      let span = this.spanUnder;
-      span.replaceChild(document.createTextNode(newTextStr), span.childNodes[0]);
-      span = this.spanOver;
-      span.replaceChild(document.createTextNode(newTextStr), span.childNodes[0]);
+      this.textStr = newTextStr;
+      this.$self.setAttribute('data-content', this.textStr);
     }
     if (perc !== this.perc) {
-      this.divOver.style.width = `${perc}%`;
-      this.perc = this.perc;
+      this.perc = max(min(perc, 1), 0);
+      this.$self.style.width = `${this.perc}%`;
     }
   }
 }

@@ -1,115 +1,110 @@
 /* cover the whole screen */
 
 #bootstrap {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    position: absolute;
-    background: #14191e;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	position: absolute;
+	background: #14191e;
 }
-
 
 /* position the card */
 
 [data-bootstrap-inner] {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: fit-content;
-    transform: translate(-50%, -50%);
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: fit-content;
+	transform: translate(-50%, -50%);
 }
-
 
 /* indirect size of the card */
 
-
 /* is determined by *[data-logo-container] */
-
 
 /* this is determined by media queries */
 
 .saira-extra-condensed {
-    text-align: right;
-    font-family: 'Saira Extra Condensed';
+	text-align: right;
+	font-family: 'Saira Extra Condensed';
 }
 
 .white {
-    color: white;
+	color: white;
 }
 
 .reddish {
-    color: #e3493c;
+	color: #e3493c;
 }
 
 [data-logo-svg] {
-    display: block;
+	display: block;
 }
 
 [data-logo-container] {
-    height: fit-content;
-    width: fit-content;
+	height: fit-content;
+	width: fit-content;
 }
 
-[data-logo-progress-container] {
-    position: absolute;
-    top: 0;
-    transform: translate(0, -100%);
+[data-progress-container] {
+	position: absolute;
+	top: 0;
+	transform: translate(0, -100%);
+	width: 100%;
+	-webkit-transform: translate(0, -100%);
+	-moz-transform: translate(0, -100%);
+	-ms-transform: translate(0, -100%);
+	-o-transform: translate(0, -100%);
+}
+
+[data-inverted-progress] {
+	position: relative;
+	user-select: none;
+}
+
+[data-inverted-progress]:before,
+[data-inverted-progress]:after {
+	content: attr(data-content);
+	overflow: hidden;
+	position: absolute;
+	text-overflow: ellipsis;
+	text-indent: 0.3em;
+	white-space: nowrap;
+}
+/* inverted text */
+[data-inverted-progress]:after {
+    color: red;
     width: 100%;
+    background: blue;
 }
 
-[data-logo-progress] {
-    position: relative;
-    color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    border: 0.08em solid;
-    user-select: none;
-    width: 100%;
-}
-
-[data-logo-progress]>span,
-[data-logo-progress]>div>span {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    padding: 0 0.3em;
-    overflow-x: hidden;
-}
-
-[data-logo-progress]>div {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 0px;
-    /*  aka 95.34%; here is your width progress */
-    z-index: 1;
-    overflow-x: hidden;
-}
-
-[data-logo-progress]>div {
-    color: #222222;
-    background: rgba(255, 255, 255, 0.8);
+[data-inverted-progress]:before {
+    color: blue;
+    background: red;
+    width:25%;
 }
 
 .progress-1 {
-    font-family: 'League Mono';
-    font-weight: 100;
-    font-size: 14px;
+	font-family: 'League Mono';
+	font-weight: 100;
+	font-size: 14px;
 }
 
 .progress-2 {
-    font-family: 'Roboto Condensed';
-    font-weight: 100;
-    font-size: 14px;
+	font-family: 'Roboto Condensed';
+	font-weight: 100;
+	font-size: 14px;
 }
 
 .progress-3 {
-    font-family: 'Open Sans Condensed';
-    font-weight: 100;
-    font-size: 14px;
+	font-family: 'Open Sans Condensed';
+	font-weight: 100;
+	font-size: 14px;
 }
 
 .progress-4 {
-    font-family: 'Lato';
-    font-weight: 100;
-    font-size: 14px;
+	font-family: 'Lato';
+	font-weight: 100;
+	font-size: 14px;
 }
