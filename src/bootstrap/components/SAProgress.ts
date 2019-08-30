@@ -7,16 +7,18 @@ import Base from './Base';
 export default class SALabel extends Base<HTMLDivElement> {
   // state vars
   private textStr: string;
+  private className: string;
   private perc: number;
   // reference to active DOM elts
   private spanUnder?: HTMLSpanElement;
   private spanOver?: HTMLSpanElement;
   private divOver?: HTMLDivElement;
   // constructor
-  constructor({ dataAttr = 'logo-progress', text = 'install serviceworker' }) {
+  constructor({ dataAttr = 'logo-progress', text = 'install serviceworker', className = '' }) {
     super({ dataAttr });
     bindMethods(this);
     this.textStr = text;
+    this.className = className;
     this.perc = 0;
   }
   createFragment() {
@@ -29,6 +31,9 @@ export default class SALabel extends Base<HTMLDivElement> {
     if (this.dataAttr) {
       const attr = document.createAttribute(`data-${this.dataAttr}`);
       divUnder.setAttributeNode(attr);
+    }
+    if (this.className) {
+      this.$self.setAttribute('class', this.className);
     }
     divUnder.appendChild(divOver);
     divUnder.appendChild(spanUnder);
@@ -45,7 +50,7 @@ export default class SALabel extends Base<HTMLDivElement> {
       span = this.spanOver;
       span.replaceChild(document.createTextNode(newTextStr), span.childNodes[0]);
     }
-    if (perc !== this.perc){
+    if (perc !== this.perc) {
       this.divOver.style.width = `${perc}%`;
       this.perc = this.perc;
     }

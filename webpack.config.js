@@ -154,12 +154,6 @@ module.exports = function () {
                 // template config
                 template: 'src/template.html',
                 inject: true, //inject assets into the given template  = false (template has own logic, leave it alone)
-                links: [
-                    /* "https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:600&display=swap",
-                     "https://cdn.jsdelivr.net/npm/@easyfonts/league-junction-typeface@1.0.2/all.css",
-                     "https://cdn.jsdelivr.net/npm/@easyfonts/league-mono-typeface@1.0.3/all.css"*/
-                ], // external loadable fonts etc, whatever
-                mobile: true,
                 meta: [{
                     name: 'viewport',
                     content: 'width=device-width, initial-scale=1'

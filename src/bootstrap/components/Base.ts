@@ -18,7 +18,7 @@ export default class Base<T extends Element> {
     }
 
     append(child: any){
-        if (!this.$self){
+        if (!this.$self || !child){
             return;
         }
         if (child instanceof Base){
