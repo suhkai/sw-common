@@ -1,25 +1,27 @@
 'use strict'
 
 import ran from '../../utils/random';
+import syncAnimFrame from '../../utils/syncAnimationFrame';
 import Base from './Base';
 
 export default class SALogo extends Base<SVGSVGElement> {
-    private angle1: number;
-    private angle2: number;
-    private angle3: number;
+    public angle1: number;
+    public angle2: number;
+    public angle3: number;
     private scale1: number;
     private scale2: number;
     private $pathWhite?: SVGPathElement;
     private $pathBlack?: SVGPathElement;
     private $pathTopLevel?: SVGPathElement;
 
-    constructor({ dataAttr = 'logo-svg', angle1 = 0, angle2 = 0, angle3 = 0, scale1 = 0.8, scale2 = 0.5 }) {
+    constructor({ dataAttr = 'logo-svg', angle1 = 0, angle2 = 11, angle3 = 0, scale1 = 0.8, scale2 = 0.5 }) {
         super({ dataAttr });
         this.angle1 = angle1;
         this.angle2 = angle2;
         this.angle3 = angle3;
         this.scale1 = scale1;
         this.scale2 = scale2;
+        this.render = syncAnimFrame(this.render);
         // create svg template
     }
 
@@ -72,7 +74,7 @@ export default class SALogo extends Base<SVGSVGElement> {
         super.mount($mp);
     }
 
-    calculatePaths(angle1 = this.angle1, angle2 = this.angle2, angle3 = this.angle3, scale1 = this.scale1, scale2 = this.scale2) {
+    private calculatePaths(angle1 = this.angle1, angle2 = this.angle2, angle3 = this.angle3, scale1 = this.scale1, scale2 = this.scale2) {
         // we want to make this alterable, for now constants
         const scaleI1 = scale(this.scale1, this.scale1);
         const scaleI2 = scale(this.scale2, this.scale2);

@@ -17,12 +17,14 @@
 	top: 50%;
 	width: fit-content;
 	transform: translate(-50%, -50%);
+	-webkit-transform: translate(-50%, -50%);
+	-moz-transform: translate(-50%, -50%);
+	-ms-transform: translate(-50%, -50%);
+	-o-transform: translate(-50%, -50%);
 }
 
 /* indirect size of the card */
-
 /* is determined by *[data-logo-container] */
-
 /* this is determined by media queries */
 
 .saira-extra-condensed {
@@ -61,6 +63,7 @@
 [data-inverted-progress] {
 	position: relative;
 	user-select: none;
+	border:2px solid transparent;
 }
 
 [data-inverted-progress]:before,
@@ -68,43 +71,29 @@
 	content: attr(data-content);
 	overflow: hidden;
 	position: absolute;
-	text-overflow: ellipsis;
-	text-indent: 0.3em;
 	white-space: nowrap;
+	left:-2px;
+	top: -2px;
 }
 /* inverted text */
 [data-inverted-progress]:after {
-    color: red;
-    width: 100%;
-    background: blue;
+	width: 20%;
+	background:#ccc;
+	color: #14191e;
+	border-left: 2px solid #ccc;
+	border-bottom: 2px solid #ccc;
+	border-top: 2px solid #ccc;
 }
-
+/* before is ontop of after z-index wise*/
 [data-inverted-progress]:before {
-    color: blue;
-    background: red;
-    width:25%;
+	width: 100%;
+	background:#14191e;
+	color: #ccc;
+	border: 2px solid #ccc;
 }
 
-.progress-1 {
-	font-family: 'League Mono';
-	font-weight: 100;
-	font-size: 14px;
-}
-
-.progress-2 {
+.progress {
 	font-family: 'Roboto Condensed';
-	font-weight: 100;
-	font-size: 14px;
-}
-
-.progress-3 {
-	font-family: 'Open Sans Condensed';
-	font-weight: 100;
-	font-size: 14px;
-}
-
-.progress-4 {
-	font-family: 'Lato';
-	font-weight: 100;
+	font-weight: 800;
 	font-size: 14px;
 }
