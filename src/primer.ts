@@ -2,8 +2,8 @@
 
 //import createPlugins from './utils/jss-plugins';
 import SABootInfo from './bootstrap/components/SABootInfo';
-//import { create } from 'jss';
-import '@easyfonts/league-mono-typeface/ultralight.css';
+
+//css
 import '@easyfonts/saira-typeface/css/saira-extra-condensed-600.css';
 import './globals.css';
 import './btstrp-general.css';
