@@ -3,6 +3,10 @@
 
 // following https://github.com/Microsoft/TypeScript-Babel-Starter#using-rollup
 
+// for css
+
+// https://lengstorf.com/learn-rollup-css/
+
 import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
