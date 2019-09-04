@@ -4,10 +4,11 @@
 import SABootInfo from './bootstrap/components/SABootInfo';
 
 //css
-import '@easyfonts/saira-typeface/css/saira-extra-condensed-600.css';
+/*import '@easyfonts/saira-typeface/css/saira-extra-condensed-600.css';
 import './globals.css';
 import './btstrp-general.css';
 import './btstrp-media-qry.css';
+*/
 
 const isHttpValidResponse = (response: Response) => {
     const { status, statusText } = response;

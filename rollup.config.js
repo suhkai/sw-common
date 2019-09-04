@@ -1,4 +1,4 @@
-https://hackernoon.com/building-and-publishing-a-module-with-typescript-and-rollup-js-faa778c85396
+//https://hackernoon.com/building-and-publishing-a-module-with-typescript-and-rollup-js-faa778c85396
 // ^this one looks good
 
 // following https://github.com/Microsoft/TypeScript-Babel-Starter#using-rollup
@@ -7,6 +7,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
 import pkg from './package.json';
+import typescript from 'rollup-plugin-typescript2';
 
 const extensions = ['.mjs', '.js', '.jsx', '.json', '.css', '.woff', '.woff2', '.ts', '.tsx'];
 
@@ -21,9 +22,9 @@ const plugins = [
     include: 'node_modules/**',
     ignoreGlobals: false,
   }),
-  /*typescript({
+  typescript({
     typescript: require('typescript'),
-  }),*/
+  }),
   babel({
     presets: [
       ["@babel/env", {
