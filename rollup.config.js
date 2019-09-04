@@ -1,84 +1,81 @@
-import typescript from 'rollup-plugin-typescript2';
-import resolve from 'rollup-plugin-node-resolve';
-import css from 'rollup-plugin-css-only';
-import pkg from './package.json';
-import url from 'rollup-plugin-url'
-import sass from 'rollup-plugin-sass';
+https://hackernoon.com/building-and-publishing-a-module-with-typescript-and-rollup-js-faa778c85396
+// ^this one looks good
 
-console.log(pkg.main, pkg.module)
+// following https://github.com/Microsoft/TypeScript-Babel-Starter#using-rollup
+
+import commonjs from 'rollup-plugin-commonjs';
+import nodeResolve from 'rollup-plugin-node-resolve';
+import babel from 'rollup-plugin-babel';
+import pkg from './package.json';
+
+const extensions = ['.mjs', '.js', '.jsx', '.json', '.css', '.woff', '.woff2', '.ts', '.tsx'];
+
+const plugins = [
+  nodeResolve({
+    module: true,
+    jsnext: true,
+    main: true,
+    preferBuiltins: false
+  }),
+  commonjs({
+    include: 'node_modules/**',
+    ignoreGlobals: false,
+  }),
+  /*typescript({
+    typescript: require('typescript'),
+  }),*/
+  babel({
+    presets: [
+      ["@babel/env", {
+        "useBuiltIns": "usage",
+        "corejs": {
+          version: 3,
+          proposals: true
+        }
+      }],
+      "@babel/preset-typescript",
+      // 'minify'
+    ],
+    plugins: [
+      "@babel/proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      "@babel/plugin-transform-async-to-generator",
+      // 😠 😠😠😠
+      // below plugin helps resolve this safari issue((
+      // see link https://stackoverflow.com/questions/33878586/safari-babel-webpack-const-declarations-are-not-supported-in-strict-mode
+      "@babel/plugin-transform-block-scoping"
+    ]
+  })
+];
+/*
+options: {
+  presets: [
+    ["@babel/env", {
+      "useBuiltIns": "usage",
+      "corejs": {
+        version: 3,
+        proposals: true
+      }
+    }],
+    "@babel/preset-typescript",
+    // 'minify'
+  ],
+    plugins: [
+      "@babel/proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      "@babel/plugin-transform-async-to-generator",
+      // 😠 😠😠😠
+      // below plugin helps resolve this safari issue((
+      // see link https://stackoverflow.com/questions/33878586/safari-babel-webpack-const-declarations-are-not-supported-in-strict-mode
+      "@babel/plugin-transform-block-scoping"
+    ]
+}*/
+
 export default {
   input: 'src/primer.ts',
   output: [{
-
-      dir: 'dist',
-      format: 'umd'
-    },
-    /*
-    {
-      file: pkg.module,
-      format: 'es',
-    },
-    */
-  ],
-  external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ],
-  plugins: [
-    typescript({
-      typescript: require('typescript'),
-    }),
-    sass({}),
-    resolve({
-
-      // the fields to scan in a package.json to determine the entry point
-      // if this list contains "browser", overrides specified in "pkg.browser"
-      // will be used
-      mainFields: ['module', 'main'], // Default: ['module', 'main']
-
-     
-      // some package.json files have a "browser" field which specifies
-      // alternative files to load for people bundling for the browser. If
-      // that's you, either use this option or add "browser" to the
-      // "mainfields" option, otherwise pkg.browser will be ignored
-      browser: true, // Default: false
-
-      // not all files you want to resolve are .js files
-      extensions: ['.mjs', '.js', '.jsx', '.json', '.css', '.woff', '.woff2'], // Default: [ '.mjs', '.js', '.json', '.node' ]
-
-      // whether to prefer built-in modules (e.g. `fs`, `path`) or
-      // local ones with the same names
-      preferBuiltins: false, // Default: true
-
-      // Lock the module search in this path (like a chroot). Module defined
-      // outside this path will be marked as external
-      //jail: '/my/jail/path', // Default: '/'
-
-      // Set to an array of strings and/or regexps to lock the module search
-      // to modules that match at least one entry. Modules not matching any
-      // entry will be marked as external
-      //only: ['some_module', /^@some_scope\/.*$/], // Default: null
-
-      // If true, inspect resolved files to check that they are
-      // ES2015 modules
-      //modulesOnly: true, // Default: false
-
-      // Force resolving for these modules to root's node_modules that helps
-      // to prevent bundling the same package multiple times if package is
-      // imported from dependencies.
-      //dedupe: ['react', 'react-dom'], // Default: []
-
-      // Any additional options that should be passed through
-      // to node-resolve
-      /*customResolveOptions: {
-        moduleDirectory: 'js_modules'
-      }*/
-    }),
-    //url({
-    //limit: 0, // inline files < 10k, copy files > 10k
-    //  include: ['**/*.woff2'],
-    //  emitFiles: true, // defaults to true
-    //}),*/
-
-  ],
+    dir: 'dist',
+    format: 'umd'
+  }],
+  plugins
 }
