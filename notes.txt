@@ -1,0 +1,8 @@
+// https://hackernoon.com/building-and-publishing-a-module-with-typescript-and-rollup-js-faa778c85396
+// ^this one looks good
+// following https://github.com/Microsoft/TypeScript-Babel-Starter#using-rollup
+// for css
+// https://lengstorf.com/learn-rollup-css/
+// https://github.com/borodean/postcss-assets
+
+Nice 
