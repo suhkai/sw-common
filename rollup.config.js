@@ -9,23 +9,36 @@ import simplevars from 'postcss-simple-vars';
 import nested from 'postcss-nested';
 import cssnext from 'postcss-cssnext';
 import cssnano from 'cssnano';
-import url from "rollup-plugin-url"
+import url from 'rollup-plugin-url';
+import assets from 'postcss-assets';
+
+console.log(assets({
+  //loadPaths: ['node_modules/', 'src/'],
+  cachebuster: true,
+  relative: true
+}));
+
 
 const plugins = [
   url({
     limit: 0, // inline files < 10k, copy files > 10k
-    include: ["node_modules/**/*.woff2"], // defaults to .svg, .png, .jpg and .gif files
+    include: ["node_modules/@easyfonts/saira-typeface/fonts/*.woff2"], // defaults to .svg, .png, .jpg and .gif files
     emitFiles: true // defaults to true
-  }),  
+  }),
   postcss({
     modules: true,
     extract: true,
-    extensions: ['.css'],
+    extensions: ['.css', '.woff2'],
     plugins: [
-               simplevars(),
-               nested(),
-               cssnext({ warnForDuplicates: false, }),
-               cssnano(),
+      simplevars(),
+      nested(),
+      cssnext({ warnForDuplicates: false, }),
+      cssnano(),
+      assets({
+        loadPaths: ['node_modules/', 'src/'],
+        cachebuster: true,
+        relative: true
+      })
     ],
   }),
   nodeResolve({
@@ -72,6 +85,6 @@ export default {
     dir: 'dist',
     format: 'iife'
   }],
-  sourceMap: 'inline',
+  //sourceMap: 'inline',
   plugins
 }
