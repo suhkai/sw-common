@@ -25,59 +25,13 @@ module.exports = function () {
             extensions: ['.wasm', '.mjs', '.js', '.json', '.ts', '.tsx', '.css']
         },
         devtool: 'source-map',
+
         optimization: {
-            minimizer: [
-                new TerserPlugin({
-                    cache: true,
-                    sourceMap: true,
-                    extractComments: true,
-                    terserOptions: {
-                        ecma: undefined,
-                        warnings: false,
-                        parse: {},
-                        compress: {
-                            booleans_as_integers: true,
-                        },
-                        mangle: true, // Note `mangle.properties` is `false` by default.
-                        module: false,
-                        output: null,
-                        toplevel: false,
-                        nameCache: null,
-                        ie8: false,
-                        keep_classnames: undefined,
-                        keep_fnames: false,
-                        safari10: false,
-                    },
-                }),
-                new OptimizeCSSAssetsPlugin({})]
+            minimizer: [new OptimizeCSSAssetsPlugin({})]
         },
-        /* optimization: {
-             sideEffects: true, // respect the sideEffects flag in package.json
-             flagIncludedChunks: true,
-             mergeDuplicateChunks: true,
-             removeEmptyChunks: true,
-             removeAvailableModules: true,
-             minimize: false,
-             // optimization.nodeEnv: '..', uses DefinePlugin to set process.env.NODE_ENV
-             chunkIds: 'named',
-             moduleIds: 'hashed',
-             splitChunks: {
-                 chunks(chunk) {
-                     // exclude `sw-notice`
-                     return !['sw-notice'].includes(chunk.name);
-                 }
-             },
-             namedModules: true, //named modules for better debugging
-             runtimeChunk: false, // { name: entrypoint => `runtime~${entrypoint.name}` }
-             //runtimeChunk: {	
-             //    name: (entrypoint) => ['runtime-sw-notice','sw-notice'].includes(entrypoint.name)  ? 9 :`runtime~${entrypoint.name}`
-             //}
-             minimizer:[new OptimizeCSSAssetsPlugin({})]
-         },*/
         mode: 'production',
         entry: {
-            'sw-notice': './src/sw.ts',
-            'primer': './src/primer.ts'
+            'main.css': './src/main.css',
         },
         output: {
             globalObject: 'this'
@@ -108,33 +62,33 @@ module.exports = function () {
                     test: /\.(m|j|t)s$/,
                     exclude: /node_modules/,
                     use: [{
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [
-                                ["@babel/env", {
-                                    "useBuiltIns": "usage",
-                                    "corejs": {
-                                        version: 3,
-                                        proposals: true
-                                    }
-                                }],
-                                "@babel/preset-typescript",
-                                // 'minify'
-                            ],
-                            plugins: [
-                                "@babel/proposal-class-properties",
-                                "@babel/proposal-object-rest-spread",
-                                "@babel/plugin-transform-async-to-generator",
-                                // 😠 😠😠😠
-                                // below plugin helps resolve this safari issue((
-                                // see link https://stackoverflow.com/questions/33878586/safari-babel-webpack-const-declarations-are-not-supported-in-strict-mode
-                                "@babel/plugin-transform-block-scoping"
-                            ]
+                            loader: 'babel-loader',
+                            options: {
+                                presets: [
+                                    ["@babel/env", {
+                                        "useBuiltIns": "usage",
+                                        "corejs": {
+                                            version: 3,
+                                            proposals: true
+                                        }
+                                    }],
+                                    "@babel/preset-typescript",
+                                    // 'minify'
+                                ],
+                                plugins: [
+                                    "@babel/proposal-class-properties",
+                                    "@babel/proposal-object-rest-spread",
+                                    "@babel/plugin-transform-async-to-generator",
+                                    // 😠 😠😠😠
+                                    // below plugin helps resolve this safari issue((
+                                    // see link https://stackoverflow.com/questions/33878586/safari-babel-webpack-const-declarations-are-not-supported-in-strict-mode
+                                    "@babel/plugin-transform-block-scoping"
+                                ]
+                            }
+                        },
+                        {
+                            loader: 'ts-loader'
                         }
-                    },
-                    {
-                        loader: 'ts-loader'
-                    }
                     ]
                 },
             ]
