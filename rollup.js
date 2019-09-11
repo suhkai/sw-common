@@ -1,14 +1,55 @@
 const rollup = require('rollup');
+const {resolve} = require('path');
+const colors = require('colors');
+const node_builtins = require('rollup-plugin-node-builtins');
+//const builtins = require('builtin-modules');
+console.log(resolve('./math.js'));
 
-
-const inputOptions = {
+function myExample () {
+    return {
+      name: 'my-example', // this name will show up in warnings and errors
+      resolveId ( source ) {
+          console.log(`plgin-resolveId ${source}`.red);
+          return null;
+      },
+      load ( id ) {
+        console.log(`plgin-load ${id}`.red);
+        return null; // other ids should be handled as usually
+      },
+      augmentChunkHash(chunkInfo) {
+        console.log(`augmentChunkHash ${JSON.stringify(chunkInfo)}`.red);
+      },
+      banner(){
+          return '/*MY FIRST PLUGIN*/';
+      },
+      buildStart(){
+        console.log('BUILD_START'.red);
+      },
+      buildEnd(err){
+          console.log('buildEnd:'.red);
+          err && console.log(String(err).red);
+      },
+      generateBundle(options, bundle, isWrite){
+          console.log('GENERATE BUNDLE OPTIONS>>',options);
+          console.log('GENERATE BUNDLE BUNDLE>>',bundle);
+          console.log(bundle['bundle-a8f1ffdd-iife.js'].code);
+          console.log(this.emitFile)
+      }
+      // TODO: https://rollupjs.org/guide/en/#plugin-development
+      // I am at "intro"
+    };
+  }
   
+  // rollup.config.js
+  
+const inputOptions = {
+    plugins: [myExample(), /*node_builtins()*/],
 // core input options
 //xx  external,
 //xx  input, // required
-//  plugins,
+//xx  plugins,
 //  
-//
+//  
 //  // advanced input options
 //  cache,
 //  inlineDynamicImports,
@@ -32,7 +73,12 @@ const inputOptions = {
 //  experimentalOptimizeChunks,
 //  experimentalTopLevelAwait,
 //  perf
-  
+    external: (id, parentId, isResolved) => {
+        console.log(`external args: ${id}, ${parentId}, ${isResolved}`);
+        return false;
+        //if (id === './math') return false;
+        //return true;
+    },
     input: {
         bundle: 'es6.js',
     }
@@ -80,6 +126,9 @@ const outputOptions = {
         dir:'dist',
         entryFileNames: '[name]-[hash]-[format].js',
         name: 'mybundle' //Access the exports of the bundle
+    },
+    globals: {
+        [resolve('./math.js')]: 'window.LIB'
     }
 }
 
@@ -95,7 +144,6 @@ async function build() {
         }
     }
     await bundle.write(outputOptions);
-
 }
 
 build();
