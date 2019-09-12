@@ -1,78 +1,126 @@
 const rollup = require('rollup');
-const {resolve} = require('path');
+const { resolve } = require('path');
 const colors = require('colors');
 const node_builtins = require('rollup-plugin-node-builtins');
 //const builtins = require('builtin-modules');
 console.log(resolve('./math.js'));
 
-function myExample () {
+function delay(t) {
+    return new Promise(resolve => {
+        setTimeout(() => resolve(), t);
+    });
+}
+
+function myExample() {
     return {
-      name: 'my-example', // this name will show up in warnings and errors
-      resolveId ( source ) {
-          console.log(`plgin-resolveId ${source}`.red);
-          return null;
-      },
-      load ( id ) {
-        console.log(`plgin-load ${id}`.red);
-        return null; // other ids should be handled as usually
-      },
-      augmentChunkHash(chunkInfo) {
-        console.log(`augmentChunkHash ${JSON.stringify(chunkInfo)}`.red);
-      },
-      banner(){
-          return '/*MY FIRST PLUGIN*/';
-      },
-      buildStart(){
-        console.log('BUILD_START'.red);
-      },
-      buildEnd(err){
-          console.log('buildEnd:'.red);
-          err && console.log(String(err).red);
-      },
-      generateBundle(options, bundle, isWrite){
-          console.log('GENERATE BUNDLE OPTIONS>>',options);
-          console.log('GENERATE BUNDLE BUNDLE>>',bundle);
-          console.log(bundle['bundle-a8f1ffdd-iife.js'].code);
-          console.log(this.emitFile)
-      }
-      // TODO: https://rollupjs.org/guide/en/#plugin-development
-      // I am at "intro"
+        name: 'my-example', // this name will show up in warnings and errors
+        resolveId(source) {
+            console.log(`plgin-resolveId ${source}`.red);
+            if (source === './doest-exist'){
+                return { id: resolve('./dyn2.js'), external: false }; 
+            }
+            return null;
+        },
+        load(id) {
+            console.log(`plgin-load ${id}`.red);
+            return null; // other ids should be handled as usually
+        },
+        augmentChunkHash(chunkInfo) {
+            console.log(`augmentChunkHash`.red);
+        },
+        banner() {
+            return '/*MY FIRST PLUGIN*/';
+        },
+        buildStart() {
+            console.log('BUILD_START'.red);
+        },
+        buildEnd(err) {
+            console.log('buildEnd:'.red);
+            err && console.log(String(err).red);
+        },
+        generateBundle(options, bundle, isWrite) {
+            console.log('GENERATE BUNDLE OPTIONS>>', options);
+            console.log('GENERATE BUNDLE BUNDLE>>', bundle);
+            for (const chunk in bundle) {
+                chunk.code && console.log(chunk.code);
+            }
+        }
+        // TODO: https://rollupjs.org/guide/en/#plugin-development
+        // I am at "intro"
+        ,
+        intro: async function () {
+            //await delay(1000);
+            return '\'hello world\';';
+        },
+        load(id) {
+            //throw new Error('reached here');
+            console.log(this.getModuleInfo(id));
+            console.log(`plg-load [${id}]`.red);
+            return null;
+        },
+        options(io){
+           // console.log(`plg-options ${JSON.stringify(Object.entries(io))}`.red);
+            return null;
+        },
+        outputOptions(oo){
+            console.log(`plg-options-out`.red);
+            return null;
+        },
+        outro: '/*HELLO THIS IS A TEST*/',
+        renderChunk(code, ci, oo){
+            console.log('plg-renderChunk'.red);
+            return null;
+        },
+        renderStart(){
+            console.log('plg-renderStart'.red);
+        },
+        resolveDynamicImport(specifier, importer){
+            console.log(`plg-resolveDynamicImport ${specifier}<-${importer}`.red);
+            return resolve('./dyn.js');
+        },
+        // cant make it work below
+        resolveFileUrl(chunkId, file, format, modId, refId, relPath){
+            console.log(`plg-resolveFileUrl`.red);
+            throw new Error('stop here');
+            return null;
+        }
+
     };
-  }
-  
-  // rollup.config.js
-  
+}
+
+// rollup.config.js
+
 const inputOptions = {
     plugins: [myExample(), /*node_builtins()*/],
-// core input options
-//xx  external,
-//xx  input, // required
-//xx  plugins,
-//  
-//  
-//  // advanced input options
-//  cache,
-//  inlineDynamicImports,
-//  manualChunks,
-//  onwarn,
-//  preserveModules,
-//  strictDeprecations,
-//
-//  // danger zone
-//  acorn,
-//  acornInjectPlugins,
-//  context,
-//  moduleContext,
-//  preserveSymlinks,
-//  shimMissingExports,
-//  treeshake,
-//
-//  // experimental
-//  chunkGroupingSize,
-//  experimentalCacheExpiry,
-//  experimentalOptimizeChunks,
-//  experimentalTopLevelAwait,
-//  perf
+    // core input options
+    //xx  external,
+    //xx  input, // required
+    //xx  plugins,
+    //  
+    //  
+    //  // advanced input options
+    //  cache,
+    //  inlineDynamicImports,
+    //  manualChunks,
+    //  onwarn,
+    //  preserveModules,
+    //  strictDeprecations,
+    //
+    //  // danger zone
+    //  acorn,
+    //  acornInjectPlugins,
+    //  context,
+    //  moduleContext,
+    //  preserveSymlinks,
+    //  shimMissingExports,
+    //  treeshake,
+    //
+    //  // experimental
+    //  chunkGroupingSize,
+    //  experimentalCacheExpiry,
+    //  experimentalOptimizeChunks,
+    //  experimentalTopLevelAwait,
+    //  perf
     external: (id, parentId, isResolved) => {
         console.log(`external args: ${id}, ${parentId}, ${isResolved}`);
         return false;
@@ -82,48 +130,49 @@ const inputOptions = {
     input: {
         bundle: 'es6.js',
     }
+
 };
 
 const outputOptions = {
-// core output options
-//xx  dir,
-//xx  file,
-//xx  format, // required
-//xx  globals,
-//xx  name,
-  
-//advanced output options
-//assetFileNames,
-//banner,
-//chunkFileNames,
-//compact,
-//entryFileNames,
-//extend,
-//externalLiveBindings,
-//footer,
-//interop,
-//intro,
-//outro,
-//paths,
-//sourcemap,
-//sourcemapExcludeSources,
-//sourcemapFile,
-//sourcemapPathTransform,
-  
-// danger zone
-//amd,
-//dynamicImportFunction,
-//esModule,
-//exports,
-//freeze,
-//indent,
-//namespaceToStringTag,
-//noConflict,
-//preferConst,
-//strict
+    // core output options
+    //xx  dir,
+    //xx  file,
+    //xx  format, // required
+    //xx  globals,
+    //xx  name,
+
+    //advanced output options
+    //assetFileNames,
+    //banner,
+    //chunkFileNames,
+    //compact,
+    //entryFileNames,
+    //extend,
+    //externalLiveBindings,
+    //footer,
+    //interop,
+    //xx intro,
+    //outro,
+    //paths,
+    //sourcemap,
+    //sourcemapExcludeSources,
+    //sourcemapFile,
+    //sourcemapPathTransform,
+
+    // danger zone
+    //amd,
+    //dynamicImportFunction,
+    //esModule,
+    //exports,
+    //freeze,
+    //indent,
+    //namespaceToStringTag,
+    //noConflict,
+    //preferConst,
+    //strict
     output: {
-        format: 'iife',
-        dir:'dist',
+        format: 'esm',
+        dir: 'dist',
         entryFileNames: '[name]-[hash]-[format].js',
         name: 'mybundle' //Access the exports of the bundle
     },
