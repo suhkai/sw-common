@@ -1,5 +1,7 @@
 const rollup = require('rollup');
-const { resolve } = require('path');
+const {
+    resolve
+} = require('path');
 const colors = require('colors');
 const node_builtins = require('rollup-plugin-node-builtins');
 //const builtins = require('builtin-modules');
@@ -16,8 +18,11 @@ function myExample() {
         name: 'my-example', // this name will show up in warnings and errors
         resolveId(source) {
             console.log(`plgin-resolveId ${source}`.red);
-            if (source === './doest-exist'){
-                return { id: resolve('./dyn2.js'), external: false }; 
+            if (source === './doest-exist') {
+                return {
+                    id: resolve('./dyn2.js'),
+                    external: false
+                };
             }
             return null;
         },
@@ -58,32 +63,38 @@ function myExample() {
             console.log(`plg-load [${id}]`.red);
             return null;
         },
-        options(io){
-           // console.log(`plg-options ${JSON.stringify(Object.entries(io))}`.red);
+        options(io) {
+            // console.log(`plg-options ${JSON.stringify(Object.entries(io))}`.red);
             return null;
         },
-        outputOptions(oo){
+        outputOptions(oo) {
             console.log(`plg-options-out`.red);
             return null;
         },
         outro: '/*HELLO THIS IS A TEST*/',
-        renderChunk(code, ci, oo){
+        renderChunk(code, ci, oo) {
             console.log('plg-renderChunk'.red);
             return null;
         },
-        renderStart(){
+        renderStart() {
             console.log('plg-renderStart'.red);
         },
-        resolveDynamicImport(specifier, importer){
+        resolveDynamicImport(specifier, importer) {
             console.log(`plg-resolveDynamicImport ${specifier}<-${importer}`.red);
             return resolve('./dyn.js');
         },
         // cant make it work below
-        resolveFileUrl(chunkId, file, format, modId, refId, relPath){
+        resolveFileUrl(chunkId, file, format, modId, refId, relPath) {
             console.log(`plg-resolveFileUrl`.red);
             throw new Error('stop here');
             return null;
+        },
+        resolveImportMeta(property, info) {
+            console.log(`plg-resolveImportMeta ${property}->${JSON.stringify(info,null,4)}`.red);
+            
+            return null;
         }
+        //next: transform(){...}
 
     };
 }
@@ -91,7 +102,7 @@ function myExample() {
 // rollup.config.js
 
 const inputOptions = {
-    plugins: [myExample(), /*node_builtins()*/],
+    plugins: [myExample(), /*node_builtins()*/ ],
     // core input options
     //xx  external,
     //xx  input, // required
@@ -171,7 +182,7 @@ const outputOptions = {
     //preferConst,
     //strict
     output: {
-        format: 'esm',
+        format: 'commonjs',
         dir: 'dist',
         entryFileNames: '[name]-[hash]-[format].js',
         name: 'mybundle' //Access the exports of the bundle
@@ -184,7 +195,9 @@ const outputOptions = {
 async function build() {
     const bundle = await rollup.rollup(inputOptions);
     console.log(bundle.watchFiles); // an array of file names this bundle depends on
-    const { output } = await bundle.generate(outputOptions);
+    const {
+        output
+    } = await bundle.generate(outputOptions);
     for (const chunkAsset of output) {
 
         if (chunkAsset.type === 'chunk') {
