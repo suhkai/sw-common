@@ -26,10 +26,6 @@ function myExample() {
             }
             return null;
         },
-        load(id) {
-            console.log(`plgin-load ${id}`.red);
-            return null; // other ids should be handled as usually
-        },
         augmentChunkHash(chunkInfo) {
             console.log(`augmentChunkHash`.red);
         },
@@ -93,9 +89,27 @@ function myExample() {
             console.log(`plg-resolveImportMeta ${property}->${JSON.stringify(info,null,4)}`.red);
             
             return null;
-        }
+        },
         //next: transform(){...}
-
+        transform(code, id){
+            console.log(`plg-transform:${id}`.red);
+            const ast = this.parse(code);
+            console.log(ast);
+            return null;
+        },
+        writeBundle(bundle){
+            console.log(`plg-writeBundle:`.red);
+            console.log(bundle);
+            const midId = this.emitFile({
+                type: 'asset',
+                source: '{ "hello":"world" }',
+                name: 'manifest.json',
+                //fileName?: string
+            });
+            console.log(`plg-writeBudle.emitAsset ${midId}`);
+        }
+        // Looking at fileurls
+        //https://rollupjs.org/guide/en/#file-urls
     };
 }
 
