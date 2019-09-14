@@ -1,36 +1,39 @@
 {
     "compilerOptions": {
-        "sourceMap": true,
-        // Target latest version of ECMAScript.
-        "target": "esnext",
-        // Search under node_modules for non-relative imports.
-        "moduleResolution": "node",
-        // Process & infer types from .js files.
-        "allowJs": true,
-        // Don't emit; allow Babel to transform files.
-        "noEmit": true,
-        // Enable strictest settings like strictNullChecks & noImplicitAny.
-        "strict": true,
-        // Disallow features that require cross-file information for emit.
-        "isolatedModules": true,
-        // Import non-ES modules as default imports.
+        "allowJs": false,
+        "allowSyntheticDefaultImports": false,
+        "allowUmdGlobalAccess": false,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "alwaysStrict": true,
+        "checkJs": false,
+        "declaration": true,
+        "declarationDir": "dist/types",
+        "declarationMap": true,
+        "diagnostics": true,
+        "disableSizeLimit": true,
         "esModuleInterop": true,
-        "module":"ESNext",
+        "isolatedModules": false,
+        "jsx": "preserve",
         "lib": [
+            "es2018",
             "webworker",
             "dom"
         ],
-        "baseUrl": ".",
-        "paths": {
-            "~root/*": [
-                "src/*"
-            ]
-        }
+        "listEmittedFiles": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "noEmit": true,
+        "noEmitOnError": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "esnext",
+        "noErrorTruncation": true
     },
-    "include": [
-        "src/**/*"
-    ],
     "exclude": [
         "node_modules"
+    ],
+    "include": [
+        "src/**/*"
     ]
 }

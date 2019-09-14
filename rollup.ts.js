@@ -9,9 +9,13 @@ const babel = require('rollup-plugin-babel');
 const node_builtins = require('rollup-plugin-node-builtins');
 const node_resolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
-const { uglify } = require('rollup-plugin-uglify');
+const {
+    uglify
+} = require('rollup-plugin-uglify');
 // babel
-const { DEFAULT_EXTENSIONS } = require('@babel/core');
+const {
+    DEFAULT_EXTENSIONS
+} = require('@babel/core');
 
 //typescript
 const tsc = require('typescript');
@@ -30,6 +34,7 @@ const inputOptions = {
             typescript: tsc,
             declaration: true,
             sourceMap: true,
+            useTsconfigDeclarationDir: true
         }),
         babel({
             extensions: [
@@ -43,7 +48,7 @@ const inputOptions = {
             configFile: false,
             sourceMaps: true,
             presets: [
-               // "minify",
+                // "minify",
                 [
                     "@babel/env",
                     {
@@ -61,35 +66,32 @@ const inputOptions = {
             ],
         }),
         node_resolve(),
-        /*commonjs({
+        commonjs({
             // non-CommonJS modules will be ignored, but you can also
             // specifically include/exclude files
-            include: 'node_modules/**',  // Default: undefined
+            include: 'node_modules/**', // Default: undefined
             //exclude: [ 'node_modules/foo/**', 'node_modules/bar/**' ],  // Default: undefined
             // these values can also be regular expressions
             // include: /node_modules/
-      
             // search for files other than .js files (must already
             // be transpiled by a previous plugin!)
-            extensions: [ '.js' ],  // Default: [ '.js' ]
-      
+            extensions: ['.js'], // Default: [ '.js' ]
             // if true then uses of `global` won't be dealt with by this plugin
-            ignoreGlobal: false,  // Default: false
-      
+            ignoreGlobal: false, // Default: false
             // if false then skip sourceMap generation for CommonJS modules
-            sourceMap: true,  // Default: true
-      
+            sourceMap: true, // Default: true
             // explicitly specify unresolvable named exports
             // (see below for more details)
-            namedExports: { 'react': ['createElement', 'Component' ] },  // Default: undefined
-      
+            namedExports: {
+                'react': ['createElement', 'Component']
+            }, // Default: undefined
             // sometimes you have to leave require statements
             // unconverted. Pass an array containing the IDs
             // or a `id => boolean` function. Only use this
             // option if you know what you're doing!
-            ignore: [ 'conditional-runtime-dependency' ]
-          }),*/
-          //uglify({})
+            ignore: ['conditional-runtime-dependency']
+        }),
+        uglify({})
     ],
     input: {
         bundle: './src/primer.ts',
@@ -99,7 +101,7 @@ const inputOptions = {
 
 const outputOptions = {
     output: {
-        format: 'iife',
+        format: 'cjs',
         dir: 'dist',
         entryFileNames: '[name]-[hash]-[format].js',
         name: 'mybundle', //Access the exports of the bundle
@@ -125,6 +127,4 @@ async function build() {
     }*/
     await bundle.write(outputOptions);
 }
-
-
 build();

@@ -89,7 +89,6 @@ self.addEventListener('notificationclick', e => {
             for (const client of cl){
                 if (client.visibilityState === 'visible'){
                     return client.focus();
-                    break;
                 }
             }
             return cl[0].focus();
