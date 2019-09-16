@@ -1,7 +1,7 @@
 //node
 const path = require('path');
 const fs = require('fs');
-
+const rmdirRecursive = require('rmdir-recursive');
 //rollup and plugins
 const rollup = require('rollup');
 const typescript = require('rollup-plugin-typescript2');
@@ -22,6 +22,7 @@ const tsc = require('typescript');
 
 //misc
 const colors = require('colors');
+const glob = require('glob');
 
 const {
     resolve,
@@ -29,6 +30,16 @@ const {
 } = path;
 
 const inputOptions = {
+    // advanced input options
+    cache: true,
+    //inlineDynamicImports,
+    manualChunks: {
+        vendor: ['classnames'],
+        react:['react']
+        },
+    //onwarn,
+    //preserveModules,
+    //strictDeprecations,
     plugins: [
         typescript({
             typescript: tsc,
@@ -91,7 +102,7 @@ const inputOptions = {
             // option if you know what you're doing!
             ignore: ['conditional-runtime-dependency']
         }),
-        uglify({})
+        //uglify({})
     ],
     input: {
         bundle: './src/primer.ts',
@@ -110,9 +121,9 @@ const outputOptions = {
 }
 
 async function build() {
-    fs.rmdirSync('./dist/', {
-        recursive: true
-    });
+    // clean out dist directory
+    const t1 = new Date(); 
+    rmdirRecursive('./dist');
     const bundle = await rollup.rollup(inputOptions);
     console.log(bundle.watchFiles); // an array of file names this bundle depends on
     const {
@@ -126,5 +137,7 @@ async function build() {
         }
     }*/
     await bundle.write(outputOptions);
+    const d = new Date()-t1;
+    console.log(`build took ${d/1000} sec`)
 }
 build();

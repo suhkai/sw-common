@@ -2,6 +2,15 @@
 
 //import createPlugins from './utils/jss-plugins';
 import SABootInfo from './bootstrap/components/SABootInfo';
+import classNames from 'classnames';
+
+import react from 'react';
+
+console.log(react);
+
+console.log(classNames('hello'));
+
+//classNames('foo', 'bar'); // => 'foo bar'
 
 const isHttpValidResponse = (response: Response) => {
     const { status, statusText } = response;
@@ -43,7 +52,8 @@ async function bootStrap() {
         { media: 'screen' }
     )
     console.log(sheet);
-    sheet.attach();*/
+    sheet.attach();
+    */
     
     const mp = window.document.querySelector<HTMLElement>('#bootstrap');
     if (mp) {
