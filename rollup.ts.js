@@ -31,15 +31,24 @@ const {
 
 const inputOptions = {
     // advanced input options
+    external: ['react'],
+    
     cache: true,
     //inlineDynamicImports,
-    manualChunks: {
+    /*manualChunks: {
         vendor: ['classnames'],
-        react:['react']
-        },
-    //onwarn,
-    //preserveModules,
-    //strictDeprecations,
+        react: ['react']
+    },*/
+    onwarn: (warning, warn) => {
+       // console.log('ipt-options-onwarn', warning, warning.toString());
+        warn(warning);
+    },
+    preserveModules: true, 
+    strictDeprecations: true, // below is deprecated and would throw an error 
+    treeshake: {
+        pureExternalModules: true
+    },
+    //treeShake: true,
     plugins: [
         typescript({
             typescript: tsc,
@@ -93,6 +102,7 @@ const inputOptions = {
             sourceMap: true, // Default: true
             // explicitly specify unresolvable named exports
             // (see below for more details)
+            // can also be a function
             namedExports: {
                 'react': ['createElement', 'Component']
             }, // Default: undefined
@@ -105,24 +115,30 @@ const inputOptions = {
         //uglify({})
     ],
     input: {
-        bundle: './src/primer.ts',
+        bundle: './es6.js',
     }
 
 };
 
 const outputOptions = {
     output: {
+        //amd", "cjs", "system", "esm", "iife" or "umd".
         format: 'cjs',
         dir: 'dist',
-        entryFileNames: '[name]-[hash]-[format].js',
+        //entryFileNames: '[name]-[hash]-[format].js',
+        entryFileNames: '[name]-[format].js',
         name: 'mybundle', //Access the exports of the bundle
         sourcemap: true,
+      
+    },
+    globals:{
+       // react: 'Reactx'
     }
 }
 
 async function build() {
     // clean out dist directory
-    const t1 = new Date(); 
+    const t1 = new Date();
     rmdirRecursive('./dist');
     const bundle = await rollup.rollup(inputOptions);
     console.log(bundle.watchFiles); // an array of file names this bundle depends on
@@ -137,7 +153,7 @@ async function build() {
         }
     }*/
     await bundle.write(outputOptions);
-    const d = new Date()-t1;
-    console.log(`build took ${d/1000} sec`)
+    const d = new Date() - t1;
+    console.log(`build took ${d / 1000} sec`)
 }
 build();

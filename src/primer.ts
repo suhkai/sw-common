@@ -4,9 +4,9 @@
 import SABootInfo from './bootstrap/components/SABootInfo';
 import classNames from 'classnames';
 
-import react from 'react';
+import { createElement, createFactory } from 'react';
 
-console.log(react);
+console.log(createElement);
 
 console.log(classNames('hello'));
 
