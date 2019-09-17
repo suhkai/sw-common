@@ -13,3 +13,5 @@ rendered it will look like this
 }(Reactx));
 //# sourceMappingURL=bundle-2738170c-iife.js.map
 */
+
+console.log(this.document.body);

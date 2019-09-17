@@ -44,11 +44,13 @@ const inputOptions = {
         warn(warning);
     },
     preserveModules: true, 
-    strictDeprecations: true, // below is deprecated and would throw an error 
+    strictDeprecations: false, // below is deprecated and would throw an error 
     treeshake: {
         pureExternalModules: true
     },
-    //treeShake: true,
+    context: 'self',
+    // TODO: I AM HERE
+    //moduleContext
     plugins: [
         typescript({
             typescript: tsc,
