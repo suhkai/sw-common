@@ -44,13 +44,26 @@ const inputOptions = {
         warn(warning);
     },
     preserveModules: true, 
-    strictDeprecations: false, // below is deprecated and would throw an error 
+    strictDeprecations: true, // below is deprecated and would throw an error 
+    // deprecated
     treeshake: {
         pureExternalModules: true
     },
     context: 'self',
+   
     // TODO: I AM HERE
-    //moduleContext
+    moduleContext: id => {
+        console.log(`inp-opts-moduleContext ${id}`.red);
+        return 'hello'+Math.trunc(Math.random(1)*10);
+    },
+    preserveSymlinks: true,
+    shimMissingExports:true,
+    treeshake:{
+        annotations: true, // got it
+        propertyReadSideEffects: false, // got it
+        tryCatchDeoptimization: false,
+        unknownGlobalSideEffects: false
+    },
     plugins: [
         typescript({
             typescript: tsc,
