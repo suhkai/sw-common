@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const rmdirRecursive = require('rmdir-recursive');
 //rollup and plugins
-const rollup = require('rollup');
+const { rollup, watch } = require('rollup');
 const typescript = require('rollup-plugin-typescript2');
 const babel = require('rollup-plugin-babel');
 const node_builtins = require('rollup-plugin-node-builtins');
@@ -32,38 +32,45 @@ const {
 const inputOptions = {
     // advanced input options
     external: ['react'],
-    
-    cache: true,
+
+    //cache: true,
     //inlineDynamicImports,
-    /*manualChunks: {
+    /*
+    manualChunks: {
         vendor: ['classnames'],
         react: ['react']
-    },*/
+    }
+    */
     onwarn: (warning, warn) => {
-       // console.log('ipt-options-onwarn', warning, warning.toString());
+        // console.log('ipt-options-onwarn', warning, warning.toString());
         warn(warning);
     },
-    preserveModules: true, 
+    //preserveModules: true,
     strictDeprecations: true, // below is deprecated and would throw an error 
     // deprecated
     treeshake: {
         pureExternalModules: true
     },
     context: 'self',
-   
+
     // TODO: I AM HERE
     moduleContext: id => {
         console.log(`inp-opts-moduleContext ${id}`.red);
-        return 'hello'+Math.trunc(Math.random(1)*10);
+        return 'hello' + Math.trunc(Math.random(1) * 10);
     },
     preserveSymlinks: true,
-    shimMissingExports:true,
-    treeshake:{
+    shimMissingExports: true,
+    treeshake: {
         annotations: true, // got it
         propertyReadSideEffects: false, // got it
-        tryCatchDeoptimization: false,
-        unknownGlobalSideEffects: false
+        tryCatchDeoptimization: false, // = false will treeshake within try{} catch{} blocks.
+        unknownGlobalSideEffects: false // understood, the last explenation was not completely correct.
     },
+    //chunkGroupingSize:, set max size (bytes) to chunk 
+    //experimentalCacheExpiry: default 10, after 10 builds purge cache,
+    //experimentalOptimizeChunks:, // autogroup chunks to have minimul *number* of chunks
+    //experimentalTopLevelAwait:, 
+    perf: true,
     plugins: [
         typescript({
             typescript: tsc,
@@ -135,40 +142,129 @@ const inputOptions = {
 
 };
 
-const outputOptions = {
-    output: {
-        //amd", "cjs", "system", "esm", "iife" or "umd".
-        format: 'cjs',
-        dir: 'dist',
-        //entryFileNames: '[name]-[hash]-[format].js',
-        entryFileNames: '[name]-[format].js',
-        name: 'mybundle', //Access the exports of the bundle
-        sourcemap: true,
-      
+const outputOptions = [
+    {
+        output: {
+            //amd", "cjs", "esm", "iife", "system", "umd".
+            format: 'amd',
+            dir: 'dist',
+            //entryFileNames: '[name]-[hash]-[format].js',
+            entryFileNames: '[name]-[format]-[hash].js',
+            assetFileNames: '[name]-[hash].[ext]',
+            name: 'mybundle1', //Access the exports of the bundle
+            sourcemap: true,
+            banner: '/* THIS IS A BANNER */',
+            footer: '/* THIS IS A FOOTER */',
+            //chunkFileNames: understood
+            compact: false,
+            extend: true, // very clear why its needed, extend a global by using several bundles
+            externalLiveBindings: true,
+            freeze: true,
+            noConflict: true,
+            preferConst: true, // doesnt work this is babels job
+            globals: {
+                react: 'Reacty'
+            },
+            exports: 'named',
+            dynamicImportFunction: 'hello-world',
+            amd: {
+                id: 'my-bundle',
+                define:'no-way-dude'
+            }
+        },
+
     },
-    globals:{
-       // react: 'Reactx'
+    {
+        output:
+        {
+            //amd", "cjs", "esm", "iife", "system", "umd".
+            format: 'cjs',
+            dir: 'dist',
+            //entryFileNames: '[name]-[hash]-[format].js',
+            entryFileNames: '[name]-[format].js',
+            name: 'mybundle1', //Access the exports of the bundle
+            sourcemap: true,
+            compact: false,
+            //externalLiveBindings: true,// only for "external" imports that are re-exported
+            freeze: true,
+            indent: true,
+            // namespaceToStringTag: // understood
+            noConflict: true,
+            globals: {
+                react: 'Reactz'
+            },
+            esModule: false,
+            exports: 'auto',
+            dynamicImportFunction: 'hello-world'
+        },
+
     }
-}
+];
 
 async function build() {
     // clean out dist directory
     const t1 = new Date();
     rmdirRecursive('./dist');
-    const bundle = await rollup.rollup(inputOptions);
+    const bundle = await rollup(inputOptions);
+    console.log('does have getTimings', bundle.getTimings());
     console.log(bundle.watchFiles); // an array of file names this bundle depends on
-    const {
-        output
-    } = await bundle.generate(outputOptions);
-    /*for (const chunkAsset of output) {
-
-        if (chunkAsset.type === 'chunk') {
-            console.log('Asset-code', chunkAsset.code);
-            console.log('Asset-modules', chunkAsset.modules);
+    for (let i = 0; i < outputOptions.length; i++) {
+        const oo = outputOptions[i];
+        const {
+            output
+        } = await bundle.generate(oo.output);
+        /*
+        for (const chunkAsset of output) {
+            if (chunkAsset.type === 'chunk') {
+                console.log('Asset-code', chunkAsset.code);
+                console.log('Asset-modules', chunkAsset.modules);
+            }
         }
-    }*/
-    await bundle.write(outputOptions);
-    const d = new Date() - t1;
-    console.log(`build took ${d / 1000} sec`)
+        */
+        await bundle.write(oo.output);
+    }
+    //const d = new Date() - t1;
+    //console.log(`build took ${d / 1000} sec`)
+
 }
 build();
+
+/*
+ // core output options
+xx    dir,
+xx    file,
+xx    format, // required
+xx    globals,
+xx    name,
+
+    // advanced output options
+xx   assetFileNames,
+xx    banner,
+xx    chunkFileNames,
+xx    compact,
+xx    entryFileNames,
+xx    extend,
+xx    footer,
+    interop,
+    intro,
+    outro,
+    paths,
+xx  sourcemap,
+    sourcemapExcludeSources,
+    sourcemapFile,
+    sourcemapPathTransform,
+
+    // danger zone
+xx    amd.id,
+xx    amd.define
+xx    dynamicImportFunction,
+xx    esModule,
+xx    exports,
+xx    externalLiveBindings,
+xx    freeze,
+xx    indent,
+xx    namespaceToStringTag,
+xx    noConflict,
+xx    preferConst,
+    strict
+*/
