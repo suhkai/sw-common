@@ -11,5 +11,7 @@ import('hello-world').then(({ default: _default }) => {
 
 const d = new Impure(a);
 
-export { Impure, d };
+export { d };
 export { createDocument } from 'react';
+export default Impure;
+

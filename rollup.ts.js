@@ -137,7 +137,7 @@ const inputOptions = {
         //uglify({})
     ],
     input: {
-        bundle: './es6.js',
+        bundle: resolve('./es6.js'),
     }
 
 };
@@ -146,7 +146,7 @@ const outputOptions = [
     {
         output: {
             //amd", "cjs", "esm", "iife", "system", "umd".
-            format: 'amd',
+            format: 'umd',
             dir: 'dist',
             //entryFileNames: '[name]-[hash]-[format].js',
             entryFileNames: '[name]-[format]-[hash].js',
@@ -170,7 +170,19 @@ const outputOptions = [
             amd: {
                 id: 'my-bundle',
                 define:'no-way-dude'
-            }
+            },
+            interop:false,
+            // doesnt make sense with cjs,esm, system
+            paths: function (id){
+                const map = {
+                    react:'http://some-place'
+                }
+                console.log(`output.path.${this.format}->${id}`.red);
+                return map[id];
+            },
+            sourcemap: true,
+            sourcemapExcludeSources: true,
+            strict: false
         },
 
     },
@@ -180,7 +192,7 @@ const outputOptions = [
             //amd", "cjs", "esm", "iife", "system", "umd".
             format: 'cjs',
             dir: 'dist',
-            //entryFileNames: '[name]-[hash]-[format].js',
+            //-> entryFileNames: '[name]-[hash]-[format].js',
             entryFileNames: '[name]-[format].js',
             name: 'mybundle1', //Access the exports of the bundle
             sourcemap: true,
@@ -195,7 +207,25 @@ const outputOptions = [
             },
             esModule: false,
             exports: 'auto',
-            dynamicImportFunction: 'hello-world'
+            dynamicImportFunction: 'hello-world',
+            interop:true,
+            intro: 'const ENV = "production";',
+            outro: 'const ENV2 = "prod2";',
+            paths: function (id){
+                const map = {
+                    react:'http://some-place'
+                }
+                console.log(`output.path.${this.format}->${id}`.red);
+                return map[id];
+            },
+            sourcemapExcludeSources: true,
+            //sourcemapFile: -> this property only works when the outout is specified by 'file' ??
+            sourcemapPathTransform: function(relativePath) { // --> this is given relative to the output of the 'dist
+                // not sure why src/es6 being outputted to map is argumented here as "../es6.js"
+                console.log(`relativePath-${this.format}->[${relativePath}]`.red);
+                return `spark://${path.basename(relativePath)}`;
+            },
+            strict: false
         },
 
     }
@@ -225,7 +255,7 @@ async function build() {
     }
     //const d = new Date() - t1;
     //console.log(`build took ${d / 1000} sec`)
-
+    
 }
 build();
 
@@ -245,14 +275,14 @@ xx    compact,
 xx    entryFileNames,
 xx    extend,
 xx    footer,
-    interop,
-    intro,
-    outro,
-    paths,
+xx?   interop,
+xx    intro,
+xx    outro,
+xx    paths,
 xx  sourcemap,
-    sourcemapExcludeSources,
-    sourcemapFile,
-    sourcemapPathTransform,
+xx    sourcemapExcludeSources,
+xx    sourcemapFile,
+xx    sourcemapPathTransform, no idea why orignial sources in map files are "../es6.js"
 
     // danger zone
 xx    amd.id,
@@ -266,5 +296,5 @@ xx    indent,
 xx    namespaceToStringTag,
 xx    noConflict,
 xx    preferConst,
-    strict
+xx    strict
 */
