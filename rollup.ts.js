@@ -139,7 +139,6 @@ const inputOptions = {
     input: {
         bundle: resolve('./es6.js'),
     }
-
 };
 
 const outputOptions = [
