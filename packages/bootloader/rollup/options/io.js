@@ -3,6 +3,8 @@ const {
     resolve
 } = require('path');
 
+const color = require('colors');
+
 const tsc = require('typescript');
 const typescript = require('rollup-plugin-typescript2');
 
@@ -21,6 +23,7 @@ const {
     DEFAULT_EXTENSIONS
 } = require('@babel/core');
 
+const entry = resolve('./src/boot.tsx');
 
 function plugins(isProd) {
     const rc = [
@@ -60,6 +63,13 @@ function plugins(isProd) {
                     }
                 ]
             ],
+            plugins: [
+                ["@babel/plugin-transform-react-jsx", {
+                    "pragma": "Preact.h", // default pragma is React.createElement
+                    "pragmaFrag": "Preact.Fragment", // default is React.Fragment
+                    "throwIfNamespace": false // defaults to true
+                }]
+            ]
         }),
         // how to resolve modules imported from in /node_modules
         node_resolve(),
@@ -75,6 +85,7 @@ function plugins(isProd) {
 
 module.exports = function () {
     return {
+        external: ['preact'],
         strictDeprecations: true, // do not use deprecated options 
         context: 'self',
         treeshake: {
@@ -84,9 +95,9 @@ module.exports = function () {
             unknownGlobalSideEffects: false // understood, the last explenation was not completely correct.
         },
         perf: true, // collect build metrics
-        plugins: plugins(),
+        plugins: plugins(process.argv.includes('--prod')),
         input: {
-            bundle: resolve('./boot.ts'),
+            bootloader: entry,
         }
     };
 };

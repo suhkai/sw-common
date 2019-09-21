@@ -145,7 +145,7 @@ const outputOptions = [
     {
         output: {
             //amd", "cjs", "esm", "iife", "system", "umd".
-            format: 'umd',
+            format: 'iife',
             dir: 'dist',
             //entryFileNames: '[name]-[hash]-[format].js',
             entryFileNames: '[name]-[format]-[hash].js',
@@ -160,18 +160,18 @@ const outputOptions = [
             externalLiveBindings: true,
             freeze: true,
             noConflict: true,
-            preferConst: true, // doesnt work this is babels job
+            //preferConst: true, // doesnt work this is babels job
             globals: {
                 react: 'Reacty'
             },
-            exports: 'named',
-            dynamicImportFunction: 'hello-world',
-            amd: {
-                id: 'my-bundle',
-                define:'no-way-dude'
-            },
+            //exports: 'named',
+            //dynamicImportFunction: 'hello-world',
+            //amd: {
+            //    id: 'my-bundle',
+            //    define:'no-way-dude'
+            //},
             interop:false,
-            // doesnt make sense with cjs,esm, system
+            // for cjs  
             paths: function (id){
                 const map = {
                     react:'http://some-place'
@@ -181,7 +181,7 @@ const outputOptions = [
             },
             sourcemap: true,
             sourcemapExcludeSources: true,
-            strict: false
+            strict: true
         },
 
     },

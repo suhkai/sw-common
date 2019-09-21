@@ -1,3 +1,15 @@
+/*
+
+[data-logo-svg] {
+	display: block;
+}
+
+[data-logo-container] {
+	height: fit-content;
+	width: fit-content;
+}
+*/
+
 'use strict'
 
 import { useState } from 'preact/hooks';
