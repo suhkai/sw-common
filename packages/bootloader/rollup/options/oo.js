@@ -1,5 +1,5 @@
 const iife = {
-    format: 'iife',
+    format: 'umd',
     dir: 'dist',
     entryFileNames: '[name]-[format]-[hash].js',
     name: 'boot-loader',
@@ -10,7 +10,8 @@ const iife = {
     freeze: true,
     noConflict: true,
     globals: {
-        preact: 'window.preact'
+        preact: 'window.preact',
+        jss: 'window.jss'
     },
     exports: 'named',
     interop: false,

@@ -1,17 +1,19 @@
-console.log(this.document.body);
-class Impure {
-	constructor(a) {
-		this.k = a;
-	}
-}
+//import createPlugins from './jss-plugins';
+import { create } from 'jss';
 
-import('hello-world').then(({ default: _default }) => {
-	console.log(_default);
-});
+//const plugins = createPlugins().map(fn => fn());
 
-const d = new Impure(a);
+const jss = create({ /*plugins*/ });
 
-export { d };
-export { createDocument } from 'react';
-export default Impure;
+const sheet = jss.createStyleSheet({
+    containerLogo: {
+        margin: 'auto'
+    }
+},
+    { media: 'screen' }
+)
+console.log(sheet);
+sheet.attach();
+
+
 
