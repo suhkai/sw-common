@@ -1,5 +1,6 @@
 #distribution dirs
 dist/
+package-lock.json
 
 # Logs
 logs
