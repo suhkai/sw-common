@@ -31,16 +31,16 @@ const {
 
 const inputOptions = {
     // advanced input options
-    external: ['react'],
+    //external: ['react', 'jss'],
 
     //cache: true,
     //inlineDynamicImports,
-    /*
+    
     manualChunks: {
-        vendor: ['classnames'],
+        vendor: ['jss'],
         react: ['react']
-    }
-    */
+    },
+    
     onwarn: (warning, warn) => {
         // console.log('ipt-options-onwarn', warning, warning.toString());
         warn(warning);
@@ -145,7 +145,7 @@ const outputOptions = [
     {
         output: {
             //amd", "cjs", "esm", "iife", "system", "umd".
-            format: 'iife',
+            format: 'esm',
             dir: 'dist',
             //entryFileNames: '[name]-[hash]-[format].js',
             entryFileNames: '[name]-[format]-[hash].js',
@@ -162,7 +162,8 @@ const outputOptions = [
             noConflict: true,
             //preferConst: true, // doesnt work this is babels job
             globals: {
-                react: 'Reacty'
+                react: 'Reacty',
+                jss: 'JSS'
             },
             //exports: 'named',
             //dynamicImportFunction: 'hello-world',

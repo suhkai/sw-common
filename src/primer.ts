@@ -1,6 +1,6 @@
 // this bootstrap script is injected into the minimalist html page
 
-//import createPlugins from './utils/jss-plugins';
+import createPlugins from './utils/jss-plugins';
 import SABootInfo from './bootstrap/components/SABootInfo';
 import classNames from 'classnames';
 
