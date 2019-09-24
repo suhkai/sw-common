@@ -20,7 +20,9 @@
     "jss-plugin-rule-value-function": "^10.0.0",
     "jss-plugin-vendor-prefixer": "^10.0.0",
     "preact": "^8.5.2",
-    "react": "^16.9.0"
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "react-jss": "^10.0.0"
   },
   "description": "A Service Worker with configurable caching and boot sequence wich can be customized for each app",
   "devDependencies": {
