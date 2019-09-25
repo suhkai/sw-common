@@ -1,9 +1,10 @@
 import { verbose } from 'sqlite3';
 
-import {lstat} from 'fs';
-
-const db = new (verbose()).Database(':memory:');
-
-console.log('hello world', db, lstat);
+const db = new (verbose()).Database(':memory:', err => {
+    if (err) {
+        console.error(err.message);
+    }
+    console.log('Connected to the chinook database.');
+});
 
 db.close();
