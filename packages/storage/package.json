@@ -34,6 +34,8 @@
   "name": "storage",
   "scripts": {
     "build": "node rollup.js",
+    "all": "npm run build && node dist/storage-cjs.js",
+    "start": "node dist/storage-cjs.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "1.0.0"

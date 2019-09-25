@@ -7,7 +7,7 @@ const colors = require('colors');
 
 
 //rollup
-const { rollup, watch } = require('rollup');
+const { rollup } = require('rollup');
 
 //build
 const inputOptions = require('./rollup/options/io');
@@ -17,7 +17,6 @@ const { cjs } = require('./rollup/options/oo');
 const isProduction = process.argv.includes('--prod') !== 0;
 const io = inputOptions(isProduction);
 async function build() {
-    
     const t1 = new Date();
     rmdirRecursiveSync('./dist');
     const bundle = await rollup(io);
@@ -34,6 +33,5 @@ async function build() {
 }
 
 build().catch(err => {
-
     console.log(String(err).red);
 });
