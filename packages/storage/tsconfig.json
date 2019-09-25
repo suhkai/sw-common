@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "allowJs": false,
+        "allowSyntheticDefaultImports": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "alwaysStrict": true,
+        "checkJs": false,
+        "declaration": false,
+        "diagnostics": true,
+        "disableSizeLimit": true,
+        "esModuleInterop": true,
+        "isolatedModules": false,
+        "jsx": "preserve",
+        "lib": [
+            "es2018",
+            "webworker",
+            "dom"
+        ],
+        "listEmittedFiles": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "noEmit": true,
+        "noEmitOnError": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "esnext",
+        "noErrorTruncation": true
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "include": [
+        "src/**/*"
+    ]
+}
