@@ -1,5 +1,9 @@
 import { verbose } from 'sqlite3';
 
-const db = new (verbose().Database)(':memory:');
+import {lstat} from 'fs';
 
+const db = new (verbose()).Database(':memory:');
 
+console.log('hello world', db, lstat);
+
+db.close();

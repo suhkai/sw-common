@@ -3,31 +3,24 @@ const {
     resolve
 } = require('path');
 
-const color = require('colors');
-
+require('colors');
 const tsc = require('typescript');
 const typescript = require('rollup-plugin-typescript2');
-const json = require('rollup-plugin-json');
-
-// for using modules from node_modules
 const node_resolve = require('rollup-plugin-node-resolve');
-//Convert CommonJS modules to ES6, so they can be included in a Rollup bundle
 const convertCommonJS_to_ES6 = require('rollup-plugin-commonjs');
-// only use in production
-const {
-    uglify
-} = require('rollup-plugin-uglify');
+const { uglify } = require('rollup-plugin-uglify');
 const babel = require('rollup-plugin-babel');
 
+
 //extraction
-const {
-    DEFAULT_EXTENSIONS
-} = require('@babel/core');
+const { DEFAULT_EXTENSIONS } = require('@babel/core');
+const { builtinModules } = require('module');
 
 const entry = resolve('./src/index.ts');
+
 console.log(entry);
 
-function plugins(isProd) {
+function plugins() {
     const rc = [
         typescript({
             tsconfigDefaults: {},
@@ -45,44 +38,38 @@ function plugins(isProd) {
                 '.tsx'
             ],
             sourceMaps: true,
-            exclude: 'node_modules/**',
+            exclude: 'node_modules/**', // no node_modules should be transpiled
             babelrc: false,
             configFile: false,
             sourceMaps: true,
-            presets: [
-                [
-                    "@babel/env",
-                    {
-                        targets: {
-                            edge: "17",
-                            firefox: "60",
-                            chrome: "67",
-                            safari: "11.1",
-                            ie: "11",
-                            esmodules: true,
-                        },
-                        useBuiltIns: false
-                    }
-                ]
-            ]
+            presets: ["@babel/preset-env"]
         }),
         // how to resolve modules imported from in /node_modules
-        node_resolve({ preferBuiltins: false }),
-        convertCommonJS_to_ES6({
-            include: 'node_modules/**', // Default: undefined
+        node_resolve({
+            mainFields: ['main'],
+            preferBuiltins: true
         }),
-        json({
-            include: 'node_modules/**',
-        })
+        convertCommonJS_to_ES6({
+            include: /node_modules/,
+            //namedExports: { 'sqlite3': ['verbose'] },  
+        }),
+        uglify({ toplevel: true, compress: true })
     ];
-    if (isProd) {
-        rc.push(uglify());
-    }
     return rc;
 }
 
+const { devDependencies, dependencies } = require('../../package.json');
+
 module.exports = function () {
     return {
+        preserveModules: true,
+        external: (id, parentId, resolved) => {
+            //if (id === 'sqlite3') return false;
+            if (resolved) { console.log('WHY IS THIS RESOLVED??'.red, id, parentId); return false; }
+            if (id in devDependencies || id in dependencies) return true;
+            if (builtinModules.includes(id)) return true;
+            return false;
+        },
         cache: false,
         strictDeprecations: true, // do not use deprecated options 
         context: 'self',
@@ -93,7 +80,7 @@ module.exports = function () {
             unknownGlobalSideEffects: false // understood, the last explenation was not completely correct.
         },
         perf: true, // collect build metrics
-        plugins: plugins(process.argv.includes('--prod')),
+        plugins: plugins(),
         input: {
             storage: entry,
         }

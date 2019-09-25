@@ -5,12 +5,13 @@ const fs = require('fs');
 const rmdirRecursiveSync = require('rmdir-recursive').sync;
 const colors = require('colors');
 
+
 //rollup
 const { rollup, watch } = require('rollup');
 
 //build
 const inputOptions = require('./rollup/options/io');
-const { iife } = require('./rollup/options/oo');
+const { cjs } = require('./rollup/options/oo');
 
 //init
 const isProduction = process.argv.includes('--prod') !== 0;
@@ -21,14 +22,13 @@ async function build() {
     rmdirRecursiveSync('./dist');
     const bundle = await rollup(io);
     //console.log(bundle.watchFiles); // an array of file names this bundle depends on
-    const { output } = await bundle.generate(iife);
+    const { output } = await bundle.generate(cjs);
     for(const chunk of output){
         for (const [entry, value] of Object.entries(chunk.modules)){
             console.log(`emitted ${basename(entry)}\t\t${value.renderedLength} bytes`.green);
         }
     }
-    //console.log(output);
-    //await bundle.write(iife);
+    await bundle.write(cjs);
     const d = new Date() - t1;
     console.log(`build took ${d / 1000} sec`.green);
 }

@@ -11,6 +11,7 @@
   "author": "jacob.bogers <Jacob.Bogers@doclerholding.com>",
   "license": "ISC",
   "dependencies": {
+    "module": "^1.2.5",
     "sqlite3": "^4.1.0"
   },
   "devDependencies": {
@@ -31,7 +32,6 @@
     "rollup": "^1.21.4",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.24.0",
     "rollup-plugin-uglify": "^6.0.3",

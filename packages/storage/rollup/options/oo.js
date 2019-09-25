@@ -1,7 +1,7 @@
 const cjs = {
     format: 'cjs',
     dir: 'dist',
-    entryFileNames: '[name]-[format]-[hash].js',
+    entryFileNames: '[name]-[format].js',
     name: 'storage',
     sourcemap: true,
     compact: false,
@@ -9,11 +9,11 @@ const cjs = {
     externalLiveBindings: true,
     freeze: true,
     noConflict: true,
-    exports: 'named',
+    //exports: 'named',
     interop: false,
     sourcemap: true,
     sourcemapExcludeSources: true,
-    strict: false
+    strict: true
 };
 
 module.exports = {
