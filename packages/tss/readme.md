@@ -4,7 +4,7 @@ StylePropertyMap
 
 https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleDeclaration
 
-## CSSStyleDeclaration
+## CSSStyleDeclaration // baked into typescript
 
 example:  `document.styleSheets[0].cssRules[0].style` returns a `CSSStyleDeclaration`
 
