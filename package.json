@@ -7,7 +7,6 @@
     "@easyfonts/league-mono-typeface": "^1.0.3",
     "@easyfonts/saira-typeface": "^1.0.6",
     "@types/classnames": "^2.2.9",
-    "@types/react": "^16.9.2",
     "classnames": "^2.2.6",
     "colors": "^1.3.3",
     "core-js": "^3.2.1",

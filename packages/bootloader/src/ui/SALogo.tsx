@@ -12,8 +12,7 @@
 
 'use strict';
 
-import { Ref } from 'react';
-import { useRef, useLayoutEffect } from 'preact/hooks';
+import { Ref, useRef, useLayoutEffect } from 'preact/hooks';
 import { mulMM, mulMV, rotate, scale } from './math';
 
 import jssprep from './jss-local';

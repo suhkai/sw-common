@@ -1,0 +1,20 @@
+{
+  "name": "theming",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "src": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "jacobbogers <jkfbogers@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jss": "^9.5.8",
+    "@types/react": "^16.9.3",
+    "preact": "^10.0.0-rc.3"
+  },
+  "dependencies": {}
+}
