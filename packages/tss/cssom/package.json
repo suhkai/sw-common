@@ -1,5 +1,5 @@
 {
-  "name": "preact-tss",
+  "name": "cssom",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,6 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "jacobbogers <jkfbogers@gmail.com>",
+  "author": "",
   "license": "ISC"
 }
