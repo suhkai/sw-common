@@ -1,14 +1,15 @@
 'use strict';
-import Preact from 'preact';
+import 'react';
 
 
 export function SAInvertedProgress(textStr = '', progress: number) {
-  return (
-    <div progress-container>
-      <div inverted-progress data-content={textStr} class="progress" style={`width:${progress}%;`}>
-        {textStr}
-      </div>
-    </div>);
+	return (
+		<div data-progress-container>
+			<div data-inverted-progress data-content={textStr} className={'progress'} style={ { width: `${progress}%;` }}>
+				{textStr}
+			</div>
+		</div>
+	);
 }
 
 /*

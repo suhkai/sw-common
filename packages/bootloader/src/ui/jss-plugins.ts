@@ -17,7 +17,7 @@
 
 // there is a bug in the stock plugins type decleration, so we need to explicit typcast to JSSPlugin
 
-import functions from 'jss-plugin-rule-value-function';
+import functions  from 'jss-plugin-rule-value-function';
 
 //Top level global declarations block
 //doesnt use suffix like .button-0
@@ -51,7 +51,7 @@ import vendorPrefixer from 'jss-plugin-vendor-prefixer';
 
 // sort props on specificity
 // https://cssinjs.org/jss-plugin-props-sort
-import propsSort from 'jss-plugin-props-sort';
+import propsSort from  'jss-plugin-props-sort';
 
 function createPlugins() {
     return [
