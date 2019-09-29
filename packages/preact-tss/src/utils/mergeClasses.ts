@@ -1,5 +1,5 @@
 // @flow
-import type {Classes} from 'jss'
+import {Classes} from 'jss'
 
 function mergeClasses(baseClasses: Classes, additionalClasses: Classes) {
   const combinedClasses = {...baseClasses}

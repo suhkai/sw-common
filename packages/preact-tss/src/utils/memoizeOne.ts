@@ -1,13 +1,11 @@
-// @flow
-
 type Result = any
 type Args = any
 type ComputeFn = (...args: Args) => Result
 type MemoFn = (...args: Args) => Result
 
 const memoize = (fn: ComputeFn): MemoFn => {
-  let lastArgs
-  let lastResult
+  let lastArgs: any;
+  let lastResult: any;
 
   return (...args: Args): Result => {
     if (Array.isArray(lastArgs) && args.length === lastArgs.length) {

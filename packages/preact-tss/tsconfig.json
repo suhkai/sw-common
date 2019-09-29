@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         "allowJs": false,
         "allowSyntheticDefaultImports": false,
         "allowUnreachableCode": false,
@@ -8,7 +8,6 @@
         "alwaysStrict": true,
         "checkJs": false,
         "declaration": true,
-        "declarationDir": "dist/types",
         "declarationMap": true,
         "diagnostics": true,
         "disableSizeLimit": true,

@@ -1,9 +1,14 @@
 // @flow
 
-import {SheetsManager, type StyleSheet} from 'jss'
-import type {Context} from '../types'
+import {
+  SheetsManager,
+  StyleSheet
+} from 'jss'
+import {
+  Context
+} from '../types'
 
-type Options<Theme> = {
+type Options < Theme > = {
   sheet: StyleSheet,
   context: Context,
   index: number,
@@ -32,8 +37,13 @@ export const getManager = (context: Context, managerId: number) => {
   return manager
 }
 
-export const manageSheet = <Theme>(options: Options<Theme>) => {
-  const {sheet, context, index, theme} = options
+export const manageSheet = < Theme > (options: Options < Theme > ) => {
+  const {
+    sheet,
+    context,
+    index,
+    theme
+  } = options
   if (!sheet) {
     return
   }
@@ -45,7 +55,7 @@ export const manageSheet = <Theme>(options: Options<Theme>) => {
   }
 }
 
-export const unmanageSheet = <Theme>(options: Options<Theme>) => {
+export const unmanageSheet = < Theme > (options: Options < Theme > ) => {
   if (!options.sheet) {
     return
   }

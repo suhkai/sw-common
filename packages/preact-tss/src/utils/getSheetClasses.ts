@@ -1,13 +1,13 @@
 import { StyleSheet } from 'jss'
-import { DynamicRules } from '../types'
+import { DynamicRules, Classes } from '../types'
 import { getMeta } from './sheetsMeta'
 
-const getSheetClasses = (sheet: StyleSheet, dynamicRules: ?DynamicRules) => {
+const getSheetClasses = (sheet: StyleSheet, dynamicRules: DynamicRules) => {
   if (!dynamicRules) {
     return sheet.classes
   }
 
-  const classes = {}
+  const classes: Classes = {}
   const meta = getMeta(sheet)
 
   if (!meta) {

@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+//import Preact from 'preact'
 import isInBrowser from 'is-in-browser'
 import {ThemeContext as DefaultThemeContext} from 'theming'
 
