@@ -88,7 +88,7 @@ function precision(dec = 0) {
 //const svgNS = 'http://www.w3.org/2000/svg';
 const prec4 = precision(4);
 
-export function SvgLogo(props: SVGProps) {
+export function SALogo(props: SVGProps) {
     const { angle1, angle2, angle3, scale1, scale2 } = props;
     const maskId = useRef(String(Math.random())); //
     const rectId = useRef(String(Math.random()));

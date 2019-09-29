@@ -14,13 +14,29 @@
 */
 
 'use strict';
+import 'react';
+import { SALogo } from './SALogo';
+import { SALabel } from './SALabel';
+import { SAInvertedProgress } from './SAInvertedProgress';
 
-import Base from './Base';
-import SALogo from './SALogo';
-import SALabel from './SALabel';
-import SAProgress from './SAInvertedProgress';
 
-export default class LogoContainer extends Base<HTMLDivElement> {
+export function LogoContainer() {
+    const scale = { scale1: 0.8, scale2: 0.5, angle1: 0, angle2:2, angle3: 3 };
+    return (
+        <div data-bootstrap-inner>
+            <div data-logo-container>
+                <div data-progress-container>
+                    <SAInvertedProgress textStr={"installing..."} progress={10} />
+                </div>
+                <SALabel />
+                <SALogo { ...scale } />
+            </div>
+        </div>
+    );
+}
+
+/*
+export default class xLogoContainer extends Base<HTMLDivElement> {
     private svgLogo: SALogo;
     private logoLabel: SALabel;
     private svgLogoContainer: Base<HTMLDivElement>;
@@ -63,8 +79,8 @@ export default class LogoContainer extends Base<HTMLDivElement> {
     render() {
         const svg = this.svgLogo;
         svg.render();
-        const s2 = swingBetween(-12,12,0,0.4,true);
-        const s3 = swingBetween(-24,24,0,0.6,true);
+        const s2 = swingBetween(-12, 12, 0, 0.4, true);
+        const s3 = swingBetween(-24, 24, 0, 0.6, true);
         setInterval(() => {
             svg.angle1 = svg.angle1 + 0.2;
             svg.angle2 = s2();
@@ -80,17 +96,17 @@ function swingBetween(a: number, b: number, s: number, incr: number, dir: boolea
     let c = s;
     return () => {
         c += cd ? incr : -incr;
-        if (c < a){
-            c +=incr;
+        if (c < a) {
+            c += incr;
             cd = true;
         }
-        if (c > b){
+        if (c > b) {
             c -= incr;
             cd = false;
         }
         return c;
     };
 }
-
+*/
 
 

@@ -30,7 +30,7 @@ import 'react';
 */
 
 
-export default function SALabel() {
+export function SALabel() {
     return (<div className={"saira-extra-condensed"}>
         <span className="white">SUPER</span><span className="reddish">ALGOS</span>
     </div>);

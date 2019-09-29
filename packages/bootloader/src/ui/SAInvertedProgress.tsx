@@ -2,10 +2,10 @@
 import 'react';
 
 
-export function SAInvertedProgress(textStr = '', progress: number) {
+export function SAInvertedProgress({ textStr = '', progress = 0 }) {
 	return (
 		<div data-progress-container>
-			<div data-inverted-progress data-content={textStr} className={'progress'} style={ { width: `${progress}%;` }}>
+			<div data-inverted-progress data-content={textStr} className={'progress'} style={{ width: `${progress}%;` }}>
 				{textStr}
 			</div>
 		</div>
