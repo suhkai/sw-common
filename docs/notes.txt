@@ -5,4 +5,53 @@
 // https://lengstorf.com/learn-rollup-css/
 // https://github.com/borodean/postcss-assets
 
-Nice 
+Nice:
+Using a rollup plugin to generate a html resource
+
+https://gitlab.com/thekelvinliu/rollup-plugin-static-site
+
+make a simple html plugin
+
+htmlwebpack plugins (sub plugins)
+
+-- webpack-subresource-integrity
+https://www.npmjs.com/package/webpack-subresource-integrity
+
+subresource integrety https://www.w3.org/TR/SRI/ (integrity attribute??)
+
+-- appcache-webpack-plugin
+this is the old appcache PWA feature (application Cache under devtools)
+
+-- favicons-webpack-plugin
+
+https://github.com/jantimon/favicons-webpack-plugin
+
+has wonderfull html injection
+Note: html-webpack-plugin must come before favicons-webpack-plugin in the plugins array.
+path to logo can be relative, absolute path (from //) or node module resolution path (no / or ./ as part of the name)
+
+https://github.com/jantimon/favicons-webpack-plugin#advanced-usage
+
+under the hood uses https://github.com/itgalaxy/favicons (node module)
+// wonderfull i can use this to make manifest.json files)))
+
+
+-- html-webpack-harddisk-plugin
+doesnt seem usefull 
+WAIT, i see multi use of HTMLWebpackplugin to generate seperate html files, with diff configurations
+and (alwaysWriteToDisk: true)
+https://github.com/jantimon/html-webpack-harddisk-plugin#basic-usage
+
+
+-- html-webpack-inline-source-plugin
+
+embed jss and css inline (wut?)
+
+-- html-webpack-inline-svg-plugin  
+can make sense maybe, dont know))
+
+
+
+
+
+
