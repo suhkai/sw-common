@@ -179,16 +179,90 @@ clean-webpack-plugin
 https://github.com/kangax/html-minifier (minimies html)
 
 
+vector clock, state synchronisation
+https://towardsdatascience.com/understanding-lamport-timestamps-with-pythons-multiprocessing-library-12a6427881c6
 
 
+p4d = require('parse5/lib/tree-adapters/default');
+
+```javascript
+parse5('<html></html>'); // or parse5('')
+
+//->
+```
 
 
+```html
+<!doctype html>
+<html lang="en">
 
+<head>
+    <meta charset="utf-8">
+    <meta content="ie=edge" http-equiv="x-ua-compatible">
+    <base href="https://example.com">
+    <title>this is the title</title>
+    <link href="myfavicon.ico" rel="shortcut icon" />
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <meta name="name" content="description" />
+    <meta name="content"
+        content="Rogue game, Quest for Dungeon remake in HTML5" />
+    <link rel="shortcut icon" href="myfavicon.ico" />
+</head>
 
+<body>
+    <div id="app"> </div>
+    <script src="main.js" type="text/javascript"></script>
+    <script type="text/javascript" src="main.js"></script>
+</body>
 
+</html>
+```
 
+```javascript
+//<!doctype html>
+ { nodeName: '#documentType',
+       name: 'html',
+       publicId: '',
+       systemId: '',
+       parentNode: [Circular] }
+```
 
+```javascript
+//p5.parse('')
+{ nodeName: '#document',
+  mode: 'quirks',
+  childNodes:
+   [ { nodeName: 'html',
+       tagName: 'html',
+       attrs: [],
+       namespaceURI: 'http://www.w3.org/1999/xhtml',
+       childNodes: [Array],
+       parentNode: [Circular] } ] }
 
+//p5.parse('<!doctype html><html></html>')
+{ nodeName: '#document',
+  mode: 'no-quirks',
+  childNodes:
+   [ { nodeName: '#documentType', //<!doctype html>
+       name: 'html',
+       publicId: '',
+       systemId: '',
+       parentNode: [Circular] },
+     { nodeName: 'html',
+       tagName: 'html',
+       attrs: [],
+       namespaceURI: 'http://www.w3.org/1999/xhtml',
+       childNodes: [Array],
+       parentNode: [Circular] } ] }
+```
 
-
-
+function unsetParentNode(ast){
+    if (ast.childNodes){
+        for (const elt of ast.childNodes){
+            if (elt.parentNode){
+                elt.parentNode = ''
+            };
+            unsetParentNode(elt);
+        }
+    }
+}
