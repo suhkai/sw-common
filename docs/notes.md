@@ -171,6 +171,13 @@ https://www.npmjs.com/package/libtidy-updated
 https://github.com/htacg/tidy-html5
 
 
+LoaderOptionsPlugin
+webpack-node-externals
+extract-text-webpack-plugin
+clean-webpack-plugin
+
+https://github.com/kangax/html-minifier (minimies html)
+
 
 
 
