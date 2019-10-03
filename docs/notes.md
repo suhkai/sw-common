@@ -256,6 +256,26 @@ parse5('<html></html>'); // or parse5('')
        parentNode: [Circular] } ] }
 ```
 
+## What is a systemID
+
+```javascript
+p5.parse('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">')
+{ nodeName: '#document',
+  mode: 'no-quirks',
+  childNodes:
+   [ { nodeName: '#documentType',
+       name: 'html',
+       publicId: '-//W3C//DTD HTML 4.0//EN', // first part
+       systemId: 'http://www.w3.org/TR/REC-html40/strict.dtd', // second part
+       parentNode: [Circular] },
+     { nodeName: 'html',
+       tagName: 'html',
+       attrs: [],
+       namespaceURI: 'http://www.w3.org/1999/xhtml',
+       childNodes: [Array],
+       parentNode: [Circular] } ] }
+```
+
 function unsetParentNode(ast){
     if (ast.childNodes){
         for (const elt of ast.childNodes){
@@ -266,3 +286,40 @@ function unsetParentNode(ast){
         }
     }
 }
+
+createDocument
+createDocumentFragment 
+createElement (tagName, namespaceUri, attr)
+createTexNode
+createCommentNode
+appendChild
+insertBefore
+setTemplateContent
+getTemplateContent
+setDocumentType
+detachNode
+insertText
+insertTextBefore
+adoptAttributes
+getFirstChild
+getChildNodes
+getParentNode
+getAttrList
+getTextNodeContent 
+
+isTextNode 
+isDocumentTypeNode 
+isElementNode 
+
+adoptAttributes()
+insertTextBefore()
+insertText() ("merges" text nodes)
+detachNode(node) // detaches the "node" from its parent
+getDocumentMode(mode) // quircks no
+
+
+<div class="front_clip"><div class="ring_clip"></div></div>
+
+
+ta = require('parse5/lib/tree-adapters/default');
+html = require('parse5/lib/common/html');

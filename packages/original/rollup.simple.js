@@ -9,13 +9,16 @@ const oo = [{
         format: 'iife'
     },
     dir: './dist',
-    banner: '/* banner comment */'
+    banner: '/* banner comment */',
+    assetFileNames:'[name]-[hash].[ext]',
+    chunkFileNames:'[name]-[hash].js',
+    entryFileNames:'[name]-entry-[hash].js'
 }];
 
 const io = {
     input: {
-        1:'./lm'
-        //bundle: resolve('./xes7.js'),
+        //1:'./lm'
+        bundle: resolve('./es7.js'),
     },
     plugins: [plugin({ dir: './dist'})]
 };
@@ -24,7 +27,7 @@ const io = {
 async function build() {
     // clean out dist directory
     const t1 = new Date();
-    rmdirRecursive('./dist');
+    //rmdirRecursive('./dist');
     const bundle = await rollup(io);
     console.log(bundle.watchFiles); // an array of file names this bundle depends on
     for (let i = 0; i < oo.length; i++) {

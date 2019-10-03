@@ -99,7 +99,8 @@
     "checktypes": "node_modules/.bin/tsc",
     "lint": "eslint src/main-blb.js",
     "server": "node test/server.js ./dist",
-    "test": "cross-env-shell NODE_ENV=test TS_NODE_DISABLE_WARNINGS=true nyc mocha"
+    "test": "cross-env-shell NODE_ENV=test TS_NODE_DISABLE_WARNINGS=true nyc mocha",
+    "start": "rm -rf ./dist/* && node rollup.simple.js"
   },
   "version": "1.0.0-alpha"
 }
