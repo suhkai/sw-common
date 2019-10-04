@@ -17,8 +17,25 @@ const addSuffix = (path, suffix) => {
 
 const forceArray = a => Array.isArray(a) ? a : [a];
 
+function node(nodeName, tagName, attrs=[], namespaceURI = 'http://www.w3.org/1999/xhtml', childNodes=[]){
+  return { 
+    nodeName, tagName, attrs, namespaceURI, childNodes   
+  } 
+}
+
+function titleNode(title, parent){
+    const p = node('title','title');
+    p.childNodes.push(textNode(title,p));
+    return p;
+}
+
+function textNode(str, parent){
+  return { nodenName: '#text', value: str, parentNode: parent };
+}
+
+
 module.exports = function htmlGenerator({
-  title,
+  title = 'roolapp',
   fileName = 'index.html',
   inject,
   favicon,
@@ -47,7 +64,8 @@ module.exports = function htmlGenerator({
    namespaceURI: 'http://www.w3.org/1999/xhtml',
    childNodes: [Array],
    parentNode: [Circular] } ],*/
-  
+   const titleTag = titleNode(title,null);
+   console.log(titleTag);
    let cnt=1;
   return {
     name: 'htmlGenerator',
