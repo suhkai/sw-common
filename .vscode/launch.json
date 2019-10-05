@@ -7,14 +7,9 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/app.js"
-        },
-        {
-            "type": "node",
-            "request": "launch",
             "name": "pck/original/rollup.simple",
             "program": "${workspaceFolder}/packages/original/rollup.simple.js",
+            "cwd": "${workspaceFolder}/packages/original",
             "stopOnEntry": true
         }
     ]

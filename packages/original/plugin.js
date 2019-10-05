@@ -1,11 +1,76 @@
-const { relative, resolve } = require('path');
+const {
+  relative,
+  resolve
+} = require('path');
 const parse5 = require('parse5');
-const hmtl = require('parse5/lib/common/html');
 const ta = require('parse5/lib/tree-adapters/default');
+const hmtl = require('parse5/lib/common/html');
+const {
+  NAMESPACES: {
+    HTML
+  }
+} = require('parse5/lib/common/html');
 
 // remove now the colors
 require('colors');
 
+function normalizeAttrProps(attr) {
+  return Object.entries(attr || {}).map(([p, v]) => [p && p.toLowerCase(), v && v.toLowerCase() || v]).sort((a, b) => {
+    if (a[0] < b[0]) return -1;
+    if (a[0] > b[0]) return 1;
+    return 0;
+  });
+}
+
+function metaIsEaual(m1, m2) {
+  //normalize
+  const n1 = normalizeAttrProps(m1);
+  const n2 = normalizeAttrProps(m2);
+  if (n1.length !== n2.length) return false;
+  let i = 0;
+  while (n1[i][0] === n2[i][0] && n1[i][1] === n2[i][1] && i < n1.length) {
+    i++
+  }
+  if (i === length) return true;
+  return false;
+}
+
+
+function renderHTML(lang = 'en', title = 'rollup app', metas = [{}], links = {}) {
+  const doc = ta.createDocument();
+  const html = ta.createElement('html', HTML, [{
+    name: 'lang',
+    value: lang
+  }])
+  ta.appendChild(doc, html);
+  const head = ta.createElement('head', HTML, []);
+  ta.appendChild(html, head);
+  const titleElt = ta.createElement('title', HTML, []);
+  ta.insertText(titleElt, title);
+  ta.appendChild(head, titleElt);
+  //
+  {
+    // dedup metas
+    const uniqueMeta = [];
+    for (const meta of metas) {
+      const found = uniqueMeta.find(m => {
+        return metaIsEaual(m, meta);
+      });
+      if (found) continue;
+      uniqueMeta.push(meta);
+    }
+    for (const meta of uniqueMeta) {
+      const metaElt = ta.createElement('meta', HTML, normalizeAttrProps(meta).map(e => ({
+        name: e[0],
+        value: e[1]
+      })));
+      ta.appendChild(head, metaElt);
+    }
+  }
+
+
+  console.log(parse5.serialize(doc).blue);
+}
 
 
 const addSuffix = (path, suffix) => {
@@ -17,20 +82,28 @@ const addSuffix = (path, suffix) => {
 
 const forceArray = a => Array.isArray(a) ? a : [a];
 
-function node(nodeName, tagName, attrs=[], namespaceURI = 'http://www.w3.org/1999/xhtml', childNodes=[]){
-  return { 
-    nodeName, tagName, attrs, namespaceURI, childNodes   
-  } 
+function node(nodeName, tagName, attrs = [], namespaceURI = 'http://www.w3.org/1999/xhtml', childNodes = []) {
+  return {
+    nodeName,
+    tagName,
+    attrs,
+    namespaceURI,
+    childNodes
+  }
 }
 
-function titleNode(title, parent){
-    const p = node('title','title');
-    p.childNodes.push(textNode(title,p));
-    return p;
+function titleNode(title, parent) {
+  const p = node('title', 'title');
+  p.childNodes.push(textNode(title, p));
+  return p;
 }
 
-function textNode(str, parent){
-  return { nodenName: '#text', value: str, parentNode: parent };
+function textNode(str, parent) {
+  return {
+    nodenName: '#text',
+    value: str,
+    parentNode: parent
+  };
 }
 
 
@@ -54,19 +127,33 @@ module.exports = function htmlGenerator({
   // template
   // hash (querystring hash?)
   suffix = false,
-} = {},
-) {
+} = {}, ) {
 
-   // generate titleSnippet
-   /*[ { nodeName: 'title',
-   tagName: 'title',
-   attrs: [],
-   namespaceURI: 'http://www.w3.org/1999/xhtml',
-   childNodes: [Array],
-   parentNode: [Circular] } ],*/
-   const titleTag = titleNode(title,null);
-   console.log(titleTag);
-   let cnt=1;
+  // generate titleSnippet
+  /*[ { nodeName: 'title',
+  tagName: 'title',
+  attrs: [],
+  namespaceURI: 'http://www.w3.org/1999/xhtml',
+  childNodes: [Array],
+  parentNode: [Circular] } ],*/
+  renderHTML('en', title, [{
+      charset: 'utf-8'
+    },
+    {
+      content: 'ie=edge',
+      ['http-equiv']: 'x-ua-compatible'
+    },
+    {
+      name: 'viewport',
+      content: 'width=device-width',
+      ['initial-scale']: 1
+    },
+    {
+      content: 'width=device-width, initial-scale=1',
+      name: 'viewport'
+    }
+  ]);
+  let cnt = 1;
   return {
     name: 'htmlGenerator',
     /*async load(id) {
@@ -104,7 +191,7 @@ module.exports = function htmlGenerator({
         //console.log(bundle)
         console.log(`  ${entry}->[type:${value.type}][code:${value.code || value.source}]`.yellow);
       }
-      if (isWrite===true){
+      if (isWrite === true) {
         console.log('EMITTING ASSET'.red);
         this.emitFile({
           type: 'asset',
@@ -115,9 +202,9 @@ module.exports = function htmlGenerator({
       }
       console.log('end of generateBundle'.red);
     },
-    writeBundle(bundle){
+    writeBundle(bundle) {
       console.log('writeBundle'.red);
-      for (const [entry, value] of Object.entries(bundle)){
+      for (const [entry, value] of Object.entries(bundle)) {
         console.log(entry, value)
       }
     }

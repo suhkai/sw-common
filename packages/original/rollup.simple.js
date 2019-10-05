@@ -1,5 +1,5 @@
 const plugin = require('./plugin');
-const rmdirRecursive = require('rmdir-recursive');
+//const rmdirRecursive = require('rmdir-recursive');
 const { rollup, watch } = require('rollup');
 const { resolve } = require('path');
 
@@ -14,6 +14,7 @@ const oo = [{
     chunkFileNames:'[name]-[hash].js',
     entryFileNames:'[name]-entry-[hash].js'
 }];
+
 
 const io = {
     input: {
