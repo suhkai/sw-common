@@ -162,7 +162,7 @@ module.exports = function htmlGenerator(po) {
   console.log(parse5.serialize(doc).blue);
 
 
-
+  let assetRef;
   let cnt = 1;
   return {
     name: 'htmlGenerator',
@@ -173,6 +173,13 @@ module.exports = function htmlGenerator(po) {
     },*/
     async buildStart(io) {
       console.log('buildStart'.red);
+      assetRef = this.emitFile({
+        type: 'asset',
+        //source: '<htm><head></head><body></body></html>',
+        name: 'index.html',
+        //fileName: 'index.html'
+      });
+      console.log(`assetref=${assetRef}`.red)
 
     },
     async banner(a, b) {
@@ -180,15 +187,20 @@ module.exports = function htmlGenerator(po) {
       return '/* HELLO WOOOOOOOOORLD */'; // will be added to the text
     },
     buildEnd(error) {
+      //this.setAssetSource(assetRef, 'hello world');
       console.log('buildEnd'.red);
       error && console.log(`error is: ${String(error).green}`);
+      for (const moduleId of this.moduleIds) {
+        console.log(`moduleid:${moduleId}`.blue, this.getModuleInfo(moduleId)) /* ... */
+      }
+     
     },
-    /*resolveId(source, importer) {
+    resolveId(source, importer) {
       console.log('resolveId'.red);
       console.log(`  ->[source][${source}]`.yellow);
       console.log(`  ->[importer][${importer}]`.yellow);
-      return null;//hello.js';
-    },*/
+      return null; //hello.js';
+    },
 
     async generateBundle(oo, bundle, isWrite) {
       // when isWrite is "false" then it will not be immediatly written to a file
@@ -199,17 +211,21 @@ module.exports = function htmlGenerator(po) {
 
       for (const [entry, value] of Object.entries(bundle)) {
         //console.log(bundle)
-        console.log(`  ${entry}->[type:${value.type}][code:${value.code || value.source}]`.yellow);
+        console.log(`${entry}->[type:${value.type}][code:${value.code || value.source}]`.yellow);
       }
-      if (isWrite === true) {
-        console.log('EMITTING ASSET'.red);
-        this.emitFile({
-          type: 'asset',
-          source: '<htm><head></head><body></body></html>',
-          name: 'index.html',
-          //fileName: 'index.html'
-        });
-      }
+      this.setAssetSource(assetRef, 'hello world');
+      //console.log(this.)
+      //if (isWrite === false) {
+      //  console.log('EMITTING ASSET'.red);
+      /*
+      this.emitFile({
+        type: 'asset',
+        source: '<htm><head></head><body></body></html>',
+        name: 'index.html',
+        //fileName: 'index.html'
+      });
+      */
+      //}
       console.log('end of generateBundle'.red);
     },
     writeBundle(bundle) {
@@ -217,6 +233,7 @@ module.exports = function htmlGenerator(po) {
       for (const [entry, value] of Object.entries(bundle)) {
         console.log(entry, value)
       }
+      console.log(this.getFileName(assetRef));
     }
   };
 }

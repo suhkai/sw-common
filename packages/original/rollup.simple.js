@@ -26,34 +26,35 @@ const io = {
         //1:'./lm'
         bundle: resolve('./es7.js'),
     },
-    plugins: [plugin({
-        lang: 'de',
-        title: 'rollup app',
-        base: 'http://www.skyjs.net',
-        mmobile: true,
-        metas: [{
-                charset: 'UTF-8'
-            },
-            {
-                name: 'description',
-                content: 'Free Web tutorials'
-            },
-            {
-                name: 'keywords',
-                content: 'HTML,CSS,XML,JavaScript'
-            },
-            {
-                name: 'author',
-                content: 'John Doe'
-            }
-        ],
-        links: [{
+    plugins: [
+        plugin({
+            lang: 'de',
+            title: 'rollup app',
+            base: 'http://www.skyjs.net',
+            mmobile: true,
+            metas: [{
+                    charset: 'UTF-8'
+                },
+                {
+                    name: 'description',
+                    content: 'Free Web tutorials'
+                },
+                {
+                    name: 'keywords',
+                    content: 'HTML,CSS,XML,JavaScript'
+                },
+                {
+                    name: 'author',
+                    content: 'John Doe'
+                }
+            ],
+            links: [{
                 href: 'https://fonts.googleapis.com/css?family=Saira+Semi+Condensed&display=swap',
                 rel: 'stylesheet'
-            }
-        ],
-        favicon: './someIcon.url'
-    })]
+            }],
+            favicon: './someIcon.url'
+        })
+    ]
 };
 
 
@@ -62,13 +63,14 @@ async function build() {
     const t1 = new Date();
     //rmdirRecursive('./dist');
     const bundle = await rollup(io);
+    console.log('rollup part 1 finished'.cyan);
     console.log(bundle.watchFiles); // an array of file names this bundle depends on
     for (let i = 0; i < oo.length; i++) {
         const o = oo[i];
-        const {
+        /*const {
             output
         } = await bundle.generate(o);
-        console.log(output);
+        /*console.log(output);*/
         await bundle.write(o);
     }
 }
