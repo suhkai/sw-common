@@ -1,18 +1,23 @@
 const plugin = require('./plugin');
 //const rmdirRecursive = require('rmdir-recursive');
-const { rollup, watch } = require('rollup');
-const { resolve } = require('path');
+const {
+    rollup,
+    watch
+} = require('rollup');
+const {
+    resolve
+} = require('path');
 
 // array, can have multiple outputs for single input
 const oo = [{
-    output:{
+    output: {
         format: 'iife'
     },
     dir: './dist',
     banner: '/* banner comment */',
-    assetFileNames:'[name]-[hash].[ext]',
-    chunkFileNames:'[name]-[hash].js',
-    entryFileNames:'[name]-entry-[hash].js'
+    assetFileNames: '[name]-[hash].[ext]',
+    chunkFileNames: '[name]-[hash].js',
+    entryFileNames: '[name]-entry-[hash].js'
 }];
 
 
@@ -21,7 +26,34 @@ const io = {
         //1:'./lm'
         bundle: resolve('./es7.js'),
     },
-    plugins: [plugin({ dir: './dist'})]
+    plugins: [plugin({
+        lang: 'de',
+        title: 'rollup app',
+        base: 'http://www.skyjs.net',
+        mmobile: true,
+        metas: [{
+                charset: 'UTF-8'
+            },
+            {
+                name: 'description',
+                content: 'Free Web tutorials'
+            },
+            {
+                name: 'keywords',
+                content: 'HTML,CSS,XML,JavaScript'
+            },
+            {
+                name: 'author',
+                content: 'John Doe'
+            }
+        ],
+        links: [{
+                href: 'https://fonts.googleapis.com/css?family=Saira+Semi+Condensed&display=swap',
+                rel: 'stylesheet'
+            }
+        ],
+        favicon: './someIcon.url'
+    })]
 };
 
 

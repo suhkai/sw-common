@@ -15,9 +15,9 @@ const {
 require('colors');
 
 function normalizeAttrProps(attr) {
-  return Object.entries(attr || {}).map(([p, v]) => [p && p.toLowerCase(), 
-    v && typeof v === 'string' && v.toLowerCase() || v 
-   ]).sort((a, b) => {
+  return Object.entries(attr || {}).map(([p, v]) => [p && p.toLowerCase(),
+    v && typeof v === 'string' && v.toLowerCase() || v
+  ]).sort((a, b) => {
     if (a[0] < b[0]) return -1;
     if (a[0] > b[0]) return 1;
     return 0;
@@ -25,7 +25,9 @@ function normalizeAttrProps(attr) {
 }
 
 function metaIsEaual(m1, m2) {
-  //normalize
+  //
+  // normalize
+  //
   const n1 = normalizeAttrProps(m1);
   const n2 = normalizeAttrProps(m2);
   if (n1.length !== n2.length) return false;
@@ -37,8 +39,12 @@ function metaIsEaual(m1, m2) {
   return false;
 }
 
+function isObject(o) {
+  return (a !== null && typeof o === 'object' && !Array.isArray(o));
+}
 
-function renderHTML(lang = 'en', title = 'rollup app', metas = [{}], links = {}) {
+
+function skeleton(lang) {
   const doc = ta.createDocument();
   const html = ta.createElement('html', HTML, [{
     name: 'lang',
@@ -47,33 +53,57 @@ function renderHTML(lang = 'en', title = 'rollup app', metas = [{}], links = {})
   ta.appendChild(doc, html);
   const head = ta.createElement('head', HTML, []);
   ta.appendChild(html, head);
-  const titleElt = ta.createElement('title', HTML, []);
-  ta.insertText(titleElt, title);
-  ta.appendChild(head, titleElt);
-  //
-  {
-    // dedup metas
-    const uniqueMeta = [];
-    for (const meta of metas) {
-      const found = uniqueMeta.find(m => {
-        return metaIsEaual(m, meta);
-      });
-      if (found) continue;
-      uniqueMeta.push(meta);
-    }
-    for (const meta of uniqueMeta) {
-      const metaElt = ta.createElement('meta', HTML, normalizeAttrProps(meta).map(e => ({
-        name: e[0],
-        value: e[1] === undefined ? '' : String(e[1])
-      })));
-      ta.appendChild(head, metaElt);
-    }
-  }
-
-
-  console.log(parse5.serialize(doc).blue);
+  const body = ta.createElement('body', HTML, []);
+  ta.appendChild(html, body);
+  return [doc, html, head, body];
 }
 
+function buildMetasOrLinks(tag, head, metas = [{}], cb) {
+  const uniqueMeta = [];
+  if (cb) {
+    cb(uniqueMeta);
+  }
+  for (const meta of metas) {
+    const found = uniqueMeta.find(m => {
+      return metaIsEaual(m, meta);
+    });
+    if (found) continue;
+    Object.keys(meta).length && uniqueMeta.push(meta);
+  }
+  for (const meta of uniqueMeta) {
+    const metaElt = ta.createElement(tag, HTML, normalizeAttrProps(meta).map(e => ({
+      name: e[0],
+      value: e[1] === undefined ? '' : String(e[1])
+    })));
+    ta.appendChild(head, metaElt);
+  }
+}
+
+function addTitle(head, title) {
+  const tag = ta.createElement('title', HTML, []);
+  ta.appendChild(head, tag);
+  ta.insertText(tag, title);
+  return tag;
+}
+
+function addBase(head, href, target) {
+  const attrs = [];
+  if (target) {
+    attrs.push({
+      name: 'target',
+      value: target
+    });
+  }
+  if (href) {
+    attrs.push({
+      name: 'href',
+      value: href
+    });
+  }
+  const tag = ta.createElement('base', HTML, attrs);
+  ta.appendChild(head, tag);
+  return tag;
+}
 
 const addSuffix = (path, suffix) => {
   if (!suffix) return path;
@@ -82,79 +112,57 @@ const addSuffix = (path, suffix) => {
   return `${path}?${param}`;
 };
 
-const forceArray = a => Array.isArray(a) ? a : [a];
 
-function node(nodeName, tagName, attrs = [], namespaceURI = 'http://www.w3.org/1999/xhtml', childNodes = []) {
-  return {
-    nodeName,
-    tagName,
-    attrs,
-    namespaceURI,
-    childNodes
-  }
-}
+module.exports = function htmlGenerator(po) {
 
-function titleNode(title, parent) {
-  const p = node('title', 'title');
-  p.childNodes.push(textNode(title, p));
-  return p;
-}
+  const {
+    lang = 'en',
+      base,
+      title = 'rollup.js app',
+      metas,
+      mobile = true,
+      links,
+      favicon,
+      fileName = 'index.html',
+      inject = true,
+      showErrors,
+      appMountId,
+      baseHref,
+      // planned
+      // excludeChunks,
+      // chunksSortMode
+      // chunks
+      // excludeChunks , will inject scripts and styles 
+      // template
+      // hash (querystring hash?)
+      suffix = false,
+  } = po;
 
-function textNode(str, parent) {
-  return {
-    nodenName: '#text',
-    value: str,
-    parentNode: parent
-  };
-}
-
-
-module.exports = function htmlGenerator({
-  title = 'roolapp',
-  fileName = 'index.html',
-  inject,
-  favicon,
-  meta,
-  links,
-  mobile,
-  showErrors,
-  appMountId,
-  baseHref,
-
-  // planned
-  // excludeChunks,
-  // chunksSortMode
-  // chunks
-  // excludeChunks , will inject scripts and styles 
-  // template
-  // hash (querystring hash?)
-  suffix = false,
-} = {}, ) {
-
-  // generate titleSnippet
-  /*[ { nodeName: 'title',
-  tagName: 'title',
-  attrs: [],
-  namespaceURI: 'http://www.w3.org/1999/xhtml',
-  childNodes: [Array],
-  parentNode: [Circular] } ],*/
-  renderHTML('en', title, [{
-      charset: 'utf-8'
-    },
-    {
-      content: 'ie=edge',
-      ['http-equiv']: 'x-ua-compatible'
-    },
-    {
-      name: 'viewport',
-      content: 'width=device-width',
-      ['initial-scale']: '1'
-    },
-    {
-      content: 'width=device-width, initial-scale=1',
-      name: 'viewport'
+  const [doc, html, head, body] = skeleton(lang);
+  buildMetasOrLinks('meta', head, metas, unique => {
+    if (mobile) {
+      unique.push({
+        content: 'width=device-width,initial-scale=1',
+        name: 'viewport'
+      })
     }
-  ]);
+  });
+
+  buildMetasOrLinks('link', head, links, unique => {
+    if (favicon !== undefined) {
+      unique.push({
+        rel: 'shortcut icon',
+        href: favicon
+      });
+    }
+  });
+
+  title && addTitle(head, title);
+  base && addBase(head, base);
+  console.log(parse5.serialize(doc).blue);
+
+
+
   let cnt = 1;
   return {
     name: 'htmlGenerator',
@@ -210,66 +218,5 @@ module.exports = function htmlGenerator({
         console.log(entry, value)
       }
     }
-
-
-    /*async generateBundle( outputOptions , bundle, isWrite) {
-      if (!dir) this.error('`opts.dir` is required!');
-
-      // don't do anything when bundle isn't written
-      if (!isWrite) return;
-
-      // figure out paths
-      const outputDir = relative(process.cwd(), resolve(dir));
-      const relativeOutput = p => relative(outputDir, resolve(p));
-
-      // create template data
-      const scripts = forceArray(moreScripts).concat(addSuffix(relativeOutput(file), suffix));
-
-      const styles = forceArray(moreStyles).concat(
-        css && addSuffix(relativeOutput(css), suffix)
-      )
-      .filter(f => f);
-
-      const templateData = {
-        title,
-        ...data,
-        scripts,
-        styles,
-      };
-
-      let templateFn;
-      if (useDefault) {
-        templateFn = doT.compile(defaultTemplate);
-      } else {
-        let userTemplate = await readFile(path, 'utf8').catch(err => this.error(err.toString()));
-
-        if (useDoT) {
-          // inject scripts and styles if the user template doesn't handle them
-          [
-            { arr: scriptsTemplate, hint: `${doT.templateSettings.varname}.scripts`, tag: '</body>' },
-            { arr: stylesTemplate, hint: `${doT.templateSettings.varname}.styles`, tag: '</head>' },
-          ].forEach(({ arr, hint, tag }) => {
-            const matches = userTemplate.match(doT.templateSettings.iterate) || [];
-            const shouldSkip = matches.some(str => str.includes(hint));
-            if (shouldSkip) return;
-
-            const tagClose = userTemplate.lastIndexOf(tag);
-            userTemplate = [
-              userTemplate.slice(0, tagClose),
-              arr.join(''),
-              userTemplate.slice(tagClose, userTemplate.length),
-            ].join('');
-          });
-          templateFn = doT.compile(userTemplate);
-        } else {
-          templateFn = d => func(userTemplate, d);
-        }
-      }
-
-      // generate and write html
-      const html = `${templateFn(templateData).trim()}\n`;
-      const htmlPath = resolve(outputDir, filename);
-      await outputFile(htmlPath, html).catch(err => this.error(err.toString()));
-    },*/
   };
 }

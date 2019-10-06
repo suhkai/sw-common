@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "webpack-cli",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "jacob.bogers <Jacob.Bogers@doclerholding.com>",
