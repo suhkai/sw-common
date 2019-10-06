@@ -15,7 +15,9 @@ const {
 require('colors');
 
 function normalizeAttrProps(attr) {
-  return Object.entries(attr || {}).map(([p, v]) => [p && p.toLowerCase(), v && v.toLowerCase() || v]).sort((a, b) => {
+  return Object.entries(attr || {}).map(([p, v]) => [p && p.toLowerCase(), 
+    v && typeof v === 'string' && v.toLowerCase() || v 
+   ]).sort((a, b) => {
     if (a[0] < b[0]) return -1;
     if (a[0] > b[0]) return 1;
     return 0;
@@ -31,7 +33,7 @@ function metaIsEaual(m1, m2) {
   while (n1[i][0] === n2[i][0] && n1[i][1] === n2[i][1] && i < n1.length) {
     i++
   }
-  if (i === length) return true;
+  if (i === n1.length) return true;
   return false;
 }
 
@@ -62,7 +64,7 @@ function renderHTML(lang = 'en', title = 'rollup app', metas = [{}], links = {})
     for (const meta of uniqueMeta) {
       const metaElt = ta.createElement('meta', HTML, normalizeAttrProps(meta).map(e => ({
         name: e[0],
-        value: e[1]
+        value: e[1] === undefined ? '' : String(e[1])
       })));
       ta.appendChild(head, metaElt);
     }
@@ -146,7 +148,7 @@ module.exports = function htmlGenerator({
     {
       name: 'viewport',
       content: 'width=device-width',
-      ['initial-scale']: 1
+      ['initial-scale']: '1'
     },
     {
       content: 'width=device-width, initial-scale=1',
