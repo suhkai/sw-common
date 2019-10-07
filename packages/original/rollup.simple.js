@@ -4,6 +4,7 @@ const {
     rollup,
     watch
 } = require('rollup');
+
 const {
     resolve
 } = require('path');
@@ -64,7 +65,9 @@ async function build() {
     //rmdirRecursive('./dist');
     const bundle = await rollup(io);
     console.log('rollup part 1 finished'.cyan);
-    console.log(bundle.watchFiles); // an array of file names this bundle depends on
+    // what methods and props does the bundle object have
+    
+    console.log(Object.keys(bundle));
     for (let i = 0; i < oo.length; i++) {
         const o = oo[i];
         /*const {

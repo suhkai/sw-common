@@ -11,6 +11,14 @@
             "program": "${workspaceFolder}/packages/original/rollup.simple.js",
             "cwd": "${workspaceFolder}/packages/original",
             "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "pck/original/favicon.test",
+            "program": "${workspaceFolder}/packages/original/favicon.test.js",
+            "cwd": "${workspaceFolder}/packages/original",
+            "stopOnEntry": true
         }
     ]
 }
