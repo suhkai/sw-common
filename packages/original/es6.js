@@ -15,5 +15,3 @@ const sheet = jss.createStyleSheet({
 console.log(sheet);
 sheet.attach();
 
-
-

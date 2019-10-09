@@ -206,14 +206,15 @@ module.exports = function htmlGenerator(po) {
       // when isWrite is "false" then it will not be immediatly written to a file
       // so basicly generateBundle is 
       console.log(`generateBundle ${cnt++}`.red);
-      console.log(`  ->options:${JSON.stringify(oo)}`.yellow);
+      //console.log(`  ->options:${JSON.stringify(oo)}`.yellow);
       console.log(`  ->iswrite-flag:${JSON.stringify(isWrite)}`.yellow);
 
       for (const [entry, value] of Object.entries(bundle)) {
         //console.log(bundle)
-        console.log(`${entry}->[type:${value.type}][code:${value.code || value.source}]`.yellow);
+        console.log(`>>${entry}->[type:${value.type}]`.yellow);
       }
       this.setAssetSource(assetRef, 'hello world');
+      console.log(this.getFileName(assetRef));
       //console.log(this.)
       //if (isWrite === false) {
       //  console.log('EMITTING ASSET'.red);
@@ -231,7 +232,7 @@ module.exports = function htmlGenerator(po) {
     writeBundle(bundle) {
       console.log('writeBundle'.red);
       for (const [entry, value] of Object.entries(bundle)) {
-        console.log(entry, value)
+        //console.log(entry, value)
       }
       console.log(this.getFileName(assetRef));
     }
