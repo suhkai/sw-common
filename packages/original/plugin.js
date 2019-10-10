@@ -175,8 +175,8 @@ module.exports = function htmlGenerator(po) {
       console.log('buildStart'.red);
       assetRef = this.emitFile({
         type: 'asset',
-        source: '',//'<htm><head></head><body></body></html>',
-        name: 'index.html',
+        //source: '<htm><head></head><body></body></html>',
+        name: 'fonts/index.html',
         //fileName: 'index.html'
       });
       console.log(`assetref=${assetRef}`.red)
@@ -219,6 +219,9 @@ module.exports = function htmlGenerator(po) {
         }
         console.log(`>>${entry}->[type:${value.type}]`.yellow);
       }
+      //oo.dir = './dist/fonts';
+      this.setAssetSource(assetRef, 'hello world');
+      //oo.dir = './dist';
       console.log(this.getFileName(assetRef));
       //console.log(this.)
       //if (isWrite === false) {
