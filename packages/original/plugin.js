@@ -33,7 +33,7 @@ function metaIsEaual(m1, m2) {
   if (n1.length !== n2.length) return false;
   let i = 0;
   while (n1[i][0] === n2[i][0] && n1[i][1] === n2[i][1] && i < n1.length) {
-    i++
+    i++;
   }
   if (i === n1.length) return true;
   return false;
@@ -209,8 +209,14 @@ module.exports = function htmlGenerator(po) {
       //console.log(`  ->options:${JSON.stringify(oo)}`.yellow);
       console.log(`  ->iswrite-flag:${JSON.stringify(isWrite)}`.yellow);
 
-      for (const [entry, value] of Object.entries(bundle)) {
+      for (const entry of Object.keys(bundle)) {
         //console.log(bundle)
+        const value = bundle[entry];
+        if (value.type === 'asset'){
+           value.fileName = '';
+           value.source = undefined;
+           this.setAssetSource(assetRef, 'hello world');
+        }
         console.log(`>>${entry}->[type:${value.type}]`.yellow);
       }
       //oo.dir = './dist/fonts';
