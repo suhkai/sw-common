@@ -6,15 +6,15 @@ const {
 } = require('rollup');
 
 const {
-    resolve
+    resolve, join
 } = require('path');
 
 // array, can have multiple outputs for single input
 const oo = [{
     output: {
         format: 'iife'
-    },
-    dir: './dist',
+    }, 
+    dir: join(__dirname,'./dist'),
     banner: '/* banner comment */',
     assetFileNames: '[name]-[hash].[ext]',
     chunkFileNames: '[name]-[hash].js',
@@ -25,7 +25,7 @@ const oo = [{
 const io = {
     input: {
         //1:'./lm'
-        bundle: resolve('./es7.js'),
+        bundle: require.resolve('./es7.js'),
     },
     plugins: [
         plugin({
