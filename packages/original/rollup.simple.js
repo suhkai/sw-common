@@ -1,4 +1,4 @@
-const plugin = require('./rollup-plugin-html-advanced');
+const plugin = require('../rollup-plugin-html-advanced');
 
 //const rmdirRecursive = require('rmdir-recursive');
 const {

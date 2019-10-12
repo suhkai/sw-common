@@ -1,6 +1,7 @@
 const {
   relative,
-  resolve
+  resolve,
+  dirname
 } = require('path');
 const parse5 = require('parse5');
 const ta = require('parse5/lib/tree-adapters/default');
@@ -113,6 +114,58 @@ const addSuffix = (path, suffix) => {
 };
 
 
+const favicons = require('favicons');
+
+favicons.config.file = {}; // no manifest
+const html = require('./favicon-html');
+//const favicon = favicons.config.html.favicons;
+//console.log(favicons.config);
+favicons.config.html = { favicons:html.favicons }; // no html <link and <meta tags
+
+// need html , need icons
+// 
+
+const favConfig = {
+  //path:'some-path',
+  icons: {
+    android: false,
+    appleIcon: false,
+    appleStartup: false,
+    coast: false,
+    favicons: true,
+    firefox: false,
+    windows: false,
+    yandex: false
+  },
+  // true (true for all) or an object
+  // if it is an object it is immediatly selective
+  manifest: {
+    android: true,
+
+
+  }
+}
+
+function getName(file){
+  if (typeof file !== 'string'){
+    return false;
+  }
+  if (file[0] === '/'){ // from root
+    return file;
+  }
+  const _dir = dirname(require.main.filename || __dirname);
+  const fullPath = resolve(_dir, file);
+  return fullPath;
+}
+
+const result = favicons(getName('./favicon.png'), favConfig);
+
+result.then( o=> { 
+  console.log(JSON.stringify(o.html));
+  console.log(o.images);
+  console.log(o.files);
+});
+
 module.exports = function htmlGenerator(po) {
 
   const {
@@ -165,7 +218,7 @@ module.exports = function htmlGenerator(po) {
   let assetRef;
   let cnt = 1;
   return {
-    name: 'htmlGenerator',
+    name: 'html-advanced',
     /*async load(id) {
       console.log('load'.red);
       console.log(`  ->[id]:${id}`.yellow);

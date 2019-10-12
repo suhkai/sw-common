@@ -1,0 +1,19 @@
+{
+  "name": "rollup-plugin-html-advanced",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "favicons": "^5.4.1",
+    "parse5": "^5.1.0"
+  },
+  "devDependencies": {
+    "colors": "^1.4.0"
+  }
+}

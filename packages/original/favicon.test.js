@@ -1,9 +1,4 @@
 console.log(process.env["NODE_PATH"]);
-const favicons = require('../favicons');
-const config = favicons.config;
-
-const oldHtml = favicons.config.html;
-favicons.config.html = require('./favicon-html');
 
 const source = 'test/turkey.png';
 
