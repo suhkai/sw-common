@@ -1,9 +1,15 @@
-const favicons = require('favicons');
+console.log(process.env["NODE_PATH"]);
+const favicons = require('../favicons');
+const config = favicons.config;
+
+const oldHtml = favicons.config.html;
+favicons.config.html = require('./favicon-html');
+
 const source = 'test/turkey.png';
 
 
 const config2 = {
-    path: '/',
+    path: '/favicons',
     appName: null,
     appShortName: null,
     appDescription: null,
@@ -25,40 +31,15 @@ const config2 = {
     manifestRelativePaths: false,
     icons: {
         android: true,
-        appleIcon: true,
-        appleStartup: true,
-        coast: true,
-        favicons: true,
-        firefox: true,
-        windows: true,
-        yandex: true
+        appleIcon: false,
+        appleStartup: false,
+        coast: false,
+        favicons: false,
+        firefox: false,
+        windows: false,
+        yandex: false
     }
 }
-
-const configuration = {
-    path: 'favicons/',
-    appName: 'my wonderfull app',
-    appShortName: 'wonder',
-    display: 'standalone',
-    start_url: '/?homescreen=1',
-    html: 'index.html',
-    background: 'white',                       // Background colour for flattened icons. `string`
-    theme_color: 'red',
-    version: '10',
-    api_version: 'hello',
-    //theme_color: '',
-    //replace: true,
-    icons: {
-        android: false,  // manifest // Create Android homescreen icon. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
-        appleIcon: false,            // Create Apple touch icons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
-        appleStartup: false,         // Create Apple startup images. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
-        coast: false,                // Create Opera Coast icon. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
-        favicons: true,              // Create regular favicons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
-        firefox: false,              // Create Firefox OS icons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
-        windows: true,               // Create Windows 8 tile icons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
-        yandex: true                 // 
-    }
-};
 
 async function processFav() {
     const result = await favicons(source, config2);

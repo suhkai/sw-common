@@ -3,8 +3,7 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
-        {
+    "configurations": [{
             "type": "node",
             "request": "launch",
             "name": "pck/original/rollup.simple",
@@ -18,7 +17,10 @@
             "name": "pck/original/favicon.test",
             "program": "${workspaceFolder}/packages/original/favicon.test.js",
             "cwd": "${workspaceFolder}/packages/original",
-            "stopOnEntry": true
+            "env": {
+                "NODE_PATH": "/c/Users/jacob/repos/ui/sw-common/packages/favicons/node_modules:/c/Users/jacob/repos/ui/sw-common/packages"
+            },
+            "stopOnEntry": false
         },
         {
             "type": "node",
