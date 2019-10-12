@@ -1,5 +1,5 @@
-console.log(process.env["NODE_PATH"]);
-const plugin = require('plugin');
+const plugin = require('./rollup-plugin-html-advanced');
+
 //const rmdirRecursive = require('rmdir-recursive');
 const {
     rollup,
