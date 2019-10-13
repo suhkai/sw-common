@@ -303,13 +303,18 @@ const windows = [
 
 ]
 
-const yandex = [yandexManifest];
+
 
 module.exports = {
-    yandex,
     android,
     windows,
     favicons,
     coast,
     appleStartup,
+    manifest: {
+        appleStartup: appleStartup,
+        windows: windowManifest,
+        android: androidManifest,
+        yandex:yandexManifest
+    }
 }

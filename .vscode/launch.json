@@ -9,7 +9,7 @@
             "name": "pck/original/rollup.simple",
             "program": "${workspaceFolder}/packages/original/rollup.simple.js",
             "cwd": "${workspaceFolder}/packages/original",
-            "stopOnEntry": true
+            "stopOnEntry": false
         },
         {
             "type": "node",

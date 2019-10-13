@@ -44,7 +44,6 @@ function isObject(o) {
   return (a !== null && typeof o === 'object' && !Array.isArray(o));
 }
 
-
 function skeleton(lang) {
   const doc = ta.createDocument();
   const html = ta.createElement('html', HTML, [{
@@ -113,58 +112,11 @@ const addSuffix = (path, suffix) => {
   return `${path}?${param}`;
 };
 
+// test favicons processing
+const processFavicons = require('./favicon-processing');
 
-const favicons = require('favicons');
+processFavicons({android: 7, image: './favicon.png'});
 
-favicons.config.file = {}; // no manifest
-const html = require('./favicon-html');
-//const favicon = favicons.config.html.favicons;
-//console.log(favicons.config);
-favicons.config.html = { favicons:html.favicons }; // no html <link and <meta tags
-
-// need html , need icons
-// 
-
-const favConfig = {
-  //path:'some-path',
-  icons: {
-    android: false,
-    appleIcon: false,
-    appleStartup: false,
-    coast: false,
-    favicons: true,
-    firefox: false,
-    windows: false,
-    yandex: false
-  },
-  // true (true for all) or an object
-  // if it is an object it is immediatly selective
-  manifest: {
-    android: true,
-
-
-  }
-}
-
-function getName(file){
-  if (typeof file !== 'string'){
-    return false;
-  }
-  if (file[0] === '/'){ // from root
-    return file;
-  }
-  const _dir = dirname(require.main.filename || __dirname);
-  const fullPath = resolve(_dir, file);
-  return fullPath;
-}
-
-const result = favicons(getName('./favicon.png'), favConfig);
-
-result.then( o=> { 
-  console.log(JSON.stringify(o.html));
-  console.log(o.images);
-  console.log(o.files);
-});
 
 module.exports = function htmlGenerator(po) {
 
