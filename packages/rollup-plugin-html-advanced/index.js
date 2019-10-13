@@ -115,7 +115,10 @@ const addSuffix = (path, suffix) => {
 // test favicons processing
 const processFavicons = require('./favicon-processing');
 
-processFavicons({android: 7, image: './favicon.png'});
+processFavicons({
+  android: true,
+  image: './favicon.png'
+});
 
 
 module.exports = function htmlGenerator(po) {

@@ -132,9 +132,12 @@ async function faviconProcessing(options = {}) {
         // process android
         if (options[platform]) {
             faviconOptions.icons.android = true;
-            htmlReplacement.android = html.android;
-            faviconOptions.path = options.android.path || '/';
-
+            htmlReplacement[platform] = html[platform];
+            if (typeof options[platform] === 'boolean'){
+                options[platform] = { path: `/${platform}/` };
+            }
+            options[platform].path =  options[platform].path || `/${platform}/`;
+            faviconOptions.path = options.android.path 
             try {
                 config.html = htmlReplacement;
                 const result = await favicons(image, faviconOptions);
