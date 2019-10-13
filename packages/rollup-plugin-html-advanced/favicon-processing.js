@@ -51,13 +51,10 @@ const html = require('./favicon-html');
     }
 */
 
-config.files = {};
-
-const dummyHTML = () => ({
-    tag: 'dummy'
-});
-
 function getName(file) {
+    if (Buffer.isBuffer(file)) {
+        return file;
+    }
     if (typeof file !== 'string') {
         return false;
     }
@@ -72,14 +69,14 @@ function getName(file) {
 async function faviconProcessing(options = {}) {
     const errors = [];
     const o = {
-        android: 0, //0= skip, 1 = icons + html (non manifest), 2 = icons+html+manifest
-        windows: 0,
-        appleIcon: 0,
-        appleStartup: 0,
-        coast: 0,
-        favicons: 0,
-        firefox: 0,
-        yandex: 0
+        android: false, //0= skip, 1 = icons + html (non manifest), 2 = icons+html+manifest
+        windows: false,
+        appleIcon: false,
+        appleStartup: false,
+        coast: false,
+        favicons: false,
+        firefox: false,
+        yandex: false
     };
     if (!isObject(options)) {
         return [null, `Illegal Argument: not a valid object ${options}`]
@@ -90,12 +87,8 @@ async function faviconProcessing(options = {}) {
     allProps.forEach(key => {
         if (key in options) {
             const value = options[key];
-            if (!isPositiveInteger(value)) {
-                errors.push(`"${key}" config option MUST BE an integer value >= 0`);
-                return;
-            }
-            if (options[key] > 7) {
-                errors.push(`"${key} config option MUST be a valid bit mask <= 7, it is: ${options[key]}`);
+            if (!Object(value) && typeof value !== 'boolean') {
+                errors.push(`"${key}" config option MUST BE an Object or a boolean`);
                 return;
             }
             // key is valid
@@ -137,19 +130,19 @@ async function faviconProcessing(options = {}) {
         };
         const htmlReplacement = {};
         // process android
-        if (options.android & (constants.ICON || constants.HTML)) {
+        if (options[platform]) {
             faviconOptions.icons.android = true;
             htmlReplacement.android = html.android;
-        }
-        if (options.android & constants.MANIFEST) {
-            htmlReplacement.android.push(html.manifest.android); // generate extra html tag for manifest
-        }
-        try {
-            config.html = htmlReplacement;
-            const result = await favicons(image, faviconOptions);
-            all[platform] = result;
-        } catch (err) {
-            all[platform].error = err;
+            faviconOptions.path = options.android.path || '/';
+
+            try {
+                config.html = htmlReplacement;
+                const result = await favicons(image, faviconOptions);
+                all[platform] = result;
+            } catch (err) {
+                all[platform] = {};
+                all[platform].error = err;
+            }
         }
     }
     return [all, null];

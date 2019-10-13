@@ -27,19 +27,7 @@ const sizes = size => entry('sizes', `${size}x${size}`);
 
 const hrefAppleTouch = (rel, value) => href(rel(`apple-touch-icon-${value}x${value}.png`))
 
-function androidManifest({
-    relative,
-    loadManifestWithCredentials
-}) {
-    const rc = {
-        tag: 'link',
-        attrs: [relmanifest, href(`${relative('manifest.json')}`)]
-    };
-    if (loadManifestWithCredentials) {
-        rc.attrs.push(crossOrigin);
-    }
-    return rc;
-};
+
 
 function windowManifest({
     relative
@@ -90,6 +78,19 @@ const android = [
             tag: 'meta',
             attrs: [entry('name', 'application-name')]
         };
+    },
+    function androidManifest({
+        relative,
+        loadManifestWithCredentials
+    }) {
+        const rc = {
+            tag: 'link',
+            attrs: [relmanifest, href(`${relative('manifest.json')}`)]
+        };
+        if (loadManifestWithCredentials) {
+            rc.attrs.push(crossOrigin);
+        }
+        return rc;
     }
 ];
 
@@ -299,8 +300,7 @@ const windows = [
             entry('name', 'msapplication-TileImage'),
             entry('content', `${relative('mstile-144x144.png')}`)
         ]
-    }),
-
+    })
 ]
 
 
@@ -314,7 +314,6 @@ module.exports = {
     manifest: {
         appleStartup: appleStartup,
         windows: windowManifest,
-        android: androidManifest,
         yandex:yandexManifest
     }
 }
