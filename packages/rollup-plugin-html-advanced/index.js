@@ -117,7 +117,10 @@ const processFavicons = require('./favicon-processing');
 
 processFavicons({
   android: true,
+  windows: true,
   image: './favicon.png'
+}).then(d => {
+  console.log(d);
 });
 
 
@@ -181,6 +184,8 @@ module.exports = function htmlGenerator(po) {
     },*/
     async buildStart(io) {
       console.log('buildStart'.red);
+      this.cache.set('hello',{someprop:'world'});
+      const c = this.cache.get('hello');
       assetRef = this.emitFile({
         type: 'asset',
         //source: '<htm><head></head><body></body></html>',
@@ -201,7 +206,7 @@ module.exports = function htmlGenerator(po) {
       for (const moduleId of this.moduleIds) {
         console.log(`moduleid:${moduleId}`.blue, this.getModuleInfo(moduleId)) /* ... */
       }
-     
+
     },
     resolveId(source, importer) {
       console.log('resolveId'.red);
@@ -220,10 +225,10 @@ module.exports = function htmlGenerator(po) {
       for (const entry of Object.keys(bundle)) {
         //console.log(bundle)
         const value = bundle[entry];
-        if (value.type === 'asset'){
-           value.fileName = '';
-           value.source = undefined;
-           this.setAssetSource(assetRef, 'hello world');
+        if (value.type === 'asset') {
+          value.fileName = '';
+          value.source = undefined;
+          this.setAssetSource(assetRef, 'hello world');
         }
         console.log(`>>${entry}->[type:${value.type}]`.yellow);
       }

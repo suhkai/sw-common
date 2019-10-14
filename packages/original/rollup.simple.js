@@ -24,6 +24,7 @@ const oo = [{
 
 
 const io = {
+    cache:true,
     input: {
         //1:'./lm'
         bundle: require.resolve('./es7.js'),

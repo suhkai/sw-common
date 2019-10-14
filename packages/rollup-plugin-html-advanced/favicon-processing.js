@@ -13,16 +13,6 @@
 | yandex       | yes      | yes   | yes           | no                |
 */
 
-/*
-{
-  android :{ // existance of android structure means you wat android
-      manifest: true/false
-  }
-
-  android: true // everything possible for this
-
-}
-*/
 const {
     relative,
     resolve,
@@ -37,19 +27,7 @@ const favicons = require('../favicons');
 const config = favicons.config;
 const html = require('./favicon-html');
 
-/*
- android,
-    windows,
-    favicons,
-    coast,
-    appleStartup,
-    manifest: {
-        appleStartup: appleStartup,
-        windows: windowManifest,
-        android: androidManifest,
-        yandex:yandexManifest
-    }
-*/
+const parallelWait = require('./parallelWait');
 
 function getName(file) {
     if (Buffer.isBuffer(file)) {
@@ -66,7 +44,7 @@ function getName(file) {
     return fullPath;
 }
 
-async function faviconProcessing(options = {}) {
+function faviconProcessing(options = {}) {
     const errors = [];
     const o = {
         android: false, //0= skip, 1 = icons + html (non manifest), 2 = icons+html+manifest
@@ -98,15 +76,15 @@ async function faviconProcessing(options = {}) {
     });
     // we had errors?
     if (errors.length) {
-        return [null, errors];
+        return Promise.resolve([null, errors]);
     }
     // did we configure anything?
     if (nonConfigured === allProps.length) {
-        return [null, null]; // no errors , no data
+        return Promise.resolve([null, null]); // no errors , no data
     }
     // did we specifiy an image?
     if (!options.image || (typeof options.image !== 'string' && !Buffer.isBuffer(options.image))) {
-        return [null, `favicon "image" must be a path to a local image file or a Buffer object`];
+        return Promise.resolve([null, `favicon "image" must be a path to a local image file or a Buffer object`]);
     }
     const image = getName(options.image);
     // turn everything off by default
@@ -133,22 +111,19 @@ async function faviconProcessing(options = {}) {
         if (options[platform]) {
             faviconOptions.icons.android = true;
             htmlReplacement[platform] = html[platform];
-            if (typeof options[platform] === 'boolean'){
-                options[platform] = { path: `/${platform}/` };
+            if (typeof options[platform] === 'boolean') {
+                options[platform] = {
+                    path: `/${platform}/`
+                };
             }
-            options[platform].path =  options[platform].path || `/${platform}/`;
-            faviconOptions.path = options.android.path 
-            try {
-                config.html = htmlReplacement;
-                const result = await favicons(image, faviconOptions);
-                all[platform] = result;
-            } catch (err) {
-                all[platform] = {};
-                all[platform].error = err;
-            }
+            options[platform].path = options[platform].path || `/${platform}/`;
+            faviconOptions.path = options.android.path
+            config.html = htmlReplacement;
+            all[platform] = favicons(image, faviconOptions);
         }
+        // wait for all promises to resolve reject
     }
-    return [all, null];
+    return parallelWait(all).then(result => [result, null]);
 }
 
 module.exports = faviconProcessing;
