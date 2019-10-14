@@ -17,7 +17,7 @@ module.exports = function (promises) {
         const resolved = rc.resolved;
         const rejected = rc.rejected;
         if (!promises || promises.length === 0 || Object.keys(promises).length === 0) {
-            resulve(rc);
+            resolve(rc);
             return;
         }
         const length = o => isObject(o) ? Object.keys(o).length: o.length;

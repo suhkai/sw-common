@@ -11,251 +11,121 @@ const {
     HTML
   }
 } = require('parse5/lib/common/html');
+const clone = require('clone');
 
-// remove now the colors
-require('colors');
-
-function normalizeAttrProps(attr) {
-  return Object.entries(attr || {}).map(([p, v]) => [p && p.toLowerCase(),
-    v && typeof v === 'string' && v.toLowerCase() || v
-  ]).sort((a, b) => {
-    if (a[0] < b[0]) return -1;
-    if (a[0] > b[0]) return 1;
-    return 0;
-  });
-}
-
-function metaIsEaual(m1, m2) {
-  //
-  // normalize
-  //
-  const n1 = normalizeAttrProps(m1);
-  const n2 = normalizeAttrProps(m2);
-  if (n1.length !== n2.length) return false;
-  let i = 0;
-  while (n1[i][0] === n2[i][0] && n1[i][1] === n2[i][1] && i < n1.length) {
-    i++;
-  }
-  if (i === n1.length) return true;
-  return false;
-}
-
-function isObject(o) {
-  return (a !== null && typeof o === 'object' && !Array.isArray(o));
-}
-
-function skeleton(lang) {
-  const doc = ta.createDocument();
-  const html = ta.createElement('html', HTML, [{
-    name: 'lang',
-    value: lang
-  }])
-  ta.appendChild(doc, html);
-  const head = ta.createElement('head', HTML, []);
-  ta.appendChild(html, head);
-  const body = ta.createElement('body', HTML, []);
-  ta.appendChild(html, body);
-  return [doc, html, head, body];
-}
-
-function buildMetasOrLinks(tag, head, metas = [{}], cb) {
-  const uniqueMeta = [];
-  if (cb) {
-    cb(uniqueMeta);
-  }
-  for (const meta of metas) {
-    const found = uniqueMeta.find(m => {
-      return metaIsEaual(m, meta);
-    });
-    if (found) continue;
-    Object.keys(meta).length && uniqueMeta.push(meta);
-  }
-  for (const meta of uniqueMeta) {
-    const metaElt = ta.createElement(tag, HTML, normalizeAttrProps(meta).map(e => ({
-      name: e[0],
-      value: e[1] === undefined ? '' : String(e[1])
-    })));
-    ta.appendChild(head, metaElt);
-  }
-}
-
-function addTitle(head, title) {
-  const tag = ta.createElement('title', HTML, []);
-  ta.appendChild(head, tag);
-  ta.insertText(tag, title);
-  return tag;
-}
-
-function addBase(head, href, target) {
-  const attrs = [];
-  if (target) {
-    attrs.push({
-      name: 'target',
-      value: target
-    });
-  }
-  if (href) {
-    attrs.push({
-      name: 'href',
-      value: href
-    });
-  }
-  const tag = ta.createElement('base', HTML, attrs);
-  ta.appendChild(head, tag);
-  return tag;
-}
-
-const addSuffix = (path, suffix) => {
-  if (!suffix) return path;
-
-  const param = suffix === true ? `s=${Date.now()}` : suffix;
-  return `${path}?${param}`;
-};
-
+const isObject = require('./isObject');
 // test favicons processing
 const processFavicons = require('./favicon-processing');
 
-processFavicons({
-  android: true,
-  windows: true,
-  image: './favicon.png'
-}).then(d => {
-  console.log(d);
-});
+// for debugging
+require('colors');
 
+const isBuffer = Buffer.isBuffer;
 
-module.exports = function htmlGenerator(po) {
+module.exports = function htmlGenerator(op = {}) {
+  // validate plugin-options
+  const fullPluginName = 'rollup-plugin-html-advanced';
+  if (!isObject(op)) {
+    throw new Error(`plugin "${fullPluginName}" was not passed an JS Object as "option"`);
+  }
 
-  const {
-    lang = 'en',
-      base,
-      title = 'rollup.js app',
-      metas,
-      mobile = true,
-      links,
-      favicon,
-      fileName = 'index.html',
-      inject = true,
-      showErrors,
-      appMountId,
-      baseHref,
-      // planned
-      // excludeChunks,
-      // chunksSortMode
-      // chunks
-      // excludeChunks , will inject scripts and styles 
-      // template
-      // hash (querystring hash?)
-      suffix = false,
-  } = po;
+  const o = clone(op);
 
-  const [doc, html, head, body] = skeleton(lang);
-  buildMetasOrLinks('meta', head, metas, unique => {
-    if (mobile) {
-      unique.push({
-        content: 'width=device-width,initial-scale=1',
-        name: 'viewport'
-      })
+  const options = Object.create(null);
+  options.lang = o.lang || 'en'
+  options.base = o.base || undefined;
+  options.title = o.tile || 'rollup.js app';
+  options.metas = o.metas;
+  options.links = o.links;
+  options.mobile = o.mobile || true;
+  options.favicon = o.favicon;
+
+  // correct favicon
+  if (typeof o.favicon === 'string' || isBuffer(o.favicon)) {
+    options.favicon = {
+      image: o.favicon,
+      platforms: {
+        normative: true
+      }
     }
-  });
-
-  buildMetasOrLinks('link', head, links, unique => {
-    if (favicon !== undefined) {
-      unique.push({
-        rel: 'shortcut icon',
-        href: favicon
-      });
+  }
+  if (isObject(options.favicon)) {
+    // do we have an image?
+    if (typeof options.favicon.image !== 'string' && !isBuffer(options.favicon.image)) {
+      throw new Error(`${fullPluginName}: "options.favicon.image" must be a string or a Buffer object`);
     }
-  });
+    // any keys on platform
+    options.favicon.platforms = options.favicon.platform || {
+      normative: {
+         path:
+      }
+    };
+    if (!isObject(options.favicon.platforms)) {
+      throw new Error(`${fullPluginName}: "options.favicon.platform"`);
+    }
+    // there must at least me one prop that NOT false or an empty string
+    let validPlatform = false;
+    for (const value of Object.values(options.favicon.platforms)) {
+      if (value === true || (typeof value === 'string' && value.length > 0)) {
+        validPlatform = true;
+        break;
+      }
+    }
+    if (!validPlatform) {
+      throw new Error(`${fullPluginName}: no valid platforms specified in "options.favicon.platform"`);
+    }
+  }
+  options.name = o.name || 'index.html'
 
-  title && addTitle(head, title);
-  base && addBase(head, base);
-  console.log(parse5.serialize(doc).blue);
-
-
-  let assetRef;
-  let cnt = 1;
   return {
-    name: 'html-advanced',
-    /*async load(id) {
-      console.log('load'.red);
-      console.log(`  ->[id]:${id}`.yellow);
-      return 'console.log("hello world");';
-    },*/
-    async buildStart(io) {
-      console.log('buildStart'.red);
-      this.cache.set('hello',{someprop:'world'});
-      const c = this.cache.get('hello');
-      assetRef = this.emitFile({
-        type: 'asset',
-        //source: '<htm><head></head><body></body></html>',
-        name: 'fonts/index.html',
-        //fileName: 'index.html'
-      });
-      console.log(`assetref=${assetRef}`.red)
-
-    },
-    async banner(a, b) {
-      console.log('banner'.red);
-      return '/* HELLO WOOOOOOOOORLD */'; // will be added to the text
-    },
-    buildEnd(error) {
-      //this.setAssetSource(assetRef, 'hello world');
-      console.log('buildEnd'.red);
-      error && console.log(`error is: ${String(error).green}`);
-      for (const moduleId of this.moduleIds) {
-        console.log(`moduleid:${moduleId}`.blue, this.getModuleInfo(moduleId)) /* ... */
-      }
-
-    },
-    resolveId(source, importer) {
-      console.log('resolveId'.red);
-      console.log(`  ->[source][${source}]`.yellow);
-      console.log(`  ->[importer][${importer}]`.yellow);
-      return null; //hello.js';
-    },
-
+    name: fullPluginName,
+    // this is basicly the only hook we need
     async generateBundle(oo, bundle, isWrite) {
-      // when isWrite is "false" then it will not be immediatly written to a file
-      // so basicly generateBundle is 
-      console.log(`generateBundle ${cnt++}`.red);
-      //console.log(`  ->options:${JSON.stringify(oo)}`.yellow);
-      console.log(`  ->iswrite-flag:${JSON.stringify(isWrite)}`.yellow);
+      // generate favicons
 
-      for (const entry of Object.keys(bundle)) {
-        //console.log(bundle)
-        const value = bundle[entry];
-        if (value.type === 'asset') {
-          value.fileName = '';
-          value.source = undefined;
-          this.setAssetSource(assetRef, 'hello world');
+      if (options.favicon) {
+        const image = options.favicon.image;
+        const platforms = options.favicon.platforms;
+        const [answer, error] = await processFavicons({
+          favicons: platforms.normative,
+          android: platforms.android,
+          windows: platforms.windows,
+          appleIcon: platforms.appleIcon,
+          appleStartup: platforms.appleStartup,
+          coast: platforms.coast,
+          firefox: platforms.firefox,
+          yandex: platforms.yandex,
+          image
+        });
+        if (error) {
+          this.error(`favicon generation error: ${String(error)}`);
         }
-        console.log(`>>${entry}->[type:${value.type}]`.yellow);
+        const {
+          resolved,
+          rejected
+        } = answer;
+        for (const [name, warning] of Object.entries(rejected)) {
+          this.warn(`assets for favicon platform [${name}] was not generated, warning: ${String(warning)}`);
+        }
+        for (const [platformName, assetClasses] of Object.entries(resolved)) {
+          //files
+          for (const file of assetClasses.files) {
+            console.log(file);
+          }
+          //html
+          for (const snip of assetClasses.html) {
+            console.log(snip);
+          }
+          for (const image of assetClasses.images) {
+            const filePath = platformName === 'favicons' ? platforms.normative.path : platforms[platformName].path;
+            this.emitFile({
+              fileName: join(filePath, image.name),
+              source: image.contents,
+              type: 'asset'
+            });
+          }
+        }
       }
-      //oo.dir = './dist/fonts';
-      this.setAssetSource(assetRef, 'hello world');
-      //oo.dir = './dist';
-      console.log(this.getFileName(assetRef));
-      //console.log(this.)
-      //if (isWrite === false) {
-      //  console.log('EMITTING ASSET'.red);
-      /*
-      this.emitFile({
-        type: 'asset',
-        source: '<htm><head></head><body></body></html>',
-        name: 'index.html',
-        //fileName: 'index.html'
-      });
-      */
-      //}
-      console.log('end of generateBundle'.red);
-    },
-    writeBundle(bundle) {
-      console.log('writeBundle'.red);
-      for (const [entry, value] of Object.entries(bundle)) {
-        //console.log(entry, value)
-      }
-      console.log(this.getFileName(assetRef));
     }
   };
 }

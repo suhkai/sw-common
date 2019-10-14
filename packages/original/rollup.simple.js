@@ -31,6 +31,10 @@ const io = {
     },
     plugins: [
         plugin({
+            favicon: './favicon.png'
+        }
+            
+            /*{
             lang: 'de',
             title: 'rollup app',
             base: 'http://www.skyjs.net',
@@ -56,7 +60,7 @@ const io = {
                 rel: 'stylesheet'
             }],
             favicon: './someIcon.url'
-        })
+        }*/)
     ]
 };
 

@@ -13,6 +13,8 @@
 | yandex       | yes      | yes   | yes           | no                |
 */
 
+ 
+
 const {
     relative,
     resolve,
@@ -76,7 +78,7 @@ function faviconProcessing(options = {}) {
     });
     // we had errors?
     if (errors.length) {
-        return Promise.resolve([null, errors]);
+        return Promise.resolve([null, errors.join('|')]);
     }
     // did we configure anything?
     if (nonConfigured === allProps.length) {
@@ -91,7 +93,7 @@ function faviconProcessing(options = {}) {
 
     const all = {};
     for (const platform of allProps) {
-        if (!(platform in options)) {
+        if (!(platform in options && options[platform])) {
             continue;
         }
         const faviconOptions = {
@@ -109,15 +111,20 @@ function faviconProcessing(options = {}) {
         const htmlReplacement = {};
         // process android
         if (options[platform]) {
-            faviconOptions.icons.android = true;
+            faviconOptions.icons[platform] = true;
             htmlReplacement[platform] = html[platform];
             if (typeof options[platform] === 'boolean') {
                 options[platform] = {
                     path: `/${platform}/`
                 };
             }
+            if (typeof options[platform] === 'string'){
+                options[platform] = {
+                    path: `/${options[platform]}/`
+                };
+            }
             options[platform].path = options[platform].path || `/${platform}/`;
-            faviconOptions.path = options.android.path
+            faviconOptions.path = options[platform].path
             config.html = htmlReplacement;
             all[platform] = favicons(image, faviconOptions);
         }
