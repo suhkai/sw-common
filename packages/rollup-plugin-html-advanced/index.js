@@ -1,26 +1,57 @@
+const path = require('path');
 const {
-  relative,
-  resolve,
-  dirname
-} = require('path');
+  join
+} = path;
+
+//
 const parse5 = require('parse5');
 const ta = require('parse5/lib/tree-adapters/default');
 const hmtl = require('parse5/lib/common/html');
+
 const {
   NAMESPACES: {
     HTML
   }
 } = require('parse5/lib/common/html');
+
 const clone = require('clone');
 
 const isObject = require('./isObject');
 // test favicons processing
 const processFavicons = require('./favicon-processing');
 
+//
 // for debugging
+//
 require('colors');
 
 const isBuffer = Buffer.isBuffer;
+
+function htmlRootToFsRoot(fullPath) {
+
+  const {
+    root,
+    dir,
+    base,
+    ext,
+    name
+  } = path.parse(fullPath);
+
+  // if there is a root, correct the dir for this
+  let dir2 = dir;
+  if (root && dir.startsWith(root)) {
+    dir2 = dir.slice(root.length);
+  }
+
+  const corrected = path.format({
+    root: '',
+    dir: dir2,
+    base,
+    ext,
+    name
+  });
+  return corrected;
+}
 
 module.exports = function htmlGenerator(op = {}) {
   // validate plugin-options
@@ -40,12 +71,16 @@ module.exports = function htmlGenerator(op = {}) {
   options.mobile = o.mobile || true;
   options.favicon = o.favicon;
 
+
+
   // correct favicon
   if (typeof o.favicon === 'string' || isBuffer(o.favicon)) {
     options.favicon = {
       image: o.favicon,
       platforms: {
-        normative: true
+        normative: {
+          path: '/normative'
+        }
       }
     }
   }
@@ -55,9 +90,9 @@ module.exports = function htmlGenerator(op = {}) {
       throw new Error(`${fullPluginName}: "options.favicon.image" must be a string or a Buffer object`);
     }
     // any keys on platform
-    options.favicon.platforms = options.favicon.platform || {
+    options.favicon.platforms = options.favicon.platforms || {
       normative: {
-         path:
+        path: '/normative'
       }
     };
     if (!isObject(options.favicon.platforms)) {
@@ -70,11 +105,16 @@ module.exports = function htmlGenerator(op = {}) {
         validPlatform = true;
         break;
       }
+      if (isObject(value) && typeof value.path === 'string' && value.path.length > 0) {
+        validPlatform = true;
+        break;
+      }
     }
     if (!validPlatform) {
       throw new Error(`${fullPluginName}: no valid platforms specified in "options.favicon.platform"`);
     }
   }
+  //
   options.name = o.name || 'index.html'
 
   return {
@@ -82,10 +122,31 @@ module.exports = function htmlGenerator(op = {}) {
     // this is basicly the only hook we need
     async generateBundle(oo, bundle, isWrite) {
       // generate favicons
-
       if (options.favicon) {
         const image = options.favicon.image;
         const platforms = options.favicon.platforms;
+        for (const [platformName, platformObj] of Object.entries(platforms)) {
+          if (platformObj === true) {
+            platforms[platformName] = {
+              path: `/${platformName}`
+            };
+            continue;
+          }
+          if (typeof platformObj === 'string') {
+            platforms[platformName] = {
+              path: `/${platformObj}`
+            };
+            continue;
+          }
+          if (!isObject(platformObj)) {
+            platforms[platformName] = false; // clear it
+            this.warn(`icons for ${platformName} will not be generated, wrong configuration object for this platforl`);
+          }
+          if (platformObj['path'] === undefined) {
+            platforms[platformName] = false; // clear it
+            this.warn(`icons for favicon.${platformName} will not be generatoed, please specify an "path" property in the favicon.${platformName}.path property`);
+          }
+        }
         const [answer, error] = await processFavicons({
           favicons: platforms.normative,
           android: platforms.android,
@@ -110,7 +171,12 @@ module.exports = function htmlGenerator(op = {}) {
         for (const [platformName, assetClasses] of Object.entries(resolved)) {
           //files
           for (const file of assetClasses.files) {
-            console.log(file);
+            const filePath = platformName === 'favicons' ? platforms.normative.path : platforms[platformName].path;
+            this.emitFile({
+              fileName: htmlRootToFsRoot(join(filePath, file.name)),
+              source: file.contents,
+              type: 'asset'
+            });
           }
           //html
           for (const snip of assetClasses.html) {
@@ -119,7 +185,7 @@ module.exports = function htmlGenerator(op = {}) {
           for (const image of assetClasses.images) {
             const filePath = platformName === 'favicons' ? platforms.normative.path : platforms[platformName].path;
             this.emitFile({
-              fileName: join(filePath, image.name),
+              fileName: htmlRootToFsRoot(join(filePath, image.name)),
               source: image.contents,
               type: 'asset'
             });

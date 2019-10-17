@@ -13,14 +13,11 @@
 | yandex       | yes      | yes   | yes           | no                |
 */
 
- 
-
 const {
     relative,
     resolve,
     dirname
 } = require('path');
-
 
 const isObject = require('./isObject');
 const constants = require('./constants');

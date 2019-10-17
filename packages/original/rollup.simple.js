@@ -7,15 +7,16 @@ const {
 } = require('rollup');
 
 const {
-    resolve, join
+    resolve,
+    join
 } = require('path');
 
 // array, can have multiple outputs for single input
 const oo = [{
     output: {
         format: 'iife'
-    }, 
-    dir: join(__dirname,'./dist'),
+    },
+    dir: join(__dirname, './dist'),
     banner: '/* banner comment */',
     assetFileNames: '[name]-[hash].[ext]',
     chunkFileNames: '[name]-[hash].js',
@@ -24,16 +25,25 @@ const oo = [{
 
 
 const io = {
-    cache:true,
+    cache: true,
     input: {
         //1:'./lm'
         bundle: require.resolve('./es7.js'),
     },
     plugins: [
         plugin({
-            favicon: './favicon.png'
-        }
-            
+                favicon: {
+                    image: './redis.svg',
+                    platforms: {
+                        normative: true,
+                        android: true,
+                        windows: {
+                            path: '/somepath'
+                        }
+                    }
+                }
+            }
+
             /*{
             lang: 'de',
             title: 'rollup app',
@@ -60,7 +70,8 @@ const io = {
                 rel: 'stylesheet'
             }],
             favicon: './someIcon.url'
-        }*/)
+        }*/
+        )
     ]
 };
 
@@ -72,7 +83,7 @@ async function build() {
     const bundle = await rollup(io);
     console.log('rollup part 1 finished'.cyan);
     // what methods and props does the bundle object have
-    
+
     console.log(Object.keys(bundle));
     for (let i = 0; i < oo.length; i++) {
         const o = oo[i];
