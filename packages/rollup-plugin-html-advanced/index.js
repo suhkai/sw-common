@@ -1,25 +1,15 @@
-const path = require('path');
+
 const {
   join
-} = path;
+} = require('path');
 
 //
-const parse5 = require('parse5');
-const ta = require('parse5/lib/tree-adapters/default');
-const hmtl = require('parse5/lib/common/html');
-
-const {
-  NAMESPACES: {
-    HTML
-  }
-} = require('parse5/lib/common/html');
-
 const clone = require('clone');
 
 const isObject = require('./isObject');
 // test favicons processing
 const processFavicons = require('./favicon-processing');
-
+const htmlRootToFsRoot = require('./htmlRootToFsRoot');
 //
 // for debugging
 //
@@ -27,31 +17,6 @@ require('colors');
 
 const isBuffer = Buffer.isBuffer;
 
-function htmlRootToFsRoot(fullPath) {
-
-  const {
-    root,
-    dir,
-    base,
-    ext,
-    name
-  } = path.parse(fullPath);
-
-  // if there is a root, correct the dir for this
-  let dir2 = dir;
-  if (root && dir.startsWith(root)) {
-    dir2 = dir.slice(root.length);
-  }
-
-  const corrected = path.format({
-    root: '',
-    dir: dir2,
-    base,
-    ext,
-    name
-  });
-  return corrected;
-}
 
 module.exports = function htmlGenerator(op = {}) {
   // validate plugin-options

@@ -14,7 +14,6 @@
 */
 
 const {
-    relative,
     resolve,
     dirname
 } = require('path');
