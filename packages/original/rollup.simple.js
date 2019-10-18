@@ -32,46 +32,26 @@ const io = {
     },
     plugins: [
         plugin({
-                favicon: {
-                    image: './redis.svg',
-                    platforms: {
-                        normative: true,
-                        android: true,
-                        windows: {
-                            path: '/somepath'
-                        }
+            favicon: {
+                image: './redis.svg',
+                platforms: {
+                    normative: true,
+                    android: true,
+                    windows: {
+                        path: '/somepath'
                     }
                 }
-            }
-
-            /*{
-            lang: 'de',
-            title: 'rollup app',
-            base: 'http://www.skyjs.net',
-            mmobile: true,
-            metas: [{
-                    charset: 'UTF-8'
-                },
-                {
-                    name: 'description',
-                    content: 'Free Web tutorials'
-                },
-                {
-                    name: 'keywords',
-                    content: 'HTML,CSS,XML,JavaScript'
-                },
-                {
-                    name: 'author',
-                    content: 'John Doe'
-                }
-            ],
-            links: [{
-                href: 'https://fonts.googleapis.com/css?family=Saira+Semi+Condensed&display=swap',
-                rel: 'stylesheet'
-            }],
-            favicon: './someIcon.url'
-        }*/
-        )
+            },
+            lang: 'en',
+            base: 'http://jacob-bogers.com',
+            title: 'rollup.js test app',
+            mobile: true,
+            appId: 'myApp',
+            meta: [],
+            link: [],
+            script: [],
+            name: 'index.html'
+        })
     ]
 };
 

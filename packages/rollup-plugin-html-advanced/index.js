@@ -1,25 +1,30 @@
-
+// 
 const {
   join
 } = require('path');
-
-//
+// 
 const clone = require('clone');
-
+//
 const isObject = require('./isObject');
 // test favicons processing
 const processFavicons = require('./favicon-processing');
 const htmlRootToFsRoot = require('./htmlRootToFsRoot');
-//
+const {
+  htmlProcessing,
+  convertOptionTagsToP5,
+  createElement,
+  serialize
+} = require('./html-processing');
+// 
 // for debugging
-//
+// 
 require('colors');
-
+//
 const isBuffer = Buffer.isBuffer;
-
-
+//
 module.exports = function htmlGenerator(op = {}) {
   // validate plugin-options
+  
   const fullPluginName = 'rollup-plugin-html-advanced';
   if (!isObject(op)) {
     throw new Error(`plugin "${fullPluginName}" was not passed an JS Object as "option"`);
@@ -29,16 +34,75 @@ module.exports = function htmlGenerator(op = {}) {
 
   const options = Object.create(null);
   options.lang = o.lang || 'en'
-  options.base = o.base || undefined;
-  options.title = o.tile || 'rollup.js app';
-  options.metas = o.metas;
-  options.links = o.links;
+  options.base = o.base;
+  options.title = o.title || 'rollup.js app';
   options.mobile = o.mobile || true;
   options.favicon = o.favicon;
+  options.appId = o.appId
 
+  options.meta = o.meta || [];
+  options.link = o.link || [];
+  options.script = o.script || [];
+  options.name = o.name || 'index.html';
+
+  // !logger, !title, !base, !meta, !link, !scripts, !appId
+  if (typeof options.lang !== 'string') {
+    logger.error('options.lang is not a string');
+  }
+  if (typeof options.title !== 'string') {
+    logger.error('options.title is not a string');
+  }
+  if (typeof options.appId !== 'string') {
+    logger.error('options.appId is not a string');
+  }
+  if (typeof options.mombile !== 'boolean') {
+    logger.error('options.mobile is not a boolean')
+  }
+  if (typeof options.name !== 'string') {
+    logger.error('options.name is not a string')
+  }
+  if (!Array.isArray(options.meta)) {
+    logger.error('options.meta is not an array');
+  }
+  if (!Array.isArray(options.link)) {
+    logger.error('options.link is not an array');
+  }
+  if (!Array.isArray(options.script)) {
+    logger.error('options.script is not an array');
+  }
+
+  // transform meta tags
+  options.meta = convertOptionTagsToP5('meta', options.meta);
+  // transform link tags
+  options.links = convertOptionTagsToP5('link', options.meta);
+  // transform script tags
+  options.script = convertOptionTagsToP5('script', options.script);
+  
+  // optional mobile
+  if (options.mobile === 'true') {
+    options.meta.push(createElement('meta', [{
+      name: 'content',
+      value: 'width=device-width, initial-scale=1'
+    }, {
+      name: 'name',
+      value: 'viewport'
+    }]));
+  }
+
+  // optional title
+  if (options.title) {
+    options.meta.push(createElement('title', [{
+      name: 'content',
+      value: 'width=device-width, initial-scale=1'
+    }, {
+      name: 'name',
+      value: 'viewport'
+    }]));
+  }
 
 
   // correct favicon
+
   if (typeof o.favicon === 'string' || isBuffer(o.favicon)) {
     options.favicon = {
       image: o.favicon,
@@ -49,6 +113,7 @@ module.exports = function htmlGenerator(op = {}) {
       }
     }
   }
+
   if (isObject(options.favicon)) {
     // do we have an image?
     if (typeof options.favicon.image !== 'string' && !isBuffer(options.favicon.image)) {
@@ -80,12 +145,17 @@ module.exports = function htmlGenerator(op = {}) {
     }
   }
   //
-  options.name = o.name || 'index.html'
 
   return {
     name: fullPluginName,
     // this is basicly the only hook we need
     async generateBundle(oo, bundle, isWrite) {
+      
+      const logger = {
+        error: this.error,
+        warn: this.warn
+      };
+      
       // generate favicons
       if (options.favicon) {
         const image = options.favicon.image;
@@ -145,8 +215,9 @@ module.exports = function htmlGenerator(op = {}) {
           }
           //html
           for (const snip of assetClasses.html) {
-            console.log(snip);
+            meta.push(snip); // already in parse5 format!
           }
+          //images
           for (const image of assetClasses.images) {
             const filePath = platformName === 'favicons' ? platforms.normative.path : platforms[platformName].path;
             this.emitFile({
@@ -155,6 +226,17 @@ module.exports = function htmlGenerator(op = {}) {
               type: 'asset'
             });
           }
+          // generate final html
+          const [ html, head, body, doc ] = htmlProcessing(logger, title, base, meta, link, scripts, appId, lang);
+          // TODO: add sources to the body end
+          const htmlSource = serialize(doc);
+          
+          // emit final html
+          this.emitFile({
+            type:'asset',
+            source: asset,
+            name: options.name
+          });
         }
       }
     }

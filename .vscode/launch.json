@@ -29,6 +29,14 @@
             "program": "${workspaceFolder}/packages/original/syslog.test.js",
             "cwd": "${workspaceFolder}/packages/original",
             "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "pck/rollup-plugin-html-advanced/test-html-proc",
+            "program": "${workspaceFolder}/packages/rollup-plugin-html-advanced/test-html-proc.js",
+            "cwd": "${workspaceFolder}/packages/original",
+            "stopOnEntry": true
         }
     ]
 }
