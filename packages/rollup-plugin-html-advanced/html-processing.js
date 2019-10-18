@@ -69,18 +69,20 @@ function sortTags(t1, t2) {
  * }]
  */
 
-function tagProcessing(tags) {
+function tagProcessing(tagName, tags) {
 
   // sort tags amongst themselves
   tags.sort(sortTags);
   // deduplication
-  const rc = elts.filter((t1, idx, arr) => {
+  const rc = tags.filter((t1, idx, arr) => {
     const found = arr.slice(idx + 1).find(a => {
       const found2 = sortTags(a, t1) === 0;
       return found2;
     });
+    // FIXME:  compare also values of the attributes
+    found && found.value)
     return !found;
-  }).map(attrs => createElement(tagName, attrs));
+  });
   //
   return rc;
 }
@@ -90,16 +92,16 @@ function tagProcessing(tags) {
 //
 
 function createSkeleton(lang) {
-  doc = ta.createDocument();
-  html = createElement('html');
+  const doc = ta.createDocument();
+  const html = createElement('html');
   if (lang) {
     html.attrs.push({
       name: 'lang',
       value: lang
     });
   }
-  head = createElement('head');
-  body = createElement('body');
+  const head = createElement('head');
+  const body = createElement('body');
   ta.appendChild(doc, html);
   ta.appendChild(html, head);
   ta.appendChild(html, body);
@@ -107,7 +109,6 @@ function createSkeleton(lang) {
 }
 
 function appendTo(parent, children) {
-  ta.createElement(child.tag)
   // meta, link, script, title, base, etc
   for (const child of children) {
     for (const attribute of child.attrs) {
@@ -121,8 +122,8 @@ function appendTo(parent, children) {
 }
 
 function htmlProcessing(logger, title, base, meta, link, scripts, appId, lang) {
-  const metaCleaned = tagProcessing(clone(meta));
-  const linkCleaned = tagProcessing(clone(link));
+  const metaCleaned = tagProcessing('meta', clone(meta));
+  const linkCleaned = tagProcessing('link', clone(link));
   // generate html skeleton
   const [doc, html, head, body] = createSkeleton(lang);
   appendTo(head, metaCleaned);

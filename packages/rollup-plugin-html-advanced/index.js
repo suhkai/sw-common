@@ -23,139 +23,140 @@ require('colors');
 const isBuffer = Buffer.isBuffer;
 //
 module.exports = function htmlGenerator(op = {}) {
-  // validate plugin-options
-  
+
   const fullPluginName = 'rollup-plugin-html-advanced';
-  if (!isObject(op)) {
-    throw new Error(`plugin "${fullPluginName}" was not passed an JS Object as "option"`);
-  }
-
-  const o = clone(op);
-
-  const options = Object.create(null);
-  options.lang = o.lang || 'en'
-  options.base = o.base;
-  options.title = o.title || 'rollup.js app';
-  options.mobile = o.mobile || true;
-  options.favicon = o.favicon;
-  options.appId = o.appId
-
-  options.meta = o.meta || [];
-  options.link = o.link || [];
-  options.script = o.script || [];
-  options.name = o.name || 'index.html';
-
-  // !logger, !title, !base, !meta, !link, !scripts, !appId
-  if (typeof options.lang !== 'string') {
-    logger.error('options.lang is not a string');
-  }
-  if (typeof options.title !== 'string') {
-    logger.error('options.title is not a string');
-  }
-  if (typeof options.appId !== 'string') {
-    logger.error('options.appId is not a string');
-  }
-  if (typeof options.mombile !== 'boolean') {
-    logger.error('options.mobile is not a boolean')
-  }
-  if (typeof options.name !== 'string') {
-    logger.error('options.name is not a string')
-  }
-  if (!Array.isArray(options.meta)) {
-    logger.error('options.meta is not an array');
-  }
-  if (!Array.isArray(options.link)) {
-    logger.error('options.link is not an array');
-  }
-  if (!Array.isArray(options.script)) {
-    logger.error('options.script is not an array');
-  }
-
-  // transform meta tags
-  options.meta = convertOptionTagsToP5('meta', options.meta);
-  // transform link tags
-  options.links = convertOptionTagsToP5('link', options.meta);
-  // transform script tags
-  options.script = convertOptionTagsToP5('script', options.script);
-  
-  // optional mobile
-  if (options.mobile === 'true') {
-    options.meta.push(createElement('meta', [{
-      name: 'content',
-      value: 'width=device-width, initial-scale=1'
-    }, {
-      name: 'name',
-      value: 'viewport'
-    }]));
-  }
-
-  // optional title
-  if (options.title) {
-    options.meta.push(createElement('title', [{
-      name: 'content',
-      value: 'width=device-width, initial-scale=1'
-    }, {
-      name: 'name',
-      value: 'viewport'
-    }]));
-  }
-
-
-  // correct favicon
-
-  if (typeof o.favicon === 'string' || isBuffer(o.favicon)) {
-    options.favicon = {
-      image: o.favicon,
-      platforms: {
-        normative: {
-          path: '/normative'
-        }
-      }
-    }
-  }
-
-  if (isObject(options.favicon)) {
-    // do we have an image?
-    if (typeof options.favicon.image !== 'string' && !isBuffer(options.favicon.image)) {
-      throw new Error(`${fullPluginName}: "options.favicon.image" must be a string or a Buffer object`);
-    }
-    // any keys on platform
-    options.favicon.platforms = options.favicon.platforms || {
-      normative: {
-        path: '/normative'
-      }
-    };
-    if (!isObject(options.favicon.platforms)) {
-      throw new Error(`${fullPluginName}: "options.favicon.platform"`);
-    }
-    // there must at least me one prop that NOT false or an empty string
-    let validPlatform = false;
-    for (const value of Object.values(options.favicon.platforms)) {
-      if (value === true || (typeof value === 'string' && value.length > 0)) {
-        validPlatform = true;
-        break;
-      }
-      if (isObject(value) && typeof value.path === 'string' && value.path.length > 0) {
-        validPlatform = true;
-        break;
-      }
-    }
-    if (!validPlatform) {
-      throw new Error(`${fullPluginName}: no valid platforms specified in "options.favicon.platform"`);
-    }
-  }
-  //
 
   return {
     name: fullPluginName,
     // this is basicly the only hook we need
     async generateBundle(oo, bundle, isWrite) {
-      
+
       const logger = {
         error: this.error,
         warn: this.warn
       };
-      
+
+
+      if (!isObject(op)) {
+        throw new Error(`plugin "${fullPluginName}" was not passed an JS Object as "option"`);
+      }
+
+      const o = clone(op);
+
+      const options = Object.create(null);
+      options.lang = o.lang || 'en'
+      options.base = o.base;
+      options.title = o.title || 'rollup.js app';
+      options.mobile = o.mobile || true;
+      options.favicon = o.favicon;
+      options.appId = o.appId
+
+      options.meta = o.meta || [];
+      options.link = o.link || [];
+      options.script = o.script || [];
+      options.name = o.name || 'index.html';
+
+      // !logger, !title, !base, !meta, !link, !scripts, !appId
+      if (typeof options.lang !== 'string') {
+        logger.error('options.lang is not a string');
+      }
+      if (typeof options.title !== 'string') {
+        logger.error('options.title is not a string');
+      }
+      if (typeof options.appId !== 'string') {
+        logger.error('options.appId is not a string');
+      }
+      if (typeof options.mobile !== 'boolean') {
+        logger.error('options.mobile is not a boolean')
+      }
+      if (typeof options.name !== 'string') {
+        logger.error('options.name is not a string')
+      }
+      if (!Array.isArray(options.meta)) {
+        logger.error('options.meta is not an array');
+      }
+      if (!Array.isArray(options.link)) {
+        logger.error('options.link is not an array');
+      }
+      if (!Array.isArray(options.script)) {
+        logger.error('options.script is not an array');
+      }
+
+      // transform meta tags
+      options.meta = convertOptionTagsToP5('meta', options.meta);
+      // transform link tags
+      options.links = convertOptionTagsToP5('link', options.meta);
+      // transform script tags
+      options.script = convertOptionTagsToP5('script', options.script);
+
+      // optional mobile
+      if (options.mobile === 'true') {
+        options.meta.push(createElement('meta', [{
+          name: 'content',
+          value: 'width=device-width, initial-scale=1'
+        }, {
+          name: 'name',
+          value: 'viewport'
+        }]));
+      }
+
+      // optional title
+      if (options.title) {
+        options.meta.push(createElement('title', [{
+          name: 'content',
+          value: 'width=device-width, initial-scale=1'
+        }, {
+          name: 'name',
+          value: 'viewport'
+        }]));
+      }
+
+
+      // correct favicon
+
+      if (typeof o.favicon === 'string' || isBuffer(o.favicon)) {
+        options.favicon = {
+          image: o.favicon,
+          platforms: {
+            normative: {
+              path: '/normative'
+            }
+          }
+        }
+      }
+
+      if (isObject(options.favicon)) {
+        // do we have an image?
+        if (typeof options.favicon.image !== 'string' && !isBuffer(options.favicon.image)) {
+          throw new Error(`${fullPluginName}: "options.favicon.image" must be a string or a Buffer object`);
+        }
+        // any keys on platform
+        options.favicon.platforms = options.favicon.platforms || {
+          normative: {
+            path: '/normative'
+          }
+        };
+        if (!isObject(options.favicon.platforms)) {
+          throw new Error(`${fullPluginName}: "options.favicon.platform"`);
+        }
+        // there must at least me one prop that NOT false or an empty string
+        let validPlatform = false;
+        for (const value of Object.values(options.favicon.platforms)) {
+          if (value === true || (typeof value === 'string' && value.length > 0)) {
+            validPlatform = true;
+            break;
+          }
+          if (isObject(value) && typeof value.path === 'string' && value.path.length > 0) {
+            validPlatform = true;
+            break;
+          }
+        }
+        if (!validPlatform) {
+          throw new Error(`${fullPluginName}: no valid platforms specified in "options.favicon.platform"`);
+        }
+      }
+      //
+
       // generate favicons
       if (options.favicon) {
         const image = options.favicon.image;
@@ -203,6 +204,7 @@ module.exports = function htmlGenerator(op = {}) {
         for (const [name, warning] of Object.entries(rejected)) {
           this.warn(`assets for favicon platform [${name}] was not generated, warning: ${String(warning)}`);
         }
+
         for (const [platformName, assetClasses] of Object.entries(resolved)) {
           //files
           for (const file of assetClasses.files) {
@@ -215,7 +217,7 @@ module.exports = function htmlGenerator(op = {}) {
           }
           //html
           for (const snip of assetClasses.html) {
-            meta.push(snip); // already in parse5 format!
+            options.meta.push(snip); // already in parse5 format!
           }
           //images
           for (const image of assetClasses.images) {
@@ -226,14 +228,37 @@ module.exports = function htmlGenerator(op = {}) {
               type: 'asset'
             });
           }
+
           // generate final html
-          const [ html, head, body, doc ] = htmlProcessing(logger, title, base, meta, link, scripts, appId, lang);
+          const [html, head, body, doc] = htmlProcessing(
+            logger,
+            options.title,
+            options.base,
+            options.meta,
+            options.link,
+            options.script,
+            options.appId,
+            options.lang
+          );
           // TODO: add sources to the body end
+          // dont emit the files just yet
+          // query assets from other modules (.css and .js) 
+          for (const module in bundle) {
+            if (module.type === 'asset') {
+
+              // check assets these could be generated by other modules
+            }
+            if (module.type === 'chunk') {
+
+            }
+          }
+
+
           const htmlSource = serialize(doc);
-          
+
           // emit final html
           this.emitFile({
-            type:'asset',
+            type: 'asset',
             source: asset,
             name: options.name
           });
