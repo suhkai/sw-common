@@ -16,6 +16,7 @@ const {
   htmlProcessing,
   convertOptionTagsToP5,
   createElement,
+  createComment,
   serialize
 } = require('./html-processing');
 // 
@@ -27,10 +28,19 @@ const isBuffer = Buffer.isBuffer;
 //
 const platformOptions = {
   android: {
-    loadManifestWithCredentials: false, // not manditory
+    loadManifestWithCredentials: false, // meta tag in the "head"
+    // manifest properties
     appName: true, // manditory
     theme_color: true, // manditory
     background: true,
+    background_color: 'something', // doesnt work, see "background"
+    short_name: true, //copy from "name",
+    desription: true,
+    dir: "auto", // text-direction
+    lang: "en-US", // default
+    display: "standalone",
+    background_color: "#fff",
+    theme_color: "#fff"
   },
   appleIcon: {
     appName: true,
@@ -171,13 +181,13 @@ module.exports = function htmlGenerator(op = {}) {
         for (const [platformName, platformObj] of Object.entries(platforms)) {
           if (platformObj === true) {
             platforms[platformName] = {
-              path: `/${platformName}`
+              path: `${platformName}`
             };
             continue;
           }
           if (typeof platformObj === 'string') {
             platforms[platformName] = {
-              path: `/${platformObj}`
+              path: `${platformObj}`
             };
             continue;
           }
@@ -190,15 +200,6 @@ module.exports = function htmlGenerator(op = {}) {
             this.warn(`icons for favicon.${platformName} will not be generatoed, please specify an "path" property in the favicon.${platformName}.path property`);
           }
         }
-        /*
-        loadManifestWithCredentials: android
-appName: android
-theme_color: android
-background: android
-appleStatusBarStyle: appleIcon
-appName: appleIcon
-background: windows
-*/
         const [answer, error] = await processFavicons({
           favicons: platforms.normative,
           android: platforms.android,
@@ -232,13 +233,18 @@ background: windows
             });
           }
           //html
+          const demark = { 
+            meta: false,
+            link: false
+          };
           for (const snip of assetClasses.html) {
-            // already in parse5 format!
             if (!['meta', 'link'].includes(snip.tag)) {
               this.warn(`incorrect html snippet generated: [${snip && snip.tag}]`)
               continue;
             }
             const htmlSnip = createElement(snip.tag, snip.attrs);
+            demark[snip.tag] || options[snip.tag].push(createComment(`${platformName} section`)); 
+            demark[snip.tag] = true;
             options[snip.tag].push(htmlSnip);
           }
           //images
@@ -270,7 +276,7 @@ background: windows
         if (!['.js', '.css'].includes(struct.ext)) {
           continue;
         }
-        struct.root = struct.root || '/';
+        struct.root = '';
         const fileName = format(struct);
         const scriptTag = createElement('script', [{
           name: 'src',
@@ -278,7 +284,7 @@ background: windows
         }]);
         body.childNodes[body.childNodes.length] = scriptTag;
       }
-      const somehead = serialize(head);
+      // emit index.html
       this.emitFile({
         fileName: options.name,
         source: serialize(doc),

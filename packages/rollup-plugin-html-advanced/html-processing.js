@@ -12,6 +12,7 @@ const {
 const isUndef = o => o === undefined;
 const atrcnt = a => a.attrs.length
 const createElement = (tag, attrs = []) => ta.createElement(tag, HTML, attrs);
+const createComment = comment => ta.createCommentNode(comment);
 
 function equalAttrs(a1 = [], a2 = []) {
   if (a1.length !== a2.length) {
@@ -90,11 +91,12 @@ function sortTags(t1, t2) {
 function tagProcessing(tags) {
 
   // make sure the "attrs" are sorted
-  tags.forEach(v => v.attrs.sort(sortAttributes));
+  tags.forEach(v => v.attrs && v.attrs.sort(sortAttributes));
   // sort tags amongst themselves
-  tags.sort(sortTags);
-  // deduplication
+  // TODO: dont sort just dedeup --skip for now, because of comment tags, tags.sort(sortTags);
+  // deduplication, this always works sorted or no
   const rc = tags.filter((t1, idx, arr) => {
+    if (t1.nodeName === '#comment') return true;
     for (let i = idx + 1; i < arr.length; i++) {
       const isE = equalAttrs(arr[i].attrs, t1.attrs);
       if (isE) return false;
@@ -212,5 +214,6 @@ module.exports = {
   htmlProcessing,
   convertOptionTagsToP5,
   createElement,
+  createComment,
   serialize: parse5.serialize
 };
