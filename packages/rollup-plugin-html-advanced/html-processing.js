@@ -13,6 +13,24 @@ const isUndef = o => o === undefined;
 const atrcnt = a => a.attrs.length
 const createElement = (tag, attrs = []) => ta.createElement(tag, HTML, attrs);
 
+function equalAttrs(a1 = [], a2 = []) {
+  if (a1.length !== a2.length) {
+    return false;
+  }
+  let rc = true; // all equal
+  for (let i = 0; i < a1.length; i++) {
+    if (a1[i].name !== a2[i].name) {
+      rc = false;
+      break;
+    }
+    if (a1[i].value !== a2[i].value) {
+      rc = false;
+      break;
+    }
+  }
+  return rc;
+}
+
 function convertOptionTagsToP5(tagName, tags) {
   const elts = [];
   for (const tag of tags) {
@@ -57,7 +75,7 @@ function sortTags(t1, t2) {
     i++;
   }
   if (i === max) {
-    return t1.attrs.length - t1.attrs.length;
+    return t1.attrs.length - t2.attrs.length;
   }
   return r; // return last result of inequality
 }
@@ -69,19 +87,19 @@ function sortTags(t1, t2) {
  * }]
  */
 
-function tagProcessing(tagName, tags) {
+function tagProcessing(tags) {
 
+  // make sure the "attrs" are sorted
+  tags.forEach(v => v.attrs.sort(sortAttributes));
   // sort tags amongst themselves
   tags.sort(sortTags);
   // deduplication
   const rc = tags.filter((t1, idx, arr) => {
-    const found = arr.slice(idx + 1).find(a => {
-      const found2 = sortTags(a, t1) === 0;
-      return found2;
-    });
-    // FIXME:  compare also values of the attributes
-    found && found.value)
-    return !found;
+    for (let i = idx + 1; i < arr.length; i++) {
+      const isE = equalAttrs(arr[i].attrs, t1.attrs);
+      if (isE) return false;
+    }
+    return true;
   });
   //
   return rc;
@@ -108,47 +126,40 @@ function createSkeleton(lang) {
   return [doc, html, head, body];
 }
 
-function appendTo(parent, children) {
-  // meta, link, script, title, base, etc
-  for (const child of children) {
-    for (const attribute of child.attrs) {
-      const elt = createElement(child.tag, HTML, child.attrs);
-      ta.appendChild(parent, elt);
-      if (child instanceof Array) {
-        appendToHead(elt, child);
-      }
-    }
-  }
-}
-
-function htmlProcessing(logger, title, base, meta, link, scripts, appId, lang) {
-  const metaCleaned = tagProcessing('meta', clone(meta));
-  const linkCleaned = tagProcessing('link', clone(link));
-  // generate html skeleton
+function htmlProcessing(logger, title, base, meta, link, script, appId, lang) {
+  const metaCleaned = tagProcessing(clone(meta));
+  const linkCleaned = tagProcessing(clone(link));
+  //
+  // generate html skeleton.
+  //
   const [doc, html, head, body] = createSkeleton(lang);
-  appendTo(head, metaCleaned);
-  appendTo(head, linkCleaned);
+  head.childNodes.splice(0,0,...metaCleaned,...linkCleaned);
   if (title) {
     const titleElt = createElement('title');
     ta.insertText(titleElt, title);
     ta.appendChild(head, titleElt);
   }
   if (base) {
-    const baseElt = createElement('base');
+    if (typeof base === 'string') {
+      base = {
+        href: base,
+        target: '_blank'
+      };
+    }
     const {
       target = '_blank', href
     } = base;
-    baseElt.attrs.push({
-      name: 'href',
-      value: href
-    });
-    baseElt.attrs.push({
-      name: 'target',
-      value: target
-    });
+    const baseElt = createElement('base',
+      [{
+        name: 'href',
+        value: href
+      }, {
+        name: 'target',
+        value: target
+      }]);
     ta.appendChild(head, baseElt);
   }
-  for (const script of scripts) {
+  for (const _script of script) {
     const scriptElt = createElement('script');
     // attributes on scrip tag
     const {
@@ -157,7 +168,7 @@ function htmlProcessing(logger, title, base, meta, link, scripts, appId, lang) {
       defer,
       src,
       attach
-    } = script;
+    } = _script;
     if (charset) {
       scriptElt.attrs.push({
         name: 'charset',
@@ -184,14 +195,13 @@ function htmlProcessing(logger, title, base, meta, link, scripts, appId, lang) {
     } else {
       appendTo(head, script);
     }
-  } // for all scripts
+  } // for all script
   // appid
   if (appId) {
-    const appIdElt = createElement('div');
-    appIdElt.attrs.push({
+    const appIdElt = createElement('div', [{
       name: 'id',
       value: appId
-    });
+    }]);
     // insert it at the start of the body
     body.childNodes.unshift(appIdElt);
   }

@@ -3,7 +3,7 @@ const relmanifest = {
     name: 'rel',
     value: "manifest"
 };
-const href = src => ({
+const href = (src = '') => ({
     name: 'href',
     value: src
 });
@@ -11,12 +11,12 @@ const crossOrigin = {
     name: 'crossorigin',
     value: 'use-credentials'
 };
-const rel = value => ({
+const rel = (value = '') => ({
     name: 'rel',
     value
 });
 
-const entry = (name, value) => ({
+const entry = (name, value = '') => ({
     name,
     value
 });
@@ -108,13 +108,13 @@ const appleIcon = [
         attrs: [entry('name', 'apple-mobile-web-app-capable'), entry('content', 'yes')]
     }),
     ({
-        appleStatusBarStyle
+        appleStatusBarStyle = 'Error [appleStatusBarStyle] has no value'
     }) => ({
         tag: 'meta',
         attrs: [entry('name', 'apple-mobile-web-app-status-bar-style'), entry('content', `${appleStatusBarStyle}`)]
     }),
     ({
-        appName
+        appName = 'Error [appName] value was not set'
     }) => {
         const rc = {
             tag: 'link',
@@ -275,7 +275,7 @@ const favicons = [
             tag: 'link',
             attrs: [
                 rel('icon'),
-                entry('image/png'),
+                entry('type', 'image/png'),
                 sizes(size),
                 href(`${relative(`favicon-${size}x${size}.png`)}`)
             ]
@@ -284,7 +284,7 @@ const favicons = [
 
 const windows = [
     ({
-        background
+        background = 'Error [background] not set'
     }) => ({
         tag: 'meta',
         attrs: [
