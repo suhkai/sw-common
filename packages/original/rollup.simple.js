@@ -39,7 +39,12 @@ const io = {
                     android: true,
                     windows: {
                         path: '/somepath'
-                    }
+                    },
+                    firefox: true,
+                    yandex: true,
+                    appleIcon: true,
+                    appleStartup: true,
+
                 }
             },
             lang: 'en',
@@ -51,6 +56,7 @@ const io = {
             link: [],
             script: [],
             name: 'index.html'
+
         })
     ]
 };
