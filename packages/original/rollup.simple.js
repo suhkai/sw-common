@@ -1,6 +1,6 @@
 const plugin = require('../rollup-plugin-html-advanced');
 
-//const rmdirRecursive = require('rmdir-recursive');
+const rmdirRecursive = require('rmdir-recursive');
 const {
     rollup,
     watch

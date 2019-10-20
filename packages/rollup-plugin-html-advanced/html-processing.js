@@ -81,15 +81,7 @@ function sortTags(t1, t2) {
   return r; // return last result of inequality
 }
 
-/**
- * meta: [{
- *    attr1: value
- *    attr2: value , etc
- * }]
- */
-
 function tagProcessing(tags) {
-
   // make sure the "attrs" are sorted
   tags.forEach(v => v.attrs && v.attrs.sort(sortAttributes));
   // sort tags amongst themselves
@@ -107,7 +99,7 @@ function tagProcessing(tags) {
   return rc;
 }
 
-// 
+//
 // create <!DOCTYPE html><htm><head></head><body></body></html>
 //
 
@@ -131,9 +123,7 @@ function createSkeleton(lang) {
 function htmlProcessing(logger, title, base, meta, link, script, appId, lang) {
   const metaCleaned = tagProcessing(clone(meta));
   const linkCleaned = tagProcessing(clone(link));
-  //
   // generate html skeleton.
-  //
   const [doc, html, head, body] = createSkeleton(lang);
   head.childNodes.splice(0,0,...metaCleaned,...linkCleaned);
   if (title) {

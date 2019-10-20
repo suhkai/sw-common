@@ -79,11 +79,26 @@ module.exports = function htmlGenerator(op = {}) {
       options.mobile = o.mobile || true;
       options.favicon = o.favicon;
       options.appId = o.appId
+/**
+ * meta: [{
+ *    attr1: value
+ *    attr2: value , etc
+ * }]
+ */
 
       options.meta = o.meta || [];
+      /**
+ * link: [{
+ *    attr1: value
+ *    attr2: value , etc
+ * }]
+ */
+
+// https://github.com/jantimon/html-webpack-plugin#options
+
       options.link = o.link || [];
       options.script = o.script || [];
-      options.name = o.name || 'index.html';
+      options.filename = o.name || 'index.html';
 
       // !logger, !title, !base, !meta, !link, !scripts, !appId
       if (typeof options.lang !== 'string') {
@@ -98,8 +113,8 @@ module.exports = function htmlGenerator(op = {}) {
       if (typeof options.mobile !== 'boolean') {
         logger.error('options.mobile is not a boolean')
       }
-      if (typeof options.name !== 'string') {
-        logger.error('options.name is not a string')
+      if (typeof options.filename !== 'string') {
+        logger.error('options.filename is not a string')
       }
       if (!Array.isArray(options.meta)) {
         logger.error('options.meta is not an array');
@@ -111,14 +126,9 @@ module.exports = function htmlGenerator(op = {}) {
         logger.error('options.script is not an array');
       }
 
-      // transform meta tags
+      // meta tags general section
       options.meta = convertOptionTagsToP5('meta', options.meta);
-      // transform link tags
-      options.link = convertOptionTagsToP5('link', options.link);
-      // transform script tags
-      options.script = convertOptionTagsToP5('script', options.script);
-
-      // optional mobile
+      
       if (options.mobile === true) {
         options.meta.push(createElement('meta', [{
           name: 'content',
@@ -128,7 +138,18 @@ module.exports = function htmlGenerator(op = {}) {
           value: 'viewport'
         }]));
       }
+      options.meta.unshift(createComment('general meta section'));
+      
+      // link tags general section
+      options.link = convertOptionTagsToP5('link', options.link);
+      if (options.link.length){
+        options.link.unshift(createComment('general link section'));
+      }
+      
+      // transform script tags
+      options.script = convertOptionTagsToP5('script', options.script);
 
+      
       // correct favicon
 
       if (typeof o.favicon === 'string' || isBuffer(o.favicon)) {
@@ -286,7 +307,7 @@ module.exports = function htmlGenerator(op = {}) {
       }
       // emit index.html
       this.emitFile({
-        fileName: options.name,
+        fileName: options.filename,
         source: serialize(doc),
         type: 'asset'
       });
