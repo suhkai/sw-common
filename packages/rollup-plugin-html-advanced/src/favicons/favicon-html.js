@@ -28,7 +28,6 @@ const sizes = size => entry('sizes', `${size}x${size}`);
 const hrefAppleTouch = (rel, value) => href(rel(`apple-touch-icon-${value}x${value}.png`))
 
 
-
 function windowManifest({
     relative
 }) {

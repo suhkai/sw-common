@@ -9,17 +9,17 @@ const {
 // 
 const clone = require('clone');
 //
-const isObject = require('./isObject');
+const isObject = require('./utils/isObject');
 // test favicons processing
-const processFavicons = require('./favicon-processing');
-const htmlRootToFsRoot = require('./htmlRootToFsRoot');
+const processFavicons = require('./favicons/favicon-processing');
+const htmlRootToFsRoot = require('./utils/stripAbsolutePath');
 const {
   htmlProcessing,
   convertOptionTagsToP5,
   createElement,
   createComment,
   serialize
-} = require('./html-processing');
+} = require('./html/html-processing');
 // 
 // for debugging
 // 
@@ -372,7 +372,7 @@ module.exports = function htmlGenerator(op = {}) {
       // the html "ast"
       for (const key in bundle) {
         const fileName = htmlRootToFsRoot(key);
-        const ext = extname(file);
+        const ext = extname(fileName);
         if (!['.js', '.css'].includes(ext)) {
           continue;
         }

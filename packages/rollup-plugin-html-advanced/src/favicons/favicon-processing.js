@@ -19,13 +19,14 @@ const {
     parse,
     format
 } = require('path');
-const htmlRootToFsRoot = require('./htmlRootToFsRoot');
-const isObject = require('./isObject');
+
+const htmlRootToFsRoot = require('../utils/stripAbsolutePath');
+const isObject = require('../utils/isObject');
 const favicons = require('favicons');
 const config = favicons.config;
 const html = require('./favicon-html');
 
-const parallelWait = require('./parallelWait');
+const parallelWait = require('../utils/parallelWait');
 
 function getName(file) {
     if (Buffer.isBuffer(file)) {

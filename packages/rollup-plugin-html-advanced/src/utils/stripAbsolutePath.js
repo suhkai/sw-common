@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 
-module.exports = function htmlRootToFsRoot(fullPath) {
+module.exports = function stripAbsolutePath(fullPath) {
 
     const {
       root,
