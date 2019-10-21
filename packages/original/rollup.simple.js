@@ -55,6 +55,12 @@ const io = {
             meta: [],
             link: [],
             script: [],
+            excludeChunks: a => {
+                if (a.type==='chunk' && a.name === 'bundle') { 
+                    return true; 
+                }
+                console.log(a)
+            },
             name: 'index.html'
 
         })

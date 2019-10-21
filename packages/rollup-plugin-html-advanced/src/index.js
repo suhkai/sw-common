@@ -20,6 +20,8 @@ const {
   createComment,
   serialize
 } = require('./html/html-processing');
+
+const pick = require('./utils/pick');
 // 
 // for debugging
 // 
@@ -58,11 +60,68 @@ function formatMsg(text) {
   return `plugin [${fullPluginName}]: ${text}`;
 }
 
+function injectAssets(inject, excludeChunks, excludeAssets, bundle, head, body, logger) {
+  for (const key in bundle) {
+    const fileName = htmlRootToFsRoot(key);
+    const ext = extname(fileName);
+    // I am only interested in css and js plugins
+    if (!['.js', '.css'].includes(ext)) {
+      continue;
+    }
+    // js source files
+    let addSource = true;
+    if (ext === '.js' && excludeChunks) {
+      // create representation of the chunk
+      const chunkRep = pick(bundle[key], 'name', 'type', 'modules', 'isEntry', 'fileName', 'faceModuleId');
+      addSource = !(excludeChunks(chunkRep) === true);
+    }
+    if (addSource) {
+      const scriptTag = createElement('script', [{
+        name: 'src',
+        value: fileName
+      }]);
+      if (inject === 'body' || inject === true) {
+        body.childNodes[body.childNodes.length] = scriptTag;
+      }
+      else if (inject === 'head') {
+        head.childNodes[head.childNodes.length] = scriptTag;
+      }
+      else {
+        const errMsg = format(`unreachable code`);
+        logger.error(errMsg);
+        // unreachable code, it will stop here
+      }
+    }
+    // css files
+    let addCss = true;
+    if (ext === '.css' && excludeAssets) {
+      const assetRep = pick(bundle[key], 'fileName', 'isAsset', 'type', 'source');
+      addCss = !(excludeAssets(assetReps) === true);
+    }
+    if (addCss) {
+      const cssTag = createElement('link', [
+        {
+          name: 'href',
+          value: fileName
+        },
+        {
+          name: 'rel',
+          value: 'stylesheet'
+        }
+      ]);
+      head.childNodes[head.childNodes.length] = cssTag;
+    }
+    else {
+      const errMsg = format(`unreachable code`);
+      logger.error(errMsg);
+      // unreachable code, it will stop here
+    }
+  }
+}
+
+
 module.exports = function htmlGenerator(op = {}) {
-
-
-
-
+ 
   return {
     name: fullPluginName,
     // this is basicly the only hook we need
@@ -126,6 +185,7 @@ module.exports = function htmlGenerator(op = {}) {
       options.mobile = o.mobile || true;
       options.favicon = o.favicon;
       options.appId = o.appId;
+      // excludeChunks
       if (o.excludeChunks !== undefined) {
         if (typeof o.excludeChunks === 'function') {
           options.excludeChunks = o.excludeChunks;
@@ -135,11 +195,22 @@ module.exports = function htmlGenerator(op = {}) {
           throw new Error(`plugin "${fullPluginName}"`)
         }
       }
-      if (options.inject !== undefined){
-        if (options.inject === true || options.inject === 'body'){
+      // excludeAssets
+      if (o.excludeAssets !== undefined) {
+        if (typeof o.excludeAssets === 'function') {
+          options.excludeAssets = o.excludeAssets;
+        }
+        else {
+          const errMsg = formatMsg(`"excludeAssets" is not a funciton`);
+          throw new Error(`plugin "${fullPluginName}"`)
+        }
+      }
+      // inject
+      if (options.inject !== undefined) {
+        if (options.inject === true || options.inject === 'body') {
           o.inject = 'body';
         }
-        else if (options.inject === 'head' || options.inject === false){
+        else if (options.inject === 'head' || options.inject === false) {
           o.inject = options.inject;
         }
         else {
@@ -148,24 +219,7 @@ module.exports = function htmlGenerator(op = {}) {
         }
       }
       options.inject = true;
-
-      options.inject = options.inject
-
-      /**
-       * meta: [{
-       *    attr1: value
-       *    attr2: value , etc
-       * }]
-       */
-
       options.meta = o.meta || [];
-      /**
- * link: [{
- *    attr1: value
- *    attr2: value , etc
- * }]
- */
-
       // https://github.com/jantimon/html-webpack-plugin#options
 
       options.link = o.link || [];
@@ -368,28 +422,7 @@ module.exports = function htmlGenerator(op = {}) {
         options.lang,
         options.inject
       );
-      // collect all .js and .css from other bundels and inject them into 
-      // the html "ast"
-      for (const key in bundle) {
-        const fileName = htmlRootToFsRoot(key);
-        const ext = extname(fileName);
-        if (!['.js', '.css'].includes(ext)) {
-          continue;
-        }
-        let add = true;
-        if (options.excludeChunks) {
-          // create representation of the chunk
-          const chunkRep = pick(bundle[key], 'name', 'type', 'modules', 'isEntry', 'fileName', 'faceModuleId');
-          add = !(options.excludeChunks(chunkRep) === true);
-        }
-        if (add) {
-          const scriptTag = createElement('script', [{
-            name: 'src',
-            value: fileName
-          }]);
-          body.childNodes[body.childNodes.length] = scriptTag;
-        }
-      }
+      options.inject && injectAssets(options.inject, options.excludeChunks, options.excludeAssets, bundle, head, body, logger);
       // emit index.html
       this.emitFile({
         fileName: options.filename,

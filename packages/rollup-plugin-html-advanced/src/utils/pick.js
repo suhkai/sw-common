@@ -3,7 +3,7 @@ const clone = require('clone');
 module.exports = function pick(obj, ...args) {
     const temp = clone(obj);
     const rc = Object.create(null);
-    for (const [prop, value] of Object.entries(o)) {
+    for (const [prop, value] of Object.entries(temp)) {
         if (args.includes(prop)) {
             rc[prop] = value;
         }
