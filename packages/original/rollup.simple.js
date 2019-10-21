@@ -28,7 +28,7 @@ const io = {
     cache: true,
     input: {
         //1:'./lm'
-        bundle: require.resolve('./es7.js'),
+        bundle: './es7.js',
     },
     plugins: [
         plugin({

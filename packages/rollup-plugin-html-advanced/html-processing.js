@@ -120,12 +120,12 @@ function createSkeleton(lang) {
   return [doc, html, head, body];
 }
 
-function htmlProcessing(logger, title, base, meta, link, script, appId, lang) {
+function htmlProcessing(logger, title, base, meta, link, script, appId, lang, inject) {
   const metaCleaned = tagProcessing(clone(meta));
   const linkCleaned = tagProcessing(clone(link));
   // generate html skeleton.
   const [doc, html, head, body] = createSkeleton(lang);
-  head.childNodes.splice(0,0,...metaCleaned,...linkCleaned);
+  head.childNodes.splice(0, 0, ...metaCleaned, ...linkCleaned);
   if (title) {
     const titleElt = createElement('title');
     ta.insertText(titleElt, title);
@@ -158,8 +158,7 @@ function htmlProcessing(logger, title, base, meta, link, script, appId, lang) {
       async: _async,
       charset,
       defer,
-      src,
-      attach
+      src
     } = _script;
     if (charset) {
       scriptElt.attrs.push({
@@ -182,9 +181,10 @@ function htmlProcessing(logger, title, base, meta, link, script, appId, lang) {
       name: 'src',
       value: src
     });
-    if (attach === 'body') {
+    if (inject === 'body' || inject === true) {
       appendTo(body, script);
-    } else {
+    }
+    if (inject === 'head') {
       appendTo(head, script);
     }
   } // for all script
