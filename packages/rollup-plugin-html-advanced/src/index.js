@@ -60,6 +60,8 @@ function formatMsg(text) {
   return `plugin [${fullPluginName}]: ${text}`;
 }
 
+
+
 function injectAssets(inject, excludeChunks, excludeAssets, bundle, head, body, logger) {
   for (const key in bundle) {
     const fileName = htmlRootToFsRoot(key);

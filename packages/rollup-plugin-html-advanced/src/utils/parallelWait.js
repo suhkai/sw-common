@@ -1,7 +1,5 @@
 const eventTarget = require('./EventTarget');
-
 const isObject = o => o !== null && typeof o === 'object' && !(o instanceof Array);
-
 
 module.exports = function (promises) {
     return new Promise(resolve => {
