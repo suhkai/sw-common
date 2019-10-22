@@ -1,7 +1,5 @@
 // create validator
-
 // simple validation,
-
 // string
 
 // - string, value needs to be a string
@@ -41,6 +39,7 @@
 // date (ISO-8601)
 // YYYY-MM-DDThh:mm:ssTZD
 // TZD= +hh:mm or -hh:mm
+// http://mathforum.org/library/drmath/view/51907.html
 
 // https://www.w3.org/TR/NOTE-datetime
 // toNumber
