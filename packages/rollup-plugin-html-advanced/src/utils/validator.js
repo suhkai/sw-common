@@ -306,6 +306,8 @@ Error response
   - 'error_uri':  (optional). A URI identifying a human-readable web page with
          information about the error,
   
+https://github.com/bshaffer/oauth2-demo-php
+
   'channel',         'deleted',
   'id',              'type',
   'content',         'author',
