@@ -46,7 +46,7 @@ describe('validation tests', function () {
             for (const elt of data) {
                 const msg = elt.out[1] ? `convert ${elt.in} to boolean should result in error` : `convert ${elt.in} to boolean should succeed`;
                 it(msg, () => {
-                    const input = elt.in;
+                    const input = elt.in; // copy value from closure, because changed in next iteration
                     const output = elt.out;
                     expect(convertToBoolean(input)).to.deep.equal(output);
                 });
@@ -116,6 +116,7 @@ describe('validation tests', function () {
             expect(isInt(1)).to.deep.equal([1, null]);
             expect(isInt(1.4)).to.deep.equal([null, 'not an integer']);
             expect(isInt(-Infinity)).to.deep.equal([null, 'not an integer']);
+            expect(isInt({})).to.deep.equal([null, 'not a number']);
         });
         it('isObject', () => {
             const data = [{}, null, undefined, new Date, []];
