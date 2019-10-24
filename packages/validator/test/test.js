@@ -127,6 +127,9 @@ describe('validation tests', function () {
             expect(isObject(data[4])).to.be.false;
 
         });
+        it('createStringLengthRangeCheck',()=>{
+            throw new Error('Not implemented');
+        })
         describe('string patterns', () => {
             describe('test simple string', () => {
 
