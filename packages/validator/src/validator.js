@@ -37,59 +37,64 @@ function isInt(i) {
         return [null, 'not an integer']
 }
 
-function createRangeCheck(n, m) {
+function createRangeCheck(m, n) {
         // both should be of type number
-        m = m || Infinity;
-        n = n || -Infinity;
-        if (!(typeof n === 'number' && typeof m === 'number')) {
-                return new TypeError(`n:${n} and m:${m} are not of type number`);
+        m = m === undefined || m === null ? -Infinity : m;
+        n = n === undefined || n === null ? Infinity : n;
+        if (typeof n !== 'number') {
+                const type = typeof n;
+                throw new TypeError(`upper boundery n:<${type}>${n} MUST be of type number`);
+        }
+        if (typeof m !== 'number') {
+                const type = typeof m;
+                throw new TypeError(`lower boundery m:<${type}>${m} MUST be of type number`);
         }
         if (isNaN(n)) {
-                return new TypeError(`n is a NaN`);
+                throw new TypeError(`upper boundery n is a NaN`);
         }
         if (isNaN(m)) {
-                return new TypeError(`m is a NaN`);
+                throw new TypeError(`lower boundery m is a NaN`);
         }
-        if (n > m) {
-                throw new TypeError(`n:${n} should be smaller then m:${m}`)
+        if (m > n) {
+                throw new TypeError(`lower boundery m:${m} should be lower then upper boundery n:${n}`)
         }
         return function isInRange(i) {
-                if (i >= n && i <= m) {
+                if (i >= m && i <= n) {
                         return [i, null];
 
                 }
-                return [null, `${i} is not between ${n} and ${m} inclusive`];
+                return [null, `${i} is not between ${m} and ${n} inclusive`];
         };
 }
 
-function createStringLengthRangeCheck(n, m) {
-        // both should be of type number
-        // both should be of type number
-        m = m || Infinity;
-        n = n || 0;
-        if (!(typeof n === 'number' && typeof m === 'number')) {
-                return new TypeError(`n:${n} and m:${m} are not of type number`);
+function createStringLengthRangeCheck(m, n) {
+        m = m === undefined || m === null ? -Infinity : m;
+        n = n === undefined || n === null ? Infinity : n;
+        if (typeof n !== 'number') {
+                const type = typeof n;
+                throw new TypeError(`upper boundery n:<${type}>${n} MUST be of type number`);
+        }
+        if (typeof m !== 'number') {
+                const type = typeof m;
+                throw new TypeError(`lower boundery m:<${type}>${m} MUST be of type number`);
         }
         if (isNaN(n)) {
-                return new TypeError(`n is a NaN`);
+                throw new TypeError(`upper boundery n is a NaN`);
         }
         if (isNaN(m)) {
-                return new TypeError(`m is a NaN`);
+                throw new TypeError(`lower boundery m is a NaN`);
         }
-        if (n > m) {
-                throw new TypeError(`n:${n} should be smaller then m:${m}`);
-        }
-        if (n < 0) {
-                throw new TypeError(`n:${n} should not be smaller then 0`);
+        if (m > n) {
+                throw new TypeError(`lower boundery m:${m} should be lower then upper boundery n:${n}`);
         }
         if (m < 0) {
-                throw new TypeError(`m:${n} should not be smaller then 0`);
+                throw new TypeError(`lower boundery m:${m} should be >= 0`);
         }
         return function isInRange(str) {
-                if (str.length >= n && str.length <= m) {
+                if (str.length >= m && str.length <= n) {
                         return [str, null];
                 }
-                return [null, `string of length:${str.length} is not between ${n} and ${m} inclusive`];
+                return [null, `string of length:${str.length} is not between ${m} and ${n} inclusive`];
         }
 }
 
@@ -137,32 +142,6 @@ function createCollectionChecker(type, collection) {
 }
 
 const isObject = o => typeof o === 'object' && o !== null && !Array.isArray(o);
-
-const stringSchredder = /^string(\{[^{}]+\})?(\[[^[\]]*\])?$/;
-// check for pattern number{...}[...]
-const numberSchredder = /^number(\{[^{}]+\})?(\[[^[\]]*\])?$/;
-// check for pattern boolean{...}[...]
-const booleanSchredder = /^boolean(\{[^{}]+\})?(\[[^[\]]*\])?$/;
-
-const dummy = () => {};
-
-const mapV = new Map([
-        [stringSchredder, dummy],
-        [numberSchredder, dummy],
-        [booleanSchredder, dummy]
-]);
-
-function createValidator(instr) {
-        // check for pattern string{...}[...]
-        const tokensNzer = [stringSchredder, numberSchredder, booleanSchredder];
-        for (const [pattern, fn] of tokensNzer) {
-                const shredded = instr.match(pattern);
-                if (shredded){
-                        return fn(inst, pattern);
-                }
-        }
-        throw new TypeError(`validator pattern not recognized ${inst}`);
-}
 
 module.exports = {
         // helpers

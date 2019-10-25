@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "pck/validator/proxy-test",
+            "program": "${workspaceFolder}/packages/validator/src/proxy.js",
+            "cwd": "${workspaceFolder}/packages/validator",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "pck/validator-mocha-tests",
             "program": "${workspaceFolder}/packages/validator/node_modules/mocha/bin/_mocha",
             "args": [
