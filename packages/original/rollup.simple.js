@@ -1,14 +1,17 @@
 const plugin = require('../rollup-plugin-html-advanced');
+const fs = require('fs');
 
-const rmdirRecursive = require('rmdir-recursive');
 const {
     rollup,
     watch
 } = require('rollup');
 
+
 const {
     resolve,
-    join
+    join,
+    dirname,
+    isAbsolute
 } = require('path');
 
 // array, can have multiple outputs for single input
@@ -61,6 +64,16 @@ const io = {
     ]
 };
 
+
+function rmdir(dir){
+    if (!isAbsolute(dir)){
+        const cwd = dirname(require.main.filename || __dirname);
+        dir = resolve(cwd, dir);
+    }
+    const dirEntries = fs.readdirSync(dir, {encoding: 'utf8', withFileTypes: true});
+    
+    // get all entries of this dir
+}
 
 async function build() {
     // clean out dist directory
