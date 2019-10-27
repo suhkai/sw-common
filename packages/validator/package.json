@@ -17,8 +17,8 @@
     "nyc": "^14.1.1",
     "rimraf": "^3.0.0"
   },
-  "nyc":{
-    "reporter":[
+  "nyc": {
+    "reporter": [
       "html",
       "text"
     ],

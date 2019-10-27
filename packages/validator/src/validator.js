@@ -59,6 +59,9 @@ function createRangeCheck(m, n) {
                 throw new TypeError(`lower boundery m:${m} should be lower then upper boundery n:${n}`)
         }
         return function isInRange(i) {
+                if (typeof i !== 'number'){
+                        return [null, `${i} is not a number`];
+                }
                 if (i >= m && i <= n) {
                         return [i, null];
 
@@ -91,6 +94,9 @@ function createStringLengthRangeCheck(m, n) {
                 throw new TypeError(`lower boundery m:${m} should be >= 0`);
         }
         return function isInRange(str) {
+                if (typeof str !== 'string'){
+                        return [null, `string of length:${str.length} is not between ${m} and ${n} inclusive`];        
+                }
                 if (str.length >= m && str.length <= n) {
                         return [str, null];
                 }
@@ -127,6 +133,7 @@ function createCollectionChecker(type, collection) {
         if (errMsg) {
                 throw new TypeError(errMsg);
         }
+        //
         return function (str) {
                 const typeStr = typeof str;
                 if (typeStr !== type) {
@@ -144,8 +151,7 @@ function createCollectionChecker(type, collection) {
 const isObject = o => typeof o === 'object' && o !== null && !Array.isArray(o);
 
 module.exports = {
-        // helpers
-        createValidator,
+        // helper
         createCollectionChecker,
         isStringArray,
         isBooleanArray,
