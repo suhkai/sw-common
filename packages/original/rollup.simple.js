@@ -31,7 +31,7 @@ const io = {
     cache: true,
     input: {
         //1:'./lm'
-        bundle: require.resolve('./es7.js'),
+        bundle: './es7.js',
     },
     plugins: [
         plugin({
@@ -58,6 +58,12 @@ const io = {
             meta: [],
             link: [],
             script: [],
+            excludeChunks: a => {
+                if (a.type==='chunk' && a.name === 'bundle') { 
+                    return true; 
+                }
+                console.log(a)
+            },
             name: 'index.html'
 
         })

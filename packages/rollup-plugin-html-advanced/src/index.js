@@ -3,22 +3,25 @@ const {
   join,
   normalize,
   parse,
-  format
+  format,
+  extname
 } = require('path');
 // 
 const clone = require('clone');
 //
-const isObject = require('./isObject');
+const isObject = require('./utils/isObject');
 // test favicons processing
-const processFavicons = require('./favicon-processing');
-const htmlRootToFsRoot = require('./htmlRootToFsRoot');
+const processFavicons = require('./favicons/favicon-processing');
+const htmlRootToFsRoot = require('./utils/stripAbsolutePath');
 const {
   htmlProcessing,
   convertOptionTagsToP5,
   createElement,
   createComment,
   serialize
-} = require('./html-processing');
+} = require('./html/html-processing');
+
+const pick = require('./utils/pick');
 // 
 // for debugging
 // 
@@ -51,13 +54,118 @@ const platformOptions = {
   }
 };
 
+const fullPluginName = 'rollup-plugin-html-advanced';
+
+function formatMsg(text) {
+  return `plugin [${fullPluginName}]: ${text}`;
+}
+
+
+
+function injectAssets(inject, excludeChunks, excludeAssets, bundle, head, body, logger) {
+  for (const key in bundle) {
+    const fileName = htmlRootToFsRoot(key);
+    const ext = extname(fileName);
+    // I am only interested in css and js plugins
+    if (!['.js', '.css'].includes(ext)) {
+      continue;
+    }
+    // js source files
+    let addSource = true;
+    if (ext === '.js' && excludeChunks) {
+      // create representation of the chunk
+      const chunkRep = pick(bundle[key], 'name', 'type', 'modules', 'isEntry', 'fileName', 'faceModuleId');
+      addSource = !(excludeChunks(chunkRep) === true);
+    }
+    if (addSource) {
+      const scriptTag = createElement('script', [{
+        name: 'src',
+        value: fileName
+      }]);
+      if (inject === 'body' || inject === true) {
+        body.childNodes[body.childNodes.length] = scriptTag;
+      }
+      else if (inject === 'head') {
+        head.childNodes[head.childNodes.length] = scriptTag;
+      }
+      else {
+        const errMsg = format(`unreachable code`);
+        logger.error(errMsg);
+        // unreachable code, it will stop here
+      }
+    }
+    // css files
+    let addCss = true;
+    if (ext === '.css' && excludeAssets) {
+      const assetRep = pick(bundle[key], 'fileName', 'isAsset', 'type', 'source');
+      addCss = !(excludeAssets(assetReps) === true);
+    }
+    if (addCss) {
+      const cssTag = createElement('link', [
+        {
+          name: 'href',
+          value: fileName
+        },
+        {
+          name: 'rel',
+          value: 'stylesheet'
+        }
+      ]);
+      head.childNodes[head.childNodes.length] = cssTag;
+    }
+    else {
+      const errMsg = format(`unreachable code`);
+      logger.error(errMsg);
+      // unreachable code, it will stop here
+    }
+  }
+}
+
+
 module.exports = function htmlGenerator(op = {}) {
-
-  const fullPluginName = 'rollup-plugin-html-advanced';
-
+ 
   return {
     name: fullPluginName,
     // this is basicly the only hook we need
+    // exclude 
+    /**
+     * 
+     * @param {*} oo 
+     * @param {*} bundle 
+     * @param {*} isWrite 
+     * chunk
+     * {
+     *    [fileName: string] :{
+     *         code: // -> actual source code
+     *         dynamicImports: []
+     *         exports: [] // makes sense for libraries
+     *         facadeModuleId: ....es7.js
+     *         fileName: 'bundle-entry-2c65ad77.js'
+     *         imports: [] // no imports depends on the kinds o bundle format (cjs,will have them) 
+     *         isDynamicEntry: false
+     *         isEntry: true,
+     *         map: (its not transpiled or babilified)
+     *         modules: { 
+     *             [full path]: {...}
+     *             [full path]: {...}
+     *         }
+     *         name: 'bundle' <- entry in the input options
+     *         type: 'chunk' or asset <- what kind
+     *   }
+     * 
+     *   // name, type, modules, isEntry, fileName, faceModuleId
+
+     * 
+     * }
+     * // [fileName: string]: {
+     *      fileName: //->full file name
+     *      isAsset: true
+     *      type: "asset"
+     *      source: Buffer|String (binary data or string.)
+     * }    
+     * 
+     * so "exclusion" needs a function 
+     */
     async generateBundle(oo, bundle, isWrite) {
 
       const logger = {
@@ -65,9 +173,9 @@ module.exports = function htmlGenerator(op = {}) {
         warn: this.warn
       };
 
-
       if (!isObject(op)) {
-        throw new Error(`plugin "${fullPluginName}" was not passed an JS Object as "option"`);
+        const errMsg = formatMsg('was not passed an JS Object as "option"');
+        throw new Error(errMsg);
       }
 
       const o = clone(op);
@@ -78,27 +186,47 @@ module.exports = function htmlGenerator(op = {}) {
       options.title = o.title || 'rollup.js app';
       options.mobile = o.mobile || true;
       options.favicon = o.favicon;
-      options.appId = o.appId
-/**
- * meta: [{
- *    attr1: value
- *    attr2: value , etc
- * }]
- */
-
+      options.appId = o.appId;
+      // excludeChunks
+      if (o.excludeChunks !== undefined) {
+        if (typeof o.excludeChunks === 'function') {
+          options.excludeChunks = o.excludeChunks;
+        }
+        else {
+          const errMsg = formatMsg(`"excludeChunks" is not a funciton`);
+          throw new Error(`plugin "${fullPluginName}"`)
+        }
+      }
+      // excludeAssets
+      if (o.excludeAssets !== undefined) {
+        if (typeof o.excludeAssets === 'function') {
+          options.excludeAssets = o.excludeAssets;
+        }
+        else {
+          const errMsg = formatMsg(`"excludeAssets" is not a funciton`);
+          throw new Error(`plugin "${fullPluginName}"`)
+        }
+      }
+      // inject
+      if (options.inject !== undefined) {
+        if (options.inject === true || options.inject === 'body') {
+          o.inject = 'body';
+        }
+        else if (options.inject === 'head' || options.inject === false) {
+          o.inject = options.inject;
+        }
+        else {
+          const errMsg = formatMsg(`"inject" should be 'head'|'body'|true|false`);
+          throw new Error(`plugin "${fullPluginName}"`)
+        }
+      }
+      options.inject = true;
       options.meta = o.meta || [];
-      /**
- * link: [{
- *    attr1: value
- *    attr2: value , etc
- * }]
- */
-
-// https://github.com/jantimon/html-webpack-plugin#options
+      // https://github.com/jantimon/html-webpack-plugin#options
 
       options.link = o.link || [];
       options.script = o.script || [];
-      options.filename = o.name || 'index.html';
+      options.filename = o.filename || 'index.html';
 
       // !logger, !title, !base, !meta, !link, !scripts, !appId
       if (typeof options.lang !== 'string') {
@@ -128,7 +256,7 @@ module.exports = function htmlGenerator(op = {}) {
 
       // meta tags general section
       options.meta = convertOptionTagsToP5('meta', options.meta);
-      
+
       if (options.mobile === true) {
         options.meta.push(createElement('meta', [{
           name: 'content',
@@ -139,17 +267,17 @@ module.exports = function htmlGenerator(op = {}) {
         }]));
       }
       options.meta.unshift(createComment('general meta section'));
-      
+
       // link tags general section
       options.link = convertOptionTagsToP5('link', options.link);
-      if (options.link.length){
+      if (options.link.length) {
         options.link.unshift(createComment('general link section'));
       }
-      
+
       // transform script tags
       options.script = convertOptionTagsToP5('script', options.script);
 
-      
+
       // correct favicon
 
       if (typeof o.favicon === 'string' || isBuffer(o.favicon)) {
@@ -166,7 +294,8 @@ module.exports = function htmlGenerator(op = {}) {
       if (isObject(options.favicon)) {
         // do we have an image?
         if (typeof options.favicon.image !== 'string' && !isBuffer(options.favicon.image)) {
-          throw new Error(`${fullPluginName}: "options.favicon.image" must be a string or a Buffer object`);
+          const errMsg = formatMsg('"options.favicon.image" must be a string or a Buffer object');
+          throw new Error(errMsgà);
         }
         // any keys on platform
         options.favicon.platforms = options.favicon.platforms || {
@@ -190,7 +319,8 @@ module.exports = function htmlGenerator(op = {}) {
           }
         }
         if (!validPlatform) {
-          throw new Error(`${fullPluginName}: no valid platforms specified in "options.favicon.platform"`);
+          const errMsg = formatMsg('no valid platforms specified in "options.favicon.platform"');
+          throw new Error(errMsg);
         }
       }
       //
@@ -214,11 +344,13 @@ module.exports = function htmlGenerator(op = {}) {
           }
           if (!isObject(platformObj)) {
             platforms[platformName] = false; // clear it
-            this.warn(`icons for ${platformName} will not be generated, wrong configuration object for this platforl`);
+            const warnMsg = formatMsg(`icons for ${platformName} will not be generated, wrong configuration object for this platforl`);
+            this.warn(warnMsg);
           }
           if (platformObj['path'] === undefined) {
             platforms[platformName] = false; // clear it
-            this.warn(`icons for favicon.${platformName} will not be generatoed, please specify an "path" property in the favicon.${platformName}.path property`);
+            const warnMsg = formatMsg(`icons for favicon.${platformName} will not be generatoed, please specify an "path" property in the favicon.${platformName}.path property`);
+            this.warn(warnMsg);
           }
         }
         const [answer, error] = await processFavicons({
@@ -240,7 +372,8 @@ module.exports = function htmlGenerator(op = {}) {
           rejected
         } = answer;
         for (const [name, warning] of Object.entries(rejected)) {
-          this.warn(`assets for favicon platform [${name}] was not generated, warning: ${String(warning)}`);
+          const warnMsg = formatMsg(`assets for favicon platform [${name}] was not generated, warning: ${String(warning)}`);
+          this.warn(warnMsg);
         }
 
         for (const [platformName, assetClasses] of Object.entries(resolved)) {
@@ -254,7 +387,7 @@ module.exports = function htmlGenerator(op = {}) {
             });
           }
           //html
-          const demark = { 
+          const demark = {
             meta: false,
             link: false
           };
@@ -264,7 +397,7 @@ module.exports = function htmlGenerator(op = {}) {
               continue;
             }
             const htmlSnip = createElement(snip.tag, snip.attrs);
-            demark[snip.tag] || options[snip.tag].push(createComment(`${platformName} section`)); 
+            demark[snip.tag] || options[snip.tag].push(createComment(`${platformName} section`));
             demark[snip.tag] = true;
             options[snip.tag].push(htmlSnip);
           }
@@ -288,23 +421,10 @@ module.exports = function htmlGenerator(op = {}) {
         options.link,
         options.script,
         options.appId,
-        options.lang
+        options.lang,
+        options.inject
       );
-      // collect all .js and .css from other bundels and inject them into 
-      // the html "ast"
-      for (const key in bundle) {
-        const struct = parse(key);
-        if (!['.js', '.css'].includes(struct.ext)) {
-          continue;
-        }
-        struct.root = '';
-        const fileName = format(struct);
-        const scriptTag = createElement('script', [{
-          name: 'src',
-          value: fileName
-        }]);
-        body.childNodes[body.childNodes.length] = scriptTag;
-      }
+      options.inject && injectAssets(options.inject, options.excludeChunks, options.excludeAssets, bundle, head, body, logger);
       // emit index.html
       this.emitFile({
         fileName: options.filename,
