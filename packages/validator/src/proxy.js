@@ -15,10 +15,10 @@ const {
     // checkers
     createStringLengthRangeCheck,
     createRangeCheck,
-} = require('./proxy');
+} = require('./validator');
 
 function sanitizeFileName(name) {
-    return name.replace(/[\0?*]/g, '_');
+    return name.replace(/[\0?*+]/g, '_');
 }
 
 //https://stackoverflow.com/questions/1976007/what-characters-are-forbidden-in-windows-and-linux-directory-names
@@ -59,13 +59,38 @@ features.set('object', {
     factory: 2,
     name: 'object',
     fn: function (props) {
-        // check the props passed
+        // must be an object
+        if (!isObject(props)) {
+            const errMsg = `specify a JS object with validators to verify an object`;
+            throw new TypeError(errMsg);
+        }
+        const descr = Object.getOwnPropertyDescriptors(props);
+        const propCount = Object.keys(descr).length;
+        if (propCount === 0) {
+            const errMsg = `the JS validator object does not have any properties defined`;
+            throw new TypeError(errMsg);
+        }
+        const nonFunctions = Object.values(descr).filter(f => typeof f !== 'function');
+        if (nonFunctions.length){
+            const errMsg = `the JS validator object does not have any properties defined`;
+            throw new TypeError(errMsg);
+        }
+        // all ok with the object
+
         return function sealing(propName) {
             if (propName !== 'open' && propName !== 'closed') {
                 const errMsg = `object must be closed by "open" or "closed" modofifier, not with "${propName}"`;
                 throw new TypeError(errMsg);
             }
-            return function validateObject(obj) { //return dummy validator
+            // all ok with the modifiers
+            return function validateObject(obj) { // Return dummy validator
+                if (propName === 'closed'){
+                    // 1. If closed, no property can be defined outside the original template given
+                }
+                // 2. Check if any of the props arent defined then check if they are optional, if they are not
+                // 3. now we check the values of the props by calling the validators with the values
+                // 4. the stored values are returned, the data is immutable, return new data object, (this makes transformations possible)
+                // should it be 
                 return [obj, null];
             }
         };
@@ -95,7 +120,7 @@ function createValidatorFactory() {
         let propContext;
         let optional = false;
         const handler = {
-            get: function (target /* the primer, or fn in the chain */ , prop, receiver /* Proxy */ ) {
+            get: function (target /* the primer, or fn in the chain */, prop, receiver /* Proxy */) {
                 // completling partials
                 if (propContext && propContext.factory) {
                     propContext.fn = propContext.fn(prop); // this could throw
@@ -145,7 +170,7 @@ function createValidatorFactory() {
             set: function () {
                 throw new TypeError(`cannot use assignment in this context`);
             },
-            apply: function (target /* the primer, or fn in the chain */ , thisArg /* the proxy object */ , argumentList) {
+            apply: function (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
                 if (propContext && propContext.factory > 0) {
                     // must have a proxyt otherwise raise error
                     if (!thisArg) {
@@ -179,7 +204,7 @@ function createValidatorFactory() {
                 return result2;
                 //}
             },
-            [Symbol.toPrimitive]: function ( /*hint*/ ) {
+            [Symbol.toPrimitive]: function ( /*hint*/) {
                 return 'Object [validator]'; // generate a usefull DAG overview
             }
         };
@@ -197,15 +222,8 @@ const validatorFactory = createValidatorFactory();
 //const validator2 = validatorFactory.range(-100, 100);// should be ok
 //const validator3 = validator2.range(-2, 2); // should be ok
 //const validator4 = validatorFactory.object({})(); // should raise error, not finalized
-const validator5 = validatorFactory.object({}).open; // should finalize
-const validator6 = validatorFactory.object({}).closed; // should finalize
-const validator7 = validatorFactory.object({}); // patially constructed
-const val8 = validator7.closed.optional; // error
-const s = val8[Symbol.for('optional')];
-console.log(s);
-console.log(val8('something')) // test1 = validatorFactory.optional;
-
-
+const validator5 = validatorFactory.object({ a: () => [true] }).open; // should finalize
+console.log(typeof validator5);
 
 //console.log('>>', validator1(4));
 //console.log('>>', validator1());
