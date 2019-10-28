@@ -64,19 +64,21 @@ features.set('object', {
             const errMsg = `specify a JS object with validators to verify an object`;
             throw new TypeError(errMsg);
         }
-        const descr = Object.getOwnPropertyDescriptors(props);
-        const propCount = Object.keys(descr).length;
+        const descr = {
+            strings: Object.getOwnPropertyNames(props),
+            symbols: Object.getOwnPropertySymbols(props)
+        };
+        const propCount = descr.strings.length + descr.symbols.length;
         if (propCount === 0) {
             const errMsg = `the JS validator object does not have any properties defined`;
             throw new TypeError(errMsg);
         }
-        const nonFunctions = Object.values(descr).filter(f => typeof f !== 'function');
+        const nonFunctions = descr.filter(f => typeof props[f] !== 'function');
         if (nonFunctions.length){
             const errMsg = `the JS validator object does not have any properties defined`;
             throw new TypeError(errMsg);
         }
         // all ok with the object
-
         return function sealing(propName) {
             if (propName !== 'open' && propName !== 'closed') {
                 const errMsg = `object must be closed by "open" or "closed" modofifier, not with "${propName}"`;
@@ -85,9 +87,25 @@ features.set('object', {
             // all ok with the modifiers
             return function validateObject(obj) { // Return dummy validator
                 if (propName === 'closed'){
-                    // 1. If closed, no property can be defined outside the original template given
+                    const _symbols = Object.getOwnPropertySymbols(obj);
+                    const _strings = Object.getOwnPropertyNames(obj);
+                    // no strings outside the one form props
+                    const forbiddenStrings = _strings.filter(f=>{
+                        return descr.strings.includes(f) === false;
+                    });
+                    // symbols are converted to strings!!
+                    const forbiddenSymbols = _symbols.filter(f=>{
+                        return descr.symbols.includes(f) === false;
+                    }).map(String);
+                    
+                    if (forbiddenStrings.length + forbiddenSymbols.length){
+                        const stringProps = forbiddenStrings.length ?  `stringprops:[${forbiddenStrings.join('|')}]`: '';
+                        const symbolProps = forbiddenSymbols.length ? `symbolsprops:[${forbiddenSymbols.join('|')}]`: ''; 
+                        const errMsg =  `The validating object schema is closed. Forbidden properties: ${stringProps} ${symbolProps}`;
+                        return [null, errMsg];
+                    }
                 }
-                // 2. Check if any of the props arent defined then check if they are optional, if they are not
+                // 2. TODO: Check if any of the props arent defined then check if they are optional, if they are not
                 // 3. now we check the values of the props by calling the validators with the values
                 // 4. the stored values are returned, the data is immutable, return new data object, (this makes transformations possible)
                 // should it be 
@@ -205,7 +223,7 @@ function createValidatorFactory() {
                 //}
             },
             [Symbol.toPrimitive]: function ( /*hint*/) {
-                return 'Object [validator]'; // generate a usefull DAG overview
+                return 'Object [validator]'; // TODO: replace this string by a usefull DAG
             }
         };
         return handler;
@@ -222,6 +240,7 @@ const validatorFactory = createValidatorFactory();
 //const validator2 = validatorFactory.range(-100, 100);// should be ok
 //const validator3 = validator2.range(-2, 2); // should be ok
 //const validator4 = validatorFactory.object({})(); // should raise error, not finalized
+
 const validator5 = validatorFactory.object({ a: () => [true] }).open; // should finalize
 console.log(typeof validator5);
 
