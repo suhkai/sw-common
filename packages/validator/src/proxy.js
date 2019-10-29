@@ -101,11 +101,33 @@ features.set('object', {
                     if (forbiddenStrings.length + forbiddenSymbols.length){
                         const stringProps = forbiddenStrings.length ?  `stringprops:[${forbiddenStrings.join('|')}]`: '';
                         const symbolProps = forbiddenSymbols.length ? `symbolsprops:[${forbiddenSymbols.join('|')}]`: ''; 
-                        const errMsg =  `The validating object schema is closed. Forbidden properties: ${stringProps} ${symbolProps}`;
+                        const errMsg = `The validating object schema is closed. Forbidden properties: ${stringProps} ${symbolProps}`;
                         return [null, errMsg];
                     }
                 }
-                // 2. TODO: Check if any of the props arent defined then check if they are optional, if they are not
+                // 2. Check if any of the props arent defined then check if they are optional, if they are not
+                // collect errors
+                const shouldBeManditory = [];
+                // handle symbols
+                for (const symb of descr.symbols){
+                    if (!(symb in obj)){
+                        shouldBeManditory.push(`${String(symb)} is manditory but absent from the object`);
+                    }
+                }
+                for (const props of descr.strings){
+                    if (!(props in obj)){
+                        shouldBeManditory.push(`"${props}" is manditory but absent from the object`);
+                    }
+                }
+                if (shouldBeManditory.length){
+                    return [null, shouldBeManditory.join('|')];
+                }
+                // TODO: need to make loop over all validators while making a path, how do we do symbols??? there is no structure behind symbols
+                for (const symb of descr.symbols){
+                    if (!(symb in obj)){
+                        shouldBeManditory.push(`${String(symb)} is manditory but absent from the object`);
+                    }
+                }
                 // 3. now we check the values of the props by calling the validators with the values
                 // 4. the stored values are returned, the data is immutable, return new data object, (this makes transformations possible)
                 // should it be 
