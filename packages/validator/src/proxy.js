@@ -2,6 +2,7 @@
 
 const { features } = require('./features/dictionary');
 const $optional = Symbol.for('optional');
+const $marker = Symbol.for('ladybug');
 function primer() {
     /* noop primer  */
     console.log('function is called');
@@ -14,7 +15,7 @@ function createValidatorFactory() {
     function createHandler(parentHandler, parentAssembler) {
         let propContext;
         let optional = false;
-        const handler = {
+        const handler = Objec.freeze({
             get: function (target /* the primer, or fn in the chain */, prop, receiver /* Proxy */) {
                 // completling partials
                 if (propContext && propContext.factory) {
@@ -101,8 +102,9 @@ function createValidatorFactory() {
             },
             [Symbol.toPrimitive]: function ( /*hint*/) {
                 return 'Object [validator]'; // TODO: replace this string by a usefull DAG
-            }
-        };
+            },
+            [$marker]: true
+        });
         return handler;
     }
     // bootstrap
@@ -111,4 +113,37 @@ function createValidatorFactory() {
     return rootAssembler;
 }
 
-modules.exports = { V: createValidatorFactory() };
+function addFeature(feature) {
+    // check the options,
+    if (!isObject(feature)) {
+        throw new TypeError(`feature should be a js object`);
+    }
+    if (typeof feature.name !== 'string') {
+        throw new TypeError(`feature must have name of type string`);
+    }
+    // names are restructed javascript var names [0-1A-Za-z$_]
+    if (/^[0-1A-Za-z$_]+$/.test(feature.name)) {
+        throw new TypeError(`"name" value must be a string naming a javascript identifier`);
+    }
+    feature.factory = feature.factory || 0;
+    if (feature.factory){
+        if (typeof feature.factory !== 'number'){
+            throw new TypeError(`"factory" property wants `);
+        }
+    }
+    if (typeof feature.fn !== 'function'){
+        throw new TypeError(`"fn" is missing you must specify a validator function`);
+    }
+    // all typechecks ok
+    if (features.has(feature.name)){
+        throw new TypeError(`a feature with the name ${feature.name} is already registered, register under a different name`);
+    }
+    features.set(feature.name, feature);
+    return true;
+}
+
+function removeFeature(featureName) {
+    return features.delete(featureName);
+}
+
+modules.exports = { V: createValidatorFactory(), addFeature, removeFeature };
