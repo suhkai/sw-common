@@ -17,6 +17,8 @@ const {
     createRangeCheck,
 } = require('./validator');
 
+const $optional = Symbol.for('optional');
+
 function sanitizeFileName(name) {
     return name.replace(/[\0?*+]/g, '_');
 }
@@ -52,86 +54,128 @@ features.set('range', {
     }
 });
 
+const alphabet = Array.from({ length: 26 }).map((_, i) => String.fromCharCode(65 + i));
+
+function randomString(length = 4) {
+
+    const _alphabet = alphabet.slice();
+    for (let i = 0; i < 26 - length; i++) {
+        const idx = Math.trunc(Math.random() * _alphabet.length);
+        _alphabet.splice(idx, 1);
+    }
+    return _alphabet;
+}
+
 features.set('object', {
     // x->2, object 
     // 2->1, call object({...})
     // 1->0, you finalized with "open" or "closed",
     factory: 2,
     name: 'object',
-    fn: function (props) {
+    fn: function (schema) {
+        const prefix = randomString()
         // must be an object
-        if (!isObject(props)) {
+        if (!isObject(schema)) {
             const errMsg = `specify a JS object with validators to verify an object`;
             throw new TypeError(errMsg);
         }
-        const descr = {
-            strings: Object.getOwnPropertyNames(props),
-            symbols: Object.getOwnPropertySymbols(props)
+        const props = {
+            strings: Object.getOwnPropertyNames(schema),
+            symbols: Object.getOwnPropertySymbols(schema)
         };
-        const propCount = descr.strings.length + descr.symbols.length;
+        const propCount = props.strings.length + props.symbols.length;
         if (propCount === 0) {
             const errMsg = `the JS validator object does not have any properties defined`;
             throw new TypeError(errMsg);
         }
         const nonFunctions = descr.filter(f => typeof props[f] !== 'function');
-        if (nonFunctions.length){
+        if (nonFunctions.length) {
             const errMsg = `the JS validator object does not have any properties defined`;
             throw new TypeError(errMsg);
         }
         // all ok with the object
-        return function sealing(propName) {
-            if (propName !== 'open' && propName !== 'closed') {
-                const errMsg = `object must be closed by "open" or "closed" modofifier, not with "${propName}"`;
+        return function sealing(openOrClosed) {
+            if (openOrClosed !== 'open' && openOrClosed !== 'closed') {
+                const errMsg = `object must be closed by "open" or "closed" modofifier, not with "${openOrClosed}"`;
                 throw new TypeError(errMsg);
             }
-            // all ok with the modifiers
-            return function validateObject(obj) { // Return dummy validator
-                if (propName === 'closed'){
-                    const _symbols = Object.getOwnPropertySymbols(obj);
-                    const _strings = Object.getOwnPropertyNames(obj);
-                    // no strings outside the one form props
-                    const forbiddenStrings = _strings.filter(f=>{
-                        return descr.strings.includes(f) === false;
-                    });
-                    // symbols are converted to strings!!
-                    const forbiddenSymbols = _symbols.filter(f=>{
-                        return descr.symbols.includes(f) === false;
-                    }).map(String);
-                    
-                    if (forbiddenStrings.length + forbiddenSymbols.length){
-                        const stringProps = forbiddenStrings.length ?  `stringprops:[${forbiddenStrings.join('|')}]`: '';
-                        const symbolProps = forbiddenSymbols.length ? `symbolsprops:[${forbiddenSymbols.join('|')}]`: ''; 
-                        const errMsg = `The validating object schema is closed. Forbidden properties: ${stringProps} ${symbolProps}`;
-                        return [null, errMsg];
+            // split object in symbol and normal strings
+            function copyObject(o) {
+                const symbolObj = {};
+                const stringObj = {};
+
+                for (const prop in o) {
+                    if (typeof prop === 'string') {
+                        stringObj[prop] = o[prop];
+                    }
+                    else if (typeof prop === 'symbol') {
+                        symbolObj[`${String(prop)}`] = o[prop];
                     }
                 }
-                // 2. Check if any of the props arent defined then check if they are optional, if they are not
-                // collect errors
-                const shouldBeManditory = [];
-                // handle symbols
-                for (const symb of descr.symbols){
-                    if (!(symb in obj)){
-                        shouldBeManditory.push(`${String(symb)} is manditory but absent from the object`);
+                return { symbolObj, stringObj };
+            }
+
+            function checkMissingProps(partition, data, errors) {
+                for (const key of props[partition]) {
+                    if (!(key in data)) {
+                        if (schema[key][$optional] === false) {
+                            errors.push(`${String(key)} is manditory but absent from the object`);
+                        }
                     }
                 }
-                for (const props of descr.strings){
-                    if (!(props in obj)){
-                        shouldBeManditory.push(`"${props}" is manditory but absent from the object`);
+                return errors
+            }
+
+            function deepValidate(partition, data, ctx) {
+                const errors = [];
+                for (const key of descr[partition]) {
+                    const value = data[key];
+                    if (value === undefined) {
+                        continue; // skip it
+                    }
+                    const [result, err, final] = schema[key](value, { data: ctx.data, location: `${ctx.location}/${key}` });
+                    if (!err) {
+                        data[key] = result; // allow for transforms
+                        continue;
+                    }
+                    errors.push(err);
+                }
+                return [errors.length ? undefined : data, errors.length ? errors.join('|') : undefined, undefined];
+            }
+            //
+            return function validateObject(obj, ctx = { data: obj, location: '' }) { // Return dummy validator
+                // validation for optional and missing props etc
+                const errors = [];
+                
+                if (openOrClosed === 'closed') {
+                    for (const propKey in obj) {
+                        if (!(propKey in schema)) {
+                            errors.push(`${String(propKey)} this property is not allowed`);
+                        }
+                    }
+                    if (errors.length) {
+                        const errMsg = `The validating object schema is closed. Forbidden properties: [${errors.join('|')}]`;
+                        return [null, errMsg, null];
                     }
                 }
-                if (shouldBeManditory.length){
-                    return [null, shouldBeManditory.join('|')];
+
+                checkMissingProps('string', obj, errors);
+                checkMissingProps('symbol', obj, errors);
+
+                if (errors.length) {
+                    return [null, errors.join('|'), null];
                 }
-                // TODO: need to make loop over all validators while making a path, how do we do symbols??? there is no structure behind symbols
-                for (const symb of descr.symbols){
-                    if (!(symb in obj)){
-                        shouldBeManditory.push(`${String(symb)} is manditory but absent from the object`);
-                    }
+                // deep validation
+                const [result1, errors1] = deepValidate('string', obj, ctx);
+                if (errors1) {
+                    return [undefined, errors1, undefined];
                 }
-                // 3. now we check the values of the props by calling the validators with the values
-                // 4. the stored values are returned, the data is immutable, return new data object, (this makes transformations possible)
-                // should it be 
-                return [obj, null];
+                const [result2, errors2] = deepValidate('symbol', result1, ctx);
+                if (errors2) {
+                    return [undefined, errors2, undefined];
+                }
+                // all done
+                return [result2, undefined, undefined]
             }
         };
     }
@@ -182,7 +226,7 @@ function createValidatorFactory() {
                 if (excludeSymbols.includes(prop)) {
                     return undefined;
                 }
-                if (prop === Symbol.for('optional')) {
+                if (prop === $optional) {
                     return optional;
                 }
                 if (optional) { // closed!!
