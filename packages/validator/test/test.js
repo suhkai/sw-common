@@ -21,7 +21,6 @@ const {
     // tokenizers
     createValidator,
     createCollectionChecker,
-
 } = require('../src/validator');
 
 
@@ -56,7 +55,7 @@ describe('validation tests', function () {
     describe('helpers', () => {
         describe('isStringArray', () => {
             it('non array', () => {
-                const [arr, err] = isStringArray({a:1});
+                const [arr, err] = isStringArray({ a: 1 });
                 expect(arr).to.be.null;
                 expect(err).to.equal('collection is not a array [object Object]');
             });
@@ -153,26 +152,46 @@ describe('validation tests', function () {
             expect(result1).to.deep.equal([null, '34 is not between 1 and 2 inclusive']);
             const result2 = checker(1.2);
             expect(result2).to.deep.equal([1.2, null]);
-            expect(()=>createRangeCheck(4, 2)).to.throw('lower boundery m:4 should be lower then upper boundery n:2');
-            expect(()=>createRangeCheck('1', 2)).to.throw('lower boundery m:<string>1 MUST be of type number');
-            expect(()=>createRangeCheck(1, '2')).to.throw('upper boundery n:<string>2 MUST be of type number');
-            expect(()=>createRangeCheck(NaN, 100)).to.throw('lower boundery m is a NaN');
-            expect(()=>createRangeCheck(0, NaN)).to.throw('upper boundery n is a NaN');
+            expect(() => createRangeCheck(4, 2)).to.throw('lower boundery m:4 should be lower then upper boundery n:2');
+            expect(() => createRangeCheck('1', 2)).to.throw('lower boundery m:<string>1 MUST be of type number');
+            expect(() => createRangeCheck(1, '2')).to.throw('upper boundery n:<string>2 MUST be of type number');
+            expect(() => createRangeCheck(NaN, 100)).to.throw('lower boundery m is a NaN');
+            expect(() => createRangeCheck(0, NaN)).to.throw('upper boundery n is a NaN');
         });
         it('createCollectionChecker', () => {
-            const checker = createCollectionChecker('string', ['DE','NL','GB']);
+            const checker = createCollectionChecker('string', ['DE', 'NL', 'GB']);
             const result1 = checker('DE');
-            expect(result1).to.deep.equal([ 'DE', null ]);
+            expect(result1).to.deep.equal(['DE', null]);
             const result2 = checker('XX');
-            expect(result2).to.deep.equal([ null, 'value is not part of the colelection' ]);
+            expect(result2).to.deep.equal([null, 'value is not part of the colelection']);
             const result3 = checker(1);
-            expect(result3).to.deep.equal([ null, 'value is not of type string' ]);
+            expect(result3).to.deep.equal([null, 'value is not of type string']);
         });
         //createCollectionChecker
         describe('string patterns', () => {
             describe('test simple string', () => {
 
             });
+        });
+        //
+        describe('javascript object validation', () => {
+            /*  
+                const validator1 = vF.range(-100, 100).optional;
+                const validator2 = vF.range(-100, 100);// should be ok
+                const validator3 = validator2.range(-2, 2); // should be ok
+
+                const validator4 = vF.object({
+                    favicons: vF.any([
+                        vF.if(vf.string).then( s=>{
+                    }),
+                    vF.object({
+                        path: vF.string
+                    }).closed
+                ]),
+                name: vF.string(100),
+                lastName: vF.string(30).optional
+             }).open;
+            */
         });
     })
 });
