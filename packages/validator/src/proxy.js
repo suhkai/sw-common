@@ -15,7 +15,7 @@ function createValidatorFactory() {
     function createHandler(parentHandler, parentAssembler) {
         let propContext;
         let optional = false;
-        const handler = Objec.freeze({
+        const handler = Object.freeze({
             get: function (target /* the primer, or fn in the chain */, prop, receiver /* Proxy */) {
                 // completling partials
                 if (propContext && propContext.factory) {
