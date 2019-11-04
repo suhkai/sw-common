@@ -5,7 +5,6 @@ const fs = require('fs');
 const rmdirRecursiveSync = require('rmdir-recursive').sync;
 const colors = require('colors');
 
-
 //rollup
 const { rollup } = require('rollup');
 
