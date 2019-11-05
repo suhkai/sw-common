@@ -1,5 +1,7 @@
 const { features } = require('./dictionary');
 
+const $optional = Symbol.for('optional');
+
 features.set('object', {
     factory: 2,
     name: 'object',
@@ -18,7 +20,9 @@ features.set('object', {
             const errMsg = `the JS validator object does not have any properties defined`;
             throw new TypeError(errMsg);
         }
-        const nonFunctions = descr.filter(f => typeof props[f] !== 'function');
+        const nonFunctions = props.strings.filter(f => typeof schema[f] !== 'function').concat(
+            props.symbols.filter(f => typeof schema[f] !== 'function')
+        );
         if (nonFunctions.length) {
             const errMsg = `the JS validator object does not have any properties defined`;
             throw new TypeError(errMsg);
@@ -49,7 +53,7 @@ features.set('object', {
                 for (const key of props[partition]) {
                     if (!(key in data)) {
                         if (schema[key][$optional] === false) {
-                            errors.push(`${String(key)} is manditory but absent from the object`);
+                            errors.push(`[${String(key)}] is manditory but absent from the object`);
                         }
                     }
                 }
@@ -58,7 +62,7 @@ features.set('object', {
 
             function deepValidate(partition, data, ctx) {
                 const errors = [];
-                for (const key of descr[partition]) {
+                for (const key of props[partition]) {
                     const value = data[key];
                     if (value === undefined) {
                         continue; // skip it
@@ -89,18 +93,18 @@ features.set('object', {
                     }
                 }
 
-                checkMissingProps('string', obj, errors);
-                checkMissingProps('symbol', obj, errors);
+                checkMissingProps('strings', obj, errors);
+                checkMissingProps('symbols', obj, errors);
 
                 if (errors.length) {
                     return [null, errors.join('|'), null];
                 }
                 // deep validation
-                const [result1, errors1] = deepValidate('string', obj, ctx);
+                const [result1, errors1] = deepValidate('strings', obj, ctx);
                 if (errors1) {
                     return [undefined, errors1, undefined];
                 }
-                const [result2, errors2] = deepValidate('symbol', result1, ctx);
+                const [result2, errors2] = deepValidate('symbols', result1, ctx);
                 if (errors2) {
                     return [undefined, errors2, undefined];
                 }

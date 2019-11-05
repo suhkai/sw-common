@@ -1,5 +1,5 @@
 module.exports = function createStringLengthRangeCheck(m, n) {
-    m = m === undefined || m === null ? -Infinity : m;
+    m = m === undefined || m === null ? 0 : m;
     n = n === undefined || n === null ? Infinity : n;
     if (typeof n !== 'number') {
             const type = typeof n;
@@ -23,7 +23,7 @@ module.exports = function createStringLengthRangeCheck(m, n) {
     }
     return function isInRange(str) {
             if (typeof str !== 'string'){
-                    return [null, `string of length:${str.length} is not between ${m} and ${n} inclusive`];        
+                    return [null, `value type is not of type string: ${typeof str}`];        
             }
             if (str.length >= m && str.length <= n) {
                     return [str, null];

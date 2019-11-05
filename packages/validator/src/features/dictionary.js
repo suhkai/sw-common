@@ -1,3 +1,5 @@
+const features = new Map();
+
 module.exports = {
-    features: new Map()
+    features
 };

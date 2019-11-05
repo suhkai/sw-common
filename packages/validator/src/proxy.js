@@ -7,9 +7,18 @@ function primer() {
     /* noop primer  */
     console.log('function is called');
 }
+
 const excludeSymbols = [
     Symbol.for('nodejs.util.inspect.custom'),
 ];
+
+require('./features/boolean');
+require('./features/object');
+require('./features/range');
+require('./features/string');
+require('./features/number');
+
+
 
 function createValidatorFactory() {
     function createHandler(parentHandler, parentAssembler) {
@@ -72,10 +81,21 @@ function createValidatorFactory() {
                     if (!thisArg) {
                         throw new TypeError(`finalizing a validator "${propContext.name}" must be done immediatly on creation`);
                     }
-                    const temp = {
-                        ...propContext,
-                        fn: propContext.fn(...argumentList) // this can throw!!
-                    };
+                    let temp;
+                    try {
+                        temp = {
+                            ...propContext,
+                            fn: propContext.fn(...argumentList) // this can throw!!
+                        };
+                    }
+                    catch (err) {
+                        // clear out the state because
+                        if (propContext && propContext.factory > 0) {
+                            propContext = undefined; // clear it
+                        }
+                        // re-throw
+                        throw err;
+                    }
                     temp.factory--;
                     if (temp.factory > 0) {
                         propContext = temp;
@@ -126,16 +146,16 @@ function addFeature(feature) {
         throw new TypeError(`"name" value must be a string naming a javascript identifier`);
     }
     feature.factory = feature.factory || 0;
-    if (feature.factory){
-        if (typeof feature.factory !== 'number'){
+    if (feature.factory) {
+        if (typeof feature.factory !== 'number') {
             throw new TypeError(`"factory" property wants `);
         }
     }
-    if (typeof feature.fn !== 'function'){
+    if (typeof feature.fn !== 'function') {
         throw new TypeError(`"fn" is missing you must specify a validator function`);
     }
     // all typechecks ok
-    if (features.has(feature.name)){
+    if (features.has(feature.name)) {
         throw new TypeError(`a feature with the name ${feature.name} is already registered, register under a different name`);
     }
     features.set(feature.name, feature);
@@ -146,4 +166,4 @@ function removeFeature(featureName) {
     return features.delete(featureName);
 }
 
-modules.exports = { V: createValidatorFactory(), addFeature, removeFeature };
+module.exports = { V: createValidatorFactory(), addFeature, removeFeature };

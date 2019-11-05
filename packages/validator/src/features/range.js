@@ -1,5 +1,5 @@
 
-
+const { features } = require('./dictionary');
 const createRangeCheck = require('../createRangeCheck');
 
 features.set('range', {
@@ -7,3 +7,4 @@ features.set('range', {
     name: 'range',
     fn: createRangeCheck
 });
+

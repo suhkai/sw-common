@@ -1,0 +1,224 @@
+const chaiAsPromised = require('chai-as-promised');
+const { describe, it, before, after } = require('mocha');
+const chai = require('chai');
+chai.should();
+chai.use(chaiAsPromised);
+const { expect } = chai;
+
+const convertToNumber = require('../src/convert2Number');
+const convertToBoolean = require('../src/convert2Boolean');
+const isStringArray = require('../src/isStringArray');
+const isInt = require('../src/isInteger');
+const isObject = require('../src/isObject');
+const createStringLengthRangeCheck = require('../src/createStringLengthRangeCheck');
+const checkNumberRange = require('../src/createRangeCheck');
+const isBooleanArray = require('../src/isBooleanArray');
+const isNumberArray = require('../src/isNumbersArray');
+const equals = require('../src/equals');
+
+describe('utils tests', function () {
+    describe('object  tests', () => {
+        it('isObject', () => {
+            const data = [{}, null, undefined, new Date, []];
+            expect(isObject(data[0])).to.be.true;
+            expect(isObject(data[1])).to.be.false;
+            expect(isObject(data[2])).to.be.false;
+            expect(isObject(data[3])).to.be.true;
+            expect(isObject(data[4])).to.be.false;
+        });
+    });
+    describe('equals', () => {
+        it('compare strings', () => {
+            const result1 = equals('string1', 'string2');
+            const result2 = equals('same', 'same');
+            expect(result1).to.be.false;
+            expect(result2).to.be.true;
+        });
+        it('compare numbers', () => {
+            const result1 = equals(1, 2);
+            const result2 = equals(123.4, 123.4);
+            expect(result1).to.be.false;
+            expect(result2).to.be.true;
+        });
+        it('compare Symbols', () => {
+            const result1 = equals(Symbol.for('1'), Symbol.for('@'));
+            const result2 = equals(Symbol.for('something'), Symbol.for('something'));
+            expect(result1).to.be.false;
+            expect(result2).to.be.true;
+        });
+        it('compare booleans', () => {
+            const result1 = equals(true, false);
+            const result2 = equals(false, false);
+            expect(result1).to.be.false;
+            expect(result2).to.be.true;
+        });
+        it('compare nulls', () => {
+            const result1 = equals(null, undefined);
+            const result2 = equals(null, null);
+            expect(result1).to.be.false;
+            expect(result2).to.be.true;
+        });
+        it('compare objects', () => {
+            const result1 = equals({}, {});
+            expect(result1).to.be.true;
+            const result2 = equals({a:'2'}, {a:'2'});
+            expect(result2).to.be.true;
+            const result3 = equals({a:'2', b:{c:Symbol.for('v')}}, {a:'2', b:{c:Symbol.for('v')}});
+            expect(result3).to.be.true;
+            const result4 = equals({a:'2', b:{c:Symbol.for('v')}}, {a:'2', b:{c:Symbol.for('v2')}});
+            expect(result4).to.be.false;
+            const result5 = equals({}, {a:'2', b:{c:Symbol.for('v2')}});
+            expect(result5).to.be.false;
+            const result6 = equals({a:'2', b:{c:Symbol.for('v2')}}, {c:'2', b:{c:Symbol.for('v2')}});
+            expect(result6).to.be.false;
+            const result7 = equals({[Symbol.for('a')]:'2'}, {[Symbol.for('c')]:'2'});
+            expect(result7).to.be.false;
+        });
+        it('compare arrays', () => {
+            const result1 = equals([], []);
+            const result2 = equals([3, 5], [5, 3]);
+            const result3 = equals([3, 3, 5], [5, 3, 3]);
+            const result4 = equals([3, 3, 5], [5, 5, 3]);
+            expect(result1).to.be.true;
+            expect(result2).to.be.true;
+            expect(result3).to.be.true;
+            expect(result4).to.be.false;
+        });
+    });
+    describe('scalar tests', () => {
+        it('isInteger', () => {
+            expect(isInt(1)).to.deep.equal([1, null]);
+            expect(isInt(1.4)).to.deep.equal([null, 'not an integer']);
+            expect(isInt(-Infinity)).to.deep.equal([null, 'not an integer']);
+            expect(isInt({})).to.deep.equal([null, 'not a number']);
+        });
+        it('createStringLengthRangeCheck', () => {
+            expect(() => createStringLengthRangeCheck(-1, 12)).to.throw('lower boundery m:-1 should be >= 0');
+            expect(() => createStringLengthRangeCheck(4, 2)).to.throw('lower boundery m:4 should be lower then upper boundery n:2');
+            expect(() => createStringLengthRangeCheck('4', 2)).to.throw('lower boundery m:<string>4 MUST be of type number');
+            expect(() => createStringLengthRangeCheck(4, '2')).to.throw('upper boundery n:<string>2 MUST be of type number');
+            expect(() => createStringLengthRangeCheck(NaN, 2)).to.throw('lower boundery m is a NaN');
+            expect(() => createStringLengthRangeCheck(4, NaN)).to.throw('upper boundery n is a NaN');
+            const checker = createStringLengthRangeCheck(2, 10);
+            const result1 = checker('some string longer the 10 chars');
+            expect(result1).to.deep.equal([null, 'string of length:31 is not between 2 and 10 inclusive']);
+            const result2 = checker('x');// to short
+            expect(result2).to.deep.equal([null, 'string of length:1 is not between 2 and 10 inclusive']);
+            const result3 = checker('hello');
+            expect(result3).to.deep.equal(['hello', null]);
+        });
+        it('createRangeCheck', () => {
+            const createRangeCheck = checkNumberRange(false);
+            const checker = createRangeCheck(1, 2);
+            const result1 = checker(34);
+            expect(result1).to.deep.equal([null, '34 is not between 1 and 2 inclusive']);
+            const result2 = checker(1.2);
+            expect(result2).to.deep.equal([1.2, null]);
+            expect(() => createRangeCheck(4, 2)).to.throw('lower boundery m:4 should be lower then upper boundery n:2');
+            expect(() => createRangeCheck('1', 2)).to.throw('lower boundery m:<string>1 MUST be of type number');
+            expect(() => createRangeCheck(1, '2')).to.throw('upper boundery n:<string>2 MUST be of type number');
+            expect(() => createRangeCheck(NaN, 100)).to.throw('lower boundery m is a NaN');
+            expect(() => createRangeCheck(0, NaN)).to.throw('upper boundery n is a NaN');
+        });
+    })
+    describe('type conversions', () => {
+        it('conversion to number', () => {
+            const data = ['34234', 'xxEAZE', 4234];
+            expect(convertToNumber(data[0])).to.deep.equal([34234, null]);
+            expect(convertToNumber(data[1])).to.deep.equal([null, 'cannot convert to number']);
+            expect(convertToNumber(data[2])).to.deep.equal([4234, null]);
+        });
+        describe('conversion to boolean', () => {
+            const data = [
+                { in: 'true', out: [true, null] },
+                { in: 'TrUE', out: [true, null] },
+                { in: 'False', out: [false, null] },
+                { in: 'Falsex', out: [null, 'cannot convert to boolean'] },
+                { in: false, out: [false, null] },
+                { in: true, out: [true, null] },
+                { in: null, out: [null, 'cannot convert to boolean for other then string type'] }
+            ];
+            for (const elt of data) {
+                const msg = elt.out[1] ? `convert ${elt.in} to boolean should result in error` : `convert ${elt.in} to boolean should succeed`;
+                it(msg, () => {
+                    const input = elt.in; // copy value from closure, because changed in next iteration
+                    const output = elt.out;
+                    expect(convertToBoolean(input)).to.deep.equal(output);
+                });
+            }
+        });
+    });
+    describe('helpers', () => {
+        describe('isStringArray', () => {
+            it('non array', () => {
+                const [arr, err] = isStringArray({ a: 1 });
+                expect(arr).to.be.null;
+                expect(err).to.equal('collection is not a array [object Object]');
+            });
+            it('empty array', () => {
+                const [arr, err] = isStringArray([]);
+                expect(arr).to.be.null;
+                expect(err).to.equal('collection is not an empty array');
+            });
+            it('array of strings', () => {
+                const data = ['a string', 'i like startrek'];
+                const [arr, err] = isStringArray(data);
+                expect(err).to.be.null;
+                expect(arr).to.deep.equal(data);
+            });
+            it('array of non strings', () => {
+                const data = [1, Symbol.for('zup'), true, 'a string', 'i like startrek'];
+                const [arr, err] = isStringArray(data);
+                expect(arr).to.be.null;
+                expect(err).equal('not all elements were strings');
+            });
+        });
+        describe('isNumberArray', () => {
+            it('empty array test', () => {
+                const [arr, err] = isNumberArray([]);
+                expect(arr).to.be.null;
+                expect(err).to.equal('collection is not an empty array');
+            });
+            it('array of numbers', () => {
+                const data = [1, 334, 2345, NaN, Infinity];
+                const [arr, err] = isNumberArray(data);
+                expect(err).to.be.null;
+                expect(arr).to.deep.equal(data);
+            });
+        });
+        describe('isBooleanArray', () => {
+            it('empty array test', () => {
+                const [arr, err] = isBooleanArray([]);
+                expect(arr).to.be.null;
+                expect(err).to.equal('collection is not an empty array');
+            });
+            it('array of booleans', () => {
+                const data = [false, true];
+                const [arr, err] = isBooleanArray(data);
+                expect(err).to.be.null;
+                expect(arr).to.deep.equal(data);
+            });
+        });
+
+
+        describe('javascript object validation', () => {
+            /*  
+                const validator1 = vF.range(-100, 100).optional;
+                const validator2 = vF.range(-100, 100);// should be ok
+                const validator3 = validator2.range(-2, 2); // should be ok
+     
+                const validator4 = vF.object({
+                    favicons: vF.any([
+                        vF.if(vf.string).then( s=>{
+                    }),
+                    vF.object({
+                        path: vF.string
+                    }).closed
+                ]),
+                name: vF.string(100),
+                lastName: vF.string(30).optional
+             }).open;
+            */
+        });
+    })
+});

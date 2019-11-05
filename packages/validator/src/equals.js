@@ -11,7 +11,7 @@ const scalars = [
 // isXXXX
 
 const isScalar = s => {
-    scalars.includes(typeof s);
+    return scalars.includes(typeof s);
 }
 
 const isClass = c => {
@@ -30,51 +30,69 @@ const equalSimple = (a, b) => a === b;
 
 const equalArray = (arr1, arr2) => {
     // for every part in arr1, there is something in arr2
+
     if (arr1.length !== arr2.length) return false;
-    arr1.filter(a1 => arr2.find(a2 => {
-        return equal(a1, a2); // each element not neccesarily a scalar
-    }));
+    
+    const ac2 = arr2.slice(0);
+
+    for (let i = 0; i < arr1.length; i++) {
+        const foundIdx = ac2.findIndex( v => equal(v, arr1[i]));
+        if (foundIdx >= 0){
+            ac2.splice(foundIdx, 1);
+        }
+    }
+    if (ac2.length) return false;
+
+    const ac1 = arr1.slice(0);
+
+    for (let i = 0; i < arr2.length; i++) {
+        const foundIdx = ac1.findIndex( v => equal(v, arr2[i]));
+        if (foundIdx >= 0){
+            ac1.splice(foundIdx,1);
+        }
+    }
+    if (ac1.length) return false;
+
+    return true;
 }
 
-const equalFunction = (f1,f2) => {
+const equalFunction = (f1, f2) => {
     return f1.toString() === f2.toString();
 }
 
-const equalClass = (c1,c2) => {
+const equalClass = (c1, c2) => {
     return c1.toString() === c2.toString();
 }
 
-function equalprops(a,b, selector){
+function equalprops(a, b, selector) {
     const aS = selector(a);
     const bS = selector(b);
-    if (aS.lengt !== bS.length){
+    if (aS.length !== bS.length) {
         return false;
     }
-    if (!equalArray(aS,bS)){
+    if (!equalArray(aS, bS)) {
         return false;
     }
-    for (const s of As){
+    for (const s of aS) {
         const v1 = a[s];
         const v2 = b[s];
-        if (!equal(v1,v2)){
+        if (!equal(v1, v2)) {
             return false;
         }
     }
     return true;
 }
 
-
-const equalObject =(a,b) => {
+const equalObject = (a, b) => {
     // lets to symbolsfor (const a )
-    if (!equalprops(a,b, Object.getOwnPropertyNames)){
+    if (!equalprops(a, b, Object.getOwnPropertyNames)) {
         return false;
     }
-    if (!equalprops(a,b, Object.getOwnPropertyDescriptors)){
+    if (!equalprops(a, b, Object.getOwnPropertySymbols)) {
         return false;
     }
     return true;
 }
-
 
 function equal(a, b) {
     if (isScalar(a) && isScalar(b)) {
@@ -83,17 +101,22 @@ function equal(a, b) {
     if (isArray(a) && isArray(b)) {
         return equalArray(a, b);
     }
-    if (isFunction(a) && isFunction(b)){
-        return equalFunction(a,b);
+    if (isFunction(a) && isFunction(b)) {
+        return equalFunction(a, b);
     }
-    if (isObject(a) && isObject(b)){
-        return equalObject(a,b);
+    if (isObject(a) && isObject(b)) {
+        return equalObject(a, b);
     }
-    if (isClass(a) && isClass(b)){
-        return equalClass(a,b);
+    if (isClass(a) && isClass(b)) {
+        return equalClass(a, b);
+    }
+    if (a === null && a === b) {
+        return true;
+    }
+    if (a === undefined && a === b) {
+        return true;
     }
     return false;
-
 }
 
 module.exports = equal;
