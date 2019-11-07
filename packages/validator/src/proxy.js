@@ -1,11 +1,11 @@
 'use strict';
-
+const clone = require('clone');
 const { features } = require('./features/dictionary');
 const $optional = Symbol.for('optional');
 const $marker = Symbol.for('ladybug');
 function primer() {
     /* noop primer  */
-    console.log('function is called');
+    throw new TypeError(`Internal Error: you reached a dead-stop function, please file this Error on as an issue on github: `)
 }
 
 const excludeSymbols = [
@@ -21,8 +21,7 @@ require('./features/number');
 
 
 function createValidatorFactory() {
-    function createHandler(parentHandler, parentAssembler) {
-        let propContext;
+    function createHandler(propContext, parentAssembler) {
         let optional = false;
         const handler = Object.freeze({
             get: function (target /* the primer, or fn in the chain */, prop, receiver /* Proxy */) {
@@ -31,7 +30,7 @@ function createValidatorFactory() {
                     propContext.fn = propContext.fn(prop); // this could throw
                     propContext.factory--;
                     if (propContext.factory === 0) {
-                        const assembly = new Proxy(propContext.fn, createHandler(this, receiver)); // create parent-child-chain of handlers for callback
+                        const assembly = new Proxy(propContext.fn, createHandler(undefined, parentAssembler /*dont use reciver*/)); // skip the isolated chain where we finalized a curried function
                         propContext = undefined;
                         return assembly;
                     }
@@ -67,42 +66,29 @@ function createValidatorFactory() {
                     throw new TypeError(erMsg);
                 }
                 if (found.factory > 0) {
-                    propContext = found; // park if or next
-                    return receiver;
+                    return new Proxy(primer /*use dummy just in case*/, createHandler(clone(found), parentAssembler || receiver));
+                    // V.object({..., a:V.hello, ...});
+                    // V.object
                 }
+                // this validator needs no constructing
                 return new Proxy(found.fn, createHandler(this, receiver)); // create parent-child-chain of handlers for callback
             },
             set: function () {
                 throw new TypeError(`cannot use assignment in this context`);
             },
             apply: function (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
+                // finalizing a feature via completing calling the curried function
                 if (propContext && propContext.factory > 0) {
-                    // must have a proxyt otherwise raise error
-                    if (!thisArg) {
-                        throw new TypeError(`finalizing a validator "${propContext.name}" must be done immediatly on creation`);
+                    const temp = {
+                        ...propContext,
+                        fn: propContext.fn(...argumentList) // this can throw!!
+                    };
+                    Object.assign(propContext, temp);
+                    propContext.factory--;
+                    if (propContext.factory > 0) {
+                        return new Proxy(temp.fn, createHandler(propContext, parentAssembler || thisarg)); //not done yet with finalizing
                     }
-                    let temp;
-                    try {
-                        temp = {
-                            ...propContext,
-                            fn: propContext.fn(...argumentList) // this can throw!!
-                        };
-                    }
-                    catch (err) {
-                        // clear out the state because
-                        if (propContext && propContext.factory > 0) {
-                            propContext = undefined; // clear it
-                        }
-                        // re-throw
-                        throw err;
-                    }
-                    temp.factory--;
-                    if (temp.factory > 0) {
-                        propContext = temp;
-                        return thisArg;
-                    }
-                    propContext = undefined;
-                    const assembly = new Proxy(temp.fn, createHandler(this, thisArg)); // create parent-child-chain of handlers for callback
+                    const assembly = new Proxy(temp.fn, createHandler(undefined, parentAssembler || thisArg)); // create parent-child-chain of handlers for callback
                     return assembly;
                 }
                 //

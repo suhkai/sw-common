@@ -65,31 +65,35 @@ describe('features tests', function () {
             expect(checker).to.throw('lower boundery m:56 should be lower then upper boundery n:-99');
         });
     });
-    describe('object stets',()=>{
+    describe('object tests',()=>{
         it('object with scalar properties some optional',()=>{
-            const schema ={
+            const checker = V.object({
                 id: V.integer(),
                 name: V.string(0,30).optional,
                 lastName: V.string(0,30)
-            };
-            const checker = V.object(schema).closed;
+            }).closed;
+
             const result = checker({
                 id: 1234,
                 name: 'Hans',
                 lastName: 'Kazan'
             });
             expect(result).to.deep.equal([ { id: 1234, name: 'Hans', lastName: 'Kazan' }, undefined, undefined ]);
+            
             const result2 = checker({
                 id: 1234,
                 name: 'Hans',
                 lastName: 'Kazan',
                 s: 'a' // should break because schema is closed
             });
+            
             expect(result2).to.deep.equal([ null, 'The validating object schema is closed. Forbidden properties: [s this property is not allowed]', null ]);
+            
             const result3 = checker({
                 id: 1234,
                 lastName: 'Kazan'
             });
+            
             expect(result3).to.deep.equal([ { id: 1234, lastName: 'Kazan' }, undefined, undefined ]);
             const result4 = checker({
                 id: 1234
