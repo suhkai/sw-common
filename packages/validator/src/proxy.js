@@ -79,6 +79,9 @@ function createValidatorFactory() {
             apply: function (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
                 // finalizing a feature via completing calling the curried function
                 if (propContext && propContext.factory > 0) {
+                    if (thisArg === undefined){
+                        throw new TypeError(`feature "${propContext.name}" has not been finalized`);
+                    }
                     const temp = {
                         ...propContext,
                         fn: propContext.fn(...argumentList) // this can throw!!
