@@ -1,10 +1,9 @@
-
 const createRangeCheck = require('../createRangeCheck');
 
 const { features } = require('./dictionary');
 
-features.set('number', {
+features.set('integer', {
     factory: 1,
-    name: 'number',
-    fn: createRangeCheck()
+    name: 'integer',
+    fn: createRangeCheck(true)
 });

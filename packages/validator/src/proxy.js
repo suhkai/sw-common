@@ -17,6 +17,7 @@ require('./features/object');
 require('./features/range');
 require('./features/string');
 require('./features/number');
+require('./features/integer');
 
 
 
