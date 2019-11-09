@@ -18,7 +18,7 @@ require('./features/range');
 require('./features/string');
 require('./features/number');
 require('./features/integer');
-
+require('./features/enum');
 
 
 function createValidatorFactory() {

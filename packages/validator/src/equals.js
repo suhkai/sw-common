@@ -1,4 +1,3 @@
-
 const isObject = require('./isObject');
 
 const scalars = [
@@ -19,7 +18,13 @@ const isClass = c => {
 }
 
 const isFunction = f => {
-    return typeof f === 'function' && f.toString().startsWith('function');
+    if (typeof f === 'function') {
+        const str = f.toString();
+        if (str.startsWith('function') || /^\(([^\)\(]*)\)\s*=>\s*/.test(str)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 const isArray = Array.isArray;
@@ -32,12 +37,12 @@ const equalArray = (arr1, arr2) => {
     // for every part in arr1, there is something in arr2
 
     if (arr1.length !== arr2.length) return false;
-    
+
     const ac2 = arr2.slice(0);
 
     for (let i = 0; i < arr1.length; i++) {
-        const foundIdx = ac2.findIndex( v => equal(v, arr1[i]));
-        if (foundIdx >= 0){
+        const foundIdx = ac2.findIndex(v => equal(v, arr1[i]));
+        if (foundIdx >= 0) {
             ac2.splice(foundIdx, 1);
         }
     }
@@ -46,9 +51,9 @@ const equalArray = (arr1, arr2) => {
     const ac1 = arr1.slice(0);
 
     for (let i = 0; i < arr2.length; i++) {
-        const foundIdx = ac1.findIndex( v => equal(v, arr2[i]));
-        if (foundIdx >= 0){
-            ac1.splice(foundIdx,1);
+        const foundIdx = ac1.findIndex(v => equal(v, arr2[i]));
+        if (foundIdx >= 0) {
+            ac1.splice(foundIdx, 1);
         }
     }
     if (ac1.length) return false;
@@ -56,8 +61,12 @@ const equalArray = (arr1, arr2) => {
     return true;
 }
 
+const regxpNormalisation = /^\(([^\)\(]*)\)\s*=>\s*/;
+
 const equalFunction = (f1, f2) => {
-    return f1.toString() === f2.toString();
+    const str1 = f1.toString().replace(regxpNormalisation,'$1=>');
+    const str2 = f2.toString().replace(regxpNormalisation,'$1=>');
+    return str1 === str2;
 }
 
 const equalClass = (c1, c2) => {

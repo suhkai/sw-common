@@ -1,22 +1,22 @@
 const chaiAsPromised = require('chai-as-promised');
-const { describe, it, before, after } = require('mocha');
+const {
+    describe,
+    it,
+    before,
+    after
+} = require('mocha');
 const chai = require('chai');
 chai.should();
 chai.use(chaiAsPromised);
-const { expect } = chai;
+const {
+    expect
+} = chai;
 
-const convertToNumber = require('../src/convert2Number');
-const convertToBoolean = require('../src/convert2Boolean');
-const isStringArray = require('../src/isStringArray');
-const isInt = require('../src/isInteger');
-const isObject = require('../src/isObject');
-const createStringLengthRangeCheck = require('../src/createStringLengthRangeCheck');
-const createRangeCheck = require('../src/createRangeCheck');
-const isBooleanArray = require('../src/isBooleanArray');
-const isNumberArray = require('../src/isNumbersArray');
-const equals = require('../src/equals');
-
-const { V, addFeature, removeFeature } = require('../src/proxy');
+const {
+    V,
+    addFeature,
+    removeFeature
+} = require('../src/proxy');
 
 describe('features tests', function () {
     describe('string', () => {
@@ -65,23 +65,40 @@ describe('features tests', function () {
             expect(checker).to.throw('lower boundery m:56 should be lower then upper boundery n:-99');
         });
     });
+    describe('enum tests', () => {
+        it('not finding a value in an enum list', () => {
+            const fn = (a,b) => console.log('hello',a,b);
+            const checker = V.enum([
+                'blue','red','orange', fn, Symbol.for('honey')
+            ]).optional;
+            const v1 = checker('blue');
+            expect(v1).to.deep.equal(['blue', undefined]);
+            const v2 = checker(Symbol.for('honey'));
+            expect(v2).to.deep.equal([Symbol.for('honey'), undefined]);
+            const v3 = checker((a,b)=>console.log('hello',a,b));
+            expect(typeof v3[0]).to.equal('function');
+            expect(v3[1]).to.be.undefined;
+            const v4 = checker('cyan');
+            expect(v4).to.deep.equal([ undefined, '"cyan" not found in list' ]);
+        });
+    });
     describe('object tests', () => {
         it('empty schema object construction', () => {
             const checker = () => V.object({});
             expect(checker).to.throw('the JS validator object does not have any properties defined');
         });
         it('incomplete schema object construction', () => {
-            const checker = ()=> V.object({
+            const checker = () => V.object({
                 a: V.number()
             })();
             expect(checker).to.throw('feature "object" has not been finalized');
         });
 
         it('object with scalar properties some optional', () => {
-                    it('empty schema object construction', () => {
-            const checker = () => V.object({});
-            expect(checker).to.throw('the JS validator object does not have any properties defined');
-        });
+            it('empty schema object construction', () => {
+                const checker = () => V.object({});
+                expect(checker).to.throw('the JS validator object does not have any properties defined');
+            });
 
             const checker = V.object({
                 id: V.integer(),
@@ -94,7 +111,11 @@ describe('features tests', function () {
                 name: 'Hans',
                 lastName: 'Kazan'
             });
-            expect(result).to.deep.equal([{ id: 1234, name: 'Hans', lastName: 'Kazan' }, undefined, undefined]);
+            expect(result).to.deep.equal([{
+                id: 1234,
+                name: 'Hans',
+                lastName: 'Kazan'
+            }, undefined, undefined]);
 
             const result2 = checker({
                 id: 1234,
@@ -110,7 +131,10 @@ describe('features tests', function () {
                 lastName: 'Kazan'
             });
 
-            expect(result3).to.deep.equal([{ id: 1234, lastName: 'Kazan' }, undefined, undefined]);
+            expect(result3).to.deep.equal([{
+                id: 1234,
+                lastName: 'Kazan'
+            }, undefined, undefined]);
             const result4 = checker({
                 id: 1234
             });

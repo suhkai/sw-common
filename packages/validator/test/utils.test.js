@@ -1,9 +1,16 @@
 const chaiAsPromised = require('chai-as-promised');
-const { describe, it, before, after } = require('mocha');
+const {
+    describe,
+    it,
+    before,
+    after
+} = require('mocha');
 const chai = require('chai');
 chai.should();
 chai.use(chaiAsPromised);
-const { expect } = chai;
+const {
+    expect
+} = chai;
 
 const convertToNumber = require('../src/convert2Number');
 const convertToBoolean = require('../src/convert2Boolean');
@@ -15,8 +22,76 @@ const checkNumberRange = require('../src/createRangeCheck');
 const isBooleanArray = require('../src/isBooleanArray');
 const isNumberArray = require('../src/isNumbersArray');
 const equals = require('../src/equals');
+const createFind = require('../src/createFind');
 
-describe('utils tests', function () {
+describe('utilities', function () {
+    describe('find', () => {
+        it('create find failure because of empty non array or empty list', () => {
+            expect(() => createFind(undefined)).to.throw;
+            expect(() => createFind([])).to.throw;
+        });
+        it('create find list of string, number and objects', () => {
+            const find = createFind(['hello', 'world', 1]);
+            const res1 = find(1); // [1, undefined]
+            expect(res1).to.deep.equal([1, undefined]);
+            const res2 = find({}); // [undefined, not found]
+            expect(res2).to.deep.equal([undefined, '"[object Object]" not found in list']);
+        });
+        it('create find function to find non-scalar values', () => {
+            const find = createFind([{
+                    'hello': 'world'
+                },
+                [
+                    1,
+                    2,
+                    4,
+                    5,
+                    'nada',
+                    undefined,
+                    null,
+                    {}
+                ],
+                undefined,
+                null
+            ]);
+            const res1 = find({hello: 'world'}); // [1, undefined]
+            expect(res1).to.deep.equal([ {hello:'world'}, undefined]);
+            const res2 = find(undefined);
+            expect(res2).to.deep.equal([undefined, undefined]);
+            const res3 = find(null);
+            expect(res3).to.deep.equal([null, undefined]);
+            const res4 = find( [
+                1,
+                2,
+                4,
+                5,
+                'nadax',
+                undefined,
+                null
+            ]);
+            expect(res4).to.deep.equal([ undefined, '"1,2,4,5,nadax,," not found in list' ])
+            const res5 = find( [
+                1,
+                2,
+                4,
+                {},
+                5,
+                'nada',
+                undefined,
+                null
+            ]);
+            expect(res5).to.deep.equal([[
+                1,
+                2,
+                4,
+                {},
+                5,
+                'nada',
+                undefined,
+                null
+            ], undefined]);
+        });
+    });
     describe('object  tests', () => {
         it('isObject', () => {
             const data = [{}, null, undefined, new Date, []];
@@ -61,17 +136,60 @@ describe('utils tests', function () {
         it('compare objects', () => {
             const result1 = equals({}, {});
             expect(result1).to.be.true;
-            const result2 = equals({a:'2'}, {a:'2'});
+            const result2 = equals({
+                a: '2'
+            }, {
+                a: '2'
+            });
             expect(result2).to.be.true;
-            const result3 = equals({a:'2', b:{c:Symbol.for('v')}}, {a:'2', b:{c:Symbol.for('v')}});
+            const result3 = equals({
+                a: '2',
+                b: {
+                    c: Symbol.for('v')
+                }
+            }, {
+                a: '2',
+                b: {
+                    c: Symbol.for('v')
+                }
+            });
             expect(result3).to.be.true;
-            const result4 = equals({a:'2', b:{c:Symbol.for('v')}}, {a:'2', b:{c:Symbol.for('v2')}});
+            const result4 = equals({
+                a: '2',
+                b: {
+                    c: Symbol.for('v')
+                }
+            }, {
+                a: '2',
+                b: {
+                    c: Symbol.for('v2')
+                }
+            });
             expect(result4).to.be.false;
-            const result5 = equals({}, {a:'2', b:{c:Symbol.for('v2')}});
+            const result5 = equals({}, {
+                a: '2',
+                b: {
+                    c: Symbol.for('v2')
+                }
+            });
             expect(result5).to.be.false;
-            const result6 = equals({a:'2', b:{c:Symbol.for('v2')}}, {c:'2', b:{c:Symbol.for('v2')}});
+            const result6 = equals({
+                a: '2',
+                b: {
+                    c: Symbol.for('v2')
+                }
+            }, {
+                c: '2',
+                b: {
+                    c: Symbol.for('v2')
+                }
+            });
             expect(result6).to.be.false;
-            const result7 = equals({[Symbol.for('a')]:'2'}, {[Symbol.for('c')]:'2'});
+            const result7 = equals({
+                [Symbol.for('a')]: '2'
+            }, {
+                [Symbol.for('c')]: '2'
+            });
             expect(result7).to.be.false;
         });
         it('compare arrays', () => {
@@ -102,7 +220,7 @@ describe('utils tests', function () {
             const checker = createStringLengthRangeCheck(2, 10);
             const result1 = checker('some string longer the 10 chars');
             expect(result1).to.deep.equal([null, 'string of length:31 is not between 2 and 10 inclusive']);
-            const result2 = checker('x');// to short
+            const result2 = checker('x'); // to short
             expect(result2).to.deep.equal([null, 'string of length:1 is not between 2 and 10 inclusive']);
             const result3 = checker('hello');
             expect(result3).to.deep.equal(['hello', null]);
@@ -129,14 +247,34 @@ describe('utils tests', function () {
             expect(convertToNumber(data[2])).to.deep.equal([4234, null]);
         });
         describe('conversion to boolean', () => {
-            const data = [
-                { in: 'true', out: [true, null] },
-                { in: 'TrUE', out: [true, null] },
-                { in: 'False', out: [false, null] },
-                { in: 'Falsex', out: [null, 'cannot convert to boolean'] },
-                { in: false, out: [false, null] },
-                { in: true, out: [true, null] },
-                { in: null, out: [null, 'cannot convert to boolean for other then string type'] }
+            const data = [{
+                    in: 'true',
+                    out: [true, null]
+                },
+                {
+                    in: 'TrUE',
+                    out: [true, null]
+                },
+                {
+                    in: 'False',
+                    out: [false, null]
+                },
+                {
+                    in: 'Falsex',
+                    out: [null, 'cannot convert to boolean']
+                },
+                {
+                    in: false,
+                    out: [false, null]
+                },
+                {
+                    in: true,
+                    out: [true, null]
+                },
+                {
+                    in: null,
+                    out: [null, 'cannot convert to boolean for other then string type']
+                }
             ];
             for (const elt of data) {
                 const msg = elt.out[1] ? `convert ${elt.in} to boolean should result in error` : `convert ${elt.in} to boolean should succeed`;
@@ -151,7 +289,9 @@ describe('utils tests', function () {
     describe('helpers', () => {
         describe('isStringArray', () => {
             it('non array', () => {
-                const [arr, err] = isStringArray({ a: 1 });
+                const [arr, err] = isStringArray({
+                    a: 1
+                });
                 expect(arr).to.be.null;
                 expect(err).to.equal('collection is not a array [object Object]');
             });
