@@ -23,8 +23,114 @@ const isBooleanArray = require('../src/isBooleanArray');
 const isNumberArray = require('../src/isNumbersArray');
 const equals = require('../src/equals');
 const createFind = require('../src/createFind');
+const {
+    tokenGenerator
+} = require('../src/path');
+
 
 describe('utilities', function () {
+    describe('path tokenizer', () => {
+        it('tokenize path "/favicons/android/path', () => {
+            const path = '/favicons/android/path';
+            const tokens1 = Array.from(tokenGenerator(path));
+            expect(tokens1).to.deep.equal(
+                [{
+                        start: 0,
+                        end: 0,
+                        token: '\u0002'
+                    },
+                    {
+                        start: 1,
+                        token: '\u0001',
+                        end: 8
+                    },
+                    {
+                        start: 9,
+                        end: 9,
+                        token: '\u0002'
+                    },
+                    {
+                        start: 10,
+                        token: '\u0001',
+                        end: 16
+                    },
+                    {
+                        start: 17,
+                        end: 17,
+                        token: '\u0002'
+                    },
+                    {
+                        start: 18,
+                        token: '\u0001',
+                        end: 21
+                    }
+                ]
+            );
+        });
+        it('tokenize non root- path "favicons/android/path', () => {
+            const path = 'favicons/android/path';
+            const tokens1 = Array.from(tokenGenerator(path));
+            expect(tokens1).to.deep.equal(
+                [{
+                        start: 0,
+                        token: '\u0001',
+                        end: 7
+                    },
+                    {
+                        start: 8,
+                        end: 8,
+                        token: '\u0002'
+                    },
+                    {
+                        start: 9,
+                        token: '\u0001',
+                        end: 15
+                    },
+                    {
+                        start: 16,
+                        end: 16,
+                        token: '\u0002'
+                    },
+                    {
+                        start: 17,
+                        token: '\u0001',
+                        end: 20
+                    }
+                ]
+            );
+        });
+        it('tokenize non root- paths "favicons/", "favicons", tokenize empty path ""', () => {
+            const path1 = 'favicons/';
+            const path2 = 'favicons';
+            const path3 = '';
+            const tokens1 = Array.from(tokenGenerator(path1));
+            const tokens2 = Array.from(tokenGenerator(path2));
+            const tokens3 = Array.from(tokenGenerator(path3));
+            expect(tokens1).to.deep.equal([{
+                    start: 0,
+                    token: '\u0001',
+                    end: 7
+                },
+                {
+                    start: 8,
+                    end: 8,
+                    token: '\u0002'
+                }
+            ]);
+            expect(tokens2).to.deep.equal(
+                [{
+                    start: 0,
+                    token: '\u0001',
+                    end: 7
+                }]);
+            expect(tokens3).to.deep.equal(
+                [{
+                    start: 0,
+                    token: '\u0001',
+                    end: -1
+                }])
+        });
+    });
     describe('find', () => {
         it('create find failure because of empty non array or empty list', () => {
             expect(() => createFind(undefined)).to.throw;
@@ -54,13 +160,17 @@ describe('utilities', function () {
                 undefined,
                 null
             ]);
-            const res1 = find({hello: 'world'}); // [1, undefined]
-            expect(res1).to.deep.equal([ {hello:'world'}, undefined]);
+            const res1 = find({
+                hello: 'world'
+            }); // [1, undefined]
+            expect(res1).to.deep.equal([{
+                hello: 'world'
+            }, undefined]);
             const res2 = find(undefined);
             expect(res2).to.deep.equal([undefined, undefined]);
             const res3 = find(null);
             expect(res3).to.deep.equal([null, undefined]);
-            const res4 = find( [
+            const res4 = find([
                 1,
                 2,
                 4,
@@ -69,8 +179,8 @@ describe('utilities', function () {
                 undefined,
                 null
             ]);
-            expect(res4).to.deep.equal([ undefined, '"1,2,4,5,nadax,," not found in list' ])
-            const res5 = find( [
+            expect(res4).to.deep.equal([undefined, '"1,2,4,5,nadax,," not found in list'])
+            const res5 = find([
                 1,
                 2,
                 4,
@@ -80,16 +190,18 @@ describe('utilities', function () {
                 undefined,
                 null
             ]);
-            expect(res5).to.deep.equal([[
-                1,
-                2,
-                4,
-                {},
-                5,
-                'nada',
-                undefined,
-                null
-            ], undefined]);
+            expect(res5).to.deep.equal([
+                [
+                    1,
+                    2,
+                    4,
+                    {},
+                    5,
+                    'nada',
+                    undefined,
+                    null
+                ], undefined
+            ]);
         });
     });
     describe('object  tests', () => {
