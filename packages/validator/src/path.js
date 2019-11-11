@@ -51,7 +51,6 @@ function* tokenGenerator(path) {
             yield partialToken;
             partialToken = undefined;
             continue;
-
         }
         if (!partialToken) {
             partialToken = {
@@ -69,6 +68,29 @@ function* tokenGenerator(path) {
     throw new Error(`Internal tokenizer error you should not be here parsing: [${path}]`);
 }
 
+function reference(path) {
+    if (typeof path !== 'string') {
+        throw new TypeError(`argument path must be of type string ${String(path)}`);
+    }
+    const instructions = Array.from(tokenGenerator(path));
+    for (const opcode of instructions) {
+        if (opcode.start < opcode.end) {
+            throw new TypeError(`${String(path)} could not be parsed`);
+        }
+    }
+    // minor matchType = "any" "in" "exact"
+    return function (matchType) {
+        //
+        // context has 2 props
+        // "location" (tokenArray) (value copy) and "root" (object)
+        //
+        return function pick(data, context) {
+
+        }
+    }
+}
+
 module.exports = {
     tokenGenerator
 };
+
