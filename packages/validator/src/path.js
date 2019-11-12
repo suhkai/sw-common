@@ -68,23 +68,58 @@ function* tokenGenerator(path) {
     throw new Error(`Internal tokenizer error you should not be here parsing: [${path}]`);
 }
 
+// returns final path form path1 (relative) and path2 (always absolute)
+function join(path1, path2){
+
+}
+
 function reference(path) {
+    //validation
     if (typeof path !== 'string') {
-        throw new TypeError(`argument path must be of type string ${String(path)}`);
+        throw new TypeError(`argument path must be of type string: ${JSON.stringify(path)}`);
     }
-    const instructions = Array.from(tokenGenerator(path));
-    for (const opcode of instructions) {
-        if (opcode.start < opcode.end) {
-            throw new TypeError(`${String(path)} could not be parsed`);
+
+    if (path === ''){
+        throw new TypeError(`argument must be an actual path: ${JSON.stringify(path)}`)
+    }
+
+    const inst = Array.from(tokenGenerator(path));
+    
+    while (inst.length){
+        const lastToken = inst[inst.length-1].token;
+        if (lastToken !== tokens.SLASH){
+            break;
         }
+        inst.pop();
+    };
+
+    // remove double '//' -> '/'
+    for (let i = inst.length -1 ; i > 0;){
+       if (inst[i].token === tokens.SLASH){
+            if (inst[i].token === token.SLASH){
+                inst.splice(i,1);
+                continue;
+            }
+       }
+       i--;
     }
+
+    if (inst.length === 0){
+        throw new TypeError(`${String(path)} is an invalid path name.`)
+    }
+
+    const isAbsolute = inst[0].token === tokens.SLASH;
+
+    // at this point we have a valid path 
+    // contains
     // minor matchType = "any" "in" "exact"
     return function (matchType) {
         //
         // context has 2 props
         // "location" (tokenArray) (value copy) and "root" (object)
-        //
+        //  
         return function pick(data, context) {
+            // relative 
 
         }
     }
