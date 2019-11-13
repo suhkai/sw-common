@@ -25,7 +25,7 @@ const equals = require('../src/equals');
 const createFind = require('../src/createFind');
 const {
     tokenGenerator
-} = require('../src/path');
+} = require('../src/tokenizer');
 
 
 describe('utilities', function () {
@@ -33,102 +33,55 @@ describe('utilities', function () {
         it('tokenize path "/favicons/android/path', () => {
             const path = '/favicons/android/path';
             const tokens1 = Array.from(tokenGenerator(path));
-            expect(tokens1).to.deep.equal(
-                [{
-                        start: 0,
-                        end: 0,
-                        token: '\u0002'
-                    },
-                    {
-                        start: 1,
-                        token: '\u0001',
-                        end: 8
-                    },
-                    {
-                        start: 9,
-                        end: 9,
-                        token: '\u0002'
-                    },
-                    {
-                        start: 10,
-                        token: '\u0001',
-                        end: 16
-                    },
-                    {
-                        start: 17,
-                        end: 17,
-                        token: '\u0002'
-                    },
-                    {
-                        start: 18,
-                        token: '\u0001',
-                        end: 21
-                    }
-                ]
+            expect(tokens1).to.deep.equal([{ token: '\u0002', start: 0, end: 0, value: '/' },
+            { token: '\u0001', start: 1, end: 8, value: 'favicons' },
+            { token: '\u0002', start: 9, end: 9, value: '/' },
+            { token: '\u0001', start: 10, end: 16, value: 'android' },
+            { token: '\u0002', start: 17, end: 17, value: '/' },
+            { token: '\u0001', start: 18, end: 21, value: 'path' }]
             );
         });
         it('tokenize non root- path "favicons/android/path', () => {
             const path = 'favicons/android/path';
             const tokens1 = Array.from(tokenGenerator(path));
+
             expect(tokens1).to.deep.equal(
-                [{
-                        start: 0,
-                        token: '\u0001',
-                        end: 7
-                    },
-                    {
-                        start: 8,
-                        end: 8,
-                        token: '\u0002'
-                    },
-                    {
-                        start: 9,
-                        token: '\u0001',
-                        end: 15
-                    },
-                    {
-                        start: 16,
-                        end: 16,
-                        token: '\u0002'
-                    },
-                    {
-                        start: 17,
-                        token: '\u0001',
-                        end: 20
-                    }
-                ]
+                [{ token: '\u0001', start: 0, end: 7, value: 'favicons' },
+                { token: '\u0002', start: 8, end: 8, value: '/' },
+                { token: '\u0001', start: 9, end: 15, value: 'android' },
+                { token: '\u0002', start: 16, end: 16, value: '/' },
+                { token: '\u0001', start: 17, end: 20, value: 'path' }]
             );
         });
         it('tokenize non root- paths "favicons/", "favicons", tokenize empty path ""', () => {
             const path1 = 'favicons/';
             const path2 = 'favicons';
             const path3 = '';
+            const path4 = '../...././/./\\//';
+
             const tokens1 = Array.from(tokenGenerator(path1));
             const tokens2 = Array.from(tokenGenerator(path2));
             const tokens3 = Array.from(tokenGenerator(path3));
-            expect(tokens1).to.deep.equal([{
-                    start: 0,
-                    token: '\u0001',
-                    end: 7
-                },
-                {
-                    start: 8,
-                    end: 8,
-                    token: '\u0002'
-                }
-            ]);
+            const tokens4 = Array.from(tokenGenerator(path4));
+
+
+            expect(tokens1).to.deep.equal([{ token: '\u0001', start: 0, end: 7, value: 'favicons' },
+            { token: '\u0002', start: 8, end: 8, value: '/' }]);
             expect(tokens2).to.deep.equal(
-                [{
-                    start: 0,
-                    token: '\u0001',
-                    end: 7
-                }]);
-            expect(tokens3).to.deep.equal(
-                [{
-                    start: 0,
-                    token: '\u0001',
-                    end: -1
-                }])
+                [{ token: '\u0001', start: 0, end: 7, value: 'favicons' }]);
+            expect(tokens3).to.deep.equal([]);
+            expect(tokens4).to.deep.equal(
+                [{ token: '\u0003', start: 0, end: 1, value: '..' },
+                { token: '\u0002', start: 2, end: 2, value: '/' },
+                { token: '\u0001', start: 3, end: 6, value: '....' },
+                { token: '\u0002', start: 7, end: 7, value: '/' },
+                { token: '\u0004', start: 8, end: 8, value: '.' },
+                { token: '\u0002', start: 9, end: 9, value: '/' },
+                { token: '\u0002', start: 10, end: 10, value: '/' },
+                { token: '\u0004', start: 11, end: 11, value: '.' },
+                { token: '\u0002', start: 12, end: 12, value: '/' },
+                { token: '\u0001', start: 13, end: 14, value: '/' }, //<-- note this is not a devider but a prop name)) we can deal with these edge cases
+                { token: '\u0002', start: 15, end: 15, value: '/' }])
         });
     });
     describe('find', () => {
@@ -145,18 +98,18 @@ describe('utilities', function () {
         });
         it('create find function to find non-scalar values', () => {
             const find = createFind([{
-                    'hello': 'world'
-                },
-                [
-                    1,
-                    2,
-                    4,
-                    5,
-                    'nada',
-                    undefined,
-                    null,
-                    {}
-                ],
+                'hello': 'world'
+            },
+            [
+                1,
+                2,
+                4,
+                5,
+                'nada',
+                undefined,
+                null,
+                {}
+            ],
                 undefined,
                 null
             ]);
@@ -202,6 +155,7 @@ describe('utilities', function () {
                     null
                 ], undefined
             ]);
+
         });
     });
     describe('object  tests', () => {
@@ -251,8 +205,8 @@ describe('utilities', function () {
             const result2 = equals({
                 a: '2'
             }, {
-                a: '2'
-            });
+                    a: '2'
+                });
             expect(result2).to.be.true;
             const result3 = equals({
                 a: '2',
@@ -260,11 +214,11 @@ describe('utilities', function () {
                     c: Symbol.for('v')
                 }
             }, {
-                a: '2',
-                b: {
-                    c: Symbol.for('v')
-                }
-            });
+                    a: '2',
+                    b: {
+                        c: Symbol.for('v')
+                    }
+                });
             expect(result3).to.be.true;
             const result4 = equals({
                 a: '2',
@@ -272,11 +226,11 @@ describe('utilities', function () {
                     c: Symbol.for('v')
                 }
             }, {
-                a: '2',
-                b: {
-                    c: Symbol.for('v2')
-                }
-            });
+                    a: '2',
+                    b: {
+                        c: Symbol.for('v2')
+                    }
+                });
             expect(result4).to.be.false;
             const result5 = equals({}, {
                 a: '2',
@@ -291,17 +245,17 @@ describe('utilities', function () {
                     c: Symbol.for('v2')
                 }
             }, {
-                c: '2',
-                b: {
-                    c: Symbol.for('v2')
-                }
-            });
+                    c: '2',
+                    b: {
+                        c: Symbol.for('v2')
+                    }
+                });
             expect(result6).to.be.false;
             const result7 = equals({
                 [Symbol.for('a')]: '2'
             }, {
-                [Symbol.for('c')]: '2'
-            });
+                    [Symbol.for('c')]: '2'
+                });
             expect(result7).to.be.false;
         });
         it('compare arrays', () => {
@@ -360,33 +314,33 @@ describe('utilities', function () {
         });
         describe('conversion to boolean', () => {
             const data = [{
-                    in: 'true',
-                    out: [true, null]
-                },
-                {
-                    in: 'TrUE',
-                    out: [true, null]
-                },
-                {
-                    in: 'False',
-                    out: [false, null]
-                },
-                {
-                    in: 'Falsex',
-                    out: [null, 'cannot convert to boolean']
-                },
-                {
-                    in: false,
-                    out: [false, null]
-                },
-                {
-                    in: true,
-                    out: [true, null]
-                },
-                {
-                    in: null,
-                    out: [null, 'cannot convert to boolean for other then string type']
-                }
+                in: 'true',
+                out: [true, null]
+            },
+            {
+                in: 'TrUE',
+                out: [true, null]
+            },
+            {
+                in: 'False',
+                out: [false, null]
+            },
+            {
+                in: 'Falsex',
+                out: [null, 'cannot convert to boolean']
+            },
+            {
+                in: false,
+                out: [false, null]
+            },
+            {
+                in: true,
+                out: [true, null]
+            },
+            {
+                in: null,
+                out: [null, 'cannot convert to boolean for other then string type']
+            }
             ];
             for (const elt of data) {
                 const msg = elt.out[1] ? `convert ${elt.in} to boolean should result in error` : `convert ${elt.in} to boolean should succeed`;
