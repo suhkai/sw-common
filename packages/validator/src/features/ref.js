@@ -30,9 +30,10 @@ function createRef(path) {
       }
       return function sliceAndValidate(partition, ctx) {
          const selector = resolve(ctx.location, to);
-         const nodelist = objectSlice(partition, selector);
+         const nodelist = objectSlice(ctx.data, selector);
+         // see if parition is in the nodelist (use deepequals)
          // fetch the node list
-         return [{ nodelist, selector }, undefined, undefined];
+         return [... nodelist, selector , undefined, undefined];
       }
    }
 }

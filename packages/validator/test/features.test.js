@@ -28,7 +28,8 @@ describe('features tests', function () {
                     streetName: 'Kodak-Drive',
                     state: 'TN',
                     houseNr: 342, // houseNr should be between 400 and 500
-                    appartment: '24A' // error should be a string
+                    appartment: '24A', // error should be a string
+                    country: 'USA'
                 }
             };
           
@@ -37,10 +38,10 @@ describe('features tests', function () {
                 lastName: V.string(),
                 address: V.object({
                     streetName: V.string(),
-                    state: V.string(0, 2).ref('../lastName').exist,
+                    state: V.string(0, 2).ref('../../lastName').exist,
                     houseNr: V.integer(),
                     appartment: V.string(0, 3)
-                }).closed
+                }).open
             }).closed;
 
             const result = checkNAW(data);

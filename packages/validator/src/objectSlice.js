@@ -6,10 +6,12 @@ module.exports = function objectSlice(object, selector, cursor = 0) {
     const instr = selector[cursor];
     switch (instr.token) {
         case tokens.SLASH:
+            const rcSub = objectSlice(object, selector, cursor + 1);
+            rc.push(...rcSub);
             break;
         case tokens.PATHPART:
             const value = object[instr.value];
-            if (cursor === undefined) {
+            if (value === undefined) {
                 break;
             }
             if (Array.isArray(value)) {
@@ -17,11 +19,14 @@ module.exports = function objectSlice(object, selector, cursor = 0) {
                     const rcSub = objectSlice(item, selector, cursor + 1);
                     rc.push(...rcSub);
                 }
+                break;
             }
             if (isObject(value)) {
                 const rcSub = objectSlice(value, selector, cursor + 1);
                 rc.push(...rcSub);
+                break;
             }
+            rc.push(value);
             break;
         default:
             throw new TypeError(`selector is an incorrect token ${JSON.stringify(intr)}`);
