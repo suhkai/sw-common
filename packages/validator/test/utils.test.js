@@ -24,7 +24,8 @@ const isNumberArray = require('../src/isNumbersArray');
 const equals = require('../src/equals');
 const createFind = require('../src/createFind');
 const {
-    tokenGenerator
+    getTokens,
+    resolve
 } = require('../src/tokenizer');
 
 
@@ -32,7 +33,7 @@ describe('utilities', function () {
     describe('path tokenizer', () => {
         it('tokenize path "/favicons/android/path', () => {
             const path = '/favicons/android/path';
-            const tokens1 = Array.from(tokenGenerator(path));
+            const tokens1 = getTokens(path);
             expect(tokens1).to.deep.equal([{ token: '\u0002', start: 0, end: 0, value: '/' },
             { token: '\u0001', start: 1, end: 8, value: 'favicons' },
             { token: '\u0002', start: 9, end: 9, value: '/' },
@@ -43,7 +44,7 @@ describe('utilities', function () {
         });
         it('tokenize non root- path "favicons/android/path', () => {
             const path = 'favicons/android/path';
-            const tokens1 = Array.from(tokenGenerator(path));
+            const tokens1 = getTokens(path);
 
             expect(tokens1).to.deep.equal(
                 [{ token: '\u0001', start: 0, end: 7, value: 'favicons' },
@@ -59,10 +60,10 @@ describe('utilities', function () {
             const path3 = '';
             const path4 = '../...././/./\\//';
 
-            const tokens1 = Array.from(tokenGenerator(path1));
-            const tokens2 = Array.from(tokenGenerator(path2));
-            const tokens3 = Array.from(tokenGenerator(path3));
-            const tokens4 = Array.from(tokenGenerator(path4));
+            const tokens1 = getTokens(path1);
+            const tokens2 = getTokens(path2);
+            const tokens3 = getTokens(path3);
+            const tokens4 = getTokens(path4);
 
 
             expect(tokens1).to.deep.equal([{ token: '\u0001', start: 0, end: 7, value: 'favicons' },
@@ -82,6 +83,49 @@ describe('utilities', function () {
                 { token: '\u0002', start: 12, end: 12, value: '/' },
                 { token: '\u0001', start: 13, end: 14, value: '/' }, //<-- note this is not a devider but a prop name)) we can deal with these edge cases
                 { token: '\u0002', start: 15, end: 15, value: '/' }])
+        });
+    });
+    describe('resolve', () => {
+        it('from "/p1/p2/p3/p4///p5/" to "../../n1/n2/./n5"', () => {
+            const from = getTokens('/p1/p2/p3/p4///p5/');
+            const to = getTokens('../../n1/n2/./n5');
+            const res1 = resolve(from, to);
+            expect(res1).to.deep.equal(
+                [
+                    { token: '\u0002', start: 0, end: 0, value: '/' },
+                    { token: '\u0001', start: 1, end: 2, value: 'p1' },
+                    { token: '\u0002', start: 3, end: 3, value: '/' },
+                    { token: '\u0001', start: 4, end: 5, value: 'p2' },
+                    { token: '\u0002', start: 6, end: 6, value: '/' },
+                    { token: '\u0001', start: 7, end: 8, value: 'p3' },
+                    { token: '\u0002', value: '/' },
+                    { token: '\u0001', start: 6, end: 7, value: 'n1' },
+                    { token: '\u0002', value: '/' },
+                    { token: '\u0001', start: 9, end: 10, value: 'n2' },
+                    { token: '\u0002', value: '/' },
+                    { token: '\u0001', start: 14, end: 15, value: 'n5' }
+                ]);
+        });
+        it('from "p1/p2/p3/p4///p5/" to "../../n1" should fail', () => {
+            const from = getTokens('p1/p2/p3/p4///p5/');
+            const to = getTokens('../../n1/n2/./n5');
+            expect(() => resolve(from, to)).to.throw('Internal error, object location path must be absolute');
+        });
+        it('from "/p1/p2/p3/p4///p5/" to "../../n1" should fail', () => {
+            const from = getTokens('/p1/p2/p3/p4///p5/');
+            const to = getTokens('../../../../../n1');
+            const res1 = resolve(from, to);
+         
+            expect(res1).to.deep.equal(
+                [
+                    { token: '\u0002', value: '/' },
+                    { token: '\u0001', start: 15, end: 16, value: 'n1' }
+                ]);
+        });
+        it('from "" to "../../n1" should fail', () => {
+            const from = getTokens('');
+            const to = getTokens('../../../n1');
+            expect(() => resolve(from, to)).to.throw('Internal error, object location path must be absolute');
         });
     });
     describe('find', () => {
@@ -158,7 +202,7 @@ describe('utilities', function () {
 
         });
     });
-    describe('object  tests', () => {
+    describe('isObject  tests', () => {
         it('isObject', () => {
             const data = [{}, null, undefined, new Date, []];
             expect(isObject(data[0])).to.be.true;

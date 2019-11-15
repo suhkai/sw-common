@@ -1,6 +1,14 @@
 const { features } = require('./dictionary');
 
 const $optional = Symbol.for('optional');
+const clone = require('clone');
+
+const {
+    tokenGenerator,
+    tokens,
+    resolve,
+    formatPath
+} = require('../tokenizer');
 
 features.set('object', {
     factory: 2,
@@ -30,7 +38,7 @@ features.set('object', {
         // all ok with the object
         return function sealing(openOrClosed) {
             if (openOrClosed !== 'open' && openOrClosed !== 'closed') {
-                const errMsg = `object must be closed by "open" or "closed" modofifier, not with "${openOrClosed}"`;
+                const errMsg = `"object" validator must be finalized by "open" or "closed" modofifier, not with "${openOrClosed}"`;
                 throw new TypeError(errMsg);
             }
             // split object in symbol and normal strings
@@ -67,20 +75,40 @@ features.set('object', {
                     if (value === undefined) {
                         continue; // skip it
                     }
-                    const [result, err, final] = schema[key](value, { data: ctx.data, location: `${ctx.location}/${key}` });
+                    // clone the context
+                    const ctxNew = { data: ctx.data, location: clone(ctx.location) };
+                    ctxNew.location.push({ token: tokens.SLASH, value: '/' }, { token: tokens.PATHPART, value: key });
+                    const [result, err, final] = schema[key](value, ctxNew);
                     if (!err) {
                         data[key] = result; // allow for transforms
                         continue;
                     }
-                    errors.push(err);
+                    // error, we have to add the path info
+                    if (Array.isArray(err)){
+                        errors.push(...err);
+                        continue;
+                    }
+                    if (!err.frozen){
+                        errors.push({ frozen:true, errorMsg:`validation error at path:${formatPath(ctxNew.location)}, error: ${err}`});
+                        continue;
+                    }
+                    errors.push(err); // pass through
                 }
-                return [errors.length ? undefined : data, errors.length ? errors.join('|') : undefined, undefined];
+                // process errors
+                if (errors.length){
+                    // are we nested object?
+                    if (ctx.location.length){
+                        return [undefined, errors, undefined];
+                    }
+                    return [undefined, errors.map(e => e.errorMsg).join('|'), undefined];
+                }
+                return [data, undefined, undefined];
             }
             //
-            return function validateObject(obj, ctx = { data: obj, location: '' }) { // Return dummy validator
+            return function validateObject(obj, ctx = { data: obj, location: [] }) { // Return dummy validator
                 // validation for optional and missing props etc
                 const errors = [];
-                
+
                 if (openOrClosed === 'closed') {
                     for (const propKey in obj) {
                         if (!(propKey in schema)) {

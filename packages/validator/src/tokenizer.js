@@ -67,7 +67,6 @@ const absorbers = {
     }
 };
 
-
 function orderAbsorbers() {
     const orderedAbsorbers = Object.values(absorbers).sort((a, b) => {
         return a.order - b.order;
@@ -86,6 +85,8 @@ function tokenize(str, i) {
     }
 }
 
+const getTokens = path => Array.from(tokenGenerator(path));
+
 function* tokenGenerator(path) {
     for (let i = 0; i < path.length;) {
         const token = tokenize(path, i);
@@ -97,47 +98,95 @@ function* tokenGenerator(path) {
     }
 }
 
+const isAbsolute = t => t.length && t[0].token === tokens.SLASH;
 
-const isAbsolute = t =>  t[0].token === tokens.SLASH;
-
-function escape(str){ // normal -> human interface
-    return str.replace('/','\\/');
+function escape(str) { // normal -> human interface
+    return str.replace('/', '\\/');
 }
 
-function descape(str){ // human interface -> normal
-    return str.replace(/\\\//g,'/');
+function descape(str) { // human interface -> normal
+    return str.replace(/\\\//g, '/');
 }
 
-function resolve(from, to){
-    if (isAbsolute(to)){
+const lastToken = a => a[a.length-1] || {};
+
+function goUp(from) {
+    if (from.length === 1 && from.token === tokens.SLASH) {
+        return;
+    }
+    // protection
+    while (from.length && from[from.length - 1].token === tokens.SLASH) {
+        from.pop();
+    }
+    if (from.length > 0) {
+        // stip trailing "/"
+        while (lastToken(from).token === tokens.SLASH){
+            from.pop();
+        }
+        // strip a path name
+        while (lastToken(from).token !== tokens.SLASH){
+            from.pop();
+        }
+        // strap the '/' 
+        while (lastToken(from).token === tokens.SLASH){
+            from.pop();
+        }
+    }
+    if (from.length === 0) {
+        from.push({ token: tokens.SLASH, value: '/' })
+        return;
+    }
+}
+
+function add(from, token) {
+    if (from.length === 0) {
+        from.push({ token: tokens.SLASH, value: '/' });
+    }
+    if (from[from.length - 1].token !== tokens.SLASH) {
+        from.push({ token: tokens.SLASH, value: '/' });
+    }
+    from.push(token);
+}
+
+function resolve(from, to) {
+    if (isAbsolute(to)) {
         return to;
     }
-    if (!isAbsolute(from)){
+    if (!isAbsolute(from)) {
         throw new TypeError(`Internal error, object location path must be absolute`);
     }
     const resolved = from.slice();
-    for(const inst of to){
-        switch(inst.token){
+    for (const inst of to) {
+        switch (inst.token) {
             case tokens.SLASH: // we dont care about this, as its just like a "space" between words
                 break;
             case tokens.PATHPART:
-                // TODO:
-                break;  
+                add(resolved, inst);
+                break;
             case tokens.PARENT:
-                // TODO
+                goUp(resolved);
                 break;
             case tokens.CURRENT:
-                break;
+                break; // skip
             default:
+                throw new TypeError(`internal error: wrong path token "${int.value}"`);
         }
     }
     return resolved;
 }
 
+function formatPath(tokens) {
+    if (tokens.length === 0) return '';
+    return tokens.map(t => t.value).join('');
+}
 
 
 module.exports = {
     tokenGenerator,
-    tokens
+    tokens,
+    resolve,
+    formatPath,
+    escape,
+    getTokens
 };
 

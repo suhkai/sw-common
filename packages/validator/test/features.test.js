@@ -19,6 +19,35 @@ const {
 } = require('../src/proxy');
 
 describe('features tests', function () {
+    describe('ref',()=>{
+        it('relative path, exist',()=>{
+            const data = {
+                firstName: 'Patrick',
+                lastName: 'Bet-David',
+                address: {
+                    streetName: 'Kodak-Drive',
+                    state: 'TN',
+                    houseNr: 342, // houseNr should be between 400 and 500
+                    appartment: '24A' // error should be a string
+                }
+            };
+          
+            const checkNAW = V.object({
+                firstName: V.string(),
+                lastName: V.string(),
+                address: V.object({
+                    streetName: V.string(),
+                    state: V.string(0, 2).ref('../lastName').exist,
+                    houseNr: V.integer(),
+                    appartment: V.string(0, 3)
+                }).closed
+            }).closed;
+
+            const result = checkNAW(data);
+            console.log(result[0].address.state);
+        });
+
+    });
     describe('string', () => {
         it('type check with implicit length check', () => {
             const checker = V.string();
@@ -67,19 +96,19 @@ describe('features tests', function () {
     });
     describe('enum tests', () => {
         it('not finding a value in an enum list', () => {
-            const fn = (a,b) => console.log('hello',a,b);
+            const fn = (a, b) => console.log('hello', a, b);
             const checker = V.enum([
-                'blue','red','orange', fn, Symbol.for('honey')
+                'blue', 'red', 'orange', fn, Symbol.for('honey')
             ]).optional;
             const v1 = checker('blue');
             expect(v1).to.deep.equal(['blue', undefined]);
             const v2 = checker(Symbol.for('honey'));
             expect(v2).to.deep.equal([Symbol.for('honey'), undefined]);
-            const v3 = checker((a,b)=>console.log('hello',a,b));
+            const v3 = checker((a, b) => console.log('hello', a, b));
             expect(typeof v3[0]).to.equal('function');
             expect(v3[1]).to.be.undefined;
             const v4 = checker('cyan');
-            expect(v4).to.deep.equal([ undefined, '"cyan" not found in list' ]);
+            expect(v4).to.deep.equal([undefined, '"cyan" not found in list']);
         });
     });
     describe('object tests', () => {
@@ -93,7 +122,36 @@ describe('features tests', function () {
             })();
             expect(checker).to.throw('feature "object" has not been finalized');
         });
+        it('nested object with errors in the leaf properties', () => {
+            const data = {
+                firstName: 'Patrick',
+                lastName: 'Bet-David',
+                address: {
+                    streetName: 'Kodak-Drive',
+                    state: 'TN',
+                    houseNr: 342, // houseNr should be between 400 and 500
+                    appartment: true // error should be a string
+                }
+            };
+          
+            const checkNAW = V.object({
+                firstName: V.string(),
+                lastName: V.string(),
+                address: V.object({
+                    streetName: V.string(),
+                    state: V.string(0, 2),
+                    houseNr: V.integer(400),
+                    appartment: V.string(0, 3)
+                }).closed
+            }).closed;
 
+            const result = checkNAW(data);
+            expect(result).to.deep.equal([
+                undefined,
+                'validation error at path:/address/houseNr, error: 342 is not between 400 and Infinity inclusive|validation error at path:/address/appartment, error: value type is not of type string: boolean',
+                undefined
+            ]);
+        });
         it('object with scalar properties some optional', () => {
             it('empty schema object construction', () => {
                 const checker = () => V.object({});
