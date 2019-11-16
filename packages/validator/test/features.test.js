@@ -81,7 +81,7 @@ describe('features tests', function () {
             }).open;
 
             const result = checkNAW(data);
-           console.log(result);
+            console.log(result);
         });
 
     });
@@ -99,6 +99,18 @@ describe('features tests', function () {
             expect([r2, err2]).to.deep.equal([null, 'string of length:13 is not between 0 and 10 inclusive']);
             const [r3, err3] = checker(123456); // 15 chars, should through error
             expect([r3, err3]).to.deep.equal([null, 'value type is not of type string: number']);
+        });
+    });
+    describe('boolean', () => {
+        const checker = V.boolean;
+        it('true', () => {
+            expect(checker(true)).to.deep.equal([ true, undefined]);
+        });
+        it('false', () => {
+            expect(checker(false)).to.deep.equal([false, undefined]);
+        });
+        it('not a boolean but thruty', () => {
+            expect(checker({})).to.deep.equal([ undefined, 'not a boolean value:{}' ]);
         });
     });
     describe('number/integer', () => {

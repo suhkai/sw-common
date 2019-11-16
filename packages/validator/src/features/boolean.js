@@ -3,9 +3,14 @@
 const createRangeCheck = require('../createRangeCheck');
 const { features } = require('./dictionary');
 
-features.set('bool', {
+features.set('boolean', {
     factory: 0,
-    name: 'bool',
-    fn: a => typeof a === 'boolean'
+    name: 'boolean',
+    fn: a => {
+        if (typeof a === 'boolean'){
+            return [a, undefined];
+        }
+        return [undefined, `not a boolean value:${JSON.stringify(a)}`];
+    }
 });
 

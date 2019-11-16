@@ -38,7 +38,7 @@ function createValidatorFactory() {
                     return receiver;
                 }
                 if (propContext && propContext.factory === 0) {
-                    const erMsg = `[${propContext.name}] <- this feautere is not fully configured, call it as a function (with or without arguments as needed)`;
+                    const erMsg = `[${propContext.name}] <- this feature is not fully configured, call it as a function (with or without arguments as needed)`;
                     throw new TypeError(erMsg);
                 }
                 if (prop === Symbol.toPrimitive) {
