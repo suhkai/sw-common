@@ -19,9 +19,12 @@ const {
 } = require('../src/proxy');
 
 describe('features tests', function () {
-    describe('ref',()=>{
-        it('relative path, exist',()=>{
+    describe('ref', () => {
+        it('relative path, doesnt exist', () => {
             const data = {
+                dictionary: {
+                    states: ['TNx', 'CA']
+                },
                 firstName: 'Patrick',
                 lastName: 'Bet-David',
                 address: {
@@ -32,20 +35,53 @@ describe('features tests', function () {
                     country: 'USA'
                 }
             };
-          
+
             const checkNAW = V.object({
                 firstName: V.string(),
                 lastName: V.string(),
                 address: V.object({
                     streetName: V.string(),
-                    state: V.string(0, 2).ref('../../lastName').exist,
+                    state: V.string(0, 2).ref('../../dictionary/states').exist,
                     houseNr: V.integer(),
                     appartment: V.string(0, 3)
                 }).open
-            }).closed;
+            }).open;
 
             const result = checkNAW(data);
-            console.log(result[0].address.state);
+            expect(result).to.deep.equal([
+                undefined,
+                'validation error at path:/address/state, error: element "TN" could not be found at /dictionary/states',
+                undefined
+            ]);
+        });
+        it('relative path, doesnt exist', () => {
+            const data = {
+                dictionary: {
+                    states: ['TN', 'CA']
+                },
+                firstName: 'Patrick',
+                lastName: 'Bet-David',
+                address: {
+                    streetName: 'Kodak-Drive',
+                    state: 'TN',
+                    houseNr: 342, // houseNr should be between 400 and 500
+                    appartment: '24A' // error should be a string
+                }
+            };
+
+            const checkNAW = V.object({
+                firstName: V.string(),
+                lastName: V.string(),
+                address: V.object({
+                    streetName: V.string(),
+                    state: V.string(0, 2).ref('../../dictionary/states').exist,
+                    houseNr: V.integer(),
+                    appartment: V.string(0, 3)
+                }).closed
+            }).open;
+
+            const result = checkNAW(data);
+           console.log(result);
         });
 
     });
@@ -134,7 +170,7 @@ describe('features tests', function () {
                     appartment: true // error should be a string
                 }
             };
-          
+
             const checkNAW = V.object({
                 firstName: V.string(),
                 lastName: V.string(),

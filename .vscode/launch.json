@@ -25,7 +25,7 @@
                 "--bail",
                 "--timeout",
                 "0",
-                "test/test.js"
+                "test/features.test.js"
             ],
             "cwd": "${workspaceFolder}/packages/validator",
             "internalConsoleOptions": "openOnSessionStart"

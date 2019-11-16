@@ -23,6 +23,7 @@ const isBooleanArray = require('../src/isBooleanArray');
 const isNumberArray = require('../src/isNumbersArray');
 const equals = require('../src/equals');
 const createFind = require('../src/createFind');
+const objectSlice = require('../src/objectSlice');
 const {
     getTokens,
     resolve
@@ -449,26 +450,81 @@ describe('utilities', function () {
                 expect(arr).to.deep.equal(data);
             });
         });
-
-
-        describe('javascript object validation', () => {
-            /*  
-                const validator1 = vF.range(-100, 100).optional;
-                const validator2 = vF.range(-100, 100);// should be ok
-                const validator3 = validator2.range(-2, 2); // should be ok
-     
-                const validator4 = vF.object({
-                    favicons: vF.any([
-                        vF.if(vf.string).then( s=>{
-                    }),
-                    vF.object({
-                        path: vF.string
-                    }).closed
-                ]),
-                name: vF.string(100),
-                lastName: vF.string(30).optional
-             }).open;
-            */
+        describe('function objectSlice',()=>{
+            it('slice towards an array',()=>{
+                const data = {
+                    country: {
+                        USA: {
+                            states:['TN','CA']
+                        }
+                    }
+                };
+                const path1 = getTokens('/country/USA/states');
+                const result = objectSlice(data, path1, 0);
+                console.log(result);
+            });
+            it('slice away an object-part',()=>{
+                const data = {
+                    country: {
+                        USA: {
+                            states:['TN','CA']
+                        }
+                    }
+                };
+                const path1 = getTokens('/country/USA');
+                const result = objectSlice(data, path1, 0);
+                console.log(result);
+            });
+            it('slice away an object-part in an array',()=>{
+                const data = {
+                    country: [{
+                        USA: {
+                            states:['TN','CA']
+                        }
+                    }]
+                };
+                const path1 = getTokens('/country/USA');
+                const result = objectSlice(data, path1, 0);
+                console.log(result);
+            });
+            it('slice towards a scalar value',()=>{
+                const data = {
+                    country: [{
+                        USA: {
+                            states:['TN','CA'],
+                            countryCode: 'US'
+                        }
+                    }]
+                };
+                const path1 = getTokens('/country/USA/countryCode');
+                const result = objectSlice(data, path1, 0);
+                console.log(result);
+            });
+            it('slice towards a nonexisting part of an object',()=>{
+                const data = {
+                    country: [{
+                        USA: {
+                            states:['TN','CA'],
+                            countryCode: 'US'
+                        }
+                    }]
+                };
+                const path1 = getTokens('/country/thispath/is/going/no-where');
+                const result = objectSlice(data, path1, 0);
+                console.log(result);
+            });
+            it('use of invalid path should result in an error throw',()=>{
+                const data = {
+                    country: [{
+                        USA: {
+                            states:['TN','CA'],
+                            countryCode: 'US'
+                        }
+                    }]
+                };
+                const path1 = getTokens('../relatovePaths/not/allowed');
+                expect(()=> objectSlice(data, path1, 0)).to.throw('selector is an incorrect token {"token":"\\u0003","start":0,"end":1,"value":".."}');
+            });
         });
     })
 });
