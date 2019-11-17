@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "pck/validator/pug-temlate",
+            "program": "${workspaceFolder}/packages/pug-template/index.js",
+            "cwd": "${workspaceFolder}/packages/pug-template",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "pck/validator/proxy-test",
             "program": "${workspaceFolder}/packages/validator/src/proxy.js",
             "cwd": "${workspaceFolder}/packages/validator",
