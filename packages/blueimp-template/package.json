@@ -1,0 +1,16 @@
+{
+  "name": "blueimp-template",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "jacob.bogers <Jacob.Bogers@doclerholding.com>",
+  "license": "ISC",
+  "dependencies": {
+    "blueimp-tmpl": "^3.13.0"
+  }
+}

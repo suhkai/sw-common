@@ -30,8 +30,8 @@ describe('features tests', function () {
                 address: {
                     streetName: 'Kodak-Drive',
                     state: 'TN',
-                    houseNr: 342, // houseNr should be between 400 and 500
-                    appartment: '24A', // error should be a string
+                    houseNr: 342, 
+                    appartment: '24A',
                     country: 'USA'
                 }
             };

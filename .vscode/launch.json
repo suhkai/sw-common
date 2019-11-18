@@ -7,7 +7,15 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "pck/validator/pug-temlate",
+            "name": "pck/validator/blueimp-template",
+            "program": "${workspaceFolder}/packages/blueimp-template/index.js",
+            "cwd": "${workspaceFolder}/packages/blueimp-template",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "pck/validator/pug-template",
             "program": "${workspaceFolder}/packages/pug-template/index.js",
             "cwd": "${workspaceFolder}/packages/pug-template",
             "stopOnEntry": true
