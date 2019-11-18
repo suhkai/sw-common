@@ -4,7 +4,7 @@
 - **done** pug
 - **done** blueimp-template
 - **done** handlebars (going to be a problem because ppl can register helpers, maybe only allow build in helpers)
-- html-loader
+- html-loader (aka no interpolation? verbatim as is?)
 
 
 ### underscore
