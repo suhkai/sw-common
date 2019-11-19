@@ -2,7 +2,7 @@ const pug = require('pug');
 const p5 = require('parse5');
 const stringify = require('json-stringify-safe');
 
-const fn = pug.compileFile('./template.pug',{ doctype:'xml', self:true, debug: false, compileDebug:true, globals:['location']});
+const fn = pug.compileFile('./template.pug',{ doctype:'xml', self:true, debug: false, compileDebug:true, globals:['window']});
 //console.log(fn);
 
 console.log(typeof fn);
