@@ -1,0 +1,21 @@
+Return-Path: <foo@example.com>
+Content-Type: multipart/alternative;
+ boundary="--_NmP-1594e15a66b37242-Part_1"
+From: =?UTF-8?Q?Fred_Foo_=F0=9F=91=BB?= <foo@example.com>
+To: bar@example.com, baz@example.com
+Subject: =?UTF-8?Q?Hello_=E2=9C=94?=
+Message-ID: <4e26cff5-8903-dad6-67a7-08ae7d2f94ac@example.com>
+Date: Wed, 20 Nov 2019 17:15:13 +0000
+MIME-Version: 1.0
+
+----_NmP-1594e15a66b37242-Part_1
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
+
+Hello world?
+----_NmP-1594e15a66b37242-Part_1
+Content-Type: text/html
+Content-Transfer-Encoding: 7bit
+
+<b>Hello world?</b>
+----_NmP-1594e15a66b37242-Part_1--
