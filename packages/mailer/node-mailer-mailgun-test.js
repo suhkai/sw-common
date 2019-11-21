@@ -3,11 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require("nodemailer");
 var mg = require('nodemailer-mailgun-transport');
+const key = require('./mailgun-test-key');
 
 // This is your API key that you retrieve from www.mailgun.com/cp (free up to 10K monthly emails)
 var auth = {
     auth: {
-        api_key: 'key-b0e9cbf005f98d0f2b0649f8b292045a',
+        api_key: `key-${key()}`,
         domain: 'mail.jacob-bogers.com'
     }
 };

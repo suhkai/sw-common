@@ -1,4 +1,5 @@
-curl -v -s --user 'api:key-b0e9cbf005f98d0f2b0649f8b292045a' \
+APIKEY=$(echo  "YTA2Y2Y5ODU5OWU3MTgxMjJiZmIzY2I3YmQxMDc5ZGE="|base64 --decode)
+curl -s --user "api:key-${APIKEY}" \
     https://api.mailgun.net/v3/mail.jacob-bogers.com/messages \
     -F from='Javascript Meetup Group Berlin <dont-reply@mail.jacob-bogers.com>' \
     -F to=jacobus.bogers@gmail.com \
