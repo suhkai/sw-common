@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "pck/validator/sequalize",
+            "program": "${workspaceFolder}/packages/sequalize/lite.js",
+            "cwd": "${workspaceFolder}/packages/sequalize",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "pck/validator/mailer",
             "program": "${workspaceFolder}/packages/mailer/node-mailer-mailgun-test.js",
             "cwd": "${workspaceFolder}/packages/mailer",
