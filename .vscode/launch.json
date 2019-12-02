@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "pck/tests/mysql2",
+            "program": "${workspaceFolder}/packages/my-sql/test-using-mysql2.js",
+            "cwd": "${workspaceFolder}/packages/my-sql",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "pck/validator/sequalize",
             "program": "${workspaceFolder}/packages/sequalize/lite.js",
             "cwd": "${workspaceFolder}/packages/sequalize",

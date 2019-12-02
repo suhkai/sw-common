@@ -1,0 +1,27 @@
+version: '3.3'
+services:
+  db:
+    image: mysql:5.7.28
+    restart: always
+    command:  --innodb_autoinc_lock_mode=2 --autocommit=0 --bulk-insert-buffer-size=2147483648 --log_output=TABLE --general_log=ON --max_allowed_packet=419430400 --binlog_cache_size=2147483648 --innodb_write_io_threads=100 --innodb_change_buffer_max_size=2147483648 --innodb-buffer-pool-size=6442450944 --innodb_io_capacity=20000 --innodb_io_capacity_max=40000 --sync_binlog=10000 --binlog_format=STATEMENT --innodb_flush_method=O_DSYNC --innodb_flush_log_at_timeout=1 --innodb_flush_log_at_trx_commit=2 
+    environment:
+      MYSQL_DATABASE: 'db'
+      # So you don't have to use root, but you can if you like
+      MYSQL_USER: 'admin'
+      # You can use whatever password you like
+      MYSQL_PASSWORD: 'admin'
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: 'admin'
+    ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      - '3306:3306'
+    expose:
+      # Opens port 3306 on the container
+      - '3306'
+      # Where our data will be persisted
+    volumes:
+      - my-db:/var/lib/mysql
+# Names our volumeysql
+# Names our volume
+volumes:
+  my-db:
