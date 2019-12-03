@@ -12,12 +12,15 @@ function randomString(length=10){
     return rc.join('');
 }
 
-function randomInt(a=0, b=1E3){
+function randomNum(a=0, b=1E3){
     const r = Math.random();
     const s = (1-r)*a + b*r; // avoid numerical truncation
     return s;
 }
 
+function randomInt(a,b){
+    return Math.trunc(randomNum(a,b));
+}
 
 function randomDate(a=-1E6,b=1E6){
     const r = Math.random();
@@ -28,5 +31,6 @@ function randomDate(a=-1E6,b=1E6){
 module.exports = {
     randomString,
     randomInt,
-    randomDate
+    randomDate,
+    randomNum
 }
