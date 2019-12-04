@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "pck/tests/mysql2",
-            "program": "${workspaceFolder}/packages/my-sql/test-using-mysql2.js",
+            "program": "${workspaceFolder}/packages/my-sql/test-using-mysql2-prod-env.js",
             "cwd": "${workspaceFolder}/packages/my-sql",
             "stopOnEntry": true
         },

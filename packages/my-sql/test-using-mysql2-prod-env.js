@@ -5,8 +5,6 @@ const mysql2 = require('mysql2');
 // because of issue https://github.com/sidorares/node-mysql2/issues/995
 const Timers = require('timers');
 
-const ws = require('ws');
-
 const {
     randomString,
     randomInt,
@@ -22,20 +20,18 @@ const crypto = require('crypto');
 const createStopWatch = require('./stop-watch');
 
 
-
-
-/*const user = 'eds_rw';
+const user = 'eds_rw';
 const password = 'qdju3mh6tig9xj7h';
 const database = 'eds_storage';
 const host = '10.128.130.50';
-const port = 3306;*/
+const port = 3306;
 
-
+/*
 const user = 'bulk_insert_user';
 const password = 'Munch2019';
 const database = 'bulk_insert_db_test';
 const host = 'localhost';
-const port = 3306;
+const port = 3306;*/
 
 const sqlInsertKeepAlive = `
  INSERT INTO keep_alive (
@@ -67,15 +63,12 @@ INSERT INTO msg_body (
 const sqlInsertHeader = `
 INSERT INTO msg_header (
     id,
-    partition_key,
-    body_md5_fk,
-    ts
+    body_md5_fk
 ) VALUES ?;
 `
 
 const sqlInsertHeaderItems = `
 INSERT INTO msg_header_items (
-    partition_key,
     header_id_fk,
     name,
     value
@@ -100,34 +93,27 @@ function probTrue(p = 0.5) {
     return Math.random() < p;
 }
 
-function geneterateHeaderItemRow(uuid, partition_key) {
+function geneterateHeaderItemRow(uuid) {
     return [
-        partition_key,
         uuid,
         randomString(50),
         randomString(50 + Math.trunc(Math.random() * 50))
     ];
 }
 
-function generateHeaderRow(md5, partition_key, ts) {
+function generateHeaderRow(md5) {
     return [
         uuidv1(),
-        partition_key,
-        md5,
-        ts
+        md5
     ];
 }
 
 
 function generateBodyRow() {
     const body = randomString(800 + Math.random() * 1000);
-    const md5 = probTrue(0.4) ? sampleUnif(md5HashSet) : createMD5(body);
-    const ts = randomDate();
-    const partition_key = randomInt(0, 24);
+    const md5 = createMD5(body);
     return [
         md5,
-        ts,
-        partition_key,
         body
     ];
 }
@@ -135,8 +121,6 @@ function generateBodyRow() {
 function generateKeepAliveRow() {
 
     const
-        ts = randomDate(),
-        partition_key = randomInt(0, 24),
         route_names = randomString(400), // large string
         pid = randomInt(),
         app = randomString(255),
@@ -153,8 +137,6 @@ function generateKeepAliveRow() {
         os_load2 = randomInt() * 0.8,
         os_uptime = randomInt();
     return [
-        ts,
-        partition_key,
         route_names,
         pid,
         app,
@@ -304,6 +286,7 @@ async function test() {
     let state;
     const stopWatch = createStopWatch();
     const lifeSpan = createStopWatch();
+    const totalTransTime = createStopWatch();
 
     let connection;
     let error;
@@ -378,27 +361,21 @@ async function test() {
             await delay(2000);
             continue;
         }
-        [, error] = await beginTransaction(connection);
-        if (error) {
-            state = 'trans failure'
-            console.log(`Error starting a transaction ${String(error)}`.red);
-            // delay it 
-            continue;
-        }
+     
         const ka = [Array.from({ length: 100 }).map(() => generateKeepAliveRow())];
         const body = [Array.from({ length: 5000 }).map(() => generateBodyRow())];
 
         // for each body we generate headers
         const headers = [body[0].reduce((col, b) => {
-            const [md5, ts, partition_key] = b;
-            const rows = Array.from({ length: 1 }).map(() => generateHeaderRow(md5, partition_key, ts));
+            const [md5] = b;
+            const rows = Array.from({ length: 1 }).map(() => generateHeaderRow(md5));
             col.push(...rows);
             return col;
         }, [])];
 
         const headerItems = [headers[0].reduce((col, b) => {
-            const [ uuid , pkey, md5, ts ] =  b;
-            const rows = Array.from({length: 4 + Math.random()*4 }).map(() => geneterateHeaderItemRow(uuid,pkey));
+            const [ uuid ] =  b;
+            const rows = Array.from({length: 4 + Math.random()*4 }).map(() => geneterateHeaderItemRow(uuid));
             col.push(...rows);
             return col;
         }, [])];
@@ -406,6 +383,16 @@ async function test() {
         // measure keep alive inserts
         stopWatch.reset(); // start measuring
         substate = 'ka0';
+        totalTransTime.reset();
+        totalTransTime.reset();
+        [, error] = await beginTransaction(connection);
+        if (error) {
+            state = 'trans failure'
+            console.log(`Error starting a transaction ${String(error)}`.red);
+            // delay it 
+            continue;
+        }
+
         const prep1 = queryKeepAlive(connection, ka);
         const prep2 = queryBodyMsg(connection, body);
         const prep3 = queryHeaderMsg(connection, headers);
@@ -441,7 +428,7 @@ async function test() {
         substate = 'body1';
 
         // measure header inserts
-        //stopWatch.reset(); // start measuring
+        // stopWatch.reset(); // start measuring
         substate = 'head0';
 
         [results, error] = await prep3;
@@ -474,6 +461,8 @@ async function test() {
             console.error(`commit body message failure:${String(error)}`.red);
             continue;
         }
+        const total = totalTransTime.peek();
+        console.log(`total trans time ${total}ms`.yellow);
     }
     console.log('db connection is going to close closed'.yellow);
     await closeConnection(connection);
