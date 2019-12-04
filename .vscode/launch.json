@@ -31,7 +31,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "pck/validator/blueimp-template",
+            "name": "template-blueimp",
             "program": "${workspaceFolder}/packages/blueimp-template/index.js",
             "cwd": "${workspaceFolder}/packages/blueimp-template",
             "stopOnEntry": true
@@ -39,7 +39,15 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "pck/validator/pug-template",
+            "name": "template-underscore",
+            "program": "${workspaceFolder}/packages/underscore-template/index.js",
+            "cwd": "${workspaceFolder}/packages/underscore-template",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "template-pug",
             "program": "${workspaceFolder}/packages/pug-template/index.js",
             "cwd": "${workspaceFolder}/packages/pug-template",
             "stopOnEntry": true

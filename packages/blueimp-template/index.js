@@ -5,13 +5,15 @@ const data = {
     url: 'https://github.com/blueimp/JavaScript-Templates',
     features: ['lightweight & fast', 'powerful', 'zero dependencies']
 }
-const oldLoad = tmpl.load;
+const oldLoad = tmpl.load; //Document.getElementById()
 console.log(oldLoad.toString());
 
+// but only if the source is a filename right?
 tmpl.load = function(id){
-    var filename = id + '.html'
+    /*var filename = id + '.html'
     console.log('Loading ' + filename);
-    return fs.readFileSync(filename, 'utf8');
+    return fs.readFileSync(filename, 'utf8');*/
+    return src;
 };
 
 const src = `
@@ -26,7 +28,13 @@ const src = `
 </ul>
 `;
 
-const result = tmpl(src, data);
+const result = tmpl('myfile', data); // like it is an DOM "id" or something  a real file name like './template.html' would not work
+const result2 = tmpl(src, data); // like it is an DOM "id" or something  a real file name like './template.html' would not work
 console.log(result);
-console.log(Object.keys(tmpl.cache));
-//tmpl.encode();
+console.log(result2);
+console.log(Object.keys(tmpl.cache)); //will actually show the cache with key "myfile", not cached if template is not loaded from an DOM like "id" attribute 
+console.log(tmpl.encode());
+
+
+
+// (template-data, source) => (string)
