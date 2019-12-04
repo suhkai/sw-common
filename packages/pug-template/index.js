@@ -4,6 +4,7 @@ const stringify = require('json-stringify-safe');
 
 global.hello='world';
 
+// internally uses fs.readFileSync , other possibilities are "compile" and "compileClient", etc
 const fn = pug.compileFile('./template.pug',{ doctype:'xml', self:true, debug: false, compileDebug:true, globals:['global']});
 //console.log(fn);
 
