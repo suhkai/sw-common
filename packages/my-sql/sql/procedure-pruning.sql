@@ -8,14 +8,11 @@ main:
 BEGIN
   DECLARE total_size_mb numeric default 0;
   DECLARE current_hour int4 default 0;
-  DECLARE get_size CURSOR FOR select ROUND(SUM(size_bytes)/1024/1024) as size_mb from (
-SELECT 
-    a.TOTAL_EXTENTS * a.EXTENT_SIZE AS size_bytes
+  DECLARE get_size CURSOR FOR SELECT ROUND(sum(data_length + index_length)/1024/1024,2) size_mb
 FROM
-    INFORMATION_SCHEMA.FILES a,
-    (SELECT 'msg_body' AS short_name UNION ALL SELECT 'msg_header_items' UNION ALL SELECT 'msg_header' UNION ALL SELECT 'keep_alive') b
+    information_schema.TABLES
 WHERE
-    a.FILE_NAME LIKE CONCAT(CONCAT('./eds_storage/', b.short_name), '#P%') ) v;
+    LOWER(table_name) IN ('msg_header_items' , 'msg_body', 'msg_header', 'keep_aliv');
   OPEN get_size;
   FETCH get_size INTO total_size_mb;
   CLOSE get_size;

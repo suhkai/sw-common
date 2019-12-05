@@ -438,7 +438,7 @@ async function test() {
         }
         else {
             console.log(results.results);
-            console.log(`duration(msgHeader): ${stopWatch.peek()} ms`.green);
+            //console.log(`duration(msgHeader): ${stopWatch.peek()} ms`.green);
         }
         substate = 'head1';
         substate = 'headItems0';
@@ -450,7 +450,7 @@ async function test() {
         }
         else {
             console.log(results.results);
-            console.log(`duration(msgHeaderItems): ${stopWatch.peek()} ms`.green);
+            //console.log(`duration(msgHeaderItems): ${stopWatch.peek()} ms`.green);
         }
         substate = 'headItems1';
 
@@ -462,7 +462,7 @@ async function test() {
             continue;
         }
         const total = totalTransTime.peek();
-        console.log(`total trans time ${total}ms`.yellow);
+        console.log(`total trans time ${total}ms`.red);
     }
     console.log('db connection is going to close closed'.yellow);
     await closeConnection(connection);
