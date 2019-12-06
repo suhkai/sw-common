@@ -2,7 +2,7 @@
   "name": "validator",
   "version": "1.0.0",
   "description": "",
-  "main": "src/validator.js",
+  "main": "src/proxy.js",
   "scripts": {
     "test": "mocha",
     "coverage": "nyc mocha"

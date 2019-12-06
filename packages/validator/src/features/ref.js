@@ -21,7 +21,7 @@ const {
    features
 } = require('./dictionary');
 const objectSlice = require('../objectSlice');
-const equals = require('../equals');
+const { equals } = require('../equals');
 
 const predicateMap = {
    array: {

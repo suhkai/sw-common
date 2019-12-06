@@ -1,5 +1,5 @@
 // literal object comparison, not to 
-const equals = require('./equals');
+const { equals } = require('./equals');
 
 
 module.exports = function createFind(objArr) {
@@ -18,4 +18,3 @@ module.exports = function createFind(objArr) {
         return [undefined, `"${String(data)}" not found in list`];   
     };
 };
-
