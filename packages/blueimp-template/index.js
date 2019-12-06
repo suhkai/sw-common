@@ -2,12 +2,19 @@ const tmpl = require('blueimp-tmpl');
 
 const { V, addFeature, removeFeature } =  require('../validator');
 
-const templateData = V.object({}).open; // anything goes
-const templateString = V.string();
-const templateArgs = V.string();
-const templ_helper = V.function();
+const isTemplateObjectData = V.object({}).open; // anything goes
+const IsTemplateString = V.string(2,);
+const isTemplateArgs = V.string(1,);
+const isFunction = V.function;
+const isBoolean = V.boolean;
+ 
+function validateOptions(o){
 
+};
 
+function render(o){
+
+}
 
 const fs = require('fs');
 const data = {
@@ -15,6 +22,7 @@ const data = {
     url: 'https://github.com/blueimp/JavaScript-Templates',
     features: ['lightweight & fast', 'powerful', 'zero dependencies']
 }
+
 const oldLoad = tmpl.load; //Document.getElementById()
 console.log(oldLoad.toString());
 

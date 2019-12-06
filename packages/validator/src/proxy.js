@@ -20,6 +20,7 @@ require('./features/number');
 require('./features/integer');
 require('./features/enum');
 require('./features/ref');
+require('./features/function');
 
 function createValidatorFactory() {
     function createHandler(propContext, parentAssembler) {

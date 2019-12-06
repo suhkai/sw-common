@@ -8,7 +8,8 @@ const scalars = [
     'string',
     'number',
     'symbol',
-    'boolean'
+    'boolean',
+    'function'
 ];
 
 function equalprops(a, b, selector) {
