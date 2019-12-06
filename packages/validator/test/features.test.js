@@ -30,7 +30,7 @@ describe('features tests', function () {
                 address: {
                     streetName: 'Kodak-Drive',
                     state: 'TN',
-                    houseNr: 342, 
+                    houseNr: 342,
                     appartment: '24A',
                     country: 'USA'
                 }
@@ -50,7 +50,7 @@ describe('features tests', function () {
             const result = checkNAW(data);
             expect(result).to.deep.equal([
                 undefined,
-                'validation error at path:/address/state, error: element "TN" could not be found at /dictionary/states',
+                [{ frozen: true, errorMsg: 'validation error at path:/address/state, error: element "TN" could not be found at /dictionary/states' }], // array of errors
                 undefined
             ]);
         });
@@ -81,7 +81,6 @@ describe('features tests', function () {
             }).open;
 
             const result = checkNAW(data);
-            console.log(result);
         });
 
     });
@@ -104,13 +103,13 @@ describe('features tests', function () {
     describe('boolean', () => {
         const checker = V.boolean;
         it('true', () => {
-            expect(checker(true)).to.deep.equal([ true, undefined]);
+            expect(checker(true)).to.deep.equal([true, undefined]);
         });
         it('false', () => {
             expect(checker(false)).to.deep.equal([false, undefined]);
         });
         it('not a boolean but thruty', () => {
-            expect(checker({})).to.deep.equal([ undefined, 'not a boolean value:{}' ]);
+            expect(checker({})).to.deep.equal([undefined, 'not a boolean value:{}']);
         });
     });
     describe('number/integer', () => {
@@ -195,11 +194,16 @@ describe('features tests', function () {
             }).closed;
 
             const result = checkNAW(data);
-            expect(result).to.deep.equal([
-                undefined,
-                'validation error at path:/address/houseNr, error: 342 is not between 400 and Infinity inclusive|validation error at path:/address/appartment, error: value type is not of type string: boolean',
-                undefined
-            ]);
+            expect(result).to.deep.equal([undefined,
+                [{
+                    frozen: true,
+                    errorMsg: 'validation error at path:/address/houseNr, error: 342 is not between 400 and Infinity inclusive'
+                },
+                {
+                    frozen: true,
+                    errorMsg: 'validation error at path:/address/appartment, error: value type is not of type string: boolean'
+                }],
+                undefined]);
         });
         it('object with scalar properties some optional', () => {
             it('empty schema object construction', () => {
@@ -230,8 +234,7 @@ describe('features tests', function () {
                 lastName: 'Kazan',
                 s: 'a' // should break because schema is closed
             });
-
-            expect(result2).to.deep.equal([null, 'The validating object schema is closed. Forbidden properties: [s this property is not allowed]', null]);
+            expect(result2).to.deep.equal([ null, [ 's this property is not allowed' ], null ]);
 
             const result3 = checker({
                 id: 1234,
@@ -245,7 +248,9 @@ describe('features tests', function () {
             const result4 = checker({
                 id: 1234
             });
-            expect(result4).to.deep.equal([null, '[lastName] is manditory but absent from the object', null]);
+            expect(result4).to.deep.equal([ null,
+                [ '[lastName] is manditory but absent from the object' ],
+                null ]);
         })
     })
 });

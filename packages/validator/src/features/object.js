@@ -10,6 +10,8 @@ const {
     formatPath
 } = require('../tokenizer');
 
+const ifArrayNotZero = require('../if-length-zero');
+
 features.set('object', {
     factory: 2,
     name: 'object',
@@ -41,22 +43,7 @@ features.set('object', {
                 const errMsg = `"object" validator must be finalized by "open" or "closed" modofifier, not with "${openOrClosed}"`;
                 throw new TypeError(errMsg);
             }
-            // split object in symbol and normal strings
-            function copyObject(o) {
-                const symbolObj = {};
-                const stringObj = {};
-
-                for (const prop in o) {
-                    if (typeof prop === 'string') {
-                        stringObj[prop] = o[prop];
-                    }
-                    else if (typeof prop === 'symbol') {
-                        symbolObj[`${String(prop)}`] = o[prop];
-                    }
-                }
-                return { symbolObj, stringObj };
-            }
-
+           
             function checkMissingProps(partition, data, errors) {
                 for (const key of props[partition]) {
                     if (!(key in data)) {
@@ -98,9 +85,9 @@ features.set('object', {
                 if (errors.length){
                     // are we nested object?
                     if (ctx.location.length){
-                        return [undefined, errors, undefined];
+                        return [undefined, ifArrayNotZero(errors), undefined];
                     }
-                    return [undefined, errors.map(e => e.errorMsg).join('|'), undefined];
+                    return [undefined, ifArrayNotZero(errors), undefined];
                 }
                 return [data, undefined, undefined];
             }
@@ -116,8 +103,7 @@ features.set('object', {
                         }
                     }
                     if (errors.length) {
-                        const errMsg = `The validating object schema is closed. Forbidden properties: [${errors.join('|')}]`;
-                        return [null, errMsg, null];
+                        return [null, errors, null];
                     }
                 }
 
@@ -125,7 +111,7 @@ features.set('object', {
                 checkMissingProps('symbols', obj, errors);
 
                 if (errors.length) {
-                    return [null, errors.join('|'), null];
+                    return [null, errors, null];
                 }
                 // deep validation
                 const [result1, errors1] = deepValidate('strings', obj, ctx);
