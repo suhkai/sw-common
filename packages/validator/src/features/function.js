@@ -12,8 +12,8 @@ function functionCheck(m) {
                 if (!isFunction(fn)) {
                         return [undefined, `is not a function`];
                 }
-                if (m && m > fn.length) {
-                        return [undefined, `function [${fn.name}] does not have the required number of manditory arguments`];
+                if (m && m !== fn.length) {
+                        return [undefined, `function [${fn.name || 'anonymous'}] does not have the required number of manditory arguments: ${m}`];
                 }
                 return [fn, undefined];
 

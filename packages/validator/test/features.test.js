@@ -19,6 +19,25 @@ const {
 } = require('../src/proxy');
 
 describe('features tests', function () {
+    describe('function', () => {
+        const fun = (a, b, c) => { };
+        it('check if it is a function type', () => {
+            const result = V.function()(fun);
+            expect(result).to.deep.equal([fun, undefined]);
+        });
+        it('invalidate a non function type', () => {
+            const result = V.function()(class A { });
+            expect(result).to.deep.equal([undefined, 'is not a function']);
+        });
+        it('invalidate a non function with wrong arguments', () => {
+            const result = V.function(3)(function func1(a, b) { });
+            expect(result).to.deep.equal([undefined, 'function [func1] does not have the required number of manditory arguments: 3']);
+        });
+        it('invalidate a anonymous function', () => {
+            const result = V.function(3)((a, b) => { });
+            expect(result).to.deep.equal([undefined, 'function [anonymous] does not have the required number of manditory arguments: 3']);
+        });
+    });
     describe('ref', () => {
         it('relative path, doesnt exist', () => {
             const data = {
@@ -234,7 +253,7 @@ describe('features tests', function () {
                 lastName: 'Kazan',
                 s: 'a' // should break because schema is closed
             });
-            expect(result2).to.deep.equal([ null, [ 's this property is not allowed' ], null ]);
+            expect(result2).to.deep.equal([null, ['s this property is not allowed'], null]);
 
             const result3 = checker({
                 id: 1234,
@@ -248,9 +267,9 @@ describe('features tests', function () {
             const result4 = checker({
                 id: 1234
             });
-            expect(result4).to.deep.equal([ null,
-                [ '[lastName] is manditory but absent from the object' ],
-                null ]);
+            expect(result4).to.deep.equal([null,
+                ['[lastName] is manditory but absent from the object'],
+                null]);
         })
     })
 });
