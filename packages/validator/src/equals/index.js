@@ -32,9 +32,6 @@ function equalprops(a, b, selector) {
     return true;
 };
 
-
-
-
 function equalObject(a, b){
     // lets to symbolsfor (const a )
     if (!equalprops(a, b, Object.getOwnPropertyNames)) {

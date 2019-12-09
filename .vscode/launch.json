@@ -32,8 +32,8 @@
             "type": "node",
             "request": "launch",
             "name": "template-blueimp",
-            "program": "${workspaceFolder}/packages/blueimp-template/index.js",
-            "cwd": "${workspaceFolder}/packages/blueimp-template",
+            "program": "${workspaceFolder}/packages/rollup-template-plugin-blueimp/index.js",
+            "cwd": "${workspaceFolder}/packages/rollup-template-plugin-blueimp",
             "stopOnEntry": true
         },
         {

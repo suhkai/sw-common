@@ -21,6 +21,7 @@ require('./features/integer');
 require('./features/enum');
 require('./features/ref');
 require('./features/function');
+require('./features/regexp');
 
 function createValidatorFactory() {
     function createHandler(propContext, parentAssembler) {

@@ -19,6 +19,20 @@ const {
 } = require('../src/proxy');
 
 describe('features tests', function () {
+    describe('regexp', () => {
+        it('check if a value is of type regexp', () => {
+            const checker = V.regexp;
+            const actualReg = /^$/g;
+            const result= checker(actualReg);
+            expect(result).to.deep.equal([ actualReg, undefined ]);
+        });
+        it('check if a value is NOT of type regexp', () => {
+            const checker = V.regexp;
+            const falseReg = 'some string';
+            const result= checker(falseReg);
+            expect(result).to.deep.equal([ undefined, 'not a regexp' ]);
+        });
+    });
     describe('function', () => {
         const fun = (a, b, c) => { };
         it('check if it is a function type', () => {
