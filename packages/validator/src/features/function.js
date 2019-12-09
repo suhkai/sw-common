@@ -1,10 +1,21 @@
-const createRangeCheck = require('../createRangeCheck');
-
 const { features } = require('./dictionary');
-const { isFunction } = require('../equals');
+const isFunction = require('../isFunction');
 
 features.set('function', {
-    factory: 0,
+    factory: 1,
     name: 'function',
-    fn: isFunction
+    fn: functionCheck
 });
+
+function functionCheck(m) {
+        return function checkFn(fn) {
+                if (!isFunction(fn)) {
+                        return [undefined, `is not a function`];
+                }
+                if (m && m > fn.length) {
+                        return [undefined, `function [${fn.name}] does not have the required number of manditory arguments`];
+                }
+                return [fn, undefined];
+
+        };
+}

@@ -1,20 +1,54 @@
 const tmpl = require('blueimp-tmpl');
 
-const { V, addFeature, removeFeature } =  require('../validator');
+const { V, addFeature, removeFeature } = require('../validator');
 
 const isTemplateObjectData = V.object({}).open; // anything goes
-const IsTemplateString = V.string(2,);
-const isTemplateArgs = V.string(1,);
+const IsTemplateString = V.string(2);
+const isTemplateArgs = V.string(1);
 const isFunction = V.function;
 const isBoolean = V.boolean;
- 
-function validateOptions(o){
+
+function validateOptions(o) {
 
 };
 
-function render(o){
+function render(o) {
 
 }
+
+V.object({
+    func_argument: 2,
+
+}).closed;
+
+/*
+
+temp_arg = 'p' (the object that willbe the template argument object) 
+temp_helper = function (old_temp_helper) => return whatever
+temp_func = oldfunc => (s,p1,p2,p3,p4,offset,str);
+
+
+[str.replace](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_function_as_a_parameter)
+
+
+function replacer(match, p1, p2, p3, offset, string) {
+  // p1 is nondigits, p2 digits, and p3 non-alphanumerics
+  return [p1, p2, p3].join(' - ');
+}
+
+function(s, p1, p2, p3, p4, p5, offset, str) {
+
+number of parameters will depend on the subgroups, so cant use arrow functions
+
+function (originalFunction){
+    retrun function(){
+        handle arguments here..
+    }
+}
+
+*/
+
+function (template: string, data: any): string
 
 const fs = require('fs');
 const data = {
@@ -27,7 +61,7 @@ const oldLoad = tmpl.load; //Document.getElementById()
 console.log(oldLoad.toString());
 
 // but only if the source is a filename right?
-tmpl.load = function(id){
+tmpl.load = function (id) {
     /*var filename = id + '.html'
     console.log('Loading ' + filename);
     return fs.readFileSync(filename, 'utf8');*/
@@ -64,27 +98,27 @@ npm install blueimp-tmpl
 
 [github repo](https://github.com/blueimp/JavaScript-Templates)
 
-options
+    options
 
-temp_arg = 'p' (the object that willbe the template argument object) 
+temp_arg = 'p'(the object that willbe the template argument object) 
 temp_helper = function (old_temp_helper) => return whatever
-temp_func = oldfunc => (s,p1,p2,p3,p4,offset,str);
+temp_func = oldfunc => (s, p1, p2, p3, p4, offset, str);
 
 
 [str.replace](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_function_as_a_parameter)
 
 
-function replacer(match, p1, p2, p3, offset, string) {
-  // p1 is nondigits, p2 digits, and p3 non-alphanumerics
-  return [p1, p2, p3].join(' - ');
-}
-
-function(s, p1, p2, p3, p4, p5, offset, str) {
-
-number of parameters will depend on the subgroups, so cant use arrow functions
-
-function (originalFunction){
-    retrun function(){
-        handle arguments here..
+    function replacer(match, p1, p2, p3, offset, string) {
+        // p1 is nondigits, p2 digits, and p3 non-alphanumerics
+        return [p1, p2, p3].join(' - ');
     }
-}
+
+function (s, p1, p2, p3, p4, p5, offset, str) {
+
+        number of parameters will depend on the subgroups, so cant use arrow functions
+
+        function (originalFunction) {
+            retrun function() {
+                handle arguments here..
+    }
+        }

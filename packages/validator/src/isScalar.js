@@ -1,5 +1,3 @@
-'use strict';
-
 const scalars = [
     'string',
     'number',
@@ -7,6 +5,6 @@ const scalars = [
     'boolean'
 ];
 
-module.exports =  function isScalar(s) {
+module.exports = function isScalar(s) {
     return scalars.includes(typeof s);
 };

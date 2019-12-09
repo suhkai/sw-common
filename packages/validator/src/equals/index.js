@@ -1,16 +1,17 @@
 'use strict';
 
 const isObject = require('../isObject');
-const isArray = Array.isArray;
-const regxpNormalisation = /^\(([^\)\(]*)\)\s*=>\s*/;
+const isFunction = require('../isFunction');
+const isScalar = require('../isScalar');
+const isClass = require('../isClass');
 
-const scalars = [
-    'string',
-    'number',
-    'symbol',
-    'boolean',
-    'function'
-];
+const equalSimple = require('./equalSimple');
+const equalFunction = require('./equalFunction');
+const equalClass = require('./equalClass');
+
+const isArray = Array.isArray;
+
+const regxpNormalisation = /^\(([^\)\(]*)\)\s*=>\s*/;
 
 function equalprops(a, b, selector) {
     const aS = selector(a);
@@ -32,33 +33,7 @@ function equalprops(a, b, selector) {
 };
 
 
-function isScalar(s) {
-    return scalars.includes(typeof s);
-};
 
-function equalFunction(f1, f2) {
-    const str1 = f1.toString().replace(regxpNormalisation,'$1=>');
-    const str2 = f2.toString().replace(regxpNormalisation,'$1=>');
-    return str1 === str2;
-};
-
-function isFunction(f){
-    if (typeof f === 'function') {
-        const str = f.toString();
-        if (str.startsWith('function') || /^\(([^\)\(]*)\)\s*=>\s*/.test(str)) {
-            return true;
-        }
-    }
-    return false;
-};
-
-function isClass(c) {
-    return typeof c === 'function' && c.toString().startsWith('class');
-};
-
-function equalClass(c1, c2) {
-    return c1.toString() === c2.toString();
-};
 
 function equalObject(a, b){
     // lets to symbolsfor (const a )
@@ -99,10 +74,6 @@ function equalArray(arr1, arr2){
     return true;
 };
 
-function equalSimple(a, b){
-    return a === b;
-};
-
 function equal(a, b) {
     if (isScalar(a) && isScalar(b)) {
         return equalSimple(a, b);
@@ -131,13 +102,9 @@ function equal(a, b) {
 module.exports = {
     equalObject,
     equals: equal,
-    equalSimple,
     equalArray,
     equalClass,
-    isClass,
-    isFunction,
     equalFunction,
-    isScalar,
     equalprops
 };
 

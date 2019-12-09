@@ -191,7 +191,6 @@ parse5('<html></html>'); // or parse5('')
 //->
 ```
 
-
 ```html
 <!doctype html>
 <html lang="en">
