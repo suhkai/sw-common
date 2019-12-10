@@ -7,9 +7,14 @@ const blueImpOptionValidator = V.object({
     arg: V.string().optional,
     parse_regexp: V.regexp.optional,
     parse_regexpfunc: V.function().optional,
-    load: V.function(1).optional
+    load: V.function(1).optional,
+    outputFile: V.default('index.html').string().optional
 }).closed;
 
+// initialize, options, -> returns error if unsucessfull or a new options object (sanitation);
+//  ---> returns (newoptions( sanatized), errors)
+// build ,=> optionally test initialized options, maybe resolve, use emitted resources from bundle
+//  --> returns { filename (fullpath or not), html (generate html), errors: list of errors }
 
 const oldLoad = tmpl.load; //Document.getElementById()
 console.log(oldLoad.toString());
