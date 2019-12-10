@@ -102,8 +102,7 @@ function createValidatorFactory() {
                 // actual calling the validator
                 //
                 if (parentAssembler === rootAssembler) {
-                    const result = target(...argumentList); // for debugging a seperate rc
-                    return result;
+                    return target(...argumentList); // for debugging a seperate rc
                 }
                 const [data, err, final] = parentAssembler(...argumentList);
                 if (err || final) { // imediatly stop

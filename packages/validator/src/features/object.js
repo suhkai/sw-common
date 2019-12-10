@@ -94,8 +94,11 @@ features.set('object', {
             //
             return function validateObject(obj, ctx = { data: obj, location: [] }) { // Return dummy validator
                 // validation for optional and missing props etc
+                if (typeof obj !== 'object'){
+                    return [undefined, `data is not an object`];
+                }
                 const errors = [];
-
+                
                 if (openOrClosed === 'closed') {
                     for (const propKey in obj) {
                         if (!(propKey in schema)) {

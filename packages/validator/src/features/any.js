@@ -8,10 +8,10 @@ features.set('any', {
     name: 'any',
     fn: a => {
         if (!isArray(a)) {
-            return [undefined, '"any" feature needs an array as configuration input'];
+            throw new Error('"any" feature needs an array as configuration input');
         }
         if (a.length === 0) {
-            return [undefined, 'trying to configure "any" feature with an non-empty array'];
+            throw new Error('trying to configure "any" feature with an non-empty array');
         }
         // all of the elements must be functions
         const errors = [];
@@ -20,8 +20,8 @@ features.set('any', {
                 errors.push(`"any" validator on index ${i} is not a callable function`);
             }
         }
-        if (error.length) {
-            return [undefined, errors];
+        if (errors.length) {
+            throw new Error(errors.join('|'));
         }
         // everything set to go
         return function checkAny(obj, ctx = { data: obj, location: [] }) {

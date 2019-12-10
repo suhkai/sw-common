@@ -19,18 +19,66 @@ const {
 } = require('../src/proxy');
 
 describe('features tests', function () {
+    describe('any', () => {
+        const string = V.string(0,50);
+        const integer = V.integer(-5,10);
+        const object = V.object({ a: V.integer() }).closed;
+        it('reject configuration thats not an array', () => {
+            const checker = () => V.any(); // 
+            expect(checker).to.throw('"any" feature needs an array as configuration input');
+        });
+        it('reject empty configuration array', () => {
+            const checker = () => V.any([]); // 
+            expect(checker).to.throw('trying to configure "any" feature with an non-empty array');
+        });
+        it('some array elements are not functions, should reject', () => {
+            const checker = () => V.any([1,2,'he']); // 
+            expect(checker).to.throw('"any" validator on index 0 is not a callable function|"any" validator on index 1 is not a callable function|"any" validator on index 2 is not a callable function');
+        });
+        it('match 0 validators in the set',()=>{
+           const checker = V.any([
+               string, integer, object
+           ]);
+           const result = checker(28) // 
+           expect(result).to.deep.equal([undefined, 'none of the "any" set of validation functions approved the input']);
+        });
+        it('match numeric validator in the set',()=>{
+            const checker = V.any([
+                string, integer, object
+            ]);
+            const result = checker(9) // 
+            expect(result).to.deep.equal([9, undefined]);
+         });
+         it('match object validator in the set',()=>{
+            const checker = V.any([
+                string, integer, object
+            ]);
+            const result = checker({a:4}) // 
+            expect(result).to.deep.equal([{a:4}, undefined]);
+         });
+         it('match object validator in the set',()=>{
+            const checker = V.object({
+              person: V.object({age: V.any( [string, integer, object]) }).closed
+            }).closed;
+            const result = checker({person:{ age: 24 }}) // 
+            expect(result).to.deep.equal([ undefined,
+                [ { frozen: true,
+                    errorMsg: 'validation error at path:/person/age, error: none of the "any" set of validation functions approved the input' } ],
+                undefined ]);
+         });
+    });
     describe('regexp', () => {
         it('check if a value is of type regexp', () => {
             const checker = V.regexp;
             const actualReg = /^$/g;
-            const result= checker(actualReg);
-            expect(result).to.deep.equal([ actualReg, undefined ]);
+            const result = checker(actualReg);
+            expect(result).to.deep.equal([actualReg, undefined]);
         });
         it('check if a value is NOT of type regexp', () => {
             const checker = V.regexp;
             const falseReg = 'some string';
-            const result= checker(falseReg);
-            expect(result).to.deep.equal([ undefined, 'not a regexp' ]);
+            const result = checker(falseReg);
+            expect(result).to.deep.equal([undefined, 'not a regexp']);
         });
     });
     describe('function', () => {
@@ -114,6 +162,21 @@ describe('features tests', function () {
             }).open;
 
             const result = checkNAW(data);
+            expect(result).to.deep.equal([
+                {
+                    dictionary: { states: ['TN', 'CA'] },
+                    firstName: 'Patrick',
+                    lastName: 'Bet-David',
+                    address:
+                    {
+                        streetName: 'Kodak-Drive',
+                        state: 'TN',
+                        houseNr: 342,
+                        appartment: '24A'
+                    }
+                },
+                undefined,
+                undefined]);
         });
 
     });
