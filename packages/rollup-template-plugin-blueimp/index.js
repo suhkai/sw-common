@@ -5,14 +5,10 @@ const { V, addFeature, removeFeature } = require('../validator');
 const blueImpOptionValidator = V.object({
     helper: V.string().optional,
     arg: V.string().optional,
-    parsing: V.object({
-        regexp: V.regexp.optional,
-        func: V.function().optional
-    }).closed.optional,
+    parse_regexp: V.regexp.optional,
+    parse_regexpfunc: V.function().optional,
     load: V.function(1).optional
 }).closed;
-
-
 
 
 const oldLoad = tmpl.load; //Document.getElementById()
