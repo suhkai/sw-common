@@ -19,9 +19,28 @@ const {
 } = require('../src/proxy');
 
 describe('features tests', function () {
+    describe('ifFalsy', () => {
+        it('correct replacement when value = "", 0, false, undefined, null', () => {
+            const checker = V.ifFalsy('replace-with-this-string');
+            const result = [0, '', false, undefined, null].map(v => checker(v));
+            expect(result).to.deep.equal([['replace-with-this-string', undefined],
+            ['replace-with-this-string', undefined],
+            ['replace-with-this-string', undefined],
+            ['replace-with-this-string', undefined],
+            ['replace-with-this-string', undefined]]);
+        });
+        it('no replacement when value is "truethy"', () => {
+            const checker = V.ifFalsy('replace-with-this-string');
+            const result = [1, 'hi', true, {}].map(v => checker(v));
+            expect(result).to.deep.equal([[1, undefined],
+            ['hi', undefined],
+            [true, undefined],
+            [{}, undefined]]);
+        });
+    });
     describe('any', () => {
-        const string = V.string(0,50);
-        const integer = V.integer(-5,10);
+        const string = V.string(0, 50);
+        const integer = V.integer(-5, 10);
         const object = V.object({ a: V.integer() }).closed;
         it('reject configuration thats not an array', () => {
             const checker = () => V.any(); // 
@@ -32,40 +51,42 @@ describe('features tests', function () {
             expect(checker).to.throw('trying to configure "any" feature with an non-empty array');
         });
         it('some array elements are not functions, should reject', () => {
-            const checker = () => V.any([1,2,'he']); // 
+            const checker = () => V.any([1, 2, 'he']); // 
             expect(checker).to.throw('"any" validator on index 0 is not a callable function|"any" validator on index 1 is not a callable function|"any" validator on index 2 is not a callable function');
         });
-        it('match 0 validators in the set',()=>{
-           const checker = V.any([
-               string, integer, object
-           ]);
-           const result = checker(28) // 
-           expect(result).to.deep.equal([undefined, 'none of the "any" set of validation functions approved the input']);
+        it('match 0 validators in the set', () => {
+            const checker = V.any([
+                string, integer, object
+            ]);
+            const result = checker(28) // 
+            expect(result).to.deep.equal([undefined, 'none of the "any" set of validation functions approved the input']);
         });
-        it('match numeric validator in the set',()=>{
+        it('match numeric validator in the set', () => {
             const checker = V.any([
                 string, integer, object
             ]);
             const result = checker(9) // 
             expect(result).to.deep.equal([9, undefined]);
-         });
-         it('match object validator in the set',()=>{
+        });
+        it('match object validator in the set', () => {
             const checker = V.any([
                 string, integer, object
             ]);
-            const result = checker({a:4}) // 
-            expect(result).to.deep.equal([{a:4}, undefined]);
-         });
-         it('match object validator in the set',()=>{
+            const result = checker({ a: 4 }) // 
+            expect(result).to.deep.equal([{ a: 4 }, undefined]);
+        });
+        it('match object validator in the set', () => {
             const checker = V.object({
-              person: V.object({age: V.any( [string, integer, object]) }).closed
+                person: V.object({ age: V.any([string, integer, object]) }).closed
             }).closed;
-            const result = checker({person:{ age: 24 }}) // 
-            expect(result).to.deep.equal([ undefined,
-                [ { frozen: true,
-                    errorMsg: 'validation error at path:/person/age, error: none of the "any" set of validation functions approved the input' } ],
-                undefined ]);
-         });
+            const result = checker({ person: { age: 24 } }) // 
+            expect(result).to.deep.equal([undefined,
+                [{
+                    frozen: true,
+                    errorMsg: 'validation error at path:/person/age, error: none of the "any" set of validation functions approved the input'
+                }],
+                undefined]);
+        });
     });
     describe('regexp', () => {
         it('check if a value is of type regexp', () => {

@@ -23,6 +23,7 @@ require('./features/ref');
 require('./features/function');
 require('./features/regexp');
 require('./features/any');
+require('./features/ifFalsy');
 
 function createValidatorFactory() {
     function createHandler(propContext, parentAssembler) {
