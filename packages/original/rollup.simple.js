@@ -16,22 +16,24 @@ const {
 
 // array, can have multiple outputs for single input
 const oo = [{
-    output: {
-        format: 'iife'
-    },
-    dir: join(__dirname, './dist'),
+    //output: {
+        format: 'iife', 
+       // dir: 'dist',
+    //},
+    dir:'dist3', // lol so this is also possible wut?
     banner: '/* banner comment */',
     assetFileNames: '[name]-[hash].[ext]',
     chunkFileNames: '[name]-[hash].js',
     entryFileNames: '[name]-entry-[hash].js'
 }];
 
+//'Error: You must set "output.dir" instead of "output.file" when providing named inputs.'
 
 const io = {
     cache: true,
     input: {
         //1:'./lm'
-        bundle: './es7.js',
+        bundle: './es7.js', // main dir , mm ok
     },
     plugins: [
         plugin({
@@ -85,8 +87,15 @@ async function build() {
     // clean out dist directory
     const t1 = new Date();
     //rmdirRecursive('./dist');
-    const bundle = await rollup(io);
-    console.log('rollup part 1 finished'.cyan);
+    let bundle
+    try {
+        bundle = await rollup(io);
+        console.log('rollup part 1 finished'.cyan);
+    }
+    catch(err){
+        console.log('waypoint 1', err);
+        return;
+    }
     // what methods and props does the bundle object have
 
     console.log(Object.keys(bundle));

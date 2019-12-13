@@ -8,8 +8,26 @@ const blueImpOptionValidator = V.object({
     parse_regexp: V.regexp.optional,
     parse_regexpfunc: V.function().optional,
     load: V.function(1).optional,
-    outputFile: V.default('index.html').string().optional
+    outputFile: V.ifFalsy('index.html').string().optional
 }).closed;
+
+// posisble input options
+const io1 = {
+    input: 'src/main.js', // could be a string , default to single entry point
+    output: {
+        file: 'bundle.js',
+        format: 'cjs'
+    }
+};
+
+const io2 = {
+    cache: true,
+    input: { // could be this multiple entry points
+        bundle: './es7.js',
+    }
+};
+
+
 
 // initialize, options, -> returns error if unsucessfull or a new options object (sanitation);
 //  ---> returns (newoptions( sanatized), errors)
@@ -21,9 +39,9 @@ console.log(oldLoad.toString());
 
 // but only if the source is a filename right?
 tmpl.load = function (id) {
-/*var filename = id + '.html'
-console.log('Loading ' + filename);
-return fs.readFileSync(filename, 'utf8');*/
+    /*var filename = id + '.html'
+    console.log('Loading ' + filename);
+    return fs.readFileSync(filename, 'utf8');*/
     return '<div>{%=o.ref%}</div>';
 };
 

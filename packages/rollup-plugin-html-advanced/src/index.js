@@ -13,6 +13,7 @@ const isObject = require('./utils/isObject');
 // test favicons processing
 const processFavicons = require('./favicons/favicon-processing');
 const htmlRootToFsRoot = require('./utils/stripAbsolutePath');
+
 const {
   htmlProcessing,
   convertOptionTagsToP5,
@@ -124,8 +125,20 @@ function injectAssets(inject, excludeChunks, excludeAssets, bundle, head, body, 
 
 module.exports = function htmlGenerator(op = {}) {
  
-  return {
+  const rc = {
     name: fullPluginName,
+    // not async
+    options: function(io){ //  but we cannot use this.error (to bail in this hook), transofrm options here
+      console.log(io)
+      return io;
+    },
+    outputOptions(oo){ // optionally transfer output options here, maybe correct them? filename dest a/b/c/d/e
+      // no need for root stuff
+    },
+    buildStart: async function(io){ 
+      // here is where it all matters
+      // this.error(` build has to stop`, this);
+    },
     // this is basicly the only hook we need
     // exclude 
     /**
@@ -433,4 +446,5 @@ module.exports = function htmlGenerator(op = {}) {
       });
     }
   };
+  return rc;
 }
