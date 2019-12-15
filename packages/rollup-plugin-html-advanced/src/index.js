@@ -134,10 +134,13 @@ module.exports = function htmlGenerator(op = {}) {
     },
     outputOptions(oo){ // optionally transfer output options here, maybe correct them? filename dest a/b/c/d/e
       // no need for root stuff
+      console.log('outputOptions',oo);
+      // this works, nice this.error('stop');
     },
     buildStart: async function(io){ 
       // here is where it all matters
       // this.error(` build has to stop`, this);
+      console.log('build-start', io);
     },
     // this is basicly the only hook we need
     // exclude 

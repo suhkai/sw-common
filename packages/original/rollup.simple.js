@@ -16,11 +16,11 @@ const {
 
 // array, can have multiple outputs for single input
 const oo = [{
-    //output: {
+    output: {
         format: 'iife', 
-       // dir: 'dist',
-    //},
-    dir:'dist3', // lol so this is also possible wut?
+        file: 'dist2/bundlexyz.js',
+    },
+    //dir:'dist',
     banner: '/* banner comment */',
     assetFileNames: '[name]-[hash].[ext]',
     chunkFileNames: '[name]-[hash].js',
@@ -31,10 +31,7 @@ const oo = [{
 
 const io = {
     cache: true,
-    input: {
-        //1:'./lm'
-        bundle: './es7.js', // main dir , mm ok
-    },
+    input:'./es7.js', // main dir , mm ok
     plugins: [
         plugin({
             favicon: {
@@ -105,6 +102,10 @@ async function build() {
             output
         } = await bundle.generate(o);
         /*console.log(output);*/
+
+        //final output object will be a merge 
+        //  --> from the rollup-api code itself: 
+        // { output: Object.assign(Object.assign(Object.assign({}, rawOutputOptions), rawOutputOptions.output), inputOptions.output)
         await bundle.write(o);
     }
 }
