@@ -20,7 +20,6 @@ members individually, this allowes us to have sent operation (an individual mess
 13. DKSIM signing will not be part of this MVP
 
 
-
 Configuration is stored in the database
 
 table config_smtp {
