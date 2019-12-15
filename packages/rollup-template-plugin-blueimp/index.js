@@ -12,9 +12,13 @@ const blueImpOptionValidator = V.object({
     parse_regexp: V.regexp.optional,
     parse_regexpfunc: V.function().optional,
     load: V.function(1).optional,
-    outputFile: V.ifFalsy('index.html').string(5)
+    // make a file validator , remove below option, this should only concern generation of (htmlstring)
+    //  via the template thats all
+    outputFile: V.ifFalsy('index.html').string(5) // move it up one level, generation is here the issue 
     // create filename validator -> relative, must have name.extension and optional basepath/root
 }).closed;
+
+// prolly the only callback is to generate
 
 //paths can be messy affair, because platform diffs, make sure we are comparing the same thing 
 
@@ -26,6 +30,9 @@ function options(outputOptions, templateOptions) {
     // relative ../../ is forbidden
     // absolute is forbidden unless it includes the full basedir of the output.file or output.dir
     const normalPathHTML = normalizePath(blueImpOptions.outputFile);
+    // do below steps in "outputOptions" hook 
+    //  (so you get this as errors soon as possible, incase it is buildinga huge project)
+    
     // if "file" is not absolute, make it so relative to current working dir (cwd)
     // if "dir" is not absolute, make it so relative to current working dir(cwd)
     // if there is no "file" AND no "dir" specified then emit error
@@ -45,6 +52,8 @@ function options(outputOptions, templateOptions) {
     // at the end keep the absolute file of the html as is
     // return the string version of the html file
     
+    // return the string, thats all, the upper level with parse it with "parse5"
+
     if (outputOptions.file){
         if (!path.isAbsolute(file)){
             
