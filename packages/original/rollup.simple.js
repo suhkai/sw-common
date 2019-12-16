@@ -31,7 +31,7 @@ const oo = [{
 
 const io = {
     cache: true,
-    input:'./es7.js', // main dir , mm ok
+    input: resolve('./es7.js'), // main dir , mm ok
     plugins: [
         plugin({
             favicon: {
@@ -46,7 +46,6 @@ const io = {
                     yandex: true,
                     appleIcon: true,
                     appleStartup: true,
-
                 }
             },
             lang: 'en',
@@ -64,7 +63,6 @@ const io = {
                 console.log(a)
             },
             name: 'index.html'
-
         })
     ]
 };

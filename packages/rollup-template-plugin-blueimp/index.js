@@ -1,69 +1,74 @@
 const path = require('path');
-
 const tmpl = require('blueimp-tmpl');
+const { add, diff, linkPositionFromFile } = require('./filetools');
 
 const {
     V
 } = require('../validator');
 
-const blueImpOptionValidator = V.object({
-    helper: V.string().optional,
-    arg: V.string().optional,
-    parse_regexp: V.regexp.optional,
-    parse_regexpfunc: V.function().optional,
-    load: V.function(1).optional,
-    // make a file validator , remove below option, this should only concern generation of (htmlstring)
-    //  via the template thats all
-    outputFile: V.ifFalsy('index.html').string(5) // move it up one level, generation is here the issue 
-    // create filename validator -> relative, must have name.extension and optional basepath/root
-}).closed;
+const isFunction = require('../validator/isFunction');
 
-// prolly the only callback is to generate
+/* tests
+const result1 = linkPositionFromFile(process.cwd(), '../images/1.jpg');
+const result2 = linkPositionFromFile(process.cwd() + '/index.html', '../images/1.jpg');
+const result3 = linkPositionFromFile(process.cwd() + '/index.html', process.cwd() + '/images/1.jpg');
+const result4 = linkPositionFromFile('index.html', process.cwd() + '/images/1.jpg');
+const result5 = linkPositionFromFile('a/b/c/index.html', '/a/b/images/1.jpg');
+const result6 = linkPositionFromFile('b/c/index.html', 'a/b/images/1.jpg');
+const result7 = linkPositionFromFile('b/c/index.html', 'b/c/images/1.jpg');
+*/
 
-//paths can be messy affair, because platform diffs, make sure we are comparing the same thing 
+console.log(result3);
 
-function options(outputOptions, templateOptions) {
-    const [blueImpOptions, error] = blueImpOptionValidator(oo);
+function validate(outputOptions, pluginOptions, templateOptions) {
+    const blueImpOptionValidator = V.object({
+        helper: V.function(1).optional,
+        arg: V.string().optional,
+        parse_regexp: V.regexp.optional,
+        parse_regexpfunc: V.function().optional,
+        load: V.function(1).optional,
+        getTemplate: V.function(assets)
+    }).closed;
+    const [, errors] = blueImpOptionValidator(templateOptions);
     if (error) {
-        return [undefined, error];
+        return [undefined, errors.join('\\n')];
     }
-    // relative ../../ is forbidden
-    // absolute is forbidden unless it includes the full basedir of the output.file or output.dir
-    const normalPathHTML = normalizePath(blueImpOptions.outputFile);
-    // do below steps in "outputOptions" hook 
-    //  (so you get this as errors soon as possible, incase it is buildinga huge project)
-    
-    // if "file" is not absolute, make it so relative to current working dir (cwd)
-    // if "dir" is not absolute, make it so relative to current working dir(cwd)
-    // if there is no "file" AND no "dir" specified then emit error
-    // if  "file" takes precedence over "dir"
-    // if  "file"
-    //     make absolute path as described above for file
-    //     strip basename.ext from "file"
-    //     if "htmlFile" is not absolute, simply resolve to full resolve(dirname(file), htmlfile) 
-    //     if "htmlFile" is absolute then take it as is, later when injecting assets need to calculate relative paths
-    // if "dir"
-    //    make absolute as described in above for dir
-    //   if "htmlFIle" is not absolute, simply resolve to full resolve(dir, html)
-    //   if "htmlFile" is absolute, later with asset injection calculate the "relative offsets"
 
-    //  otpional: on global level you can say 'assets on same path-"level" of html file or above'
-    //  
-    // at the end keep the absolute file of the html as is
-    // return the string version of the html file
-    
-    // return the string, thats all, the upper level with parse it with "parse5"
-
-   
-}
-
-function validate(outputOptions, pluginOptions, templateOptions){
-
-    // returns [undefined, errors] in case of errors
-    // returns [generate, undefined] in case of success
-    return function generate(){
-
+    if (templateOptions.helper) {
+        tmpl.helper = templateOptions.helper(templ.helper);
     }
+
+    if (templateOptions.arg) {
+        tmpl.arg = templateOptions.arg;
+    }
+
+    if (templateOptions.parse_regexp) {
+        tmpl.regexp = templateOptions.parse_regexp;
+    }
+    if (templateOptions.parse_regexpfunc) {
+        const wrapped = templateOptions.parse_regexpfunc(tmpl.func);
+        if (isFunction(wrapped)) {
+            tmpl.func = wrapped;
+        }
+        else {
+            return [undefined, `parse_regexpfun did not return the function needed by blueimp tmpl.func`];
+        }
+    }
+
+    const fileNameChecker = V.object({
+        fileName: V.ifFalsy('index.html').filename
+    }).open;
+
+    const [, errors] = fileNameChecker(pluginOptions);
+    if (error) {
+        return [undefined, errors.join('\\n')];
+    }
+
+    const rc = function generate(assets) {
+        const [templateString, templateData] = templateOptions.getTemplate(assets);
+        return tmpl(templateString, templateData);
+    };
+    return [rc, undefined];
 }
 
 module.exports = validate;

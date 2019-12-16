@@ -4,13 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "example": "node example.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "coverage": "nyc mocha"
   },
   "keywords": [],
   "author": "jacob.bogers <Jacob.Bogers@doclerholding.com>",
   "license": "ISC",
   "dependencies": {
     "blueimp-tmpl": "^3.13.0"
+  },
+  "devdependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
+    "rimraf": "^3.0.0"
   }
 }

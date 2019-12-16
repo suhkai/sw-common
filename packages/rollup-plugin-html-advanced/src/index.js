@@ -8,12 +8,12 @@ const {
 } = require('path');
 // 
 const clone = require('clone');
-//
+// 
 const isObject = require('./utils/isObject');
 // test favicons processing
 const processFavicons = require('./favicons/favicon-processing');
 const htmlRootToFsRoot = require('./utils/stripAbsolutePath');
-
+// 
 const {
   htmlProcessing,
   convertOptionTagsToP5,
@@ -60,8 +60,6 @@ const fullPluginName = 'rollup-plugin-html-advanced';
 function formatMsg(text) {
   return `plugin [${fullPluginName}]: ${text}`;
 }
-
-
 
 function injectAssets(inject, excludeChunks, excludeAssets, bundle, head, body, logger) {
   for (const key in bundle) {
@@ -121,7 +119,6 @@ function injectAssets(inject, excludeChunks, excludeAssets, bundle, head, body, 
     }
   }
 }
-
 
 module.exports = function htmlGenerator(op = {}) {
  
