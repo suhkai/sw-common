@@ -19,10 +19,45 @@ const tokens = {
     PATHPART: '\x01',
     SLASH: '\x02',
     PARENT: '\x03',
-    CURRENT: '\x04'
+    CURRENT: '\x04',
+    PREDICATE: '\0x05',
+    PREDICATE_REGEXP: '\0x05'
 };
 
 const absorbers = {
+    where: {
+        order: 1,
+        fn: (str, i) => {
+            let b = i;
+            // must start with '[' and end with ']', also note, '[' ']' are special chars used by regexp so we use "zoning/scoping" to analyse correctly.
+            if (str[b] !== '[') {
+                return undefined;
+            }
+            b++;
+            if (str[b] === '/') { // absorb regexp
+                // find the combination /] but not \\/]  there will never be a regexp class like ..\\/] (outside of a regexp class ofc its possible)
+                //  because '/' is not escaped in a regexp.
+                b++;
+                while (!(str[b] === ']' && str[b - 1] == '/' && str[b - 2] !== '\\')) {
+                    b++;
+                }
+                if (str[b] === ']') {
+                    return { token: tokens.PREDICATE_REGEXP, start: i, end: b, value: new RegExp(str.slice(i + 1, b)) };
+                }
+                // this is an error 
+                throw new TypeError(`there is no closing "/]" for the predicate with a regexp ${str.slice(i, b)}`);
+            }
+            // absorb "normal" string
+            while (!(str[b] === ']' && str[b - 1] !== '\\')) {
+                b++;
+            }
+            // check if the last one is indeed ']'
+            if (str[b] === ']') {
+                return { token: tokens.PREDICATE, start: i, end: b, value: str.slice(i + 1, b) };
+            }
+            throw new TypeError(`there is no closing "]" for the predicate ${str.slice(i, b)}`);
+        }
+    },
     pathpart: {
         order: 99,
         fn: (str, i) => {
@@ -108,7 +143,7 @@ function descape(str) { // human interface -> normal
     return str.replace(/\\\//g, '/');
 }
 
-const lastToken = a => a[a.length-1] || {};
+const lastToken = a => a[a.length - 1] || {};
 
 function goUp(from) {
     if (from.length === 1 && from.token === tokens.SLASH) {
@@ -120,15 +155,15 @@ function goUp(from) {
     }
     if (from.length > 0) {
         // stip trailing "/"
-        while (lastToken(from).token === tokens.SLASH){
+        while (lastToken(from).token === tokens.SLASH) {
             from.pop();
         }
         // strip a path name
-        while (lastToken(from).token !== tokens.SLASH){
+        while (lastToken(from).token !== tokens.SLASH) {
             from.pop();
         }
         // strap the '/' 
-        while (lastToken(from).token === tokens.SLASH){
+        while (lastToken(from).token === tokens.SLASH) {
             from.pop();
         }
     }
@@ -160,6 +195,7 @@ function resolve(from, to) {
         switch (inst.token) {
             case tokens.SLASH: // we dont care about this, as its just like a "space" between words
                 break;
+            case tokens.PREDICATE:
             case tokens.PATHPART:
                 add(resolved, inst);
                 break;

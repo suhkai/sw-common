@@ -11,7 +11,6 @@
 */
 // parition data, ctx
 const {
-   tokenize,
    getTokens,
    resolve,
    tokens,
@@ -65,8 +64,6 @@ function arrayAbsent(valueItems, target){
    }
    return [valueItems, undefined];
 }
-
-
 
 
 function createRef(path) {

@@ -4,9 +4,7 @@ const $optional = Symbol.for('optional');
 const clone = require('clone');
 
 const {
-    tokenGenerator,
     tokens,
-    resolve,
     formatPath
 } = require('../tokenizer');
 
