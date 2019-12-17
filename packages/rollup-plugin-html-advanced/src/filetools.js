@@ -2,6 +2,16 @@ const path = require('path');
 
 // navigate(outputfile, and outputfile) --> normalize, strip base names 
 
+/* tests (but it in mocha)
+const result1 = linkPositionFromFile(process.cwd(), '../images/1.jpg');
+const result2 = linkPositionFromFile(process.cwd() + '/index.html', '../images/1.jpg');
+const result3 = linkPositionFromFile(process.cwd() + '/index.html', process.cwd() + '/images/1.jpg');
+const result4 = linkPositionFromFile('index.html', process.cwd() + '/images/1.jpg');
+const result5 = linkPositionFromFile('a/b/c/index.html', '/a/b/images/1.jpg');
+const result6 = linkPositionFromFile('b/c/index.html', 'a/b/images/1.jpg');
+const result7 = linkPositionFromFile('b/c/index.html', 'b/c/images/1.jpg');
+*/
+
 function diff(from,to){
     if (path.isAbsolute(from) !== path.isAbsolute(to)){
         // both must be absolute or both must be relative

@@ -1,6 +1,6 @@
 const path = require('path');
 const tmpl = require('blueimp-tmpl');
-const { add, diff, linkPositionFromFile } = require('./filetools');
+
 
 const {
     V
@@ -8,15 +8,6 @@ const {
 
 const isFunction = require('../validator/isFunction');
 
-/* tests
-const result1 = linkPositionFromFile(process.cwd(), '../images/1.jpg');
-const result2 = linkPositionFromFile(process.cwd() + '/index.html', '../images/1.jpg');
-const result3 = linkPositionFromFile(process.cwd() + '/index.html', process.cwd() + '/images/1.jpg');
-const result4 = linkPositionFromFile('index.html', process.cwd() + '/images/1.jpg');
-const result5 = linkPositionFromFile('a/b/c/index.html', '/a/b/images/1.jpg');
-const result6 = linkPositionFromFile('b/c/index.html', 'a/b/images/1.jpg');
-const result7 = linkPositionFromFile('b/c/index.html', 'b/c/images/1.jpg');
-*/
 
 const template = `
 <html lang="en">
