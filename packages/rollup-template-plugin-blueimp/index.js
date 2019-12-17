@@ -18,57 +18,25 @@ const result6 = linkPositionFromFile('b/c/index.html', 'a/b/images/1.jpg');
 const result7 = linkPositionFromFile('b/c/index.html', 'b/c/images/1.jpg');
 */
 
-console.log(result3);
+const template = `
+<html lang="en">
+<head>
+    <!--favicon injection-->
+    <title>{%=o.title%}</title>
+    <base href="{%=o.base_url%}" target="_blank">
+    <!--css asset injection-->
+    <!--js asset injection-->
+</head>
+<body>
+    <div id="myApp"></div>
+    <script src="bundlexyz.js"></script>
+</body>
+</html>`;
 
-function validate(outputOptions, pluginOptions, templateOptions) {
-    const blueImpOptionValidator = V.object({
-        helper: V.function(1).optional,
-        arg: V.string().optional,
-        parse_regexp: V.regexp.optional,
-        parse_regexpfunc: V.function().optional,
-        load: V.function(1).optional,
-        getTemplate: V.function(assets)
-    }).closed;
-    const [, errors] = blueImpOptionValidator(templateOptions);
-    if (error) {
-        return [undefined, errors.join('\\n')];
-    }
+async function generate(){
+   return tmpl(template, {title:'Rollup Sample App', base_url:'http://my-demo-app.com'});
+};
 
-    if (templateOptions.helper) {
-        tmpl.helper = templateOptions.helper(templ.helper);
-    }
+generate().then(data=>console.log(data));
 
-    if (templateOptions.arg) {
-        tmpl.arg = templateOptions.arg;
-    }
-
-    if (templateOptions.parse_regexp) {
-        tmpl.regexp = templateOptions.parse_regexp;
-    }
-    if (templateOptions.parse_regexpfunc) {
-        const wrapped = templateOptions.parse_regexpfunc(tmpl.func);
-        if (isFunction(wrapped)) {
-            tmpl.func = wrapped;
-        }
-        else {
-            return [undefined, `parse_regexpfun did not return the function needed by blueimp tmpl.func`];
-        }
-    }
-
-    const fileNameChecker = V.object({
-        fileName: V.ifFalsy('index.html').filename
-    }).open;
-
-    const [, errors] = fileNameChecker(pluginOptions);
-    if (error) {
-        return [undefined, errors.join('\\n')];
-    }
-
-    const rc = function generate(assets) {
-        const [templateString, templateData] = templateOptions.getTemplate(assets);
-        return tmpl(templateString, templateData);
-    };
-    return [rc, undefined];
-}
-
-module.exports = validate;
+// ok i have a good design now for this
