@@ -54,7 +54,8 @@ const predicteElementAbsorber = [
                 for (let j = start; j <= end; j++) {
                     if (str[j] === '/' && str[j - 1] !== '\\') {
                         const [value, error] = createRegExpSafe(str.slice(start, j + 1));
-                        return { error, value, token: tokens.PREDICATE_ELT_REGEXP, start: i, end: j };
+                        yield { error, value, token: tokens.PREDICATE_ELT_REGEXP, start: i, end: j };
+                        return;
                     }
                 }
                 const value = str.slice(start, end);
@@ -63,11 +64,13 @@ const predicteElementAbsorber = [
             // absorb till end or untill you see a '=' (not delimited with a "\")
             for (let j = start; j <= end; j++) {
                 if (str[j] === '=' && str[j - 1] !== '\\') {
-                    return { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start: i, end: j };
+                    yield { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start: i, end: j };
+                    return;
                 }
             }
             // all of it till the end
-            return { value: str.slice(start, end), token: tokens.PREDICATE_ELT_LITERAL, start: i, end };
+            yield { value: str.slice(start, end), token: tokens.PREDICATE_ELT_LITERAL, start, end };
+            return;
         }
     }
 
@@ -120,7 +123,7 @@ const rootAbsorber = [
         order: 0,
         *fn(str, i) {
             if (str[i] === '/' && str[i - 1] !== '\\') {
-                return { token: tokens.SLASH, start: i, end: i, value: str.slice(i, i + 1) };
+                return ({ token: tokens.SLASH, start: i, end: i, value: str.slice(i, i + 1) });
             }
         }
     },
@@ -151,8 +154,11 @@ const rootAbsorber = [
 function createTokenizer(absorber) {
     const sortedAbsorber = absorber.sort((a, b) => a.order - b.order);
     return function* tokenize(str, i, b) {
+        let start = i;
         for (const fnCtx of sortedAbsorber) {
-            for (const token of fnCtx.fn(str, i, b)) {
+            const tokens = Array.from(fnCtx.fn(str, start, b));
+            for (const token of fnCtx.fn(str, start, b)) {
+                start = token.end + 1; // new start
                 yield token;
             };
         }
@@ -170,10 +176,10 @@ const getTokens = path => Array.from(tokenGenerator(path));
 function* tokenGenerator(path) {
     const sequence = defaultTokenizer(path, 0, path.length);
     let i = 0;
-    let done;
-    let token;
+    //let done;
+    //let token;
     do {
-        { done, value } = sequence.next(i);
+        const { done, value } = sequence.next(i);
         if (!done) {
             i = token.end + 1;
         }
@@ -270,6 +276,9 @@ module.exports = {
     resolve,
     formatPath,
     escape,
-    getTokens
+    getTokens,
+    defaultTokenizer,
+    predicateTokenizer,
+    predicateElement
 };
 

@@ -26,11 +26,19 @@ const createFind = require('../src/createFind');
 const objectSlice = require('../src/objectSlice');
 const {
     getTokens,
-    resolve
+    resolve,
+    predicateElement
 } = require('../src/tokenizer');
 
 
 describe('utilities', function () {
+    describe('predicateElement lexer', () => {
+        it('lex string', () => {
+            const text = 'hello-world';
+            const tokens = Array.from(predicateElement('hello world', 0, text.length - 1));
+            console.log(tokens);
+        });
+    });
     describe('path tokenizer', () => {
         it('tokenize path "/favicons/android/path', () => {
             const path = '/favicons/android/path';
