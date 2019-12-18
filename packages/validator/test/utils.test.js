@@ -30,16 +30,23 @@ const {
     predicateElement
 } = require('../src/tokenizer');
 
+const arr = Array.from;
 
 describe('utilities', function () {
     describe('predicateElement lexer', () => {
-        it('lex string', () => {
+        it.skip('lexer "hello-world"', () => {
             const text = 'hello-world';
-            const tokens = Array.from(predicateElement('hello world', 0, text.length - 1));
+            const tokens = arr(predicateElement(text, 0, text.length-1));
+            expect(tokens).to.deep.equal([ { value: 'hello-world', token: '\u0000x08', start: 0, end: 10 } ])
+        });
+        it('lexer "/^[a-z]{3}$/"', () => {
+            const text = '/^[a-z]{3}$/';
+            const tokens = arr(predicateElement(text, 0, text.length - 1));
             console.log(tokens);
+            //expect(tokens).to.deep.equal([ { value: 'hello worl', token: '\u0000x08', start: 0, end: 10 } ])
         });
     });
-    describe('path tokenizer', () => {
+    describe.skip('path tokenizer', () => {
         it('tokenize path "/favicons/android/path', () => {
             const path = '/favicons/android/path';
             const tokens1 = getTokens(path);
@@ -222,7 +229,7 @@ describe('utilities', function () {
                 ])
         });
     });
-    describe('resolve', () => {
+    describe.skip('resolve', () => {
         it('from "/p1/p2/p3/p4///p5/" to "../../n1/n2/./n5"', () => {
             const from = getTokens('/p1/p2/p3/p4///p5/');
             const to = getTokens('../../n1/n2/./n5');
@@ -325,7 +332,7 @@ describe('utilities', function () {
             expect(() => resolve(from, to)).to.throw('Internal error, object location path must be absolute');
         });
     });
-    describe('find', () => {
+    describe.skip('find', () => {
         it('create find failure because of empty non array or empty list', () => {
             // below try catch is because nyc code coverage doesnt work with expect(()=>{...}).to.throw? why?
             try {
@@ -409,7 +416,7 @@ describe('utilities', function () {
 
         });
     });
-    describe('isObject  tests', () => {
+    describe.skip('isObject  tests', () => {
         it('isObject', () => {
             const data = [{}, null, undefined, new Date, []];
             expect(isObject(data[0])).to.be.true;
@@ -419,7 +426,7 @@ describe('utilities', function () {
             expect(isObject(data[4])).to.be.false;
         });
     });
-    describe('equals', () => {
+    describe.skip('equals', () => {
         it('compare strings', () => {
             const result1 = equals('string1', 'string2');
             const result2 = equals('same', 'same');
@@ -527,7 +534,7 @@ describe('utilities', function () {
             expect(equals(cla, clc)).to.be.false;
         });
     });
-    describe('scalar tests', () => {
+    describe.skip('scalar tests', () => {
         it('isInteger', () => {
             expect(isInt(1)).to.deep.equal([1, null]);
             expect(isInt(1.4)).to.deep.equal([null, 'not an integer']);
@@ -563,7 +570,7 @@ describe('utilities', function () {
             expect(() => createRangeCheck(0, NaN)).to.throw('upper boundery n is a NaN');
         });
     })
-    describe('type conversions', () => {
+    describe.skip('type conversions', () => {
         it('conversion to number', () => {
             const data = ['34234', 'xxEAZE', 4234];
             expect(convertToNumber(data[0])).to.deep.equal([34234, null]);
@@ -610,7 +617,7 @@ describe('utilities', function () {
             }
         });
     });
-    describe('helpers', () => {
+    describe.skip('helpers', () => {
         describe('isStringArray', () => {
             it('non array', () => {
                 const [arr, err] = isStringArray({

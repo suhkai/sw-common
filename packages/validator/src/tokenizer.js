@@ -51,25 +51,25 @@ const predicteElementAbsorber = [
         *fn(str, start, end) {
             if (str[start] === '/') {
                 // must end with '/' without previous '\\' of course
-                for (let j = start; j <= end; j++) {
+                for (let j = start+1; j <= end; j++) {
                     if (str[j] === '/' && str[j - 1] !== '\\') {
-                        const [value, error] = createRegExpSafe(str.slice(start, j + 1));
-                        yield { error, value, token: tokens.PREDICATE_ELT_REGEXP, start: i, end: j };
+                        const [value, error] = createRegExp(str.slice(start, j + 1));
+                        yield { error, value, token: tokens.PREDICATE_ELT_REGEXP, start, end: j };
                         return;
                     }
                 }
-                const value = str.slice(start, end);
+                const value = str.slice(start, end+1);
                 return { error: `no closing "/" found to end the regular expression ${value}`, token: tokens.PREDICATE_ELT_REGEXP, start, end, value };
             }
             // absorb till end or untill you see a '=' (not delimited with a "\")
-            for (let j = start; j <= end; j++) {
+            for (let j = start+1; j <= end; j++) {
                 if (str[j] === '=' && str[j - 1] !== '\\') {
-                    yield { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start: i, end: j };
+                    yield { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start, end: j };
                     return;
                 }
             }
             // all of it till the end
-            yield { value: str.slice(start, end), token: tokens.PREDICATE_ELT_LITERAL, start, end };
+            yield { value: str.slice(start, end+1), token: tokens.PREDICATE_ELT_LITERAL, start, end };
             return;
         }
     }
@@ -156,7 +156,6 @@ function createTokenizer(absorber) {
     return function* tokenize(str, i, b) {
         let start = i;
         for (const fnCtx of sortedAbsorber) {
-            const tokens = Array.from(fnCtx.fn(str, start, b));
             for (const token of fnCtx.fn(str, start, b)) {
                 start = token.end + 1; // new start
                 yield token;
