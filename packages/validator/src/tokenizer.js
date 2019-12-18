@@ -19,8 +19,10 @@ const tokens = {
     SLASH: '\x02',
     PARENT: '\x03',
     CURRENT: '\x04',
-    PREDICATE: '\0x05',
-    PREDICATE_REGEXP: '\0x05'
+    //PREDICATE: '\0x05',
+    //PREDICATE_ELT: '\0x06',
+    PREDICATE_ELT_REGEXP: '\0x07',
+    PREDICATE_ELT_LITERAL: '\0x08'
 };
 
 // there should be a list of "absorbers" things like
@@ -31,45 +33,77 @@ const tokens = {
 //  all these absorbers emit token streams, any absorber token bust be "globally unique"
 //  For now how absorbers are hierarchicly linked is programmicly determined, but later do a more declerative way of doing things.
 // 
- 
 
-const absorbers = {
-    where: {
-        order: 1,
-        fn: (str, i) => {
-            let b = i;
-            // must start with '[' and end with ']', also note, '[' ']' are special chars used by regexp so we use "zoning/scoping" to analyse correctly.
-            if (str[b] !== '[') {
+function createRegExp(regexpText) {
+    try {
+        return [new RegExp(regexpText), undefined]
+    }
+    catch (err) {
+        return [undefined, String(err)];
+    }
+}
+
+const predicteElementAbsorber = [
+    {
+        name: 'clauseElt',
+        order: 0,
+        // generator
+        *fn(str, start, end) {
+            if (str[start] === '/') {
+                // must end with '/' without previous '\\' of course
+                for (let j = start; j <= end; j++) {
+                    if (str[j] === '/' && str[j - 1] !== '\\') {
+                        const [value, error] = createRegExpSafe(str.slice(start, j + 1));
+                        return { error, value, token: tokens.PREDICATE_ELT_REGEXP, start: i, end: j };
+                    }
+                }
+                const value = str.slice(start, end);
+                return { error: `no closing "/" found to end the regular expression ${value}`, token: tokens.PREDICATE_ELT_REGEXP, start, end, value };
+            }
+            // absorb till end or untill you see a '=' (not delimited with a "\")
+            for (let j = start; j <= end; j++) {
+                if (str[j] === '=' && str[j - 1] !== '\\') {
+                    return { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start: i, end: j };
+                }
+            }
+            // all of it till the end
+            return { value: str.slice(start, end), token: tokens.PREDICATE_ELT_LITERAL, start: i, end };
+        }
+    }
+
+];
+
+const predicateAbsorber = [
+    {
+        name: 'clause',
+        order: 0,
+        // generator
+        *fn(str, start, end) {
+            if (!(str[start] === '[' && str[end] === ']')) {
+                return undefined; // not a clause token
+            }
+            const firstToken = predicateElement(str, start, end);
+            if (!firstToken) {
                 return undefined;
             }
-            b++;
-            if (str[b] === '/') { // absorb regexp
-                // find the combination /] but not \\/]  there will never be a regexp class like ..\\/] (outside of a regexp class ofc its possible)
-                //  because '/' is not escaped in a regexp.
-                b++;
-                while (!(str[b] === ']' && str[b - 1] == '/' && str[b - 2] !== '\\')) {
-                    b++;
-                }
-                if (str[b] === ']') {
-                    return { token: tokens.PREDICATE_REGEXP, start: i, end: b, value: new RegExp(str.slice(i + 1, b)) };
-                }
-                // this is an error 
-                throw new TypeError(`there is no closing "/]" for the predicate with a regexp ${str.slice(i, b)}`);
+            yield firstToken;
+            if (str[firstToken.end + 1] !== '=') {
+                return undefined;
             }
-            // absorb "normal" string
-            while (!(str[b] === ']' && str[b - 1] !== '\\')) {
-                b++;
+            const lastToken = predicateElement(str, firstToken.end + 2, end);
+            if (!lastToken) {
+                return undefined;
             }
-            // check if the last one is indeed ']'
-            if (str[b] === ']') {
-                return { token: tokens.PREDICATE, start: i, end: b, value: str.slice(i + 1, b) };
-            }
-            throw new TypeError(`there is no closing "]" for the predicate ${str.slice(i, b)}`);
+            return lastToken;
         }
-    },
-    pathpart: {
+    }
+];
+
+const rootAbsorber = [
+    {
+        name: 'pathpart',
         order: 99,
-        fn: (str, i) => {
+        *fn(str, i, end) {
             let b = i;
             while (str[b] && !(str[b] === '/' && str[b - 1] !== '\\')) {
                 b++;
@@ -77,20 +111,23 @@ const absorbers = {
             if (b === i) {
                 return undefined;
             }
-            return { token: tokens.PATHPART, start: i, end: b - 1, value: descape(str.slice(i, b)) };
+            const token = predicateTokenizer(str, i, b - 1);
+            return token || { token: tokens.PATHPART, start: i, end: b - 1, value: descape(str.slice(i, b)) };
         }
     },
-    slash: {
+    {
+        name: 'slash',
         order: 0,
-        fn: (str, i) => {
+        *fn(str, i) {
             if (str[i] === '/' && str[i - 1] !== '\\') {
                 return { token: tokens.SLASH, start: i, end: i, value: str.slice(i, i + 1) };
             }
         }
     },
-    dotpaths: {
+    {
+        name: 'dots', // actually this is just an alternative to pathpart, but ok lets keep it seperate
         order: 1,
-        fn: (str, i) => {
+        *fn(str, i) {
             let b = i;
             while (str[b] === '.') {
                 b++;
@@ -109,41 +146,41 @@ const absorbers = {
             }
         }
     }
-};
+];
 
-function orderAbsorbers() {
-    const orderedAbsorbers = Object.values(absorbers).sort((a, b) => {
-        return a.order - b.order;
-    });
-    return function () {
-        return orderedAbsorbers;
+function createTokenizer(absorber) {
+    const sortedAbsorber = absorber.sort((a, b) => a.order - b.order);
+    return function* tokenize(str, i, b) {
+        for (const fnCtx of sortedAbsorber) {
+            for (const token of fnCtx.fn(str, i, b)) {
+                yield token;
+            };
+        }
     }
 }
 
-const getOrderedAbsorbers = orderAbsorbers();
-
-function tokenize(str, i) {
-    for (const fnCtx of getOrderedAbsorbers()) {
-        const token = fnCtx.fn(str, i);
-        if (token) return token;
-    }
-}
+const defaultTokenizer = createTokenizer(rootAbsorber);
+const predicateTokenizer = createTokenizer(predicateAbsorber);
+const predicateElement = createTokenizer(predicteElementAbsorber);
 
 const getTokens = path => Array.from(tokenGenerator(path));
-
 // 
 // make this more general so use an absorber and arbitraty start and stop indexes
 //
 function* tokenGenerator(path) {
-    for (let i = 0; i < path.length;) {
-        const token = tokenize(path, i);
-        if (!token) {
-            throw new TypeError(`Tokenisation process failed for ${path}`);
+    const sequence = defaultTokenizer(path, 0, path.length);
+    let i = 0;
+    let done;
+    let token;
+    do {
+        { done, value } = sequence.next(i);
+        if (!done) {
+            i = token.end + 1;
         }
-        i = token.end + 1; // advance
         yield token;
-    }
+    } while (!done && token !== undefined);
 }
+
 
 const isAbsolute = t => t.length && t[0].token === tokens.SLASH;
 
@@ -195,6 +232,8 @@ function add(from, token) {
     from.push(token);
 }
 
+
+// take this out of this module at some later point
 function resolve(from, to) {
     if (isAbsolute(to)) {
         return to;
@@ -207,22 +246,19 @@ function resolve(from, to) {
         switch (inst.token) {
             case tokens.SLASH: // we dont care about this, as its just like a "space" between words
                 break;
-            case tokens.PREDICATE:
-            case tokens.PATHPART:
-                add(resolved, inst);
-                break;
             case tokens.PARENT:
                 goUp(resolved);
                 break;
             case tokens.CURRENT:
                 break; // skip
-            default:
-                throw new TypeError(`internal error: wrong path token "${int.value}"`);
+            default: // case tokens.PATHPART: and dynamic variants go here
+                add(resolved, inst);
         }
     }
     return resolved;
 }
 
+// take this out of this module at some later point
 function formatPath(tokens) {
     if (tokens.length === 0) return '';
     return tokens.map(t => t.value).join('');

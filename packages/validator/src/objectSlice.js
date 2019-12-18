@@ -1,8 +1,18 @@
 const { tokens } = require('./tokenizer');
 const isObject = require('./isObject');
+/*
+PATHPART: '\x01',
+SLASH: '\x02',
+PARENT: '\x03',
+CURRENT: '\x04',
+//PREDICATE: '\0x05',
+//PREDICATE_ELT: '\0x06',
+PREDICATE_ELT_REGEXP: '\0x07',
+PREDICATE_ELT_LITERAL: '\0x08'
+*/
 
 function matchSlice(value, tokenClause){
-    if (tokenClause.token === tokens.PREDICATE_REGEXP){
+    if (tokenClause.token === tokens.PREDICATE_ELT_REGEXP){
         const regExp = tokenClause.value
         return value.test
     }
@@ -15,8 +25,10 @@ module.exports = function objectSlice(object, selector, cursor = 0) {
     const rc = [];
     const instr = selector[cursor];
     switch (instr.token) {
-        case tokens.PREDICATE_REGEXP:
-        case tokens.PREDICATE:
+        case tokens.PREDICATE_ELT_REGEXP: // skip it
+        case tokens.PREDICATE_ELT_LITERAL: // skip it
+            break;
+        case tokens.PATHPART:
             if (cursor !== selector.length - 1){ // predicate token (for now) must end on the last element of the path
                 break;
             }
@@ -30,16 +42,6 @@ module.exports = function objectSlice(object, selector, cursor = 0) {
                 }
                 if (isObject(value)){
                     continue; // /a/b/c/[zeaze]/he
-                }
-                if (instr.token === tokens.PREDICATE_REGEXP){
-                    if (instr.value.test(String(value))){ //
-                        rc.push(value);
-                    }
-                }
-                if (instr.token === tokens.PREDICAT){
-                    if (instr.value === String(value)){
-                        rc.push(value);
-                    }
                 }
             }
             break;
