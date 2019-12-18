@@ -1,24 +1,31 @@
 /* usage:
 / v.object({
    .
-   .
    name: v.ref('/newlyhired/persons/name').exists,
-   tasks: v.ref('/tasks/taskNames').allIn,
-   // other things you can think of   
+   tasks: v.ref('/tasks/taskNames').absent,
+   // other things you can think of
+   such as:
+      v.ref('/tasks/taskname/[key=value]/some/thing/else')
+      v.ref('/tasks/taskname/[=value]/some/thing/else')
+      v.ref('/tasks/taskname/[key=/regexp/]/some/thing/else')
+      v.ref('/tasks/taskname/[regexp=exgexp]/some/thing/else')
    .
-   .
-})
+});
+
 */
-// parition data, ctx
+// partition data, ctx
+
 const {
    getTokens,
    resolve,
    tokens,
    formatPath
 } = require('../tokenizer');
+
 const {
    features
 } = require('./dictionary');
+
 const objectSlice = require('../objectSlice');
 const { equals } = require('../equals');
 

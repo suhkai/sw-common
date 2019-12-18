@@ -7,10 +7,9 @@
 // ast will be an array of 
 //  { root->"/" or emoty,
 //    pathElts: [] array of path pathelts either names (nothingthing goes that is allowed )
-//    see path elts more as navigation instructions 
-//  target prop is 
-
-
+//    see path elts more as navigation instructions
+//  target prop is
+// 
 // emits tokens
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 // [Symbol.iterator] -> A zero arguments function that returns an object, conforming to the iterator protocol.
@@ -23,6 +22,13 @@ const tokens = {
     PREDICATE: '\0x05',
     PREDICATE_REGEXP: '\0x05'
 };
+
+// there should be a list of "absorbers" things like
+// default
+//  absorber for clauses
+//    absorber for keys within clauses
+//    absorber for value within clauses
+//  all these absorbers emit token streams, any absorber token bust be "globally unique"
 
 const absorbers = {
     where: {
@@ -122,6 +128,9 @@ function tokenize(str, i) {
 
 const getTokens = path => Array.from(tokenGenerator(path));
 
+// 
+// make this more general so use an absorber and arbitraty start and stop indexes
+//
 function* tokenGenerator(path) {
     for (let i = 0; i < path.length;) {
         const token = tokenize(path, i);
@@ -215,7 +224,6 @@ function formatPath(tokens) {
     if (tokens.length === 0) return '';
     return tokens.map(t => t.value).join('');
 }
-
 
 module.exports = {
     tokenGenerator,
