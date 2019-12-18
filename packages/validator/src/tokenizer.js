@@ -29,6 +29,9 @@ const tokens = {
 //    absorber for keys within clauses
 //    absorber for value within clauses
 //  all these absorbers emit token streams, any absorber token bust be "globally unique"
+//  For now how absorbers are hierarchicly linked is programmicly determined, but later do a more declerative way of doing things.
+// 
+ 
 
 const absorbers = {
     where: {
