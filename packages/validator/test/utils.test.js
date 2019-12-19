@@ -27,68 +27,106 @@ const objectSlice = require('../src/objectSlice');
 const {
     getTokens,
     resolve,
-    predicateElement
+    defaultTokenizer,
+    predicateTokenizer,
+    predicateElementTokenizer
 } = require('../src/tokenizer');
 
 const arr = Array.from;
 
 describe('utilities', function () {
-    describe('predicateElement lexer', () => {
-        it.skip('lexer "hello-world"', () => {
+    describe('predicateElementTokenizer lexer', () => {
+        it('lexer "hello-world"', () => {
             const text = 'hello-world';
-            const tokens = arr(predicateElement(text, 0, text.length-1));
-            expect(tokens).to.deep.equal([ { value: 'hello-world', token: '\u0000x08', start: 0, end: 10 } ])
+            const tokens = arr(predicateElementTokenizer(text, 0, text.length - 1));
+            expect(tokens).to.deep.equal([{ value: 'hello-world', token: '\u0000x08', start: 0, end: 10 }])
         });
         it('lexer "/^[a-z]{3}$/"', () => {
             const text = '/^[a-z]{3}$/';
-            const tokens = arr(predicateElement(text, 0, text.length - 1));
-            console.log(tokens);
-            //expect(tokens).to.deep.equal([ { value: 'hello worl', token: '\u0000x08', start: 0, end: 10 } ])
+            const tokens = arr(predicateElementTokenizer(text, 0, text.length - 1));
+            expect(tokens).to.deep.equal([{
+                error: undefined,
+                value: /\/^[a-z]{3}$\//,
+                token: '\u0000x07',
+                start: 0,
+                end: 11
+            }])
+        });
+        it('lexer first part of "/^[a-z]{3}$/=somevalue"', () => {
+            const text = '/^[a-z]{3}$/=somevalue';
+            const tokens = arr(predicateElementTokenizer(text, 0, text.length - 1));
+            expect([{
+                error: undefined,
+                value: /\/^[a-z]{3}$\//,
+                token: '\u0000x07',
+                start: 0,
+                end: 11
+            }]).to.deep.equal(tokens);
+        });
+        it('lexer second part of "/^[a-z]{3}$/=somevalue"', () => {
+            const text = '/^[a-z]{3}$/=somevalue';
+            const tokens = arr(predicateElementTokenizer(text, 13, text.length - 1));
+            expect([{ value: 'somevalue', token: '\u0000x08', start: 13, end: 21 }]).to.deep.equal(tokens);
         });
     });
-    describe.skip('path tokenizer', () => {
+    describe('predicateTokenizer lexer', () => {
+        it('lexer "[/^[a-z]{3}$/=somevalue]"', () => {
+            const text = '[/^[a-z]{3}$/=somevalue]';
+            const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
+            expect(tokens).to.deep.equal(
+                [{
+                    error: undefined,
+                    value: /\/^[a-z]{3}$\//,
+                    token: '\u0000x07',
+                    start: 1,
+                    end: 12
+                },
+                { value: 'somevalue', token: '\u0000x08', start: 14, end: 22 }]
+            );
+        });
+        it('lexer "[somekey=somevalue]"', () => {
+            const text = '[somekey=somevalue]';
+            const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
+            expect(tokens).to.deep.equal([{ value: 'somekey', token: '\u0000x08', start: 1, end: 7 },
+            { value: 'somevalue', token: '\u0000x08', start: 9, end: 17 }]);
+        });
+        it('lexer "[som\=ekey=/^$/]"', () => {
+            const text = '[som\\=ekey=/^$/]';
+            const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
+            expect(tokens).to.deep.equal([ { value: 'som\\=ekey', token: '\u0000x08', start: 1, end: 9 },
+            { error: undefined,
+              value: /\/^$\//,
+              token: '\u0000x07',
+              start: 11,
+              end: 14 } ]);
+        });
+    });
+    describe('defaultTokenizer lexer', () => {
+        it('lexer "/normal/and/simple/path"', () => {
+            const text = '/normal/and/simple/path';
+            const tokens = arr(defaultTokenizer(text, 0, text.length - 1));
+            expect(tokens).to.deep.equal([ { token: '\u000f', start: 0, end: 0, value: '/' },
+            { token: '\u0001', start: 1, end: 6, value: 'normal' },
+            { token: '\u000f', start: 7, end: 7, value: '/' },
+            { token: '\u0001', start: 8, end: 10, value: 'and' },
+            { token: '\u000f', start: 11, end: 11, value: '/' },
+            { token: '\u0001', start: 12, end: 17, value: 'simple' },
+            { token: '\u000f', start: 18, end: 18, value: '/' },
+            { token: '\u0001', start: 19, end: 23, value: 'path' } ]);
+        });
+    });
+    describe('path tokenizer', () => {
         it('tokenize path "/favicons/android/path', () => {
             const path = '/favicons/android/path';
             const tokens1 = getTokens(path);
-            expect(tokens1).to.deep.equal([{
-                token: '\u0002',
-                start: 0,
-                end: 0,
-                value: '/'
-            },
-            {
-                token: '\u0001',
-                start: 1,
-                end: 8,
-                value: 'favicons'
-            },
-            {
-                token: '\u0002',
-                start: 9,
-                end: 9,
-                value: '/'
-            },
-            {
-                token: '\u0001',
-                start: 10,
-                end: 16,
-                value: 'android'
-            },
-            {
-                token: '\u0002',
-                start: 17,
-                end: 17,
-                value: '/'
-            },
-            {
-                token: '\u0001',
-                start: 18,
-                end: 21,
-                value: 'path'
-            }
-            ]);
+            expect(tokens1).to.deep.equal([ { token: '\u000f', start: 0, end: 0, value: '/' },
+            { token: '\u0001', start: 1, end: 8, value: 'favicons' },
+            { token: '\u000f', start: 9, end: 9, value: '/' },
+            { token: '\u0001', start: 10, end: 16, value: 'android' },
+            { token: '\u000f', start: 17, end: 17, value: '/' },
+            { token: '\u0001', start: 18, end: 22, value: 'path' } ])
         });
-        it('tokenize non root- path "favicons/android/path', () => {
+        it.skip('tokenize non root- path "favicons/android/path', () => {
             const path = 'favicons/android/path';
             const tokens1 = getTokens(path);
 
@@ -126,7 +164,7 @@ describe('utilities', function () {
                 ]
             );
         });
-        it('tokenize non root- paths "favicons/", "favicons", tokenize empty path ""', () => {
+        it.skip('tokenize non root- paths "favicons/", "favicons", tokenize empty path ""', () => {
             const path1 = 'favicons/';
             const path2 = 'favicons';
             const path3 = '';

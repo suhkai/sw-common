@@ -1,3 +1,4 @@
+'use strict';
 // 1.token  '/'
 // 2.token name [anything not '/']
 // 3.you can have escaped \/ this is allowed,  '/' does appear as object property names in rollup "bundle" object.
@@ -16,7 +17,7 @@
 
 const tokens = {
     PATHPART: '\x01',
-    SLASH: '\x02',
+    SLASH: '\x0f',
     PARENT: '\x03',
     CURRENT: '\x04',
     //PREDICATE: '\0x05',
@@ -43,149 +44,132 @@ function createRegExp(regexpText) {
     }
 }
 
-const predicteElementAbsorber = [
-    {
-        name: 'clauseElt',
-        order: 0,
-        // generator
-        *fn(str, start, end) {
-            if (str[start] === '/') {
-                // must end with '/' without previous '\\' of course
-                for (let j = start+1; j <= end; j++) {
-                    if (str[j] === '/' && str[j - 1] !== '\\') {
-                        const [value, error] = createRegExp(str.slice(start, j + 1));
-                        yield { error, value, token: tokens.PREDICATE_ELT_REGEXP, start, end: j };
-                        return;
-                    }
-                }
-                const value = str.slice(start, end+1);
-                return { error: `no closing "/" found to end the regular expression ${value}`, token: tokens.PREDICATE_ELT_REGEXP, start, end, value };
-            }
-            // absorb till end or untill you see a '=' (not delimited with a "\")
-            for (let j = start+1; j <= end; j++) {
-                if (str[j] === '=' && str[j - 1] !== '\\') {
-                    yield { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start, end: j };
+const predicteElementAbsorber =
+{
+    name: 'clauseElt',
+    order: 0,
+    // generator
+    *fn(str, start, end) {
+        if (str[start] === '/') {
+            // must end with '/' without previous '\\' of course
+            for (let j = start + 1; j <= end; j++) {
+                if (str[j] === '/' && str[j - 1] !== '\\') {
+                    const [value, error] = createRegExp(str.slice(start, j + 1));
+                    yield { error, value, token: tokens.PREDICATE_ELT_REGEXP, start, end: j };
                     return;
                 }
             }
-            // all of it till the end
-            yield { value: str.slice(start, end+1), token: tokens.PREDICATE_ELT_LITERAL, start, end };
-            return;
+            const value = str.slice(start, end + 1);
+            return { error: `no closing "/" found to end the regular expression ${value}`, token: tokens.PREDICATE_ELT_REGEXP, start, end, value };
         }
+        // absorb till end or untill you see a '=' (not delimited with a "\")
+        for (let j = start + 1; j <= end; j++) {
+            if (str[j] === '=' && str[j - 1] !== '\\') {
+                yield { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start, end: j - 1 };
+                return;
+            }
+        }
+        // all of it till the end
+        yield { value: str.slice(start, end + 1), token: tokens.PREDICATE_ELT_LITERAL, start, end };
+        return;
     }
+};
 
-];
 
-const predicateAbsorber = [
-    {
-        name: 'clause',
-        order: 0,
-        // generator
-        *fn(str, start, end) {
-            if (!(str[start] === '[' && str[end] === ']')) {
-                return undefined; // not a clause token
-            }
-            const firstToken = predicateElement(str, start, end);
-            if (!firstToken) {
-                return undefined;
-            }
-            yield firstToken;
-            if (str[firstToken.end + 1] !== '=') {
-                return undefined;
-            }
-            const lastToken = predicateElement(str, firstToken.end + 2, end);
-            if (!lastToken) {
-                return undefined;
-            }
-            return lastToken;
+
+const predicateAbsorber =
+{
+    name: 'clause',
+    order: 0,
+    // generator
+    *fn(str, start, end) {
+        if (!(str[start] === '[' && str[end] === ']')) {
+            return undefined; // not a clause token
         }
+        const firstToken = Array.from(predicateElementTokenizer(str, start + 1, end - 1));
+        if (firstToken.length === 0) {
+            return undefined;
+        }
+        yield* firstToken;
+        if (str[firstToken[firstToken.length - 1].end + 1] !== '=') {
+            return undefined;
+        }
+        const lastToken = Array.from(predicateElementTokenizer(str, firstToken[firstToken.length - 1].end + 2, end - 1));
+        if (lastToken.length === 0) {
+            return undefined;
+        }
+        yield* lastToken;
+        return;
     }
-];
+};
 
-const rootAbsorber = [
-    {
-        name: 'pathpart',
-        order: 99,
-        *fn(str, i, end) {
-            let b = i;
-            while (str[b] && !(str[b] === '/' && str[b - 1] !== '\\')) {
-                b++;
-            };
-            if (b === i) {
-                return undefined;
-            }
-            const token = predicateTokenizer(str, i, b - 1);
-            return token || { token: tokens.PATHPART, start: i, end: b - 1, value: descape(str.slice(i, b)) };
-        }
-    },
-    {
-        name: 'slash',
-        order: 0,
-        *fn(str, i) {
+
+const rootAbsorber = 
+{
+    name: 'path',
+    order: 0,
+    *fn(str, start, end) {
+        let i = start;
+        while (i <= end) {
             if (str[i] === '/' && str[i - 1] !== '\\') {
-                return ({ token: tokens.SLASH, start: i, end: i, value: str.slice(i, i + 1) });
+                yield { token: tokens.SLASH, start: i, end: i, value: str.slice(i, i + 1) };
+                i++;
+                continue;
             }
+            // scan for next '/'
+            let i2 = i;
+            while (true) {
+                if (!str[i2]) break;
+                if (str[i2] === '/') {
+                    if (i2 > 0 && str[i2 - 1] !== '\\') {
+                        i2--;
+                        break;
+                    }
+                }
+                i2++;
+            };
+            if (i2 === i) {
+                i++;
+                continue;
+            }
+            let i3 = i;
+            while (str[i3] === '.') {
+                i3++;
+            };
+            if (i3 !== i) {
+                const len = i3 - i;
+                switch (len) {
+                    case 1:
+                        yield { token: tokens.CURRENT, start: i, end: i3, value: '.' };
+                    case 2:
+                        yield { token: tokens.PARENT, start: i, end: i3, value: '..' };
+                    default: // fall through    
+                }
+                i = i3 + 1;
+                constinue;
+            };
+            const toks = Array.from(predicateTokenizer(str, i, i2));
+            if (toks.length === 0){
+                toks.push({ token: tokens.PATHPART, start: i, end: i2, value: str.slice(i, i2+1) });
+            }
+            yield* toks;
+            i = toks[toks.length - 1].end + 1;
         }
     },
-    {
-        name: 'dots', // actually this is just an alternative to pathpart, but ok lets keep it seperate
-        order: 1,
-        *fn(str, i) {
-            let b = i;
-            while (str[b] === '.') {
-                b++;
-            };
-            if (b === i) {
-                return undefined;
-            }
-            const len = b - i;
-            switch (len) {
-                case 1:
-                    return { token: tokens.CURRENT, start: i, end: b - 1, value: str.slice(i, b) };
-                case 2:
-                    return { token: tokens.PARENT, start: i, end: b - 1, value: str.slice(i, b) };
-                default:
-                    return undefined;
-            }
-        }
-    }
-];
+};
 
-function createTokenizer(absorber) {
-    const sortedAbsorber = absorber.sort((a, b) => a.order - b.order);
-    return function* tokenize(str, i, b) {
-        let start = i;
-        for (const fnCtx of sortedAbsorber) {
-            for (const token of fnCtx.fn(str, start, b)) {
-                start = token.end + 1; // new start
-                yield token;
-            };
-        }
+
+function createTokenizer(lexer) {
+    return function* tokenize(str = '', start = 0, end = str.length-1) {
+        yield* lexer.fn(str, start, end);
     }
 }
 
 const defaultTokenizer = createTokenizer(rootAbsorber);
 const predicateTokenizer = createTokenizer(predicateAbsorber);
-const predicateElement = createTokenizer(predicteElementAbsorber);
+const predicateElementTokenizer = createTokenizer(predicteElementAbsorber);
 
-const getTokens = path => Array.from(tokenGenerator(path));
-// 
-// make this more general so use an absorber and arbitraty start and stop indexes
-//
-function* tokenGenerator(path) {
-    const sequence = defaultTokenizer(path, 0, path.length);
-    let i = 0;
-    //let done;
-    //let token;
-    do {
-        const { done, value } = sequence.next(i);
-        if (!done) {
-            i = token.end + 1;
-        }
-        yield token;
-    } while (!done && token !== undefined);
-}
-
+const getTokens = path => Array.from(defaultTokenizer(path));
 
 const isAbsolute = t => t.length && t[0].token === tokens.SLASH;
 
@@ -270,7 +254,6 @@ function formatPath(tokens) {
 }
 
 module.exports = {
-    tokenGenerator,
     tokens,
     resolve,
     formatPath,
@@ -278,6 +261,6 @@ module.exports = {
     getTokens,
     defaultTokenizer,
     predicateTokenizer,
-    predicateElement
+    predicateElementTokenizer
 };
 
