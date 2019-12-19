@@ -67,7 +67,7 @@
             "program": "${workspaceFolder}/packages/validator/node_modules/mocha/bin/_mocha",
             "cwd": "${workspaceFolder}/packages/validator",
             "internalConsoleOptions": "openOnSessionStart",
-            "stopOnEntry": true
+            "stopOnEntry": false
         },
         {
             "type": "node",
