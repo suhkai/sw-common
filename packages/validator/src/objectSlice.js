@@ -21,7 +21,7 @@ function getValue(object, selector, cursor){
         return object[instr.value];        
     }
     const clauses = [];
-    while (selector[cursor].token in predicates){
+    while (cursor < selector.length && selector[cursor].token in predicates){
         clauses.push(selector[cursor]);
         cursor++;
     }
@@ -67,7 +67,7 @@ function step(selector, cursor){
     if (!(instr.token in predicates)){
         return cursor+1;      
     }
-    while (selector[cursor].token in predicates){
+    while (cursor < selector.length && selector[cursor].token in predicates){
         cursor++;
     }
     return cursor;

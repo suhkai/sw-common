@@ -117,10 +117,15 @@ const rootAbsorber =
                 i++;
                 continue;
             }
-            // scan for next '/'
+            // scan for next '/' or end of string
             let i2 = i;
             while (true) {
-                if (!str[i2]) break;
+                if (!str[i2]) {
+                    if (i2 !== i){
+                        i2--;
+                        break;
+                    }
+                }
                 if (str[i2] === '/') {
                     if (i2 > 0 && str[i2 - 1] !== '\\') {
                         i2--;

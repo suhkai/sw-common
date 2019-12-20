@@ -20,8 +20,8 @@ const template = `
     <!--js asset injection-->
 </head>
 <body>
-    <div id="myApp"></div>
-    <script src="bundlexyz.js"></script>
+    <div id="myApp">hello</div>
+    <script src="bundlexyz.js">not legal</script>
 </body>
 </html>`;
 
@@ -31,8 +31,8 @@ async function generate(bundles, outputOptions){
 
 generate().then(text=>{
     
-    // fucking beautyfull, works:
-    const selector = getTokens('/childNodes/[nodeName=html]/childNodes/[nodeName=head]/childNodes/[nodeName=#comment]/');
+    // fucking beautyfull, works: /html/head/comment
+    const selector = getTokens('/childNodes/[nodeName=html]/childNodes/[nodeName=body]/childNodes/[nodeName=script]/childNodes');
     const data = parse5.parse(text);
     const result = objectSlice(data, selector);
     console.log(result);
@@ -41,7 +41,14 @@ generate().then(text=>{
         'css asset injection',
         'js asset injection'
       ]
-    */  
+    */
+
+  const data2 =  {
+    titles: [{language: 'en', text: 'Title'}, {language: 'sv', text: 'Rubrik'}]
+   };
+   const selector2 = getTokens('/titles/[language=en]');
+   const result2 = objectSlice(data2, selector2);
+   console.log(result2);
 
 });
 
