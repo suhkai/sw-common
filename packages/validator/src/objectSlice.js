@@ -22,7 +22,7 @@ function getValue(object, selector, cursor){
     }
     const clauses = [];
     while (selector[cursor].token in predicates){
-        clauses.push(selector[cursor].token);
+        clauses.push(selector[cursor]);
         cursor++;
     }
     // there should be 2
@@ -32,7 +32,7 @@ function getValue(object, selector, cursor){
     // first clause is a property-name clause
     const cl1 = clauses[0];
     const valueCollect = [];
-    if (cl1.token = tokens.PREDICATE_ELT_LITERAL){
+    if (cl1.token === tokens.PREDICATE_ELT_LITERAL){
         valueCollect.push(object[cl1.value]);
     }
     else {// can be more then one or 
@@ -62,13 +62,12 @@ function getValue(object, selector, cursor){
     }
 }
 
-function step(object, selector, cursor){
+function step(selector, cursor){
     const instr = selector[cursor];
     if (!(instr.token in predicates)){
         return cursor+1;      
     }
     while (selector[cursor].token in predicates){
-        clauses.push(selector[cursor].token);
         cursor++;
     }
     return cursor;
@@ -89,7 +88,7 @@ module.exports = function objectSlice(object, selector, cursor = 0) {
         case tokens.PREDICATE_ELT_LITERAL: 
         case tokens.PATHPART:
             const value = getValue(object, selector, cursor);
-            const nextCursor = step(object, selector, cursor);
+            const nextCursor = step(selector, cursor);
             // const value = object[instr.value];
             if (value === undefined) {
                 break;

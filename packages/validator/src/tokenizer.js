@@ -50,11 +50,12 @@ const predicteElementAbsorber =
     order: 0,
     // generator
     *fn(str, start, end) {
-        if (str[start] === '/') {
+        if (str[start] === '\\' && str[start+1] === '/') {
             // must end with '/' without previous '\\' of course
-            for (let j = start + 1; j <= end; j++) {
-                if (str[j] === '/' && str[j - 1] !== '\\') {
-                    const [value, error] = createRegExp(str.slice(start, j + 1));
+            for (let j = start + 2; j <= end; j++) {
+                if (str[j] === '/' && str[j-1] === '\\') {
+                    const correctedText = str.slice(start+2,j-1);
+                    const [value, error] = createRegExp(correctedText);
                     yield { error, value, token: tokens.PREDICATE_ELT_REGEXP, start, end: j };
                     return;
                 }
@@ -142,10 +143,13 @@ const rootAbsorber =
             }
             const toks = Array.from(predicateTokenizer(str, i, i2));
             if (toks.length === 0) {
-                toks.push({ token: tokens.PATHPART, start: i, end: i2, value: str.slice(i, i2 + 1) });
+                const token = { token: tokens.PATHPART, start: i, end: i2, value: str.slice(i, i2 + 1) };
+                yield token;
+                i = token.end + 1;
+                continue;
             }
             yield* toks;
-            i = toks[toks.length - 1].end + 1;
+            i = toks[toks.length - 1].end + 2;
         }
     },
 };

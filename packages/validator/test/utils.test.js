@@ -42,47 +42,47 @@ describe('utilities', function () {
             expect(tokens).to.deep.equal([{ value: 'hello-world', token: '\u0000x08', start: 0, end: 10 }])
         });
         it('lexer "/^[a-z]{3}$/"', () => {
-            const text = '/^[a-z]{3}$/';
+            const text = '\\/^[a-z]{3}$\\/';
             const tokens = arr(predicateElementTokenizer(text, 0, text.length - 1));
             expect(tokens).to.deep.equal([{
                 error: undefined,
-                value: /\/^[a-z]{3}$\//,
+                value: /^[a-z]{3}$/,
                 token: '\u0000x07',
                 start: 0,
-                end: 11
+                end: 13
             }])
         });
         it('lexer first part of "/^[a-z]{3}$/=somevalue"', () => {
-            const text = '/^[a-z]{3}$/=somevalue';
+            const text = '\\/^[a-z]{3}$\\/=somevalue';
             const tokens = arr(predicateElementTokenizer(text, 0, text.length - 1));
             expect([{
                 error: undefined,
-                value: /\/^[a-z]{3}$\//,
+                value: /^[a-z]{3}$/,
                 token: '\u0000x07',
                 start: 0,
-                end: 11
+                end: 13
             }]).to.deep.equal(tokens);
         });
-        it('lexer second part of "/^[a-z]{3}$/=somevalue"', () => {
-            const text = '/^[a-z]{3}$/=somevalue';
-            const tokens = arr(predicateElementTokenizer(text, 13, text.length - 1));
-            expect([{ value: 'somevalue', token: '\u0000x08', start: 13, end: 21 }]).to.deep.equal(tokens);
+        it('lexer second part of "\\/^[a-z]{3}$\\/=somevalue"', () => {
+            const text = '\\/^[a-z]{3}$\\/=somevalue';
+            const tokens = arr(predicateElementTokenizer(text, text.indexOf('=')+1, text.length - 1));
+            expect([{ value: 'somevalue', token: '\u0000x08', start: 15, end: 23 }]).to.deep.equal(tokens);
         });
     });
     describe('predicateTokenizer lexer', () => {
-        it('lexer "[/^[a-z]{3}$/=somevalue]"', () => {
-            const text = '[/^[a-z]{3}$/=somevalue]';
+        it('lexer "[\\/^[a-z]{3}$\\/=somevalue]"', () => {
+            const text = '[\\/^[a-z]{3}$\\/=somevalue]';
             const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
             expect(tokens).to.deep.equal(
                 [
                     {
                         error: undefined,
-                        value: /\/^[a-z]{3}$\//,
+                        value: /^[a-z]{3}$/,
                         token: '\u0000x07',
                         start: 1,
-                        end: 12
+                        end: 14
                     },
-                    { value: 'somevalue', token: '\u0000x08', start: 14, end: 22 }
+                    { value: 'somevalue', token: '\u0000x08', start: 16, end: 24 }
                 ]
             );
         });
@@ -91,17 +91,18 @@ describe('utilities', function () {
             const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
             expect(tokens).to.deep.equal([{ value: 'somekey', token: '\u0000x08', start: 1, end: 7 },
             { value: 'somevalue', token: '\u0000x08', start: 9, end: 17 }]);
+            
         });
-        it('lexer "[som\=ekey=/^$/]"', () => {
-            const text = '[som\\=ekey=/^$/]';
+        it('lexer "[som\=ekey=\\/^$\\/]"', () => {
+            const text = '[som\\=ekey=\\/^$\\/]';
             const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
             expect(tokens).to.deep.equal([{ value: 'som\\=ekey', token: '\u0000x08', start: 1, end: 9 },
             {
                 error: undefined,
-                value: /\/^$\//,
+                value: /^$/,
                 token: '\u0000x07',
                 start: 11,
-                end: 14
+                end: 16
             }]);
         });
     });
@@ -552,6 +553,33 @@ describe('utilities', function () {
             });
         });
         describe('function "objectSlice"', () => {
+            it('predicate literal', () => {
+                const data = {
+                    persons:[
+                        { 
+                            city: 'london',
+                            lastName: 'Bond',
+                            firstName: 'James'
+                        },
+                        { 
+                            city: 'london',
+                            lastName: 'MonnyPenny',
+                            firstName: 'Miss'
+                        },
+                        { 
+                            city: 'paris',
+                            lastName: 'Balsaque',
+                            firstName: 'Jean-Claude'
+                        }
+                    ]
+                };
+                const path1 = getTokens('/persons/[city=london]/firstName');
+                const result = objectSlice(data, path1);
+                expect(result).to.deep.equal([ 'James', 'Miss' ]);
+                const path2 = getTokens('/persons/[\\/Name$\\/=\\/^Bo\\/]/firstName');
+                const result2 = objectSlice(data, path2);
+                expect(result2).to.deep.equal(['James'])
+            });
             it('slice towards an array', () => {
                 const data = {
                     country: {
