@@ -74,14 +74,16 @@ describe('utilities', function () {
             const text = '[/^[a-z]{3}$/=somevalue]';
             const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
             expect(tokens).to.deep.equal(
-                [{
-                    error: undefined,
-                    value: /\/^[a-z]{3}$\//,
-                    token: '\u0000x07',
-                    start: 1,
-                    end: 12
-                },
-                { value: 'somevalue', token: '\u0000x08', start: 14, end: 22 }]
+                [
+                    {
+                        error: undefined,
+                        value: /\/^[a-z]{3}$\//,
+                        token: '\u0000x07',
+                        start: 1,
+                        end: 12
+                    },
+                    { value: 'somevalue', token: '\u0000x08', start: 14, end: 22 }
+                ]
             );
         });
         it('lexer "[somekey=somevalue]"', () => {
@@ -93,78 +95,53 @@ describe('utilities', function () {
         it('lexer "[som\=ekey=/^$/]"', () => {
             const text = '[som\\=ekey=/^$/]';
             const tokens = arr(predicateTokenizer(text, 0, text.length - 1));
-            expect(tokens).to.deep.equal([ { value: 'som\\=ekey', token: '\u0000x08', start: 1, end: 9 },
-            { error: undefined,
-              value: /\/^$\//,
-              token: '\u0000x07',
-              start: 11,
-              end: 14 } ]);
+            expect(tokens).to.deep.equal([{ value: 'som\\=ekey', token: '\u0000x08', start: 1, end: 9 },
+            {
+                error: undefined,
+                value: /\/^$\//,
+                token: '\u0000x07',
+                start: 11,
+                end: 14
+            }]);
         });
     });
     describe('defaultTokenizer lexer', () => {
         it('lexer "/normal/and/simple/path"', () => {
             const text = '/normal/and/simple/path';
             const tokens = arr(defaultTokenizer(text, 0, text.length - 1));
-            expect(tokens).to.deep.equal([ { token: '\u000f', start: 0, end: 0, value: '/' },
+            expect(tokens).to.deep.equal([{ token: '\u000f', start: 0, end: 0, value: '/' },
             { token: '\u0001', start: 1, end: 6, value: 'normal' },
             { token: '\u000f', start: 7, end: 7, value: '/' },
             { token: '\u0001', start: 8, end: 10, value: 'and' },
             { token: '\u000f', start: 11, end: 11, value: '/' },
             { token: '\u0001', start: 12, end: 17, value: 'simple' },
             { token: '\u000f', start: 18, end: 18, value: '/' },
-            { token: '\u0001', start: 19, end: 23, value: 'path' } ]);
+            { token: '\u0001', start: 19, end: 23, value: 'path' }]);
         });
     });
     describe('path tokenizer', () => {
         it('tokenize path "/favicons/android/path', () => {
             const path = '/favicons/android/path';
             const tokens1 = getTokens(path);
-            expect(tokens1).to.deep.equal([ { token: '\u000f', start: 0, end: 0, value: '/' },
+            expect(tokens1).to.deep.equal([{ token: '\u000f', start: 0, end: 0, value: '/' },
             { token: '\u0001', start: 1, end: 8, value: 'favicons' },
             { token: '\u000f', start: 9, end: 9, value: '/' },
             { token: '\u0001', start: 10, end: 16, value: 'android' },
             { token: '\u000f', start: 17, end: 17, value: '/' },
-            { token: '\u0001', start: 18, end: 22, value: 'path' } ])
+            { token: '\u0001', start: 18, end: 22, value: 'path' }])
         });
-        it.skip('tokenize non root- path "favicons/android/path', () => {
+        it('tokenize non root- path "favicons/android/path', () => {
             const path = 'favicons/android/path';
             const tokens1 = getTokens(path);
-
             expect(tokens1).to.deep.equal(
-                [{
-                    token: '\u0001',
-                    start: 0,
-                    end: 7,
-                    value: 'favicons'
-                },
-                {
-                    token: '\u0002',
-                    start: 8,
-                    end: 8,
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 9,
-                    end: 15,
-                    value: 'android'
-                },
-                {
-                    token: '\u0002',
-                    start: 16,
-                    end: 16,
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 17,
-                    end: 20,
-                    value: 'path'
-                }
-                ]
+                [{ token: '\u0001', start: 0, end: 7, value: 'favicons' },
+                { token: '\u000f', start: 8, end: 8, value: '/' },
+                { token: '\u0001', start: 9, end: 15, value: 'android' },
+                { token: '\u000f', start: 16, end: 16, value: '/' },
+                { token: '\u0001', start: 17, end: 21, value: 'path' }]
             );
         });
-        it.skip('tokenize non root- paths "favicons/", "favicons", tokenize empty path ""', () => {
+        it('tokenize non root- paths "favicons/", "favicons", "", "../...././/./\\//" tokenize empty path ""', () => {
             const path1 = 'favicons/';
             const path2 = 'favicons';
             const path3 = '';
@@ -175,194 +152,60 @@ describe('utilities', function () {
             const tokens3 = getTokens(path3);
             const tokens4 = getTokens(path4);
 
-
-            expect(tokens1).to.deep.equal([{
-                token: '\u0001',
-                start: 0,
-                end: 7,
-                value: 'favicons'
-            },
-            {
-                token: '\u0002',
-                start: 8,
-                end: 8,
-                value: '/'
-            }
+            expect(tokens1).to.deep.equal([
+                { token: '\u0001', start: 0, end: 7, value: 'favicons' },
+                { token: '\u000f', start: 8, end: 8, value: '/' }
             ]);
-            expect(tokens2).to.deep.equal(
-                [{
-                    token: '\u0001',
-                    start: 0,
-                    end: 7,
-                    value: 'favicons'
-                }]);
+
+            expect(tokens2).to.deep.equal([{ token: '\u0001', start: 0, end: 8, value: 'favicons' }]);
             expect(tokens3).to.deep.equal([]);
-            expect(tokens4).to.deep.equal(
-                [{
-                    token: '\u0003',
-                    start: 0,
-                    end: 1,
-                    value: '..'
-                },
-                {
-                    token: '\u0002',
-                    start: 2,
-                    end: 2,
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 3,
-                    end: 6,
-                    value: '....'
-                },
-                {
-                    token: '\u0002',
-                    start: 7,
-                    end: 7,
-                    value: '/'
-                },
-                {
-                    token: '\u0004',
-                    start: 8,
-                    end: 8,
-                    value: '.'
-                },
-                {
-                    token: '\u0002',
-                    start: 9,
-                    end: 9,
-                    value: '/'
-                },
-                {
-                    token: '\u0002',
-                    start: 10,
-                    end: 10,
-                    value: '/'
-                },
-                {
-                    token: '\u0004',
-                    start: 11,
-                    end: 11,
-                    value: '.'
-                },
-                {
-                    token: '\u0002',
-                    start: 12,
-                    end: 12,
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 13,
-                    end: 14,
-                    value: '/'
-                }, //<-- note this is not a devider but a prop name)) we can deal with these edge cases
-                {
-                    token: '\u0002',
-                    start: 15,
-                    end: 15,
-                    value: '/'
-                }
-                ])
+            expect(tokens4).to.deep.equal([{ token: '\u0003', start: 0, end: 1, value: '..' },
+            { token: '\u000f', start: 2, end: 2, value: '/' },
+            { token: '\u0001', start: 3, end: 6, value: '....' },
+            { token: '\u000f', start: 7, end: 7, value: '/' },
+            { token: '\u0004', start: 8, end: 8, value: '.' },
+            { token: '\u000f', start: 9, end: 9, value: '/' },
+            { token: '\u000f', start: 10, end: 10, value: '/' },
+            { token: '\u0004', start: 11, end: 11, value: '.' },
+            { token: '\u000f', start: 12, end: 12, value: '/' },
+            { token: '\u0001', start: 13, end: 14, value: '\\/' },
+            { token: '\u000f', start: 15, end: 15, value: '/' }]);
         });
     });
-    describe.skip('resolve', () => {
+    describe('resolve', () => {
         it('from "/p1/p2/p3/p4///p5/" to "../../n1/n2/./n5"', () => {
             const from = getTokens('/p1/p2/p3/p4///p5/');
             const to = getTokens('../../n1/n2/./n5');
+            //     "/p1/p2/p3/n1/n2/n5"
             const res1 = resolve(from, to);
             expect(res1).to.deep.equal(
-                [{
-                    token: '\u0002',
-                    start: 0,
-                    end: 0,
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 1,
-                    end: 2,
-                    value: 'p1'
-                },
-                {
-                    token: '\u0002',
-                    start: 3,
-                    end: 3,
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 4,
-                    end: 5,
-                    value: 'p2'
-                },
-                {
-                    token: '\u0002',
-                    start: 6,
-                    end: 6,
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 7,
-                    end: 8,
-                    value: 'p3'
-                },
-                {
-                    token: '\u0002',
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 6,
-                    end: 7,
-                    value: 'n1'
-                },
-                {
-                    token: '\u0002',
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 9,
-                    end: 10,
-                    value: 'n2'
-                },
-                {
-                    token: '\u0002',
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 14,
-                    end: 15,
-                    value: 'n5'
-                }
-                ]);
+                [{ token: '\u000f', start: 0, end: 0, value: '/' },
+                { token: '\u0001', start: 1, end: 2, value: 'p1' },
+                { token: '\u000f', start: 3, end: 3, value: '/' },
+                { token: '\u0001', start: 4, end: 5, value: 'p2' },
+                { token: '\u000f', start: 6, end: 6, value: '/' },
+                { token: '\u0001', start: 7, end: 8, value: 'p3' },
+                { token: '\u000f', value: '/' },
+                { token: '\u0001', start: 6, end: 7, value: 'n1' },
+                { token: '\u000f', value: '/' },
+                { token: '\u0001', start: 9, end: 10, value: 'n2' },
+                { token: '\u000f', value: '/' },
+                { token: '\u0001', start: 14, end: 16, value: 'n5' }]);
         });
+
         it('from "p1/p2/p3/p4///p5/" to "../../n1" should fail', () => {
             const from = getTokens('p1/p2/p3/p4///p5/');
             const to = getTokens('../../n1/n2/./n5');
             expect(() => resolve(from, to)).to.throw('Internal error, object location path must be absolute');
         });
+
         it('from "/p1/p2/p3/p4///p5/" to "../../n1" should fail', () => {
             const from = getTokens('/p1/p2/p3/p4///p5/');
             const to = getTokens('../../../../../n1');
             const res1 = resolve(from, to);
-
             expect(res1).to.deep.equal(
-                [{
-                    token: '\u0002',
-                    value: '/'
-                },
-                {
-                    token: '\u0001',
-                    start: 15,
-                    end: 16,
-                    value: 'n1'
-                }
-                ]);
+                [{ token: '\u000f', value: '/' },
+                { token: '\u0001', start: 15, end: 17, value: 'n1' }]);
         });
         it('from "" to "../../n1" should fail', () => {
             const from = getTokens('');
@@ -370,7 +213,7 @@ describe('utilities', function () {
             expect(() => resolve(from, to)).to.throw('Internal error, object location path must be absolute');
         });
     });
-    describe.skip('find', () => {
+    describe('find', () => {
         it('create find failure because of empty non array or empty list', () => {
             // below try catch is because nyc code coverage doesnt work with expect(()=>{...}).to.throw? why?
             try {
@@ -454,7 +297,7 @@ describe('utilities', function () {
 
         });
     });
-    describe.skip('isObject  tests', () => {
+    describe('isObject  tests', () => {
         it('isObject', () => {
             const data = [{}, null, undefined, new Date, []];
             expect(isObject(data[0])).to.be.true;
@@ -464,7 +307,7 @@ describe('utilities', function () {
             expect(isObject(data[4])).to.be.false;
         });
     });
-    describe.skip('equals', () => {
+    describe('equals', () => {
         it('compare strings', () => {
             const result1 = equals('string1', 'string2');
             const result2 = equals('same', 'same');
@@ -572,7 +415,7 @@ describe('utilities', function () {
             expect(equals(cla, clc)).to.be.false;
         });
     });
-    describe.skip('scalar tests', () => {
+    describe('scalar tests', () => {
         it('isInteger', () => {
             expect(isInt(1)).to.deep.equal([1, null]);
             expect(isInt(1.4)).to.deep.equal([null, 'not an integer']);
@@ -608,7 +451,7 @@ describe('utilities', function () {
             expect(() => createRangeCheck(0, NaN)).to.throw('upper boundery n is a NaN');
         });
     })
-    describe.skip('type conversions', () => {
+    describe('type conversions', () => {
         it('conversion to number', () => {
             const data = ['34234', 'xxEAZE', 4234];
             expect(convertToNumber(data[0])).to.deep.equal([34234, null]);
@@ -655,7 +498,7 @@ describe('utilities', function () {
             }
         });
     });
-    describe.skip('helpers', () => {
+    describe('helpers', () => {
         describe('isStringArray', () => {
             it('non array', () => {
                 const [arr, err] = isStringArray({
@@ -708,7 +551,7 @@ describe('utilities', function () {
                 expect(arr).to.deep.equal(data);
             });
         });
-        describe('function objectSlice', () => {
+        describe('function "objectSlice"', () => {
             it('slice towards an array', () => {
                 const data = {
                     country: {
@@ -719,7 +562,7 @@ describe('utilities', function () {
                 };
                 const path1 = getTokens('/country/USA/states');
                 const result = objectSlice(data, path1, 0);
-
+                expect(result).to.deep.equal(['TN', 'CA']);
             });
             it('slice away an object-part', () => {
                 const data = {
@@ -730,12 +573,12 @@ describe('utilities', function () {
                     }
                 };
                 const path1 = getTokens('/country/USA');
-                const result = objectSlice(data, path1, 0);
-
+                const result = objectSlice(data, path1);
+                expect(result).to.deep.equal([{ states: ['TN', 'CA'] }]);
             });
             it('slice away an object-part in an array', () => {
                 const data = {
-                    country: [{
+                    country: [{  // note this is now an element in an array
                         USA: {
                             states: ['TN', 'CA']
                         }
@@ -743,7 +586,7 @@ describe('utilities', function () {
                 };
                 const path1 = getTokens('/country/USA');
                 const result = objectSlice(data, path1, 0);
-
+                expect(result).to.deep.equal([{ states: ['TN', 'CA'] }]);
             });
             it('slice towards a scalar value', () => {
                 const data = {
@@ -756,7 +599,7 @@ describe('utilities', function () {
                 };
                 const path1 = getTokens('/country/USA/countryCode');
                 const result = objectSlice(data, path1, 0);
-
+                expect(result).to.deep.equal(['US']);
             });
             it('slice towards a nonexisting part of an object', () => {
                 const data = {
@@ -769,7 +612,7 @@ describe('utilities', function () {
                 };
                 const path1 = getTokens('/country/thispath/is/going/no-where');
                 const result = objectSlice(data, path1, 0);
-
+                expect(result).to.deep.equal([]);
             });
             it('use of invalid path should result in an error throw', () => {
                 const data = {

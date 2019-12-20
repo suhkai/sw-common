@@ -15,7 +15,7 @@
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 // [Symbol.iterator] -> A zero arguments function that returns an object, conforming to the iterator protocol.
 
-const tokens = {
+const tokens = Object.freeze({
     PATHPART: '\x01',
     SLASH: '\x0f',
     PARENT: '\x03',
@@ -24,7 +24,7 @@ const tokens = {
     //PREDICATE_ELT: '\0x06',
     PREDICATE_ELT_REGEXP: '\0x07',
     PREDICATE_ELT_LITERAL: '\0x08'
-};
+});
 
 // there should be a list of "absorbers" things like
 // default
@@ -104,7 +104,7 @@ const predicateAbsorber =
 };
 
 
-const rootAbsorber = 
+const rootAbsorber =
 {
     name: 'path',
     order: 0,
@@ -128,29 +128,21 @@ const rootAbsorber =
                 }
                 i2++;
             };
-            if (i2 === i) {
-                i++;
-                continue;
-            }
             let i3 = i;
             while (str[i3] === '.') {
                 i3++;
             };
             if (i3 !== i) {
                 const len = i3 - i;
-                switch (len) {
-                    case 1:
-                        yield { token: tokens.CURRENT, start: i, end: i3, value: '.' };
-                    case 2:
-                        yield { token: tokens.PARENT, start: i, end: i3, value: '..' };
-                    default: // fall through    
+                if (len === 1 || len === 2) {
+                    yield { token: len === 1 ? tokens.CURRENT : tokens.PARENT, start: i, end: i3-1, value: str.slice(i, i3) };
+                    i = i3;
+                    continue;
                 }
-                i = i3 + 1;
-                constinue;
-            };
+            }
             const toks = Array.from(predicateTokenizer(str, i, i2));
-            if (toks.length === 0){
-                toks.push({ token: tokens.PATHPART, start: i, end: i2, value: str.slice(i, i2+1) });
+            if (toks.length === 0) {
+                toks.push({ token: tokens.PATHPART, start: i, end: i2, value: str.slice(i, i2 + 1) });
             }
             yield* toks;
             i = toks[toks.length - 1].end + 1;
@@ -160,7 +152,7 @@ const rootAbsorber =
 
 
 function createTokenizer(lexer) {
-    return function* tokenize(str = '', start = 0, end = str.length-1) {
+    return function* tokenize(str = '', start = 0, end = str.length - 1) {
         yield* lexer.fn(str, start, end);
     }
 }
@@ -230,7 +222,7 @@ function resolve(from, to) {
     if (!isAbsolute(from)) {
         throw new TypeError(`Internal error, object location path must be absolute`);
     }
-    const resolved = from.slice();
+    const resolved = from.slice(); //copy
     for (const inst of to) {
         switch (inst.token) {
             case tokens.SLASH: // we dont care about this, as its just like a "space" between words
