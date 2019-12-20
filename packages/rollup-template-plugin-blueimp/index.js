@@ -46,10 +46,17 @@ generate().then(text=>{
   const data2 =  {
     titles: [{language: 'en', text: 'Title'}, {language: 'sv', text: 'Rubrik'}]
    };
-   const selector2 = getTokens('/titles/[language=en]');
+   const selector2 = getTokens('/titles/[language=en]/text'); // selects [ 'Title' ]
    const result2 = objectSlice(data2, selector2);
    console.log(result2);
 
+   const data3 =  {
+    titles: [{language: 'en', text: 'Title'}, {language: 'sv', text: 'Rubriek'}]
+   };
+
+   const selector3 = getTokens('/titles/[\\/(la|te)\\/=\\/e\\/]/text'); // selects [ 'Title', 'Rubriek' ]
+   const result3 = objectSlice(data3, selector3);
+   console.log(result3);
 });
 
 // ok i have a good design now for this
