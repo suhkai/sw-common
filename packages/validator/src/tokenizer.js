@@ -20,10 +20,97 @@ const tokens = Object.freeze({
     SLASH: '\x0f',
     PARENT: '\x03',
     CURRENT: '\x04',
-    //PREDICATE: '\0x05',
-    //PREDICATE_ELT: '\0x06',
     PREDICATE_ELT_REGEXP: '\0x07',
-    PREDICATE_ELT_LITERAL: '\0x08'
+    PREDICATE_ELT_LITERAL: '\0x08',
+    // from https://en.wikipedia.org/wiki/Path_(computing)
+    DOSSLASH: '\0x20',
+    DOSROOT: '\0x21',
+    /*
+
+    unix  seperator /
+    /
+
+    dos  (command.com) seperator \
+    c:\ 
+     \\servername\volume\ 
+
+    ms windows (cmd.exe)
+    
+    dir \ (works)
+    dir / (doent work)
+    
+    dir "/Program Files" works
+    dir "\Program Files" works (but singular "\" doesnt)
+
+    dir "\Program Files/R" works
+
+    dir "c:/Program Files" works
+
+  
+    dir \\?\c:\ works
+
+    dir c:   works (but it does current directory)
+
+    dir \\.\c:\  works
+
+    dir c:/ doesnt work
+
+    dir "c:/" does work
+
+    dir / doesnt work
+    dir "/" says it cant find anything
+
+    >dir "//./c:/" works
+    >dir //./c:/   doesnt work
+    dir \\.\c: doesnt work
+    dir \\.\c:\  works (but not in powershell!!)
+
+    dir //./c:/ works but not in powershell
+
+    powershell
+    dir c:  shows current dir
+    dir \\Desktop-j8f8v02\c  works
+    dir \\Desktop-j8f8v02\ doesnt
+    dir //Desktop-j8f8v02/c  works
+    dir //Desktop-j8f8v02 doesnt work
+    dir //./
+
+    // show device name for disks
+    wmic diskdrive list brief
+
+    Caption                              DeviceID            Model                                Partitions  Size          
+    Generic MassStorageClass USB Device  \\.\PHYSICALDRIVE2  Generic MassStorageClass USB Device  0                         
+    Micron_1100_MTFDDAV512TBN            \\.\PHYSICALDRIVE0  Micron_1100_MTFDDAV512TBN            3           512105932800  
+    Generic MassStorageClass USB Device  \\.\PHYSICALDRIVE1  Generic MassStorageClass USB Device  0   
+
+
+    \\?\  means turn of "." and ".." interpolation.
+
+    
+    or [drive_letter]:\
+    or \\[server]\[sharename]\   example \\Server01\user\docs\Letter.txt, 
+    or \\?\[drive_spec]:\           example \\?\C:\user\docs\Letter.txt
+    or \\?\[server]\[sharename]\
+    or \\?\UNC\[server]\[sharename]\  example \\?\UNC\Server01\user\docs\Letter.tx
+    or \\.\[physical_device]\
+
+    powerhell \ or /
+    [drive letter:]/  example UserDocs:/Letter.txt
+    [drive name:]\
+    \\[server name]\
+
+      \\?\Volume{c7586f73-3a1f-4dd4-b069-ed096296d352}
+
+      
+    dir  "\\?\Volume{c7586f73-3a1f-4dd4-b069-ed096296d352}\Program Files"  (not!! does not work in powershell)
+
+    dir \\.\UNC\localhost\c$\bin this works in powershell, does not work in cmd.Exe
+
+    */
+    DOSSERVERROOT: '\0x22',
+    POSIXROOT: '\0x23', 
+    UNCROOT: '\0x24',
+    WINDEVICEROOT: '\0x25'
 });
 
 // there should be a list of "absorbers" things like
@@ -38,52 +125,71 @@ const tokens = Object.freeze({
 function createRegExp(regexpText) {
     try {
         return [new RegExp(regexpText), undefined]
-    }
-    catch (err) {
+    } catch (err) {
         return [undefined, String(err)];
     }
 }
 
-const predicteElementAbsorber =
-{
+const predicteElementAbsorber = {
     name: 'clauseElt',
     order: 0,
     // generator
-    *fn(str, start, end) {
-        if (str[start] === '\\' && str[start+1] === '/') {
+    * fn(str, start, end) {
+        if (str[start] === '\\' && str[start + 1] === '/') {
             // must end with '/' without previous '\\' of course
             for (let j = start + 2; j <= end; j++) {
-                if (str[j] === '/' && str[j-1] === '\\') {
-                    const correctedText = str.slice(start+2,j-1);
+                if (str[j] === '/' && str[j - 1] === '\\') {
+                    const correctedText = str.slice(start + 2, j - 1);
                     const [value, error] = createRegExp(correctedText);
-                    yield { error, value, token: tokens.PREDICATE_ELT_REGEXP, start, end: j };
+                    yield {
+                        error,
+                        value,
+                        token: tokens.PREDICATE_ELT_REGEXP,
+                        start,
+                        end: j
+                    };
                     return;
                 }
             }
             const value = str.slice(start, end + 1);
-            return { error: `no closing "/" found to end the regular expression ${value}`, token: tokens.PREDICATE_ELT_REGEXP, start, end, value };
+            return {
+                error: `no closing "/" found to end the regular expression ${value}`,
+                token: tokens.PREDICATE_ELT_REGEXP,
+                start,
+                end,
+                value
+            };
         }
         // absorb till end or untill you see a '=' (not delimited with a "\")
         for (let j = start + 1; j <= end; j++) {
             if (str[j] === '=' && str[j - 1] !== '\\') {
-                yield { value: str.slice(start, j), token: tokens.PREDICATE_ELT_LITERAL, start, end: j - 1 };
+                yield {
+                    value: str.slice(start, j),
+                    token: tokens.PREDICATE_ELT_LITERAL,
+                    start,
+                    end: j - 1
+                };
                 return;
             }
         }
         // all of it till the end
-        yield { value: str.slice(start, end + 1), token: tokens.PREDICATE_ELT_LITERAL, start, end };
+        yield {
+            value: str.slice(start, end + 1),
+            token: tokens.PREDICATE_ELT_LITERAL,
+            start,
+            end
+        };
         return;
     }
 };
 
 
 
-const predicateAbsorber =
-{
+const predicateAbsorber = {
     name: 'clause',
     order: 0,
     // generator
-    *fn(str, start, end) {
+    * fn(str, start, end) {
         if (!(str[start] === '[' && str[end] === ']')) {
             return undefined; // not a clause token
         }
@@ -105,15 +211,19 @@ const predicateAbsorber =
 };
 
 
-const rootAbsorber =
-{
+const rootAbsorber = {
     name: 'path',
     order: 0,
-    *fn(str, start, end) {
+    * fn(str, start, end) {
         let i = start;
         while (i <= end) {
             if (str[i] === '/' && str[i - 1] !== '\\') {
-                yield { token: tokens.SLASH, start: i, end: i, value: str.slice(i, i + 1) };
+                yield {
+                    token: tokens.SLASH,
+                    start: i,
+                    end: i,
+                    value: str.slice(i, i + 1)
+                };
                 i++;
                 continue;
             }
@@ -121,7 +231,7 @@ const rootAbsorber =
             let i2 = i;
             while (true) {
                 if (!str[i2]) {
-                    if (i2 !== i){
+                    if (i2 !== i) {
                         i2--;
                         break;
                     }
@@ -141,14 +251,24 @@ const rootAbsorber =
             if (i3 !== i) {
                 const len = i3 - i;
                 if (len === 1 || len === 2) {
-                    yield { token: len === 1 ? tokens.CURRENT : tokens.PARENT, start: i, end: i3-1, value: str.slice(i, i3) };
+                    yield {
+                        token: len === 1 ? tokens.CURRENT : tokens.PARENT,
+                        start: i,
+                        end: i3 - 1,
+                        value: str.slice(i, i3)
+                    };
                     i = i3;
                     continue;
                 }
             }
             const toks = Array.from(predicateTokenizer(str, i, i2));
             if (toks.length === 0) {
-                const token = { token: tokens.PATHPART, start: i, end: i2, value: str.slice(i, i2 + 1) };
+                const token = {
+                    token: tokens.PATHPART,
+                    start: i,
+                    end: i2,
+                    value: str.slice(i, i2 + 1)
+                };
                 yield token;
                 i = token.end + 1;
                 continue;
@@ -207,17 +327,26 @@ function goUp(from) {
         }
     }
     if (from.length === 0) {
-        from.push({ token: tokens.SLASH, value: '/' })
+        from.push({
+            token: tokens.SLASH,
+            value: '/'
+        })
         return;
     }
 }
 
 function add(from, token) {
     if (from.length === 0) {
-        from.push({ token: tokens.SLASH, value: '/' });
+        from.push({
+            token: tokens.SLASH,
+            value: '/'
+        });
     }
     if (from[from.length - 1].token !== tokens.SLASH) {
-        from.push({ token: tokens.SLASH, value: '/' });
+        from.push({
+            token: tokens.SLASH,
+            value: '/'
+        });
     }
     from.push(token);
 }
@@ -264,4 +393,3 @@ module.exports = {
     predicateTokenizer,
     predicateElementTokenizer
 };
-
