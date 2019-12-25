@@ -23,14 +23,14 @@ const isBooleanArray = require('../src/isBooleanArray');
 const isNumberArray = require('../src/isNumbersArray');
 const { equals } = require('../src/equals');
 const createFind = require('../src/createFind');
-const objectSlice = require('../src/objectSlice');
+const objectSlice = require('../src/jspath/objectSlice');
 const {
     getTokens,
     resolve,
     defaultTokenizer,
     predicateTokenizer,
     predicateElementTokenizer
-} = require('../src/tokenizer');
+} = require('../src/jspath/tokenizer');
 
 const arr = Array.from;
 
@@ -117,7 +117,7 @@ describe('utilities', function () {
             { token: '\u000f', start: 11, end: 11, value: '/' },
             { token: '\u0001', start: 12, end: 17, value: 'simple' },
             { token: '\u000f', start: 18, end: 18, value: '/' },
-            { token: '\u0001', start: 19, end: 23, value: 'path' }]);
+            { token: '\u0001', start: 19, end: 22, value: 'path' }]);
         });
     });
     describe('path tokenizer', () => {
@@ -129,7 +129,7 @@ describe('utilities', function () {
             { token: '\u000f', start: 9, end: 9, value: '/' },
             { token: '\u0001', start: 10, end: 16, value: 'android' },
             { token: '\u000f', start: 17, end: 17, value: '/' },
-            { token: '\u0001', start: 18, end: 22, value: 'path' }])
+            { token: '\u0001', start: 18, end: 21, value: 'path' }])
         });
         it('tokenize non root- path "favicons/android/path', () => {
             const path = 'favicons/android/path';
@@ -139,7 +139,7 @@ describe('utilities', function () {
                 { token: '\u000f', start: 8, end: 8, value: '/' },
                 { token: '\u0001', start: 9, end: 15, value: 'android' },
                 { token: '\u000f', start: 16, end: 16, value: '/' },
-                { token: '\u0001', start: 17, end: 21, value: 'path' }]
+                { token: '\u0001', start: 17, end: 20, value: 'path' }]
             );
         });
         it('tokenize non root- paths "favicons/", "favicons", "", "../...././/./\\//" tokenize empty path ""', () => {
@@ -158,7 +158,7 @@ describe('utilities', function () {
                 { token: '\u000f', start: 8, end: 8, value: '/' }
             ]);
 
-            expect(tokens2).to.deep.equal([{ token: '\u0001', start: 0, end: 8, value: 'favicons' }]);
+            expect(tokens2).to.deep.equal([{ token: '\u0001', start: 0, end: 7, value: 'favicons' }]);
             expect(tokens3).to.deep.equal([]);
             expect(tokens4).to.deep.equal([{ token: '\u0003', start: 0, end: 1, value: '..' },
             { token: '\u000f', start: 2, end: 2, value: '/' },
@@ -191,7 +191,7 @@ describe('utilities', function () {
                 { token: '\u000f', value: '/' },
                 { token: '\u0001', start: 9, end: 10, value: 'n2' },
                 { token: '\u000f', value: '/' },
-                { token: '\u0001', start: 14, end: 16, value: 'n5' }]);
+                { token: '\u0001', start: 14, end: 15, value: 'n5' }]);
         });
 
         it('from "p1/p2/p3/p4///p5/" to "../../n1" should fail', () => {
@@ -206,7 +206,7 @@ describe('utilities', function () {
             const res1 = resolve(from, to);
             expect(res1).to.deep.equal(
                 [{ token: '\u000f', value: '/' },
-                { token: '\u0001', start: 15, end: 17, value: 'n1' }]);
+                { token: '\u0001', start: 15, end: 16, value: 'n1' }]);
         });
         it('from "" to "../../n1" should fail', () => {
             const from = getTokens('');

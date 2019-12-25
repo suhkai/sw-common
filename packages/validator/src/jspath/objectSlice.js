@@ -1,5 +1,5 @@
 const { tokens } = require('./tokenizer');
-const isObject = require('./isObject');
+const isObject = require('../isObject');
 /*
     PATHPART: '\x01',
     SLASH: '\x0f',

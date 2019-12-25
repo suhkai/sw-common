@@ -20,13 +20,13 @@ const {
    resolve,
    tokens,
    formatPath
-} = require('../tokenizer');
+} = require('../jspath/tokenizer');
 
 const {
    features
 } = require('./dictionary');
 
-const objectSlice = require('../objectSlice');
+const objectSlice = require('../jspath/objectSlice');
 const { equals } = require('../equals');
 
 const predicateMap = {

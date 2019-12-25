@@ -6,7 +6,7 @@ const clone = require('clone');
 const {
     tokens,
     formatPath
-} = require('../tokenizer');
+} = require('../jspath/tokenizer');
 
 const ifArrayNotZero = require('../if-length-zero');
 
