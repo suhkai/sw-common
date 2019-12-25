@@ -22,7 +22,7 @@ const tokens = Object.freeze({
     CURRENT: '\x04',
     PREDICATE_ELT_REGEXP: '\0x07',
     PREDICATE_ELT_LITERAL: '\0x08',
-  
+
 });
 
 // there should be a list of "absorbers" things like
@@ -42,7 +42,7 @@ function createRegExp(regexpText) {
     }
 }
 
-const predicteElementAbsorber = {
+const predicateElementAbsorber = {
     name: 'clauseElt',
     order: 0,
     // generator
@@ -105,15 +105,29 @@ const predicateAbsorber = {
         if (!(str[start] === '[' && str[end] === ']')) {
             return undefined; // not a clause token
         }
-        const firstToken = Array.from(predicateElementTokenizer(str, start + 1, end - 1));
+        if (end - start < 2) {
+            return undefined;
+        }
+        // find the seperator
+        let sepLoc = start + 1;
+        do {
+            sepLoc = str.indexOf('=', sepLoc);
+            if (sepLoc === -1 || sepLoc >= end - 1) {
+                return undefined;
+            }
+            if (str[sepLoc - 1] === '\\') {
+                sepLoc++;
+                continue;
+            }
+            break;
+        } while (sepLoc <= end - 1);
+        const firstToken = Array.from(predicateElementTokenizer(str, start + 1, sepLoc - 1));
         if (firstToken.length === 0) {
             return undefined;
         }
         yield* firstToken;
-        if (str[firstToken[firstToken.length - 1].end + 1] !== '=') {
-            return undefined;
-        }
-        const lastToken = Array.from(predicateElementTokenizer(str, firstToken[firstToken.length - 1].end + 2, end - 1));
+
+        const lastToken = Array.from(predicateElementTokenizer(str, sepLoc + 1, end - 1));
         if (lastToken.length === 0) {
             return undefined;
         }
@@ -200,7 +214,7 @@ function createTokenizer(lexer) {
 
 const defaultTokenizer = createTokenizer(rootAbsorber);
 const predicateTokenizer = createTokenizer(predicateAbsorber);
-const predicateElementTokenizer = createTokenizer(predicteElementAbsorber);
+const predicateElementTokenizer = createTokenizer(predicateElementAbsorber);
 
 const getTokens = path => Array.from(defaultTokenizer(path));
 
