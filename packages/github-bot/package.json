@@ -1,0 +1,18 @@
+{
+  "name": "github-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "jacob.bogers <Jacob.Bogers@doclerholding.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "smee-client": "^1.1.0"
+  },
+  "dependencies": {
+    "jwt-simple": "^0.5.6"
+  }
+}
