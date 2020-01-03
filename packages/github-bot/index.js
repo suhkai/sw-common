@@ -6,15 +6,20 @@ const config = {
     url: 'aHR0cHM6Ly9zbWVlLmlvL2h0TUlESEtwMTN4N0p3Vg=='
 }
 const fs= require('fs');
-const jwt = require('jwt-simple');
+const jwt2 = require('jsonwebtoken');
 
-const data = fs.readFileSync('./encoded.pem', { encoding: 'ascii' });
-const privateKey = Buffer.from(data, 'base64').toString();
+function readKeyFromFile(){
+    const data  = fs.readFileSync('./encoded.pem', { encoding: 'ascii' });  // rsa private key
+    const privateKey = Buffer.from(data, 'base64').toString();
+    return privateKey;
+}
+
+const pKey = readKeyFromFile();
+// lookup "6.3.  Parameters for RSA Keys" at https://tools.ietf.org/html/rfc7518#section-6.3
+console.log(pKey);
 
 const url = Buffer.from(config.url, 'base64').toString();
 const SmeeClient = require('smee-client');
-
-
 
 const smee = new SmeeClient({
     source: url,
@@ -28,16 +33,28 @@ process.on('SIGINT', (code) => {
     process.exit();
 });
 
+function base64from(str){
+    return Buffer.from(str,'base64').toString();
+}
+
 const payload = {
     iat: Math.trunc(Date.now()/1000),
-    exp: Math.trunc(Date.now()/1000) + 10*600,
-    iss: Buffer.from(config.appId,'base64').toString()
+    exp: Math.trunc(Date.now()/1000) + 600,
+    iss: Buffer.from(config.appId,'base64').toString(),
+    aud: base64from(config.clientId)
 };
 
-const token = jwt.encode(payload, privateKey);
-const p2 = jwt.decode(token, privateKey);
-console.log(token);
 
+
+const token = jwt2.sign(payload, pKey, {
+    algorithm: 'RS256',
+   // audience: decodedClientId
+});
+
+console.log(token.split('.').slice(0,2).map(base64from));
+
+
+console.log(`curl -i -H "Authorization: Bearer ${token}" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app`)
 
 // use https://github.com/octokit/rest.js (octokit js client?)
 //https://octokit.github.io/rest.js/#authentication
@@ -56,6 +73,9 @@ console.log(token);
 // curl -i -H "Authorization: Bearer YOUR_JWT" -H "Accept: application/vnd.github.machine-man-preview+json" https://api.github.com/app
 
 // test it https://developer.github.com/v3/apps/
+
+
+
 
 
 
