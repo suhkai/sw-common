@@ -10,6 +10,8 @@ for token look on desktop/emails.txt
 curl -u "username:$token" https://api.github.com/user
 ```
 
-
 github auth workflow 
 https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow
+
+
+

@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "github-app",
+            "program": "${workspaceFolder}/packages/github-bot/index.js",
+            "cwd": "${workspaceFolder}/packages/github-bot",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "mysql2",
             "program": "${workspaceFolder}/packages/my-sql/test-using-mysql2-prod-env.js",
             "cwd": "${workspaceFolder}/packages/my-sql",
