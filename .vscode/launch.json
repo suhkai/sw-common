@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "pck/error-string",
+            "program": "${workspaceFolder}/packages/error-strings/index.js",
+            "cwd": "${workspaceFolder}/packages/error-strings",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "github-app",
             "program": "${workspaceFolder}/packages/github-bot/index.js",
             "cwd": "${workspaceFolder}/packages/github-bot",
