@@ -20,6 +20,7 @@ const oo = [{
         format: 'iife', 
         file: 'dist2/bundlexyz.js',
     },
+    sourcemap: true,
     //dir:'dist',
     banner: '/* banner comment */',
     assetFileNames: '[name]-[hash].[ext]',
@@ -31,7 +32,7 @@ const oo = [{
 
 const io = {
     cache: true,
-    input: resolve('./es7.js'), // main dir , mm ok
+    input: './es7.js', // main dir , mm ok
     plugins: [
         plugin({
             favicon: {
