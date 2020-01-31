@@ -13,8 +13,7 @@ function createErrorStrings(partial, fn) {
         throw new TypeError('createErrorString was both created with no arguments, must be at least 1');
     }
     return fn();
-};
-
+}
 
 const fn1 = createErrorStrings('amqp');
 const fn2 = fn1('close');
