@@ -137,6 +137,7 @@ class ShaderUtil{
 
 	//-------------------------------------------------
 	// Setters / Getters
+	
 	//-------------------------------------------------
 
 	//Get the locations of standard Attributes that we will mostly be using. Location will = -1 if attribute is not found.
