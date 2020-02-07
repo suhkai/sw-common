@@ -1,0 +1,17 @@
+{
+  "name": "parse5-experiments",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "jacob.bogers <jacob.bogers@doclerholding.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@mangos/jxpath": "^1.0.3",
+    "flatted": "^2.0.1",
+    "parse5": "^5.1.1"
+  }
+}
