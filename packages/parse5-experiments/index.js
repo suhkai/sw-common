@@ -5,7 +5,11 @@ const html = `
 </head>
 <body>
 <!--     some comment value    -->
-<div>event some randome text <span>can</span> be used as anchor*
+<div>
+event some randome text 
+<span>can</span> 
+be 
+used as anchor*
 </div>
 <body>
 </html>`;
@@ -17,7 +21,8 @@ const jxpath = require('@mangos/jxpath');
 const ast = parse(html);
 
 // /[nodeName=h]/childNodes/[nodeName=html]/childNodes/[nodeName=head]/childNodes/[nodeName=title]/childNodes/value
-console.log(jxpath('[nodeName=#document]/childNodes/[nodeName=html]/childNodes/[nodeName=body]/childNodes/[nodeName=div]/childNodes/[nodeName=span]/childNodes/[value=can]/..', ast));
+console.log(jxpath('[nodeName=#document]/childNodes/[nodeName=html]/childNodes/[nodeName=body]/childNodes/[nodeName=#comment]/[data=/comment/]/', ast));
+//html/body/#comment/[data=/comment/]/
 
 console.log(stringify(ast));
 /* something like 
