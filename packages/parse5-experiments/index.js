@@ -18,6 +18,8 @@ const { parse, parseFragment, serialize } = require('parse5');
 const { stringify } = require('flatted');
 const jxpath = require('@mangos/jxpath');
 
+const { pathAbsorber, tokens } = require('@mangos/jxpath/internals');
+console.log(Array.from(pathAbsorber('/html/body/#comment/[data=/^some sting$/]/')));
 const ast = parse(html);
 
 // /[nodeName=h]/childNodes/[nodeName=html]/childNodes/[nodeName=head]/childNodes/[nodeName=title]/childNodes/value
