@@ -1,4 +1,4 @@
-const plugin = require('../rollup-plugin-html-advanced');
+const plugin = require('../rollup-plugin-html5');
 const fs = require('fs');
 
 const {
