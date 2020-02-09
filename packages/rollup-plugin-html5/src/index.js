@@ -1,3 +1,22 @@
+/// TOOD: https://github.com/rollup/rollup/blob/master/src/rollup/index.ts
+///  line 414
+
+/*
+function writeOutputFile(
+	build: RollupBuild,
+	outputFile: OutputAsset | OutputChunk,
+	outputOptions: OutputOptions,
+	outputPluginDriver: PluginDriver
+): Promise<void> {
+	const fileName = resolve(outputOptions.dir || dirname(outputOptions.file!), outputFile.fileName);
+	let writeSourceMapPromise: Promise<void>;
+	let source: string | Buffer;
+	if (outputFile.type === 'asset') {
+    .
+    .
+    .
+*/
+
 // 
 const {
   join,

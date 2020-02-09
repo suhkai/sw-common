@@ -18,8 +18,8 @@ const {
 const oo = [{
     output: {
         format: 'iife', 
-        file: 'dist2/bundlexyz.js',
     },
+    dir: 'dist',
     sourcemap: true,
     //dir:'dist',
     banner: '/* banner comment */',
