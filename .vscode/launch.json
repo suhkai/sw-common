@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "pck/css-parser",
+            "program": "${workspaceFolder}/packages/css-parser/index.js",
+            "cwd": "${workspaceFolder}/packages/css-parser",
+            "stopOnEntry": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "pck/pars5-test",
             "program": "${workspaceFolder}/packages/parse5-experiments/index.js",
             "cwd": "${workspaceFolder}/packages/parse5-experiments",
