@@ -9,7 +9,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "yaml": "^1.7.2"
+  "dependencies": {},
+  "devDependencies": {
+    "tsc": "^1.20150623.0"
   }
 }
