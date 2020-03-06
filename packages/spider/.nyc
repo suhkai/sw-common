@@ -1,0 +1,21 @@
+{
+  "check-coverage": false,
+  "clean": true,
+  "compact": true,
+  "extension": [
+    ".ts",
+    ".js"
+  ],
+  "include": [
+    "lib/**/*.ts",
+    "lib/**/*.js"
+  ],
+  "instrument": true,
+  "preserve-comments": false,
+  "reporter": [
+    "lcov",
+    "text"
+  ],
+  "show-process-tree": true,
+  "sourceMap": true
+}

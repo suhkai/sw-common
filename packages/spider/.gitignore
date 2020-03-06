@@ -1,0 +1,5 @@
+.nyc_output/
+.vscode/settings.json
+coverage/
+node_modules/
+.idea/
