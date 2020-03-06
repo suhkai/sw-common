@@ -14,8 +14,9 @@
   "preserve-comments": false,
   "reporter": [
     "lcov",
-    "text"
+    "text",
+    "html"
   ],
-  "show-process-tree": true,
+  "show-process-tree": false,
   "sourceMap": true
 }

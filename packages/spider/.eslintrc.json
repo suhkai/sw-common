@@ -1,0 +1,13 @@
+
+{
+    "env": {
+        "node": true,
+        "es6": true,
+        "mocha": false
+    },
+    "extends": "@csimi/eslint-config",
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "script"
+    }
+}
