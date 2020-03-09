@@ -1,6 +1,3 @@
-const http = require('http');
-
-
 module.exports = function serialize(request) {
     const data = [
         `[request-url]`
