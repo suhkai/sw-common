@@ -23,14 +23,6 @@ const createStopWatch = require('./stop-watch');
 
 
 
-
-/*const user = 'eds_rw';
-const password = 'qdju3mh6tig9xj7h';
-const database = 'eds_storage';
-const host = '10.128.130.50';
-const port = 3306;*/
-
-
 const user = 'bulk_insert_user';
 const password = 'Munch2019';
 const database = 'bulk_insert_db_test';
