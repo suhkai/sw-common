@@ -31,7 +31,7 @@ module.exports = function throttle(count, iterator) {
         }
         cnt++;
         try {
-            result = await fn();
+            result = await fn(step.value);
         } catch (err) {
             error = err;
         }
