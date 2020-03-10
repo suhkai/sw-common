@@ -1,10 +1,11 @@
 function handler(options){
+    
     return {
         name: 'must be unique name',
         initialize(){
-
+            // maybe set up a db or whatever
         },
-        validateUrl(url, inferred_headers){
+        test(url, inferred_headers){
         
         },
         createStorageName(url, headers){
@@ -19,3 +20,5 @@ function handler(options){
         }
     }
 }
+
+

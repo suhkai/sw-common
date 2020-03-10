@@ -1,8 +1,8 @@
-const setContentType = require('../../http/setContentType');
+const setContentType = require('./setHeader');
 const omitInPlaceIgnoreCase = require('../omitIgnoreCase');
 const getResponseFromRequest = require('./getResponseFromRequest');
-const writeToStreamAndEnd = require('../../http/writeToStreamAndEnd');
-const bleedReadable = require('../../http/bleedReadable');
+const writeToStreamAndEnd = require('../io/writeToStreamAndEnd');
+const bleedReadable = require('../io/bleedReadable');
 const stripCtrlCodes = require('../stripCtrlCodes');
 const isHttpSuccess = require('./isHttpSuccess');
 
