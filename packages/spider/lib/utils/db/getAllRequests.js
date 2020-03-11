@@ -4,7 +4,7 @@ const lstat = require('./lstat');
 const readdir = require('./readdir');
 
 // async iterator
-module.exports = async function getAllRequests(path, skipDirCheck = false) {
+module.exports = async function getAllRequests(path /*string*/, skipDirCheck = false) {
     // is the path a directory?
     const rc = [];
     if (!skipDirCheck) {

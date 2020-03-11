@@ -1,4 +1,4 @@
-const setContentType = require('./setHeader');
+const setHeader = require('./setHeader');
 const omitInPlaceIgnoreCase = require('../omitIgnoreCase');
 const getResponseFromRequest = require('./getResponseFromRequest');
 const writeToStreamAndEnd = require('../io/writeToStreamAndEnd');
@@ -14,24 +14,24 @@ module.exports = function createHttpClient(createHttpRequest, logger, config) {
     return async function send(method, path, originHeaders, originBody = '') {
         const headers = Object.assign({}, originHeaders);
         if (originBody.length > 0) {
-            headers['Content-Length'] = Buffer.byteLength(originBody);
-            setContentType(headers);
+            setHeader(headers); // contenttype
+            setHeader(headers, 'Content-Length', Buffer.byteLength(originBody))
         }
         else {
             omitInPlaceIgnoreCase(headers, 'Content-Type', 'Content-Length');
         }
-
+        
         const clientRequest = createHttpRequest(host, port, method, encodeURI(path), headers, proxyHost, proxyPort);
         const captureRequestPromise = getResponseFromRequest(clientRequest);
         const [msg, err1] = await writeToStreamAndEnd(clientRequest, originBody);
         if (err1 || msg !== true) {
-            const errMsg = stripCtrlCodes(`[http-req][send04][${String(err1)}]`);
+            const errMsg = stripCtrlCodes(`[http-req][writing to stream failed][${String(err1)}]`);
             logger.error(errMsg);
             return [undefined, new Error(errMsg)];
         }
         const [incMsg, err2] = await captureRequestPromise;
         if (err2) {
-            const errMsg = stripCtrlCodes(`[http-req][send05][${String(err2)}]`);
+            const errMsg = stripCtrlCodes(`[http-req][error when getting response from host][${String(err2)}]`);
             logger.error(errMsg);
             return [undefined, new Error(errMsg)];
         }
@@ -46,7 +46,7 @@ module.exports = function createHttpClient(createHttpRequest, logger, config) {
             const { statusCode, statusMessage } = incMsg;
             const errMsg = stripCtrlCodes(`[http-req][send07][status:${statusCode}][${method}][headers][${JSON.stringify(headers)}][${encodeURI(path)}][${host}][response][${responseBody}][request][${originBody}]`);
             logger.warn(errMsg);
-            return [ undefined, new Error(errMsg) ];
+            return [undefined, new Error(errMsg)];
         }
         return [responseBody, undefined];
     }
