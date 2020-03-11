@@ -1,46 +1,56 @@
 'use strict';
-const createNotifyer = (fn) => () => fn();
+const createNotifyer = (fn,o) => () => { 
+    fn();
+    o.resolved = true;
+};
 
 function waitFor() {
     let notify;
+    let used = {resolved: false};
     const promise = new Promise(resolve => {
-        notify = createNotifyer(resolve);
+        notify = createNotifyer(resolve, used);
     });
     return {
         notify,
-        promise
+        promise,
+        used
     }
 }
 
-module.exports = function throttle(count, iterator) {
+module.exports = function throttle(count = 1, iterator) {
     let cnt = 0;
     let wait;
-    let result;
-    let error;
 
-    async function process(fn) {
-        while (cnt >= count) {
-            if (!wait) {
-                wait = waitFor();
+    if (count <= 0 || typeof count !== 'number'){ 
+        count = 1;
+    }
+    
+    return async function process(fn) {
+        while(true){
+            if (!wait || wait.used.resolved){
+               wait = waitFor();
             }
-            await wait.promise;
-        }
-        const step = iterator.next();
-        if (step.done) {
-            return;
-        }
-        cnt++;
-        try {
-            result = await fn(step.value);
-        } catch (err) {
-            error = err;
-        }
-        cnt--;
-        if (wait) {
+            if (cnt >= count){
+                await wait.promise;
+                continue;  
+            }
+            cnt++;
+            const step = iterator.next();
+            if (step.done) {
+                cnt--;
+                return []; // nothing left to be done
+            }
+            let error;
+            let result;
+            try {
+                result = await fn(step.value);
+            } catch (err) {
+                error = err;
+            }
+            cnt--;
             wait.notify();
-            wait = undefined;
+            return [result, error];
         }
-        return [result, error];
     }
 };
 

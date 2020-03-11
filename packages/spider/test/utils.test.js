@@ -11,10 +11,20 @@ const mkdirp = require('utils/db/mkdirp');
 const getAllRequests = require('utils/db/getAllRequests');
 const serializeRequest = require('utils/serialize/request');
 const request = require('utils/deserialize/request');
+const createThrottle = require('utils/throttleAsync');
+
 
 chai.should();
 chai.use(chaiAsPromised);
 const { expect } = chai;
+
+function delay(ts) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ts);
+    });
+}
+
+const defer = fn => Promise.prototype.then.call(Promise.resolve(), fn);
 
 const fixtures = require('./fixtures');
 
@@ -164,6 +174,66 @@ describe('utils', () => {
             const [o, errors] = request(data);
             expect(o).to.deep.equal({ somesection: {} });
             expect(errors).to.equal('error on line 2 no "=" seperator');
+        });
+    });
+    describe('throttleAsync', async () => {
+        it('process task 2 in parrallel', async () => {
+            const data = Array.from({ length: 10 }).map((v, i) => i); // some random data
+            const process = createThrottle(2, data[Symbol.iterator]());
+            const promises = [];
+            let j = 0;
+            for (let i = 1; i <= 15; i++) {
+                promises.push(process(async (a) => {
+                    defer(() => j++);
+                    return j;
+                }));
+            }
+            const result = await Promise.all(promises);
+            expect(result).to.deep.equal([
+                [0, undefined], // grouping id 0
+                [0, undefined], //
+                [2, undefined], // grouping id 2
+                [2, undefined],
+                [4, undefined], // grouping id 4
+                [4, undefined],
+                [6, undefined],
+                [6, undefined],
+                [8, undefined],
+                [8, undefined],
+                [],
+                [],
+                [],
+                [],
+                []]);
+        });
+        it('process all in parrallel', async () => {
+            const data = Array.from({ length: 10 }).map((v, i) => i); // some random data
+            const process = createThrottle(Infinity, data[Symbol.iterator]());
+            const promises = [];
+            let j = 0;
+            for (let i = 1; i <= 15; i++) {
+                promises.push(process(async (a) => {
+                    defer(() => j++);
+                    return j;
+                }));
+            }
+            const result = await Promise.all(promises);
+            expect(result).to.deep.equal([[0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [0, undefined],
+            [],
+            [],
+            [],
+            [],
+            []]);
+
         });
     });
 });
