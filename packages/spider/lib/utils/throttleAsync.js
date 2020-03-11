@@ -1,12 +1,12 @@
 'use strict';
-const createNotifyer = (fn,o) => () => { 
+const createNotifyer = (fn, o) => () => {
     fn();
     o.resolved = true;
 };
 
 function waitFor() {
     let notify;
-    let used = {resolved: false};
+    let used = { resolved: false };
     const promise = new Promise(resolve => {
         notify = createNotifyer(resolve, used);
     });
@@ -21,18 +21,18 @@ module.exports = function throttle(count = 1, iterator) {
     let cnt = 0;
     let wait;
 
-    if (count <= 0 || typeof count !== 'number'){ 
+    if (count <= 0 || typeof count !== 'number') {
         count = 1;
     }
-    
+
     return async function process(fn) {
-        while(true){
-            if (!wait || wait.used.resolved){
-               wait = waitFor();
+        while (true) {
+            if (!wait || wait.used.resolved) {
+                wait = waitFor();
             }
-            if (cnt >= count){
+            if (cnt >= count) {
                 await wait.promise;
-                continue;  
+                continue;
             }
             cnt++;
             const step = iterator.next();

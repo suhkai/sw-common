@@ -24,7 +24,7 @@ function delay(ts) {
     });
 }
 
-const defer = fn => Promise.prototype.then.call(Promise.resolve(), fn);
+const defer = fn => Promise.prototype.then.call(Promise.resolve(),fn);
 
 const fixtures = require('./fixtures');
 
