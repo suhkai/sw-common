@@ -1,26 +1,28 @@
-module.exports = class INode {
-    constructor(type, name, version, url){
+const { basename } = require('path');
+
+class INode {
+    constructor(type, name, version, ctx = {}){
         this.children = {}; 
         this.type = type; // regular file, dir, whatever
         this.size = 0;
-        this.name = name;
+        this.name = basename(name); // basename
         this.version = version || '001';
         this.data;
-        this.url = url; // url object!!
+        this.ctx = ctx; // url object!!
     }
-    a
-    createInode(type, name, version = this.version, url){
-        if (this.chidlren[ name + version ]){
+    createInode(type, name, version = this.version, ctx){
+        if (this.children[ basename(name) + version ]){
             const base = this.getpathToRoot();
             throw new Error(`${child.name} already exist on ${base}`);
         }
-        const child = new INode(type, name, version, url);
-        children[child.getPk()] = child;
-        child.setParent(this);
+        const child = new INode(type, name, version, ctx);
+        this.children[child._getPk()] = child;
+        child._setParent(this);
+        return child;
     }
 
     _setParent(parent){
-        child.parent = parent;
+        this.parent = parent;
     }
 
     _getPk(){
@@ -28,4 +30,5 @@ module.exports = class INode {
     }
 }
 
-module.exports.root = new INode('dir', '/', 0, url);
+module.exports = INode;
+module.exports.root = new INode('device', '');
