@@ -1,9 +1,11 @@
 'use strict';
 
 const { filter } = require('./utils/functionals');
-module.exports = function engine(queue, handlers, storage) { // linked list?
-    const selectBusy = filter(q => q.state !== 'waiting');
-    const selectFree = filter(q => q.state === 'waiting');
+module.exports = function engine(options) { // linked list?
+
+    const cache = options.cache;
+    
+    hydrate(cache)
     
     let todo;
     out:
