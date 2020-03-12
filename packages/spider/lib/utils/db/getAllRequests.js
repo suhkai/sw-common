@@ -4,7 +4,7 @@ const lstat = require('./lstat');
 const readdir = require('./readdir');
 
 // async iterator
-module.exports = async function getAllRequests(path /*string*/, skipDirCheck = false) {
+module.exports = async function getAllInodes(path /*string*/, skipDirCheck = false) {
     // is the path a directory?
     const rc = [];
     if (!skipDirCheck) {
@@ -32,16 +32,14 @@ module.exports = async function getAllRequests(path /*string*/, skipDirCheck = f
             continue;
         }
         if (stat.isDirectory()) {
-            const subRc = await getAllRequests(fullp, true);
+            const subRc = await getAllInodes(fullp, true);
             rc.push(...subRc);
             continue;
         }
         if (!stat.isFile()) {
             continue;
         }
-        if (/\.request$/i.test(fileName)) { // add it
-            rc.push([{ fullp, stat }, undefined]);
-        }
+        rc.push([{ fullp, stat }, undefined]);
     }
     return rc;
 };
