@@ -28,6 +28,9 @@ async function mkdir(path, mode){
 module.exports = async function mkdirp(path, ft = 'posix', mode = 0o777) {
     const info = lexPath(path, { [ft]: true });
 
+    if (!info){
+        return [undefined, `invalid path name:"${path}"`];
+    }
     if (info.firstError) {
         return [undefined, info.firstError];
     }

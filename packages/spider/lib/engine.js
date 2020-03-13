@@ -1,26 +1,35 @@
 'use strict';
 
-const { filter } = require('./utils/functionals');
-module.exports = function engine(options) { // linked list?
+const mkdirp = require('./utils/db/mkdirp');
+const jxpath = require('@mangos/jxpath');
+const getInodes = require('./utils/db/getInodes');
 
-    const cache = options.cache;
-    
-    hydrate(cache)
-    
-    let todo;
-    out:
+const findTodos = jxpath('/**/[name=/\\.request$/]/name');
+
+module.exports = async function engine(options, logger = console) { // linked list?
+
+    // hydrate the store
+    const dir = options.cache;
+    const [, error] = await mkdirp(dir);
+    if (error) {
+        logger.error(error);
+        return;
+    }
+    const fsSystem = await getInodes(dir);
+    logger.log('done reading from disk')
+    const todoIterator = findTodos(fsSystem.parent, 'parent');
+    let step;
+    let done;
     do {
-        todo = selectFree(queue);
-        const { value: data, done } = todo.next();
-        if (done) { // no todo
-            if (selectBusy(queue).next().done)
-                break out; // nothing to do
-            }
+        const { value: step, done: done2 } = todoIterator.next();
+        if (done === false){
+            logger.log(step);
         }
-        throttle()
-        //
-        //
+        done = done2;
+
+    }
+    while (!done);
+    logger.log('processing done')
+};
 
 
-
-    };

@@ -10,8 +10,8 @@ class INode {
         this.ctx = ctx; // url object!!
     }
     createInode(type, name, version = this.version, ctx){
-        if (this.children && this.children[ basename(name) + version ]){
-            const base = this.getpathToRoot();
+        if (this.children && this.children[ basename(name) + '_' + version ]){
+            const base = this.getBase();
             throw new Error(`${child.name} already exist on ${base}`);
         }
         this.children = this.children || {};
@@ -27,6 +27,15 @@ class INode {
 
     _getPk(){
         return this.name + '_' + this.version;
+    }
+    getBase(){
+        if (this.type === 'device'){
+            return '';
+        }
+        if (this.parent === undefined){
+            return '';
+        }
+        return parent.getBase()+'/'+this.name;
     }
 }
 

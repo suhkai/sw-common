@@ -7,6 +7,17 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "mocha spider-engine-test",
+            "program": "${workspaceFolder}/packages/spider/index.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "NODE_PATH":"${workspaceFolder}/packages/spider/lib"
+            },
+            "cwd": "${workspaceFolder}/packages/spider"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "mocha spider-test",
             "program": "${workspaceFolder}/packages/spider/node_modules/mocha/bin/_mocha",
             "internalConsoleOptions": "openOnSessionStart",
