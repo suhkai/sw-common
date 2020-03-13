@@ -4,6 +4,15 @@ const lstat = require('./lstat');
 const readdir = require('./readdir');
 const { root, INode } = require('./inode');
 
+function copyTimes(inode, stat){
+    inode.atime = Number(stat.atime);
+    inode.mtime = Number(stat.mtime);
+    inode.ctime = Number(stat.ctime);
+    inode.btime = Number(stat.birthtime);
+    inode.size = stat.size;
+    inode.mode = stat.mode & 0777;
+}
+
 // async iterator
 module.exports = async function getInodes(path /*string*/, skipDirCheck = false, dir) {
     // is the path a directory?
@@ -21,6 +30,8 @@ module.exports = async function getInodes(path /*string*/, skipDirCheck = false,
             dir.ctx.error = `${path} is not a directory`;
             return dir;
         }
+        // set times
+        copyTimes(dir, stat);
     }
     
     const [fileNames, error] = await readdir(path);
@@ -37,6 +48,7 @@ module.exports = async function getInodes(path /*string*/, skipDirCheck = false,
             node.ctx.error = `${error} while statting ${fullp}`
             return dir;
         }
+        copyTimes(node, stat);
         if (stat.isDirectory()) {
             node.type = 'd';
             await getInodes(fullp, true, node) || [];
@@ -48,6 +60,9 @@ module.exports = async function getInodes(path /*string*/, skipDirCheck = false,
             continue;
         }
         node.type = 'o';  
+    }
+    if (!fileNames.length){
+        delete dir.children;
     }
     return dir;
 };

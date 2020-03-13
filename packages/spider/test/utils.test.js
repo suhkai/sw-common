@@ -1,6 +1,5 @@
 'use strict';
 
-const mocha = require('mocha');
 const chaiAsPromised = require('chai-as-promised');
 const chai = require('chai');
 const mock = require('mock-fs');
@@ -13,21 +12,15 @@ const serializeRequest = require('utils/serialize/request');
 const request = require('utils/deserialize/request');
 const createThrottle = require('utils/throttleAsync');
 
-
+const omit = require('utils/omit');
 
 chai.should();
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-function delay(ts) {
-    return new Promise(resolve => {
-        setTimeout(resolve, ts);
-    });
-}
+const defer = fn => Promise.prototype.then.call(Promise.resolve(), fn);
 
-const defer = fn => Promise.prototype.then.call(Promise.resolve(),fn);
 
-const fixtures = require('./fixtures');
 
 describe('utils', () => {
     describe('db', () => {
@@ -61,37 +54,50 @@ describe('utils', () => {
             });
         });
         describe('getInodes', () => {
+
+            function cfile(content = '') {
+                return mock.file({
+                    content,
+                    atime: 0,
+                    ctime: 0,
+                    mtime: 0,
+                    birthtime: 0,
+                    mode: 0o000
+                });
+            }
+
+            function cdir(items = {}) {
+                return mock.directory({
+                    atime: 0,
+                    ctime: 0,
+                    mtime: 0,
+                    birthtime: 0,
+                    mode: 0o100,
+                    items
+                });
+            }
+
+            const { device } = require('./fixtures');
+
             before(() => {
                 mock({
-                    '/.cache': {
-                        'favicon.request': '',
-                        'favicon.png.fetching': new Buffer(23),
-                        'assets': {/** empty directory */ },
-                        'Open Sans': {
-                            'all.css.request': ''
-                        },
-                        'somefile.request': {},
-                    },
-                    'path/to/some.png': Buffer.from([8, 6, 7, 5, 3, 0, 9]),
-                    'some/other/path': {/** another empty directory */ },
+                    '/.cache': cdir({
+                        'favicon.request': cfile(''),
+                        'favicon.png.fetching': cfile(new Buffer(23)),
+                        'assets': cdir(),
+                        'Open Sans': cdir({
+                            'all.css.request': cfile()
+                        }),
+                        'somefile.request': cfile(),
+                    }),
+                    'path/to/some.png': cfile(Buffer.from([8, 6, 7, 5, 3, 0, 9])),
+                    'some/other/path': cdir(),
                 });
             });
             it('get all entries', async () => {
-                const results = await getInodes('/.cache', );// make it undependent of filesystem type
-                //console.log(results);
-                // remove all parents otherwise will be difficult to compare
-                const a =  {};
-                const b =  {};
-                a.f = b;
-                b.f = a;
-                expect(a).to.deep.equal({ f: b }); // ok that seems to work
-            });
-            it.skip('get all direntries ending in .request a to existing regular file should be an error', async () => {
-                const results = await getAllRequests('/.cache');// make it undependent of filesystem type
-                const { getAllRequests01 } = fixtures;
-                const resultsForTest = results.map(([{ fullp, stat: { mode, size } }, error]) => [{ fullp, stat: { mode, size } }, error]);
-                console.log(resultsForTest);
-                //expect(resultsForTest).to.deep.equal(getAllRequests01);
+                const results = await getInodes('/.cache');// make it undependent of filesystem type
+                const actualDevice = results.parent;
+                expect(actualDevice).to.deep.equal(device);
             });
             after(() => {
                 mock.restore();
@@ -122,7 +128,6 @@ describe('utils', () => {
         })
     });
     describe('deserialize', () => {
-
         it('request <- correct string with control chars', () => {
             const data =
                 "[request-url]\n\r\t" +
@@ -239,7 +244,6 @@ describe('utils', () => {
             [],
             [],
             []]);
-
         });
     });
 });

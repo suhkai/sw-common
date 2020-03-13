@@ -2,7 +2,6 @@ const { basename } = require('path');
 
 class INode {
     constructor(type, name, version, ctx = {}){
-        this.children = {}; 
         this.type = type; // regular file, dir, whatever
         this.size = 0;
         this.name = basename(name); // basename
@@ -11,10 +10,11 @@ class INode {
         this.ctx = ctx; // url object!!
     }
     createInode(type, name, version = this.version, ctx){
-        if (this.children[ basename(name) + version ]){
+        if (this.children && this.children[ basename(name) + version ]){
             const base = this.getpathToRoot();
             throw new Error(`${child.name} already exist on ${base}`);
         }
+        this.children = this.children || {};
         const child = new INode(type, name, version, ctx);
         this.children[child._getPk()] = child;
         child._setParent(this);
