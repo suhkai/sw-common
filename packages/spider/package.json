@@ -1,8 +1,8 @@
 {
   "author": "",
   "dependencies": {
-    "@mangos/filepath": "0.0.3",
-    "@mangos/jxpath": "^1.0.10"
+    "@mangos/jxpath": "^1.0.10",
+    "@mangos/validator": "../../../mangos/packages/validator"
   },
   "description": "",
   "devDependencies": {
