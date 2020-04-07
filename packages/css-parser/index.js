@@ -1,7 +1,10 @@
 const csstree = require('css-tree');
 
+const jxpath = require('@mangos/jxpath');
+
 var ast = csstree.parse(
     `
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;0,800;1,300;1,400&display=swap');   
 @import "common.css" screen;
 @media only screen and (max-width: 600px) {
     body {
@@ -17,7 +20,7 @@ ul {
 `,
     {
         filename: 'somefile.css',
-        positions: false
+        positions: true
     }
 );
 
@@ -46,21 +49,12 @@ function stripQ(str = '') {
     return str.slice(start, end + 1);
 }
 
-csstree.walk(ast, function (node) {
-    // import rules
-    console.log(`${node.name}\t${node.type}`);
-    if (node.type === 'Atrule' && node.name === 'import') {
-        const url = findTypeForward(node.prelude.children.head, 'String');
-        console.log(url);
-    }
-    if (node.type === 'Url') { // use of url function look here https://developer.mozilla.org/en-US/docs/Web/CSS/url()
-        node.value.value = './somewherelse.jpg';
-        console.log(node.value)
-        // handle all cases of url
-    }
-});
+const find = jxpath('/**/[type=Url]')
 
-console.log(csstree.generate(ast))
+const found =  Array.from(find(ast, 'prev'),);
+console.log(found);
+
+// console.log(csstree.generate(ast))
 /*
 StyleSheet
 Atrule
