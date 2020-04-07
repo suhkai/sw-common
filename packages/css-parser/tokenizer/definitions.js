@@ -1,6 +1,6 @@
 'use strict';
 
-var EOF = 0; // some mobile browsers (iphone) dont like "const"
+var EOF = '\0'; // some mobile browsers (iphone) dont like "const"
 
 // https://drafts.csswg.org/css-syntax-3/
 // § 4.2. Definitions
@@ -8,7 +8,7 @@ var EOF = 0; // some mobile browsers (iphone) dont like "const"
 // digit
 // A code point between U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9).
 function isDigit(code) {
-  return code >= 0x0030 && code <= 0x0039;
+  return code >= '\u0030' && code <= '\u0039';
 }
 
 // hex digit
@@ -17,21 +17,21 @@ function isDigit(code) {
 function isHexDigit(code) {
   return (
     isDigit(code) || // 0 .. 9
-    (code >= 0x0041 && code <= 0x0046) || // A .. F
-    (code >= 0x0061 && code <= 0x0066)    // a .. f
+    (code >= '\u0041' && code <= '\u0046') || // A .. F
+    (code >= '\u0061' && code <= '\u0066')    // a .. f
   );
 }
 
 // uppercase letter
 // A code point between U+0041 LATIN CAPITAL LETTER A (A) and U+005A LATIN CAPITAL LETTER Z (Z).
 function isUppercaseLetter(code) {
-  return code >= 0x0041 && code <= 0x005A;
+  return code >= '\u0041' && code <= '\u005A';
 }
 
 // lowercase letter
 // A code point between U+0061 LATIN SMALL LETTER A (a) and U+007A LATIN SMALL LETTER Z (z).
 function isLowercaseLetter(code) {
-  return code >= 0x0061 && code <= 0x007A;
+  return code >= '\u0061' && code <= '\u007A';
 }
 
 // letter
@@ -43,19 +43,19 @@ function isLetter(code) {
 // non-ASCII code point
 // A code point with a value equal to or greater than U+0080 <control>.
 function isNonAscii(code) {
-  return code >= 0x0080;
+  return code >= '\u0080';
 }
 
 // name-start code point
 // A letter, a non-ASCII code point, or U+005F LOW LINE (_).
 function isNameStart(code) {
-  return isLetter(code) || isNonAscii(code) || code === 0x005F;
+  return isLetter(code) || isNonAscii(code) || code === '\u005F';
 }
 
 // name code point
 // A name-start code point, a digit, or U+002D HYPHEN-MINUS (-).
 function isName(code) {
-  return isNameStart(code) || isDigit(code) || code === 0x002D;
+  return isNameStart(code) || isDigit(code) || code === '\u002D';
 }
 
 // non-printable code point
@@ -63,10 +63,10 @@ function isName(code) {
 // or a code point between U+000E SHIFT OUT and U+001F INFORMATION SEPARATOR ONE, or U+007F DELETE.
 function isNonPrintable(code) {
   return (
-    (code >= 0x0000 && code <= 0x0008) ||
-    (code === 0x000B) ||
-    (code >= 0x000E && code <= 0x001F) ||
-    (code === 0x007F)
+    (code >= '\u0000' && code <= '\u0008') ||
+    (code === '\u000B') ||
+    (code >= '\u000E' && code <= '\u001F') ||
+    (code === '\u007F')
   );
 }
 
@@ -74,13 +74,13 @@ function isNonPrintable(code) {
 // U+000A LINE FEED. Note that U+000D CARRIAGE RETURN and U+000C FORM FEED are not included in this definition,
 // as they are converted to U+000A LINE FEED during preprocessing.
 function isNewline(code) {
-  return code === 0x000A;
+  return code === '\u000A';
 }
 
 // whitespace
 // A newline, U+0009 CHARACTER TABULATION, or U+0020 SPACE.
 function isWhiteSpace(code) {
-  return isNewline(code) || code === 0x0020 || code === 0x0009;
+  return isNewline(code) || code === '\u0020' || code === '\u0009';
 }
 
 
@@ -88,7 +88,7 @@ function isWhiteSpace(code) {
 // § 4.3.8. Check if two code points are a valid escape
 function isValidEscape(first, second) {
   // If the first code point is not U+005C REVERSE SOLIDUS (\), return false.
-  if (first !== 0x005C) {
+  if (first !== '\u005C') {
     return false;
   }
 
@@ -106,12 +106,12 @@ function isIdentifierStart(first, second, third) {
   // Look at the first code point:
 
   // U+002D HYPHEN-MINUS
-  if (first === 0x002D) {
+  if (first === '\u002D') {
     // If the second code point is a name-start code point or a U+002D HYPHEN-MINUS,
     // or the second and third code points are a valid escape, return true. Otherwise, return false.
     return (
       isNameStart(second) ||
-      second === 0x002D ||
+      second === '\u002D' ||
       isValidEscape(second, third)
     );
   }
@@ -123,7 +123,7 @@ function isIdentifierStart(first, second, third) {
   }
 
   // U+005C REVERSE SOLIDUS (\)
-  if (first === 0x005C) {
+  if (first === '\u005C') {
     // If the first and second code points are a valid escape, return true. Otherwise, return false.
     return isValidEscape(first, second);
   }
@@ -139,7 +139,7 @@ function isNumberStart(first, second, third) {
 
   // U+002B PLUS SIGN (+)
   // U+002D HYPHEN-MINUS (-)
-  if (first === 0x002B || first === 0x002D) {
+  if (first === '\u002B' || first === '\u002D') {
     // If the second code point is a digit, return true.
     if (isDigit(second)) {
       return 2;
@@ -148,11 +148,11 @@ function isNumberStart(first, second, third) {
     // Otherwise, if the second code point is a U+002E FULL STOP (.)
     // and the third code point is a digit, return true.
     // Otherwise, return false.
-    return second === 0x002E && isDigit(third) ? 3 : 0;
+    return second === '\u002E' && isDigit(third) ? 3 : 0;
   }
 
   // U+002E FULL STOP (.)
-  if (first === 0x002E) {
+  if (first === '\u002E') {
     // If the second code point is a digit, return true. Otherwise, return false.
     return isDigit(second) ? 2 : 0;
   }
@@ -175,12 +175,12 @@ function isNumberStart(first, second, third) {
 // detect BOM (https://en.wikipedia.org/wiki/Byte_order_mark)
 function isBOM(code) {
   // UTF-16BE
-  if (code === 0xFEFF) {
+  if (code === '\uFEFF') {
     return 1;
   }
 
   // UTF-16LE
-  if (code === 0xFFFE) {
+  if (code === '\uFFFE') {
     return 1;
   }
 
@@ -197,17 +197,17 @@ function isBOM(code) {
 // > name code point
 // >   A name-start code point, a digit, or U+002D HYPHEN-MINUS (-)
 // That means only ASCII code points has a special meaning and we define a maps for 0..127 codes only
-var CATEGORY = new Array(0x80);
+var CATEGORY = new Array(128);
 
 function charCodeCategory(code) {
-  return code < 0x80 ? CATEGORY[code] : charCodeCategory.NameStart;
+  return code < '\u0080' ? CATEGORY[code] : charCodeCategory.NameStart;
 };
 
-charCodeCategory.Eof = 0x80;
-charCodeCategory.WhiteSpace = 0x82;
-charCodeCategory.Digit = 0x83;
-charCodeCategory.NameStart = 0x84;
-charCodeCategory.NonPrintable = 0x85;
+charCodeCategory.Eof = '\u0080';
+charCodeCategory.WhiteSpace = '\u0082';
+charCodeCategory.Digit = '\u0083';
+charCodeCategory.NameStart = '\u0084';
+charCodeCategory.NonPrintable = '\u0085';
 
 for (var i = 0; i < CATEGORY.length; i++) {
   switch (true) {
@@ -233,7 +233,7 @@ for (var i = 0; i < CATEGORY.length; i++) {
 }
 
 module.exports = {
-  isDigit: isDigit,
+  isDigit,
   isHexDigit: isHexDigit,
   isUppercaseLetter: isUppercaseLetter,
   isLowercaseLetter: isLowercaseLetter,

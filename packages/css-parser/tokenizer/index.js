@@ -246,6 +246,11 @@ function tokenize(source, stream) {
         }
     }
 
+    //start
+    //start
+    //start
+    //start
+
     if (!stream) {
         stream = new TokenStream();
     }
@@ -270,7 +275,7 @@ function tokenize(source, stream) {
         var type = 0;
 
         balance[tokenCount] = sourceLength;
-
+        // top level
         switch (charCodeCategory(code)) {
             // whitespace
             case charCodeCategory.WhiteSpace:
