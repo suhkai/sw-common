@@ -29,10 +29,9 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "pck/css-parser",
-            "program": "${workspaceFolder}/packages/css-parser/index.js",
-            "cwd": "${workspaceFolder}/packages/css-parser",
-            "stopOnEntry": true
+            "name": "mocha css-parser-test",
+            "program": "${workspaceFolder}/packages/css-parser/node_modules/mocha/bin/_mocha",
+            "cwd": "${workspaceFolder}/packages/css-parser"
         },
         {
             "type": "node",
