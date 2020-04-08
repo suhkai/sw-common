@@ -1,64 +1,48 @@
+const { charCodeCategory, isValidEscape } = require('../definitions');
+const { TYPE } = require('../const');
+const consumeEscaped = require('./escape');
+
 // § 4.3.5. Consume a string token
-module.exports = function consumeStringToken(endingCodePoint) {
-  // This algorithm may be called with an ending code point, which denotes the code point
-  // that ends the string. If an ending code point is not specified,
-  // the current input code point is used.
-  if (!endingCodePoint) {
-      endingCodePoint = getCharCode(offset++);
-  }
+module.exports = function consumeStringToken(src = '', start = 0, end = src.length - 1, endingCodePoint = '"') {
+    // Repeatedly consume the next input code point from the stream:
+    let i = start;
+    let type = TYPE.String;
+    outer:
+    for (; i <= end; i++) {
+        var c = src[i];
+        switch (true) {
+            // ending code point
+            case c === endingCodePoint:
+                // Return the <string-token>.
+                break outer;
+            case charCodeCategory(c) === charCodeCategory.WhiteSpace:
+                if (c === '\u000A') {
+                    // This is a parse error. Reconsume the current input code point,
+                    // create a <bad-string-token>, and return it.
+                    i++
+                    type = TYPE.BadString;
+                    break outer;
+                }
+                break;
+            // U+005C REVERSE SOLIDUS (\)
+            case c === '\u005C':
+                // If the next input code point is EOF, do nothing.
+                if (i === end) {
+                    break;
+                }
+                if (src[i + 1] === '\u000A') {
+                    i++;
+                } else if (isValidEscape(c, str[i + 1])) {
+                    // Otherwise, (the stream starts with a valid escape) consume
+                    // an escaped code point and append the returned code point to
+                    // the <string-token>’s value.
+                    i = consumeEscaped(src, i);
+                }
+                break;
 
-  // Initially create a <string-token> with its value set to the empty string.
-  type = TYPE.String;
-
-  // Repeatedly consume the next input code point from the stream:
-  for (; offset < source.length; offset++) {
-      var code = source.charCodeAt(offset);
-
-      switch (charCodeCategory(code)) {
-          // ending code point
-          case endingCodePoint:
-              // Return the <string-token>.
-              offset++;
-              return;
-
-          // EOF
-          case charCodeCategory.Eof:
-              // This is a parse error. Return the <string-token>.
-              return;
-
-          // newline
-          case charCodeCategory.WhiteSpace:
-              if (isNewline(code)) {
-                  // This is a parse error. Reconsume the current input code point,
-                  // create a <bad-string-token>, and return it.
-                  offset += getNewlineLength(source, offset, code);
-                  type = TYPE.BadString;
-                  return;
-              }
-              break;
-
-          // U+005C REVERSE SOLIDUS (\)
-          case 0x005C:
-              // If the next input code point is EOF, do nothing.
-              if (offset === source.length - 1) {
-                  break;
-              }
-
-              var nextCode = getCharCode(offset + 1);
-
-              // Otherwise, if the next input code point is a newline, consume it.
-              if (isNewline(nextCode)) {
-                  offset += getNewlineLength(source, offset + 1, nextCode);
-              } else if (isValidEscape(code, nextCode)) {
-                  // Otherwise, (the stream starts with a valid escape) consume
-                  // an escaped code point and append the returned code point to
-                  // the <string-token>’s value.
-                  offset = consumeEscaped(source, offset) - 1;
-              }
-              break;
-
-          // anything else
-          // Append the current input code point to the <string-token>’s value.
-      }
-  }
+            // anything else
+            // Append the current input code point to the <string-token>’s value.
+        }
+    }
+    return { id: type, start, end: i }
 }

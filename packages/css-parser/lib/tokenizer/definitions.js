@@ -242,12 +242,12 @@ module.exports = {
   isNameStart: isNameStart,
   isName: isName,
   isNonPrintable: isNonPrintable,
-  isNewline: isNewline,
+  isNewline,
   isWhiteSpace: isWhiteSpace,
-  isValidEscape: isValidEscape,
+  isValidEscape,
   isIdentifierStart: isIdentifierStart,
   isNumberStart: isNumberStart,
   //
   isBOM: isBOM,
-  charCodeCategory: charCodeCategory
+  charCodeCategory
 };

@@ -9,7 +9,7 @@ module.exports = {
     colors: true,
     'full-trace': true,
     recursive: true,
-    extension: ['.js'],
+    extension: ['js'],
     opts: false,
     bail: true,
     reporter: 'spec',
@@ -18,5 +18,6 @@ module.exports = {
     //slow: 75,
     timeout: 0,
     color: true,
-    ui: 'bdd'
+    ui: 'bdd',
+    spec: 'test/**/*.test.js'
 };

@@ -86,29 +86,25 @@ function findDecimalNumberEnd(source, offset) {
 }
 
 // § 4.3.7. Consume an escaped code point
-function consumeEscaped(source, offset) {
+function consumeEscaped(src, start, end) {
     // It assumes that the U+005C REVERSE SOLIDUS (\) has already been consumed and
     // that the next input code point has already been verified to be part of a valid escape.
-    offset += 2;
+    let i = start + 2;
 
     // hex digit
-    if (isHexDigit(getCharCode(source, offset - 1))) {
-        // Consume as many hex digits as possible, but no more than 5.
-        // Note that this means 1-6 hex digits have been consumed in total.
-        for (var maxOffset = Math.min(source.length, offset + 5); offset < maxOffset; offset++) {
-            if (!isHexDigit(getCharCode(source, offset))) {
+    if (isHexDigit(src[i-1])) {
+        // Consume as many hex digits as possible, but no more than 6.
+        for (var maxOffset = Math.min(end, i + 5); i < maxOffset; i++) {
+            if (!isHexDigit(src[i])) {
                 break;
             }
         }
-
         // If the next input code point is whitespace, consume it as well.
-        var code = getCharCode(source, offset);
-        if (isWhiteSpace(code)) {
-            offset += getNewlineLength(source, offset, code);
+        if (isWhiteSpace(src[i])) {
+            i++;
         }
     }
-
-    return offset;
+    return i;
 }
 
 // §4.3.11. Consume a name
