@@ -71,6 +71,9 @@ module.exports = function createPreprocessorOverlay(str) {
 
   return new Proxy(()=>{}, Object.assign(defaultHandler(), {
     get(target/* not needed in this case */, _prop, /*receiver: Proxy */) {
+      if (_prop === 'length'){
+        return str.length - twosL;
+      }
       let prop = Number.parseInt(_prop, 10);
       if (!Number.isInteger(prop) || prop >= str.length || prop < 0) {
         return undefined;
@@ -82,9 +85,20 @@ module.exports = function createPreprocessorOverlay(str) {
       }
       let i = 0;
       let real = prop;
+      if (real < twos[0]){// shortcut
+        rawC = str[prop];
+        return map[rawC] || rawC;
+      }
+      if (real > twos[twos.length - 1]){
+        rawC = str[prop + twosL];
+        return map[rawC] || rawC;
+      }
       while (real > twos[i]) { // need to make corrections
         i++;
         real++;
+      }
+      if (real >= str.length){
+        return
       }
       if (real === twos[i]) {
         return '\u000a';

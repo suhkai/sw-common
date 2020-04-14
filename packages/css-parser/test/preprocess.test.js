@@ -27,9 +27,9 @@ describe('css preprocessor overlay', () => {
   it('check all data before the first overlayed', () => { 
     const result = '\nhtml, body, div, dl, dt, dd, ul, \r\nol';
     const collect = [];
-    for (let i = 0; i < cssSample.length; i++){
+    for (let i = 0; i < overlay.length; i++){
       collect.push(overlay[i]);
     }
-    console.log(`>${collect.join('')}<`);
+    expect(JSON.stringify(collect.join(''))).to.equal(JSON.stringify('\nhtml, body, div, dl, dt, dd, ul, \nol, li, h1, h2, h3, h4, h5, h6, pre, a, form, fieldset, input[type=\"search\"], textarea, p, blockquote, th, td {\n  margin: 0;\n  padding: 0;\n\n}\n\n\ninput:focus, textarea:focus, keygen:focus, select:focus {\n  outline-offset: -2px;\n}\n�\ndiv:before, select, * {\n  box-sizing: border-box;\n \n}\n\nbutton, input {\n\n  line-height: normal;\n}\n'))
   });
 });

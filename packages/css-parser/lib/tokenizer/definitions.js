@@ -47,7 +47,7 @@ function isNonAscii(code) {
 }
 
 // name-start code point
-// A letter, a non-ASCII code point, or U+005F LOW LINE (_).
+// A letter, a non-ASCII code point, or U+005F = LOW LINE (_).
 function isNameStart(code) {
   return isLetter(code) || isNonAscii(code) || code === '\u005F';
 }
@@ -93,7 +93,7 @@ function isValidEscape(first, second) {
   }
 
   // Otherwise, if the second code point is a newline or EOF, return false.
-  if (isNewline(second) || second === EOF) {
+  if (!second || isNewline(second) || second === EOF) {
     return false;
   }
 
@@ -233,15 +233,15 @@ for (var i = 0; i < CATEGORY.length; i++) {
 }
 
 module.exports = {
-  isDigit,
-  isHexDigit: isHexDigit,
-  isUppercaseLetter: isUppercaseLetter,
-  isLowercaseLetter: isLowercaseLetter,
-  isLetter: isLetter,
-  isNonAscii: isNonAscii,
-  isNameStart: isNameStart,
-  isName: isName,
-  isNonPrintable: isNonPrintable,
+  isDigit, //
+  isHexDigit, //
+  isUppercaseLetter, //
+  isLowercaseLetter, //
+  isLetter, //
+  isNonAscii, //
+  isNameStart, //
+  isName, //
+  isNonPrintable, //
   isNewline,
   isWhiteSpace: isWhiteSpace,
   isValidEscape,

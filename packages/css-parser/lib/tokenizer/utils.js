@@ -1,10 +1,18 @@
-var charCodeDef = require('./char-code-definitions');
-var isDigit = charCodeDef.isDigit;
-var isHexDigit = charCodeDef.isHexDigit;
-var isUppercaseLetter = charCodeDef.isUppercaseLetter;
-var isName = charCodeDef.isName;
-var isWhiteSpace = charCodeDef.isWhiteSpace;
-var isValidEscape = charCodeDef.isValidEscape;
+
+const { isDigit, //
+    isHexDigit, //
+    isUppercaseLetter, //
+    isLowercaseLetter, //
+    isLetter, //
+    isNonAscii, //
+    isNameStart, //
+    isName, //
+    isNonPrintable, //
+    isNewline,
+    isWhiteSpace: isWhiteSpace,
+    isValidEscape,
+    isIdentifierStart: isIdentifierStart,
+    isNumberStart: isNumberStart, } = require('./definitions');
 
 function getCharCode(source, offset) {
     return offset < source.length ? source.charCodeAt(offset) : 0;
@@ -65,14 +73,23 @@ function findWhiteSpaceStart(source, offset) {
     return offset + 1;
 }
 
-function findWhiteSpaceEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        if (!isWhiteSpace(source.charCodeAt(offset))) {
+// skip over white space
+function findWhiteSpaceEnd(src, start = 0, end = src.length -1) {
+    let i = start;
+    do {
+        if (!isWhiteSpace(src[i])){
+            i--;
             break;
-        }
+        };
+        i++;
+    } while (i <= end)
+    if (i < start){ 
+        return start;
     }
-
-    return offset;
+    if (i > end){
+        return end;
+    }
+    return i;
 }
 
 function findDecimalNumberEnd(source, offset) {
@@ -81,7 +98,6 @@ function findDecimalNumberEnd(source, offset) {
             break;
         }
     }
-
     return offset;
 }
 
@@ -92,7 +108,7 @@ function consumeEscaped(src, start, end) {
     let i = start + 2;
 
     // hex digit
-    if (isHexDigit(src[i-1])) {
+    if (isHexDigit(src[i - 1])) {
         // Consume as many hex digits as possible, but no more than 6.
         for (var maxOffset = Math.min(end, i + 5); i < maxOffset; i++) {
             if (!isHexDigit(src[i])) {
@@ -107,36 +123,6 @@ function consumeEscaped(src, start, end) {
     return i;
 }
 
-// §4.3.11. Consume a name
-// Note: This algorithm does not do the verification of the first few code points that are necessary
-// to ensure the returned code points would constitute an <ident-token>. If that is the intended use,
-// ensure that the stream starts with an identifier before calling this algorithm.
-function consumeName(source, offset) {
-    // Let result initially be an empty string.
-    // Repeatedly consume the next input code point from the stream:
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        // name code point
-        if (isName(code)) {
-            // Append the code point to result.
-            continue;
-        }
-
-        // the stream starts with a valid escape
-        if (isValidEscape(code, getCharCode(source, offset + 1))) {
-            // Consume an escaped code point. Append the returned code point to result.
-            offset = consumeEscaped(source, offset) - 1;
-            continue;
-        }
-
-        // anything else
-        // Reconsume the current input code point. Return result.
-        break;
-    }
-
-    return offset;
-}
 
 // §4.3.12. Consume a number
 function consumeNumber(source, offset) {
@@ -226,7 +212,6 @@ function consumeBadUrlRemnants(source, offset) {
 
 module.exports = {
     consumeEscaped: consumeEscaped,
-    consumeName: consumeName,
     consumeNumber: consumeNumber,
     consumeBadUrlRemnants: consumeBadUrlRemnants,
 

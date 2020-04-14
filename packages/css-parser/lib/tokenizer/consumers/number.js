@@ -6,12 +6,15 @@ const { TYPE } = require('../const');
 function findDecimalNumberEnd(src, start, end) {
   let i;
   for (i = start; i <= end; i++) {
-    if (!isDigit(src[i])) {
-      return i - 1;
+    if (isDigit(src[i])){
+      continue;
     }
+    break;
   }
-  if (i > end) {
-    i--
+  if (i > end){
+    i = end;
+  } else {
+    i--;
   }
   return i;
 }

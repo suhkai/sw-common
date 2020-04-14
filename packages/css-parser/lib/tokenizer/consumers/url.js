@@ -1,11 +1,9 @@
  
-
     // § 4.3.6. Consume a url token
-    // Note: This algorithm assumes that the initial "url(" has already been consumed.
+    // Note: This algorithm will start after "url(" from str
     // This algorithm also assumes that it’s being called to consume an "unquoted" value, like url(foo).
-    // A quoted value, like url("foo"), is parsed as a <function-token>. Consume an ident-like token
-    // automatically handles this distinction; this algorithm shouldn’t be called directly otherwise.
-    function consumeUrlToken() {
+    // if the url string is quoted it will correct and return the value between (") or (') tokens
+    module.exports = function consumeUrlToken(src, start, end) {
       // Initially create a <url-token> with its value set to the empty string.
       type = TYPE.Url;
 
