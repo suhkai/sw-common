@@ -243,7 +243,7 @@ module.exports = {
   isName, //
   isNonPrintable, //
   isNewline,
-  isWhiteSpace: isWhiteSpace,
+  isWhiteSpace,
   isValidEscape,
   isIdentifierStart: isIdentifierStart,
   isNumberStart: isNumberStart,

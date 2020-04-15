@@ -9,7 +9,7 @@ const { isDigit, //
     isName, //
     isNonPrintable, //
     isNewline,
-    isWhiteSpace: isWhiteSpace,
+    isWhiteSpace,
     isValidEscape,
     isIdentifierStart: isIdentifierStart,
     isNumberStart: isNumberStart, } = require('./definitions');
@@ -74,19 +74,19 @@ function findWhiteSpaceStart(source, offset) {
 }
 
 // skip over white space
-function findWhiteSpaceEnd(src, start = 0, end = src.length -1) {
+function findWhiteSpaceEnd(src, start = 0, end = src.length - 1) {
     let i = start;
     do {
-        if (!isWhiteSpace(src[i])){
+        if (!isWhiteSpace(src[i])) {
             i--;
             break;
         };
         i++;
     } while (i <= end)
-    if (i < start){ 
+    if (i < start) {
         return start;
     }
-    if (i > end){
+    if (i > end) {
         return end;
     }
     return i;
@@ -100,29 +100,6 @@ function findDecimalNumberEnd(source, offset) {
     }
     return offset;
 }
-
-// § 4.3.7. Consume an escaped code point
-function consumeEscaped(src, start, end) {
-    // It assumes that the U+005C REVERSE SOLIDUS (\) has already been consumed and
-    // that the next input code point has already been verified to be part of a valid escape.
-    let i = start + 2;
-
-    // hex digit
-    if (isHexDigit(src[i - 1])) {
-        // Consume as many hex digits as possible, but no more than 6.
-        for (var maxOffset = Math.min(end, i + 5); i < maxOffset; i++) {
-            if (!isHexDigit(src[i])) {
-                break;
-            }
-        }
-        // If the next input code point is whitespace, consume it as well.
-        if (isWhiteSpace(src[i])) {
-            i++;
-        }
-    }
-    return i;
-}
-
 
 // §4.3.12. Consume a number
 function consumeNumber(source, offset) {
@@ -182,38 +159,10 @@ function consumeNumber(source, offset) {
     return offset;
 }
 
-// § 4.3.14. Consume the remnants of a bad url
-// ... its sole use is to consume enough of the input stream to reach a recovery point
-// where normal tokenizing can resume.
-function consumeBadUrlRemnants(source, offset) {
-    // Repeatedly consume the next input code point from the stream:
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
 
-        // U+0029 RIGHT PARENTHESIS ())
-        // EOF
-        if (code === 0x0029) {
-            // Return.
-            offset++;
-            break;
-        }
-
-        if (isValidEscape(code, getCharCode(source, offset + 1))) {
-            // Consume an escaped code point.
-            // Note: This allows an escaped right parenthesis ("\)") to be encountered
-            // without ending the <bad-url-token>. This is otherwise identical to
-            // the "anything else" clause.
-            offset = consumeEscaped(source, offset);
-        }
-    }
-
-    return offset;
-}
 
 module.exports = {
-    consumeEscaped: consumeEscaped,
     consumeNumber: consumeNumber,
-    consumeBadUrlRemnants: consumeBadUrlRemnants,
 
     cmpChar: cmpChar,
     cmpStr: cmpStr,
