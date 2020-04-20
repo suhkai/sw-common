@@ -31,7 +31,7 @@ describe('consume numbers', () => {
   });
   it(`consume "1E" to undefined`, () => {
     const endinc = consumeNumber("1E");
-    expect(endinc).to.be.undefined;
+    expect(endinc).to.deep.equal({ id: 10, start: 0, end: 0 });
   });
   it(`consume (undefined) to undefined`, () => {
     const endinc = consumeNumber();

@@ -199,7 +199,7 @@ function isBOM(code) {
 var CATEGORY = new Array(128);
 
 function charCodeCategory(code) {
-  return code < '\u0080' ? CATEGORY[code] : charCodeCategory.NameStart;
+  return code < '\u0080' ? CATEGORY[code.charCodeAt(0)] : charCodeCategory.NameStart;
 };
 
 charCodeCategory.Eof = '\u0080';
@@ -209,25 +209,26 @@ charCodeCategory.NameStart = '\u0084';
 charCodeCategory.NonPrintable = '\u0085';
 
 for (var i = 0; i < CATEGORY.length; i++) {
+  const c = String.fromCharCode(i);
   switch (true) {
-    case isWhiteSpace(i):
+    case isWhiteSpace(c):
       CATEGORY[i] = charCodeCategory.WhiteSpace;
       break;
 
-    case isDigit(i):
+    case isDigit(c):
       CATEGORY[i] = charCodeCategory.Digit;
       break;
 
-    case isNameStart(i):
+    case isNameStart(c):
       CATEGORY[i] = charCodeCategory.NameStart;
       break;
 
-    case isNonPrintable(i):
+    case isNonPrintable(c):
       CATEGORY[i] = charCodeCategory.NonPrintable;
       break;
 
     default:
-      CATEGORY[i] = i || charCodeCategory.Eof;
+      CATEGORY[i] = c || charCodeCategory.Eof;
   }
 }
 

@@ -7,10 +7,11 @@ module.exports = function consumeEscaped(src, start = 0, end = src.length-1) {
   // that the next input code point has already been verified to be part of a valid escape.
   // checked first with "isValidEscape"
   let i = start + 1;
+  let maxOffset;
   // hex digit
   if (isHexDigit(src[i])) {
       // Consume as many hex digits as possible, but no more than 6.
-      for (var maxOffset = Math.min(end, i + 5); i <= maxOffset; i++) {
+      for (maxOffset = Math.min(end, i + 5); i <= maxOffset; i++) {
           if (!isHexDigit(src[i])) {
              break;
           }

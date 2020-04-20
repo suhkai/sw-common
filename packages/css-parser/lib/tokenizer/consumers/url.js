@@ -1,5 +1,5 @@
 'use strict';
-const { TYPE, NAME } = require('../const');
+const { TYPE } = require('../const');
 const { isWhiteSpace, isValidEscape } = require('../definitions');
 const { charCodeCategory } = require('../definitions');
 const consumeEscaped = require('./escape');

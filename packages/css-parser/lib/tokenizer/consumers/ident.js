@@ -1,14 +1,16 @@
-
+'use strict';
 const consumeName = require('./name');
 const consumeUrl = require('./url');
 const consumeFunction = require('./function');
+const slice = require('../slice');
+const { TYPE } = require('../const');
 
 // § 4.3.4. Consume an ident-like token
 // https://www.w3.org/TR/css-syntax-3/#consume-ident-like-token
 module.exports = function consumeIdentLikeToken(src, start, end) {
 
     let i = consumeName(src, start, end);
-    const name = src.slice(start, i + 1);
+    const name = slice(src, start, i + 1);
 
     if (name.toLowerCase().startsWith('url(')){
         return consumeUrl(src,start, end);

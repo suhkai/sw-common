@@ -1,3 +1,5 @@
+'use strict';
+
 const { charCodeCategory, isValidEscape } = require('../definitions');
 const { TYPE } = require('../const');
 const consumeEscaped = require('./escape');

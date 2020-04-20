@@ -6,12 +6,12 @@ const { TYPE } = require('../const');
 function findDecimalNumberEnd(src, start, end) {
   let i;
   for (i = start; i <= end; i++) {
-    if (isDigit(src[i])){
+    if (isDigit(src[i])) {
       continue;
     }
     break;
   }
-  if (i > end){
+  if (i > end) {
     i = end;
   } else {
     i--;
@@ -49,8 +49,10 @@ module.exports = function consumeNumber(src = '', start = 0, end = src.length - 
   // 5. If the next 2 or 3 input code points are U+0045 LATIN CAPITAL LETTER E (E)
   // or U+0065 LATIN SMALL LETTER E (e), ... , followed by a digit, then:
   if (src[i + 1] === '\u0045' /*e*/ || src[i + 1] === '\u0065') {
-    i = consumeSignFixedFloat(src, i + 2, end);
-    if (i === -1) return undefined;
+    const i2 = consumeSignFixedFloat(src, i + 2, end);
+    if (i2 >= 0) {
+      i = i2;
+    }
   }
   return { id: TYPE.Number, start: start, end: i };
 }

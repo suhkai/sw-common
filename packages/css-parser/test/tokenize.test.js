@@ -20,8 +20,7 @@ describe('token actual css', () => {
   })
 
   it('tokenstream test', () => {
-    for (const token of lexer){
-      console.log(token);
-    }    
+    const arr = Array.from(lexer);
+    console.log(arr);
   });
 });

@@ -1,3 +1,4 @@
+'use strict';
 const constants = require('./const');
 const TYPE = constants.TYPE;
 
@@ -33,10 +34,9 @@ module.exports = function* tokenize(src = '') {
         let cat = charCodeCategory(code);
         if (cat === charCodeCategory.WhiteSpace) {
             // Consume as much whitespace as possible. Return a <whitespace-token>.
-            type = TYPE.WhiteSpace;
-            const tok = findWhiteSpaceEnd(i, end)
-            yield tok;
-            i = tok.end + 1;
+            const ti = findWhiteSpaceEnd(src, i, end)
+            yield { id: TYPE.WhiteSpace, start: i, end: ti };
+            i = ti + 1;
             continue;
         }
 
@@ -102,11 +102,11 @@ module.exports = function* tokenize(src = '') {
                 i = tok.end + 1;
                 continue;
             }
-            else {
-                yield { id: TYPE.Delim, start: i, end: i };
-                i++;
-                continue;
-            }
+
+            yield { id: TYPE.Delim, start: i, end: i };
+            i++;
+            continue;
+
         }
         // U+002C COMMA (,)
         if (code === '\u002C') {
@@ -160,10 +160,10 @@ module.exports = function* tokenize(src = '') {
                 // find next "*/"
                 let endIdx = indexOf(src, '*/', i + 2);
                 if (endIdx === -1) {
-                    endIdx = end; // aborb everything i guess
+                    endIdx = end - 1; // aborb everything i guess
                 }
-                yield { id: TYPE.Comment, start: i, end: end };
-                i = endIdx + 1;
+                yield { id: TYPE.Comment, start: i, end: endIdx + 1 };
+                i = endIdx + 2;
                 continue;
             }
             yield { id: TYPE.Delim, start: i, end: i };
@@ -252,9 +252,12 @@ module.exports = function* tokenize(src = '') {
         if (cat === charCodeCategory.Digit) {
             // Reconsume the current input code point, consume a numeric token, and return it.
             const tok = consumeNumber(src, i, end);
-            yield tok;
-            i = tok.end + 1;
-            continue;
+            if (tok){
+                yield tok;
+                i = tok.end + 1;
+                continue;
+            }
+            console.log('should not happen');
         }
 
         // name-start code point

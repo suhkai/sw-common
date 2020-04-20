@@ -1,18 +1,9 @@
 
+'use strict';
 const { isDigit, //
-    isHexDigit, //
     isUppercaseLetter, //
-    isLowercaseLetter, //
-    isLetter, //
-    isNonAscii, //
-    isNameStart, //
-    isName, //
-    isNonPrintable, //
-    isNewline,
-    isWhiteSpace,
-    isValidEscape,
-    isIdentifierStart: isIdentifierStart,
-    isNumberStart: isNumberStart, } = require('./definitions');
+    isWhiteSpace
+ } = require('./definitions');
 
 function getCharCode(source, offset) {
     return offset < source.length ? source.charCodeAt(offset) : 0;
@@ -169,5 +160,5 @@ module.exports = {
 
     getNewlineLength: getNewlineLength,
     findWhiteSpaceStart: findWhiteSpaceStart,
-    findWhiteSpaceEnd: findWhiteSpaceEnd
+    findWhiteSpaceEnd
 };
