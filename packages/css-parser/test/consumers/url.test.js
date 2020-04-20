@@ -65,9 +65,9 @@ describe('consume url', () => {
   const d8 = 'rgba(0,1,3,4);';
   it(`non url css function "${d8}"`, () => {
     const t = consumeUrlToken(d8);
-    console.log(d8.slice(t.start, t.end + 1))
-    console.log(t);
-    //expect(t).to.deep.equal({ id: 7, start: 0, end: 6 });
+    //console.log(d8.slice(t.start, t.end + 1))
+    //console.log(t);
+    expect(t).to.deep.equal({ id: 8, start: 0, end: 12 });
   });
 
 });

@@ -3,6 +3,7 @@ const { TYPE } = require('../const');
 const consumeEscaped = require('./escape');
 
 // § 4.3.5. Consume a string token
+// https://www.w3.org/TR/css-syntax-3/#consume-string-token
 module.exports = function consumeStringToken(str, ecp /* ending code point */, start = 0, end = str.length - 1) {
     // Repeatedly consume the next input code point from the stream:
     let i = start;

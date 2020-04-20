@@ -127,7 +127,6 @@ function isIdentifierStart(first, second, third) {
     // If the first and second code points are a valid escape, return true. Otherwise, return false.
     return isValidEscape(first, second);
   }
-
   // anything else
   // Return false.
   return false;
@@ -176,15 +175,15 @@ function isNumberStart(first, second, third) {
 function isBOM(code) {
   // UTF-16BE
   if (code === '\uFEFF') {
-    return 1;
+    return true;
   }
 
   // UTF-16LE
   if (code === '\uFFFE') {
-    return 1;
+    return true;
   }
 
-  return 0;
+  return false;
 }
 
 // Fast code category

@@ -8,7 +8,6 @@ const consumeFunction = require('./function');
 module.exports = function consumeIdentLikeToken(src, start, end) {
 
     let i = consumeName(src, start, end);
-
     const name = src.slice(start, i + 1);
 
     if (name.toLowerCase().startsWith('url(')){
@@ -16,7 +15,7 @@ module.exports = function consumeIdentLikeToken(src, start, end) {
     }
     // is it '(' ?
     if  (src[i] === '\u0028'){
-        return consumeFunction(src, i+1); // can be "calc", "rgb" etc
+        return consumeFunction(src, start, end); // can be "calc", "rgb" etc
     }  
     // just a regular token
     return { id: TYPE.Ident, start, end: i };

@@ -40,6 +40,7 @@ const map = {
   '\u000d': '\u000a'
 };
 
+
 module.exports = function createPreprocessorOverlay(str) {
   if (typeof str !== 'string') {
     throw new Error('source must be of type string');

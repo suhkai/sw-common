@@ -1,382 +1,272 @@
-var TokenStream = require('../common/TokenStream');
-var adoptBuffer = require('../common/adopt-buffer');
+const constants = require('./const');
+const TYPE = constants.TYPE;
 
-var constants = require('./const');
-var TYPE = constants.TYPE;
+const consumeStringToken = require('../tokenizer/consumers/string');
+const consumeName = require('../tokenizer/consumers/name');
+const consumeNumber = require('../tokenizer/consumers/number');
+const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
+const indexOf = require('./indexOf');
 
-var charCodeDefinitions = require('./definitions');
-var isNewline = charCodeDefinitions.isNewline;
-var isName = charCodeDefinitions.isName;
-var isValidEscape = charCodeDefinitions.isValidEscape;
-var isNumberStart = charCodeDefinitions.isNumberStart;
-var isIdentifierStart = charCodeDefinitions.isIdentifierStart;
-var charCodeCategory = charCodeDefinitions.charCodeCategory;
-var isBOM = charCodeDefinitions.isBOM;
+const charCodeDefinitions = require('./definitions');
+const isName = charCodeDefinitions.isName;
+const isValidEscape = charCodeDefinitions.isValidEscape;
+const isNumberStart = charCodeDefinitions.isNumberStart;
+const isIdentifierStart = charCodeDefinitions.isIdentifierStart;
+const charCodeCategory = charCodeDefinitions.charCodeCategory;
+const isBOM = charCodeDefinitions.isBOM;
 
-var utils = require('./utils');
-var cmpStr = utils.cmpStr;
-var getNewlineLength = utils.getNewlineLength;
-var findWhiteSpaceEnd = utils.findWhiteSpaceEnd;
-var consumeEscaped = utils.consumeEscaped;
-var consumeName = utils.consumeName;
-var consumeNumber = utils.consumeNumber;
-var consumeBadUrlRemnants = utils.consumeBadUrlRemnants;
+const { findWhiteSpaceEnd } = require('./utils');
 
-var OFFSET_MASK = 0x00FFFFFF;
-var TYPE_SHIFT = 24;
 
-function* tokenize(src) {
+
+
+module.exports = function* tokenize(src = '') {
     //start
-    //start
-    //start
-    //start
-
-    if (!stream) {
-        stream = new TokenStream();
-    }
-
-    // ensure source is a string
-    source = String(source || '');
-
-    var sourceLength = source.length;
-    var offsetAndType = adoptBuffer(stream.offsetAndType, sourceLength + 1); // +1 because of eof-token
-    var balance = adoptBuffer(stream.balance, sourceLength + 1);
-    var tokenCount = 0;
-    var start = isBOM(getCharCode(0));
-    var offset = start;
-    var balanceCloseType = 0;
-    var balanceStart = 0;
-    var balancePrev = 0;
-
+    //ensure source is a string
+    let end = src.length;
+    let start = isBOM(src[0]) ? 1 : 0;
+    let i = start;
     // https://drafts.csswg.org/css-syntax-3/#consume-token
     // § 4.3.1. Consume a token
-    while (offset < sourceLength) {
-        var code = source.charCodeAt(offset);
-        var type = 0;
-
-        balance[tokenCount] = sourceLength;
-        // top level
-        switch (charCodeCategory(code)) {
-            // whitespace
-            case charCodeCategory.WhiteSpace:
-                // Consume as much whitespace as possible. Return a <whitespace-token>.
-                type = TYPE.WhiteSpace;
-                offset = findWhiteSpaceEnd(source, offset + 1);
-                break;
-
-            // U+0022 QUOTATION MARK (")
-            case 0x0022:
-                // Consume a string token and return it.
-                consumeStringToken();
-                break;
-
-            // U+0023 NUMBER SIGN (#)
-            case 0x0023:
-                // If the next input code point is a name code point or the next two input code points are a valid escape, then:
-                if (isName(getCharCode(offset + 1)) || isValidEscape(getCharCode(offset + 1), getCharCode(offset + 2))) {
-                    // Create a <hash-token>.
-                    type = TYPE.Hash;
-
-                    // If the next 3 input code points would start an identifier, set the <hash-token>’s type flag to "id".
-                    // if (isIdentifierStart(getCharCode(offset + 1), getCharCode(offset + 2), getCharCode(offset + 3))) {
-                    //     // TODO: set id flag
-                    // }
-
-                    // Consume a name, and set the <hash-token>’s value to the returned string.
-                    offset = consumeName(source, offset + 1);
-
-                    // Return the <hash-token>.
-                } else {
-                    // Otherwise, return a <delim-token> with its value set to the current input code point.
-                    type = TYPE.Delim;
-                    offset++;
-                }
-
-                break;
-
-            // U+0027 APOSTROPHE (')
-            case 0x0027:
-                // Consume a string token and return it.
-                consumeStringToken();
-                break;
-
-            // U+0028 LEFT PARENTHESIS (()
-            case 0x0028:
-                // Return a <(-token>.
-                type = TYPE.LeftParenthesis;
-                offset++;
-                break;
-
-            // U+0029 RIGHT PARENTHESIS ())
-            case 0x0029:
-                // Return a <)-token>.
-                type = TYPE.RightParenthesis;
-                offset++;
-                break;
-
-            // U+002B PLUS SIGN (+)
-            case 0x002B:
-                // If the input stream starts with a number, ...
-                if (isNumberStart(code, getCharCode(offset + 1), getCharCode(offset + 2))) {
-                    // ... reconsume the current input code point, consume a numeric token, and return it.
-                    consumeNumericToken();
-                } else {
-                    // Otherwise, return a <delim-token> with its value set to the current input code point.
-                    type = TYPE.Delim;
-                    offset++;
-                }
-                break;
-
-            // U+002C COMMA (,)
-            case 0x002C:
-                // Return a <comma-token>.
-                type = TYPE.Comma;
-                offset++;
-                break;
-
-            // U+002D HYPHEN-MINUS (-)
-            case 0x002D:
-                // If the input stream starts with a number, reconsume the current input code point, consume a numeric token, and return it.
-                if (isNumberStart(code, getCharCode(offset + 1), getCharCode(offset + 2))) {
-                    consumeNumericToken();
-                } else {
-                    // Otherwise, if the next 2 input code points are U+002D HYPHEN-MINUS U+003E GREATER-THAN SIGN (->), consume them and return a <CDC-token>.
-                    if (getCharCode(offset + 1) === 0x002D &&
-                        getCharCode(offset + 2) === 0x003E) {
-                        type = TYPE.CDC;
-                        offset = offset + 3;
-                    } else {
-                        // Otherwise, if the input stream starts with an identifier, ...
-                        if (isIdentifierStart(code, getCharCode(offset + 1), getCharCode(offset + 2))) {
-                            // ... reconsume the current input code point, consume an ident-like token, and return it.
-                            consumeIdentLikeToken();
-                        } else {
-                            // Otherwise, return a <delim-token> with its value set to the current input code point.
-                            type = TYPE.Delim;
-                            offset++;
-                        }
-                    }
-                }
-                break;
-
-            // U+002E FULL STOP (.)
-            case 0x002E:
-                // If the input stream starts with a number, ...
-                if (isNumberStart(code, getCharCode(offset + 1), getCharCode(offset + 2))) {
-                    // ... reconsume the current input code point, consume a numeric token, and return it.
-                    consumeNumericToken();
-                } else {
-                    // Otherwise, return a <delim-token> with its value set to the current input code point.
-                    type = TYPE.Delim;
-                    offset++;
-                }
-
-                break;
-
-            // U+002F SOLIDUS (/)
-            case 0x002F:
-                // If the next two input code point are U+002F SOLIDUS (/) followed by a U+002A ASTERISK (*),
-                if (getCharCode(offset + 1) === 0x002A) {
-                    // ... consume them and all following code points up to and including the first U+002A ASTERISK (*)
-                    // followed by a U+002F SOLIDUS (/), or up to an EOF code point.
-                    type = TYPE.Comment;
-                    offset = source.indexOf('*/', offset + 2) + 2;
-                    if (offset === 1) {
-                        offset = source.length;
-                    }
-                } else {
-                    type = TYPE.Delim;
-                    offset++;
-                }
-                break;
-
-            // U+003A COLON (:)
-            case 0x003A:
-                // Return a <colon-token>.
-                type = TYPE.Colon;
-                offset++;
-                break;
-
-            // U+003B SEMICOLON (;)
-            case 0x003B:
-                // Return a <semicolon-token>.
-                type = TYPE.Semicolon;
-                offset++;
-                break;
-
-            // U+003C LESS-THAN SIGN (<)
-            case 0x003C:
-                // If the next 3 input code points are U+0021 EXCLAMATION MARK U+002D HYPHEN-MINUS U+002D HYPHEN-MINUS (!--), ...
-                if (getCharCode(offset + 1) === 0x0021 &&
-                    getCharCode(offset + 2) === 0x002D &&
-                    getCharCode(offset + 3) === 0x002D) {
-                    // ... consume them and return a <CDO-token>.
-                    type = TYPE.CDO;
-                    offset = offset + 4;
-                } else {
-                    // Otherwise, return a <delim-token> with its value set to the current input code point.
-                    type = TYPE.Delim;
-                    offset++;
-                }
-
-                break;
-
-            // U+0040 COMMERCIAL AT (@)
-            case 0x0040:
-                // If the next 3 input code points would start an identifier, ...
-                if (isIdentifierStart(getCharCode(offset + 1), getCharCode(offset + 2), getCharCode(offset + 3))) {
-                    // ... consume a name, create an <at-keyword-token> with its value set to the returned value, and return it.
-                    type = TYPE.AtKeyword;
-                    offset = consumeName(source, offset + 1);
-                } else {
-                    // Otherwise, return a <delim-token> with its value set to the current input code point.
-                    type = TYPE.Delim;
-                    offset++;
-                }
-
-                break;
-
-            // U+005B LEFT SQUARE BRACKET ([)
-            case 0x005B:
-                // Return a <[-token>.
-                type = TYPE.LeftSquareBracket;
-                offset++;
-                break;
-
-            // U+005C REVERSE SOLIDUS (\)
-            case 0x005C:
-                // If the input stream starts with a valid escape, ...
-                if (isValidEscape(code, getCharCode(offset + 1))) {
-                    // ... reconsume the current input code point, consume an ident-like token, and return it.
-                    consumeIdentLikeToken();
-                } else {
-                    // Otherwise, this is a parse error. Return a <delim-token> with its value set to the current input code point.
-                    type = TYPE.Delim;
-                    offset++;
-                }
-                break;
-
-            // U+005D RIGHT SQUARE BRACKET (])
-            case 0x005D:
-                // Return a <]-token>.
-                type = TYPE.RightSquareBracket;
-                offset++;
-                break;
-
-            // U+007B LEFT CURLY BRACKET ({)
-            case 0x007B:
-                // Return a <{-token>.
-                type = TYPE.LeftCurlyBracket;
-                offset++;
-                break;
-
-            // U+007D RIGHT CURLY BRACKET (})
-            case 0x007D:
-                // Return a <}-token>.
-                type = TYPE.RightCurlyBracket;
-                offset++;
-                break;
-
-            // digit
-            case charCodeCategory.Digit:
-                // Reconsume the current input code point, consume a numeric token, and return it.
-                consumeNumericToken();
-                break;
-
-            // name-start code point
-            case charCodeCategory.NameStart:
-                // Reconsume the current input code point, consume an ident-like token, and return it.
-                consumeIdentLikeToken();
-                break;
-
-            // EOF
-            case charCodeCategory.Eof:
-                // Return an <EOF-token>.
-                break;
-
-            // anything else
-            default:
-                // Return a <delim-token> with its value set to the current input code point.
-                type = TYPE.Delim;
-                offset++;
+    while (i <= end) {
+        let code = src[i];
+        let cat = charCodeCategory(code);
+        if (cat === charCodeCategory.WhiteSpace) {
+            // Consume as much whitespace as possible. Return a <whitespace-token>.
+            type = TYPE.WhiteSpace;
+            const tok = findWhiteSpaceEnd(i, end)
+            yield tok;
+            i = tok.end + 1;
+            continue;
         }
 
-        switch (type) {
-            case balanceCloseType:
-                balancePrev = balanceStart & OFFSET_MASK;
-                balanceStart = balance[balancePrev];
-                balanceCloseType = balanceStart >> TYPE_SHIFT;
-                balance[tokenCount] = balancePrev;
-                balance[balancePrev++] = tokenCount;
-                for (; balancePrev < tokenCount; balancePrev++) {
-                    if (balance[balancePrev] === sourceLength) {
-                        balance[balancePrev] = tokenCount;
-                    }
-                }
-                break;
-
-            case TYPE.LeftParenthesis:
-            case TYPE.Function:
-                balance[tokenCount] = balanceStart;
-                balanceCloseType = TYPE.RightParenthesis;
-                balanceStart = (balanceCloseType << TYPE_SHIFT) | tokenCount;
-                break;
-
-            case TYPE.LeftSquareBracket:
-                balance[tokenCount] = balanceStart;
-                balanceCloseType = TYPE.RightSquareBracket;
-                balanceStart = (balanceCloseType << TYPE_SHIFT) | tokenCount;
-                break;
-
-            case TYPE.LeftCurlyBracket:
-                balance[tokenCount] = balanceStart;
-                balanceCloseType = TYPE.RightCurlyBracket;
-                balanceStart = (balanceCloseType << TYPE_SHIFT) | tokenCount;
-                break;
+        // https://www.w3.org/TR/css-syntax-3/#consume-string-token
+        // U+0022 QUOTATION MARK (")
+        if (code === '\u0022') {
+            const tok = consumeStringToken(src, code, i + 1, end);
+            yield tok;
+            i = tok.end + 1;
+            continue;
         }
 
-        offsetAndType[tokenCount++] = (type << TYPE_SHIFT) | offset;
+        // U+0023 NUMBER SIGN (#)
+        if (code === '\u0023') {
+            if (isValidEscape(src[i + 1], src[i + 2]) || isName(src[i + 1])) {
+                const it = consumeName(src, i + 1, end);
+                const tok = { id: TYPE.Hash, start: i, end: it };
+                if (isIdentifierStart(src[i + 1], src[i + 2], src[i + 3])) {
+                    tok.type = 'id';
+                }
+                yield tok;
+                i = it + 1;
+                continue;
+            }
+            else {
+                yield {
+                    id: TYPE.Delim,
+                    start: i,
+                    end: i
+                }
+                i++;
+                continue;
+            }
+        }
+
+        // https://www.w3.org/TR/css-syntax-3/#consume-string-token
+        // U+0027 APOSTROPHE (')
+        if (code === '\u0027') {
+            const tok = consumeStringToken(src, code, i + 1, end);
+            yield tok;
+            i = tok.end + 1;
+            continue;
+        }
+        // U+0028 LEFT PARENTHESIS  "("
+        if (code === '\u0028') {
+            const tok = { id: TYPE.LeftParenthesis, start: i, end: i };
+            yield tok;
+            i++;
+            continue;
+        }
+        // U+0029 LEFT PARENTHESIS  ")"
+        if (code === '\u0029') {
+            const tok = { id: TYPE.RightParenthesis, start: i, end: i };
+            yield tok;
+            i++;
+            continue;
+        }
+        // U+002B PLUS SIGN (+)
+        if (code === '\u002B') {
+            const tok = consumeNumber(src, i, end);
+            if (tok) {
+                yield tok;
+                i = tok.end + 1;
+                continue;
+            }
+            else {
+                yield { id: TYPE.Delim, start: i, end: i };
+                i++;
+                continue;
+            }
+        }
+        // U+002C COMMA (,)
+        if (code === '\u002C') {
+            yield { id: TYPE.Delim, start: i, end: i };
+            i++;
+            continue;
+        }
+        // U+002D HYPHEN-MINUS (-)
+        if (code === '\u002d') {
+            const tok = consumeNumber(src, i, end);
+            if (tok) {
+                yield tok;
+                i = tok.end + 1;
+                continue;
+            }
+            else {
+                if (src[i + 1] === '\u002d' && src[i + 2] === '\u003e') {
+                    const tok = { id: TYPE.CDC, start: i, end: i + 2 };
+                    i += 3;
+                    continue;
+                }
+                if (isIdentifierStart(src[i + 1], src[i + 2], src[i + 3])) {
+                    const tok = consumeIdentLikeToken(src, i, end);
+                    yield tok;
+                    i = tok.end + 1;
+                    continue;
+                }
+                yield { id: TYPE.Delim, start: i, end: i };
+                i++;
+                continue;
+            }
+        }
+        // U+002E FULL STOP (.)
+        if (code === '\u002e') {
+            if (isNumberStart(code, src[i + 1], src[i + 2])) {
+                const tok = consumeNumber(src, i, end);
+                if (tok) {
+                    yield tok;
+                    i = tok.end + 1;
+                    continue;
+                }
+            }
+            yield { id: TYPE.Delim, start: i, end: i };
+            i++;
+            continue;
+        }
+        // U+002F SOLIDUS (/)
+        if (code === '\u002f') {
+            // is '*'
+            if (src[i + 1] === '\u002a') {
+                // find next "*/"
+                let endIdx = indexOf(src, '*/', i + 2);
+                if (endIdx === -1) {
+                    endIdx = end; // aborb everything i guess
+                }
+                yield { id: TYPE.Comment, start: i, end: end };
+                i = endIdx + 1;
+                continue;
+            }
+            yield { id: TYPE.Delim, start: i, end: i };
+            i++;
+            continue;
+        }
+        // U+003A COLON (:)
+        if (code === '\u003a') {
+            yield { id: TYPE.Colon, start: i, end: i };
+            i++;
+            continue;
+        }
+        // ';'
+        if (code === '\u003B') {
+            yield { id: TYPE.Semicolon, start: i, end: i };
+            i++;
+            continue;
+        }
+        //// U+003C LESS-THAN SIGN (<)
+        if (code === '\u003c') {
+            // <!-- ?  // this is from css 2.1
+            if (src[i + 1] === '\u0021' && src[i + 2] === '\u002d' && src[i + 3] === '\u002d') {
+                yield { id: TYPE.CDO, start: i, end: i + 3 };
+                i += 4;
+                continue;
+            }
+            yield { id: TYPE.Delim, start: i, end: i };
+            i++;
+            continue;
+        }
+        //// U+0040 COMMERCIAL AT (@)
+        if (code === '\u0040') {
+            if (isIdentifierStart(src[i + 1], src[i + 2], src[i + 3])) {
+                const tok = consumeIdentLikeToken(src, i, end);
+                tok.id = TYPE.AtKeyword;
+                yield tok;
+                i = tok.end + 1;
+                continue;
+            }
+            // If the next 3 input code points would start an identifier, ...
+            yield { id: TYPE.Delim, start: i, end: i };
+            i++;
+            continue;
+        }
+        // U+005B LEFT SQUARE BRACKET ([)
+        if (code === '\u005B') {
+            yield { id: TYPE.LeftSquareBracket, start: i, end: i };
+            i++;
+            continue;
+        }
+
+        // U+005C REVERSE SOLIDUS (\)
+        if (code === '\u005C') {
+            if (isValidEscape(code, src[i + 1])) {
+                const tok = consumeIdentLikeToken(src, i, end);
+                yield tok;
+                i = tok.end + 1;
+                continue;
+            }
+            yield { id: TYPE.LeftSquareBracket, start: i, end: i };
+            i++;
+            continue;
+        }
+
+        // U+005D RIGHT SQUARE BRACKET (])
+        if (code === '\u005D') {
+            yield { id: TYPE.RightSquareBracket, start: i, end: i };
+            i++;
+            continue;
+        }
+
+        // U+007B LEFT CURLY BRACKET ({)
+        if (code === '\u007b') {
+            yield { id: TYPE.LeftCurlyBracket, start: i, end: i };
+            i++;
+            continue;
+        }
+
+        // U+007B LEFT CURLY BRACKET (})
+        if (code === '\u007d') {
+            yield { id: TYPE.RightCurlyBracket, start: i, end: i };
+            i++;
+            continue;
+        }
+
+        if (cat === charCodeCategory.Digit) {
+            // Reconsume the current input code point, consume a numeric token, and return it.
+            const tok = consumeNumber(src, i, end);
+            yield tok;
+            i = tok.end + 1;
+            continue;
+        }
+
+        // name-start code point
+        if (cat === charCodeCategory.NameStart) {
+            const tok = consumeIdentLikeToken(src, i, end);
+            yield tok;
+            i = tok.end + 1;
+            continue;
+        }
+
+        yield { id: TYPE.Delim, start: i, end: i };
+        i++;
     }
-
-    // done
-    // done
-    // done
-    // done
-
-
-    // finalize buffers
-    offsetAndType[tokenCount] = (TYPE.EOF << TYPE_SHIFT) | offset; // <EOF-token>
-    balance[tokenCount] = sourceLength;
-    balance[sourceLength] = sourceLength; // prevents false positive balance match with any token
-    while (balanceStart !== 0) {
-        balancePrev = balanceStart & OFFSET_MASK;
-        balanceStart = balance[balancePrev];
-        balance[balancePrev] = sourceLength;
-    }
-
-    // update stream
-    stream.source = source;
-    stream.firstCharOffset = start;
-    stream.offsetAndType = offsetAndType;
-    stream.tokenCount = tokenCount;
-    stream.balance = balance;
-    stream.reset();
-    stream.next();
-
-    return stream;
 }
 
-// extend tokenizer with constants
-Object.keys(constants).forEach(function(key) {
-    tokenize[key] = constants[key];
-});
-
-// extend tokenizer with static methods from utils
-Object.keys(charCodeDefinitions).forEach(function(key) {
-    tokenize[key] = charCodeDefinitions[key];
-});
-Object.keys(utils).forEach(function(key) {
-    tokenize[key] = utils[key];
-});
-
-module.exports = tokenize;
