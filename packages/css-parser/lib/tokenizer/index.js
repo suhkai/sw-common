@@ -6,7 +6,6 @@ const consumeStringToken = require('../tokenizer/consumers/string');
 const consumeName = require('../tokenizer/consumers/name');
 const consumeNumber = require('../tokenizer/consumers/number');
 const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
-const indexOf = require('./indexOf');
 
 const charCodeDefinitions = require('./definitions');
 const isName = charCodeDefinitions.isName;
@@ -44,6 +43,9 @@ module.exports = function* tokenize(src = '') {
         // U+0022 QUOTATION MARK (")
         if (code === '\u0022') {
             const tok = consumeStringToken(src, code, i + 1, end);
+            // correct for ("")
+            tok.start--;
+            tok.end++;
             yield tok;
             i = tok.end + 1;
             continue;
@@ -76,6 +78,9 @@ module.exports = function* tokenize(src = '') {
         // U+0027 APOSTROPHE (')
         if (code === '\u0027') {
             const tok = consumeStringToken(src, code, i + 1, end);
+             // correct for ("")
+             tok.start--;
+             tok.end++;
             yield tok;
             i = tok.end + 1;
             continue;
@@ -158,7 +163,7 @@ module.exports = function* tokenize(src = '') {
             // is '*'
             if (src[i + 1] === '\u002a') {
                 // find next "*/"
-                let endIdx = indexOf(src, '*/', i + 2);
+                let endIdx = src.indexOf('*/', i + 2);
                 if (endIdx === -1) {
                     endIdx = end - 1; // aborb everything i guess
                 }

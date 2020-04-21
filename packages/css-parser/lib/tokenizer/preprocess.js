@@ -70,9 +70,44 @@ module.exports = function createPreprocessorOverlay(str) {
     }
   }
 
-  return new Proxy(()=>{}, Object.assign(defaultHandler(), {
-    get(target/* not needed in this case */, _prop, /*receiver: Proxy */) {
-      if (_prop === 'length'){
+
+  function slice(src, s, e) {
+    if (e === undefined) e = src.length;
+    if (s === undefined) s = 0;
+    const rc = new Array({ length: e - s });
+    for (let i = s; i < e; i++) {
+      rc[i - s] = src[i];
+    }
+    return rc.join('');
+  };
+
+  function indexOf(src, value, offset = 0) {
+    let cnt = value.length - 1;
+    let length = src.length;
+    for (let i = offset; i < length;) {
+      if (src[value.length - 1 - cnt + i] === value[value.length - 1 - cnt]) {
+        cnt--;
+        if (cnt < 0) {
+          return i;
+        }
+        continue;
+      }
+      i++;
+      cnt = value.length - 1; // reset
+    }
+    return -1;
+  };
+
+
+  return new Proxy(() => { }, Object.assign(defaultHandler(), {
+    get(target/* not needed in this case */, _prop, receiver) {
+      if (_prop === 'slice') {
+        return slice.bind(receiver, receiver)
+      }
+      if (_prop === 'indexOf'){
+        return indexOf.bind(receiver, receiver);
+      }
+      if (_prop === 'length') {
         return str.length - twosL;
       }
       let prop = Number.parseInt(_prop, 10);
@@ -86,11 +121,11 @@ module.exports = function createPreprocessorOverlay(str) {
       }
       let i = 0;
       let real = prop;
-      if (real < twos[0]){// shortcut
+      if (real < twos[0]) {// shortcut
         rawC = str[prop];
         return map[rawC] || rawC;
       }
-      if (real > twos[twos.length - 1]){
+      if (real > twos[twos.length - 1]) {
         rawC = str[prop + twosL];
         return map[rawC] || rawC;
       }
@@ -98,7 +133,7 @@ module.exports = function createPreprocessorOverlay(str) {
         i++;
         real++;
       }
-      if (real >= str.length){
+      if (real >= str.length) {
         return
       }
       if (real === twos[i]) {
@@ -108,9 +143,9 @@ module.exports = function createPreprocessorOverlay(str) {
       return map[rawC] || rawC;
     },
     // for debugging remove later
-    apply (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
+    apply(target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
       return twos; // for debugging
-    }  
+    }
   }
   ));
 }

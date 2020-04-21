@@ -1,8 +1,6 @@
 'use strict';
 const consumeName = require('./name');
 const consumeUrl = require('./url');
-const consumeFunction = require('./function');
-const slice = require('../slice');
 const { TYPE } = require('../const');
 
 // § 4.3.4. Consume an ident-like token
@@ -10,15 +8,15 @@ const { TYPE } = require('../const');
 module.exports = function consumeIdentLikeToken(src, start, end) {
 
     let i = consumeName(src, start, end);
-    const name = slice(src, start, i + 1);
+    const name = src.slice(start, i + 1);
 
-    if (name.toLowerCase().startsWith('url(')){
-        return consumeUrl(src,start, end);
+    if (name.toLowerCase() === 'url' && src[i+1] === '(') {
+        return consumeUrl(src, start, end);
     }
     // is it '(' ?
-    if  (src[i] === '\u0028'){
-        return consumeFunction(src, start, end); // can be "calc", "rgb" etc
-    }  
+    if (src[i + 1] === '\u0028') {
+        return { id: TYPE.Function, start, end: i + 1 };
+    }
     // just a regular token
     return { id: TYPE.Ident, start, end: i };
 }
