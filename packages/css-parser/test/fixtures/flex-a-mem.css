@@ -1,0 +1,157 @@
+BODY,P,TD
+    { font-family:Verdana,Arial,Helvetica,sans-serif;
+      margin-top:0; margin-left:0; margin-right:0; margin-bottom:0;
+      color:#000000;
+      font-size:12px
+    }
+BIG{font-size:16px;color:#6D6362}
+
+A {color:#6B3005; text-decoration:none;}
+A:link  {color:#6B3005}
+A:vlink {color:#6B3005}
+A:hover {color:red}
+
+
+    .our-projects > div {
+     width: 31%;
+     padding: 0 1%;
+     float:left;
+    }
+    .our-projects > div img {
+     width: 100%;
+    }
+    a.contact_us_btn, .contact_us_btn {
+    	padding: 10px 20px; margin-top:20px; color: #fff; font-weight: bold; background:#af8869; display: inline-block; border:0; cursor: pointer;
+    }
+.gn {color:white;background-color:#808040;font-weight:bold;font-size:12px}
+.gs {text-decoration:bold;font-size:10px}
+
+.capt{font-size:28px;font-weight:bold;color:#AF8869; text-transform:uppercase;}
+.mod {color:#888888;font-size:11px;}
+.modpix {border:#978B3F 1px solid; width:110px;height:180px;background-color:#E7E3C4;}
+.modpix2{border:#978B3F 1px solid; width:130px;height:220px;background-color:#E7E3C4;}
+.toppix {border:#978B3F 1px solid; width:150px;height:220px;background-color:#E7E3C4;}
+
+.info_sect
+{ font-size:16px; color:black; width:660px;
+  background-color:#A49F9D;
+  border:#A49F9D 2px solid;
+}
+.info_tab
+{ font-size:12px; color:black; width:660px;
+  background-color:#EEEEDD;
+  border:#A49F9D 2px solid;
+}
+.news_td
+{ width:110px;height:110px;
+  background-color:#EEEEDD;
+  border-top:#6D6362 1px solid;
+  border-left:#6D6362 1px solid;
+  border-bottom:#6D6362 1px solid;
+}
+.news_td2
+{ background-color:#EEEEDD;
+  border-top:#6D6362 1px solid;
+  border-right:#6D6362 1px solid;
+  border-bottom:#6D6362 1px solid;
+}
+td.news_td_img{
+	border:#6d6362 3px solid;
+	border-right:#6d6362 1px solid;
+	background:#D0C8C6;
+	width:220px;
+	padding:5px;
+}
+td.news_td_text{
+	border:#6d6362 3px solid;
+	border-left:none;
+	background:#EEEEEE;
+}
+td.news_td_end{
+	background:#6d6362;
+	width:30px;
+}
+
+.tablinks
+{ width:692px;
+  border:#6D6362 2px solid;
+  background:#CAD0C6;
+  margin-top:20px;
+}
+
+.serv  {font-size:10px; font-family:Arial,Helvetica,Tahoma;
+       margin-left:0; margin-right:0; margin-top:0; margin-bottom:0;  }
+
+a.down
+  { text-decoration:underline;
+	font-size: 14px;
+	font-weight: bold;
+    color: #63f6300;
+ }
+a.down:link    { color: #636300; }
+a.down:visited { color: #636300; }
+a.down:hover   { color: #cc0000; background-color:#C1C179; }
+table.clip {
+	width:620px;
+	border:#6d6362 2px solid;
+	spacing:0;
+	padding:5px;
+	background:#af8869;
+	color: #fff;
+}
+table tr.header td {
+	color: #fff !important;
+}
+table.pages {
+	width:750px;
+	border:#6d6362 2px solid;
+	spacing:0;
+	padding:5px;
+	background:#AF8869;
+}
+table.main_videos {
+	width:750px;
+	border:#6d6362 1px solid;
+	spacing:0;
+	padding:5px;
+	background:#CCCC99;
+}
+.main_videos td.td_img  {width:150px; background:#EEEECC; border-left:#CCCC99 10px solid;}
+.main_videos td.td_info {width:220px; background:#EEEECC; }
+
+table.model_videos {
+	width:750px;
+	border:#6d6362 1px solid;
+	spacing:4px;
+	padding:5px;
+	background:#EEEECC;
+}
+.model_videos td.td_img  {width:150px; background:#FFFFFF; border-left:#EEEECC 10px solid;}
+.model_videos td.td_info {width:220px; background:#FFFFFF; }
+
+// -video trailer-
+
+.trailer-container{ width:800px; padding:0;margin:0; }
+.trailer-before{ text-align:left; padding-top:10px;}
+.trailer {width:780px; padding:15px; margin-bottom:10px;}
+.trailer_s { background:#e0dfda; BORDER: #857E50 2px solid;}
+.trailer_b { background:#bee2f2; BORDER: #436E91 2px solid;}
+.trailer_s .everyweek { background: url(/tour4/preview-s2.png) repeat-y 2 5; }
+.trailer_b .everyweek { background: url(/tour4/preview-b2.png) repeat-y 2 5; }
+.trailer_v { BORDER: #5e5e3f 2px solid; background:#d9c9af; url(/tour4/preview-v2.png) repeat-y 0 0; }
+
+
+.form-group {
+	margin-bottom: 10px;
+}
+
+.form-group label {
+	font-weight: bold;
+	display:block;
+	margin-bottom: 2px;
+}
+
+.form-group input[type="text"], .form-group input[type="email"], .form-group textarea {
+	border: 1px solid #aaa;
+}
+

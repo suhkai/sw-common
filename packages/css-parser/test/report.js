@@ -7,7 +7,7 @@ const { expect } = chai;
 const createPreprocessorOverlay = require('../lib/tokenizer/preprocess');
 const tokenizer = require('../lib/tokenizer')
 
-const fixture = fs.readFileSync(require.resolve('./fixture.css'), 'utf8');
+const fixture = fs.readFileSync(require.resolve('./fixtures/main.css'), 'utf8');
 const source = createPreprocessorOverlay(fixture);
 
 // TODO put this in preport

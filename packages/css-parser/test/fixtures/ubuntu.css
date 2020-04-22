@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Ubuntu Regular'),
+       local('Ubuntu-Regular'),
+       url(https://cdn.bluebillywig.com/fonts/ubuntu.woff2) format('woff2'),
+       url(https://cdn.bluebillywig.com/fonts/ubuntu.woff) format('woff'),
+       url(https://cdn.bluebillywig.com/fonts/ubuntu.ttf) format('truetype'),
+       url(https://cdn.bluebillywig.com/fonts/ubuntu.eot) format('embedded-opentype'),
+       url(https://cdn.bluebillywig.com/fonts/ubuntu.svg) format('svg');
+}
