@@ -10,10 +10,9 @@ const tokenizer = require('../lib/tokenizer')
 const fixture = fs.readFileSync(require.resolve('./fixtures/main.css'), 'utf8');
 const source = createPreprocessorOverlay(fixture);
 
-// TODO put this in preport
-/**
- * 
- * span {
+const css = `
+<style>
+span {
   outline: 1px black solid;
 }
 ._13 {
@@ -42,24 +41,41 @@ const source = createPreprocessorOverlay(fixture);
   font-family: arial;
 }
 
-
-
 ._1 {
   color:red;
 }
 ._5 {
   color: green;
 }
- */
+</style>
+`;
+
+const html = `
+<!DOCTYPE html>
+<html lang="en" base="http://somebase.com/today">
+<head>
+ <title>output tokens</title>
+ {{css}}
+</head>
+<body>
+<div>
+ {{snippet}}
+</div>
+</body>
+</html>
+`
+
 
 
 const lexer = tokenizer(source);
 const arr = Array.from(lexer);
 // now create htmlreport
 
-const html = arr.map(tok => {
+const snippet = arr.map(tok => {
    const data = source.slice(tok.start, tok.end+1);
    return `<span class="_${tok.id}" >${data}</span>`;
-});
+}).join('');
 
-console.log(html.join(''));
+const final = html.replace('{{snippet}}', snippet).replace('{{css}}', css)
+
+console.log(final);
