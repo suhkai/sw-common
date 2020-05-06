@@ -21,7 +21,7 @@ describe('token actual css', () => {
 
   it('tokenstream test', () => {
     for (const token of lexer){
-      console.log(token);
+      //console.log(token);
     }
   });
 });
