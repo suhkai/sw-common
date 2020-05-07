@@ -19,5 +19,5 @@ module.exports = {
     timeout: 0,
     color: true,
     ui: 'bdd',
-    spec: 'test/**/*.test.js'
+    spec: 'test/**/ref-css-test.js'
 };

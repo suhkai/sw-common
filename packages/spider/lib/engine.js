@@ -4,21 +4,22 @@ const mkdirp = require('./utils/db/mkdirp');
 const jxpath = require('@mangos/jxpath');
 const getInodes = require('./utils/db/getInodes');
 
-const findTodos = jxpath('/**/[name=/\\.request$/]/name');
+const findTodos = jxpath('/**/[name=/(\\.request|\\.fetching)$/]');
+const findDones = jxpath('/**/[name=/\\.response/]/');
 
 module.exports = async function engine(options, logger = console) { // linked list?
 
-    // hydrate the store
     const dir = options.cache;
     const [, error] = await mkdirp(dir);
     if (error) {
         logger.error(error);
         return;
     }
+    // hydrate from disk
     const fsSystem = await getInodes(dir);
     logger.log('done reading from disk')
     const todoIterator = findTodos(fsSystem.parent, 'parent');
-    let step;
+    const doneIterator = findDones(fsSystel.parent, 'parent');
     let done;
     do {
         const { value: step, done: done2 } = todoIterator.next();
@@ -29,7 +30,9 @@ module.exports = async function engine(options, logger = console) { // linked li
 
     }
     while (!done);
-    logger.log('processing done')
+    logger.log('hydrating done');
+    // get entryppoints
+    const entries = options.entries; // array of urls
 };
 
 

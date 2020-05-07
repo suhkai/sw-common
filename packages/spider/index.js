@@ -2,4 +2,4 @@
 
 const engine = require('./lib/engine');
 
-engine({ cache: 'c:/jacob/repos/mangos' });
+engine({ cache: './cache/google-fonts' });

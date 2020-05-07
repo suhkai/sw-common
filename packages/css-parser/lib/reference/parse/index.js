@@ -40,8 +40,8 @@ module.exports = function(css, options){
    * Store position information for a node
    */
 
-  function Position(start) {
-    this.start = start;
+  function Position(start) {  //l
+    this.start = start; 
     this.end = { line: lineno, column: column };
     this.source = options.source;
   }
@@ -83,7 +83,7 @@ module.exports = function(css, options){
     return {
       type: 'stylesheet',
       stylesheet: {
-        source: options.source,
+        source: options.source, // filename??
         rules: rulesList,
         parsingErrors: errorsList
       }
@@ -133,7 +133,7 @@ module.exports = function(css, options){
     if (!m) return;
     var str = m[0];
     updatePosition(str);
-    css = css.slice(str.length);
+    css = css.slice(str.length); // absorb processed css
     return m;
   }
 
@@ -149,7 +149,7 @@ module.exports = function(css, options){
    * Parse comments;
    */
 
-  function comments(rules) {
+  function comments(rules = []) {
     var c;
     rules = rules || [];
     while (c = comment()) {
@@ -161,7 +161,7 @@ module.exports = function(css, options){
   }
 
   /**
-   * Parse comment.
+   * Parse comment., comments are outside of rules? yes most of the time they are
    */
 
   function comment() {
@@ -169,15 +169,17 @@ module.exports = function(css, options){
     if ('/' != css.charAt(0) || '*' != css.charAt(1)) return;
 
     var i = 2;
+    // is NOT eof and  ( not '*' or not '/'  ) // advance -> eat comments.
     while ("" != css.charAt(i) && ('*' != css.charAt(i) || '/' != css.charAt(i + 1))) ++i;
+    // wow!! there is no abort if the comment is not terminated at eof, ok ((((
     i += 2;
 
-    if ("" === css.charAt(i-1)) {
-      return error('End of comment missing');
+    if ("" === css.charAt(i-1)) { //ah ok, because arithmatic is not correct then comment is missing in any case
+      return error('End of comment missing'); // nice it will also remember the position of the error in this case (global context)
     }
 
-    var str = css.slice(2, i - 2);
-    column += 2;
+    var str = css.slice(2, i - 2); // slice away the comment
+    column += 2; // advance
     updatePosition(str);
     css = css.slice(i);
     column += 2;
@@ -233,7 +235,7 @@ module.exports = function(css, options){
     });
 
     // ;
-    match(/^[;\s]*/);
+    match(/^[;\s]*/); // absorb ";" newlines spaces whatever
 
     return ret;
   }
@@ -562,6 +564,7 @@ module.exports = function(css, options){
     });
   }
 
+  // looks like main
   return addParent(stylesheet());
 };
 
@@ -576,22 +579,24 @@ function trim(str) {
 /**
  * Adds non-enumerable parent node reference to each node.
  */
-
-function addParent(obj, parent) {
-  var isNode = obj && typeof obj.type === 'string';
+// recursive descent object (obj) and add a parent prop to an child-object 
+function addParent(obj, parent) { // 
+  var isNode = obj && typeof obj.type === 'string'; // in first case type = "stylesheet"
   var childParent = isNode ? obj : parent;
 
+  //cascade
   for (var k in obj) {
     var value = obj[k];
-    if (Array.isArray(value)) {
-      value.forEach(function(v) { addParent(v, childParent); });
-    } else if (value && typeof value === 'object') {
+    if (Array.isArray(value)) { // handle arrays
+      value.forEach(function(v) { addParent(v, childParent); }); // recursive
+    } else if (value && typeof value === 'object') { // handle objects
       addParent(value, childParent);
     }
   }
 
+  // this node
   if (isNode) {
-    Object.defineProperty(obj, 'parent', {
+    Object.defineProperty(obj, 'parent', { // define property parent
       configurable: true,
       writable: true,
       enumerable: false,

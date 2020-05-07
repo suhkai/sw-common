@@ -16,3 +16,4 @@ report
 scripts/
 test/
 tools/
+.cache/
