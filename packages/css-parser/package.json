@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "css-tree": "^1.0.0-alpha.39"
+    "css-tree": "^1.0.0-alpha.39",
+    "source-map-resolve": "^0.6.0",
+    "urix": "^0.1.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",

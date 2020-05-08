@@ -24,8 +24,8 @@ module.exports = mixin;
  */
 
 function mixin(compiler) {
-  compiler._comment = compiler.comment;
-  compiler.map = new SourceMap();
+  compiler._comment = compiler.comment; // this is comment emitter from Compress or Identity
+  compiler.map = new SourceMap(); // SourceMapGenerator
   compiler.position = { line: 1, column: 1 };
   compiler.files = {};
   for (var k in exports) compiler[k] = exports[k];
@@ -58,6 +58,8 @@ exports.emit = function(str, pos) {
   if (pos) {
     var sourceFile = urix(pos.source || 'source.css');
 
+    // this.map is a generator
+    
     this.map.addMapping({
       source: sourceFile,
       generated: {
@@ -99,6 +101,7 @@ exports.addFile = function(file, pos) {
 exports.applySourceMaps = function() {
   Object.keys(this.files).forEach(function(file) {
     var content = this.files[file];
+    // this.map is a generator
     this.map.setSourceContent(file, content);
 
     if (this.options.inputSourcemaps !== false) {
@@ -107,6 +110,7 @@ exports.applySourceMaps = function() {
       if (originalMap) {
         var map = new SourceMapConsumer(originalMap.map);
         var relativeTo = originalMap.sourcesRelativeTo;
+        // this.map is a generator
         this.map.applySourceMap(map, file, urix(path.dirname(relativeTo)));
       }
     }
