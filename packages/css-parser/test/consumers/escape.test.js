@@ -2,19 +2,19 @@
 const chai = require('chai');
 const { expect } = chai;
 const escape = require('../../lib/tokenizer/consumers/escape');
-const { isValidEscape } = require('../../lib/tokenizer/definitions')
+const { isEscapeStart } = require('../../lib/tokenizer/checks-and-definitions')
 
 describe('consume escaped', () => {
   it(`invalid escape "\\\\n"`, () => {
-    const res = isValidEscape('\\', '\n');
+    const res = isEscapeStart('\\', '\n');
     expect(res).to.be.false;
   });
   it(`invalid escape "\\"`, () => {
-    const res = isValidEscape('\\');
+    const res = isEscapeStart('\\');
     expect(res).to.be.false;
   });
   it(`valid escape (tricky) "\\n"`, () => {
-    const res = isValidEscape('\\', 'n');
+    const res = isEscapeStart('\\', 'n');
     expect(res).to.be.true;
   });
   it(`consume hexdigit + space "\\123456 "`, () => {

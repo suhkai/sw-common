@@ -7,7 +7,7 @@ const consumeName = require('../tokenizer/consumers/name');
 const consumeNumber = require('../tokenizer/consumers/number');
 const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
 
-const charCodeDefinitions = require('./definitions');
+const charCodeDefinitions = require('./checks-and-definitions');
 const isName = charCodeDefinitions.isName;
 const isValidEscape = charCodeDefinitions.isValidEscape;
 const isNumberStart = charCodeDefinitions.isNumberStart;

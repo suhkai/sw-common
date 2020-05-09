@@ -1,6 +1,6 @@
 'use strict'
 
-const { isDigit } = require('../definitions')
+const { isDigit } = require('../checks-and-definitions')
 const { TYPE } = require('../const');
 
 function findDecimalNumberEnd(src, start, end) {

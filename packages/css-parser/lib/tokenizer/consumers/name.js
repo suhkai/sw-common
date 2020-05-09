@@ -1,7 +1,7 @@
 'use strict';
 
 const escape = require('./escape');
-const { isValidEscape, isName } = require('../definitions');
+const { isEscapeStart, isName } = require('../checks-and-definitions');
 
 // §4.3.11. Consume a name
 // Note: This algorithm does not do the verification of the first few code points that are necessary
@@ -17,7 +17,7 @@ module.exports = function consumeName(src, start = 0, end = src.length - 1) {
       continue;
     }
     // the stream starts with a valid escape
-    if (isValidEscape(src[i], src[i + 1])) {
+    if (isEscapeStart(src[i], src[i + 1])) {
       // Consume an escaped code point. Append the returned code point to result.
       i = escape(src, i, end) + 1;
       continue;

@@ -1,7 +1,6 @@
 'use strict';
 const { TYPE } = require('../const');
-const { isWhiteSpace, isValidEscape } = require('../definitions');
-const { charCodeCategory } = require('../definitions');
+const { isWS, isEscapeStart, isNoPrint } = require('../checks-and-definitions');
 const consumeEscaped = require('./escape');
 const { findWhiteSpaceEnd } = require('../utils');
 
@@ -29,7 +28,7 @@ function consumeBadUrlRemnants(src, start, end) {
         // Note: This allows an escaped right parenthesis ("\)") to be encountered
         // without ending the <bad-url-token>. This is otherwise identical to
         // the "anything else" clause.
-        if (isValidEscape(src[i], src[i + 1])) {
+        if (isEscapeStart(src[i], src[i + 1])) {
             i = consumeEscaped(src, i, end);
             continue;
         }
@@ -47,12 +46,12 @@ module.exports = function consumeUrlToken(src, start = 0, end = src.length - 1) 
     let i = start + 4;// skip "url("
 
     for (; i <= end;) {
-        if (isWhiteSpace(src[i])) {
+        if (isWS(src[i])) {
             i = findWhiteSpaceEnd(src, i) + 1;
             continue;
         }
         // next codepoint must NOT be an (") or (') token
-        if (src[i] in badurl || charCodeCategory(src[i]) === charCodeCategory.NonPrintable) {
+        if (src[i] in badurl || isNoPrint(src[i])) {
             i = consumeBadUrlRemnants(src, i + 1, end);
             return { id: TYPE.BadUrl, start, end: i };
         }
@@ -62,7 +61,7 @@ module.exports = function consumeUrlToken(src, start = 0, end = src.length - 1) 
         }
         // U+005C REVERSE SOLIDUS (\)
         if (src[i] === '\u005c') {
-            if (isValidEscape(src[i], src[i + 1])) {
+            if (isEscapeStart(src[i], src[i + 1])) {
                 i = consumeEscaped(src, i, end) + 1;
                 continue;
             }

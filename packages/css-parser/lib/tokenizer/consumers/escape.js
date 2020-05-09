@@ -1,6 +1,6 @@
 'use strict';
 
-const { isHexDigit, isWhiteSpace } = require('../definitions');
+const { isHexDigit, isWS } = require('../checks-and-definitions');
 // § 4.3.7. Consume an escaped code point
 module.exports = function consumeEscaped(src, start = 0, end = src.length-1) {
   // It assumes that the U+005C REVERSE SOLIDUS (\) has already been consumed and
@@ -20,7 +20,7 @@ module.exports = function consumeEscaped(src, start = 0, end = src.length-1) {
         i--;
       }
       // If the next input code point is whitespace, consume it as well.
-      if (isWhiteSpace(src[i+1])) {
+      if (isWS(src[i+1])) {
           i++;
       }
   }

@@ -1,14 +1,14 @@
 
 'use strict';
 const {
-    isWhiteSpace
- } = require('./definitions');
+    isWS
+ } = require('./checks-and-definitions');
 
 // skip over white space
 function findWhiteSpaceEnd(src, start = 0, end = src.length - 1) {
     let i = start;
     do {
-        if (!isWhiteSpace(src[i])) {
+        if (!isWS(src[i])) {
             i--;
             break;
         };

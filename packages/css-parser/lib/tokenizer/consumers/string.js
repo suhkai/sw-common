@@ -1,6 +1,6 @@
 'use strict';
 
-const { charCodeCategory, isValidEscape } = require('../definitions');
+const { isEscapeStart } = require('../checks-and-definitions');
 const { TYPE } = require('../const');
 const consumeEscaped = require('./escape');
 
@@ -24,7 +24,7 @@ module.exports = function consumeStringToken(str, ecp /* ending code point */, s
         }
         if (c === '\u005C') {
             // If the next input code point is EOF, do nothing.
-            if (isValidEscape(c, str[i + 1])) {
+            if (isEscapeStart(c, str[i + 1])) {
                 i = consumeEscaped(str, i, end);
                 continue
             }
