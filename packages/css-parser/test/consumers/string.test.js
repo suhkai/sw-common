@@ -7,7 +7,7 @@ describe('consume strings', () => {
   const d1 = 'consumed~"';
   it(`consume "${d1}`, () => {
     const t = consumeString(d1, '"');
-    expect(d1.slice(t.start, t.end + 1)).to.deep.equal('consumed~');
+    expect(d1.slice(t.start, t.end + 1)).to.deep.equal('consumed~"');
   });
   const d3 = 'hello world~"';
   it('consume string token hitting EOF', () => {
@@ -19,14 +19,14 @@ describe('consume strings', () => {
     const t = consumeString(d4, '"');
     //console.log(d4.slice(t.start, t.end + 1))
     //console.log(t);
-    expect(t).to.deep.equal({ id: 6, start: 0, end: 7 });
+    expect(t).to.deep.equal({ id: 4, start: 0, end: 8 });
   });
   const d5 = 'consumed\\\n"';
   it('consume string token with invalid escape', () => {
     const t = consumeString(d5, '"');
     //console.log(d5.slice(t.start, t.end + 1))
     //console.log(t);
-    expect(t).to.deep.equal({ id: 6, start: 0, end: 8 });
+    expect(t).to.deep.equal({ id: 4, start: 0, end: 9 });
   });
   const d6 = 'consumed\\\n"';
   it('consume string token with escape at EOF', () => {
@@ -40,6 +40,6 @@ describe('consume strings', () => {
     const t = consumeString(d7, '"');
     //console.log(`*${d7.slice(t.start, t.end + 1)}*`)
     //console.log(t);
-    expect(t).to.deep.equal({ id: 5, start: 0, end: 14 });
+    expect(t).to.deep.equal({ id: 5, start: 0, end: 15 });
   });
 });

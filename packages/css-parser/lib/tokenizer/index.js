@@ -80,6 +80,7 @@ module.exports = function* tokenize(src = '') {
         }
         i = advance(src, 0)
     }
+
     while (i <= end) {
         const _1 = src[i];
         const _2 = src[i + 1];
@@ -102,30 +103,19 @@ module.exports = function* tokenize(src = '') {
             yield { id: tk.WS, loc };
             i = next;
         }
-
-        /*let code = src[i];
-        let cat = charCodeCategory(code);
-        if (cat === charCodeCategory.WhiteSpace) {
-            // Consume as much whitespace as possible. Return a <whitespace-token>.
-            const ti = findWhiteSpaceEnd(src, i, end)
-            yield { id: TYPE.WhiteSpace, start: i, end: ti };
-            i = ti + 1;
-            continue;
-        }
-
+        
         // https://www.w3.org/TR/css-syntax-3/#consume-string-token
         // U+0022 QUOTATION MARK (")
-        if (code === '\u0022') {
-            const tok = consumeStringToken(src, code, i + 1, end);
+        if (_1 === '\u0022') {
+            const range = createRange()
+            col++;
+            const tok = consumeStringToken(src, _1, i + 1, end, advance);
             // correct for ("")
-            tok.start--;
-            tok.end++;
-            yield tok;
-            i = tok.end + 1;
-            continue;
+            yield { id: tok.id, loc: range()}
+            i = advance(src, tok.end);
         }
 
-        // U+0023 NUMBER SIGN (#)
+       /* // U+0023 NUMBER SIGN (#)
         if (code === '\u0023') {
             if (isValidEscape(src[i + 1], src[i + 2]) || isName(src[i + 1])) {
                 const it = consumeName(src, i + 1, end);
