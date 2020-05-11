@@ -76,7 +76,9 @@ module.exports = function* tokenize(src = '') {
             loc: {
                 s: { col, row },
                 e: { col, row }
-            }
+            },
+            s: 0,
+            e: 0
         }
         i = advance(src, 0)
     }
@@ -93,14 +95,14 @@ module.exports = function* tokenize(src = '') {
             const range = createRange()
             col += 2;
             let [loc, next] = searchUntil('*/', i + 2, range);
-            yield { id: tk.COMMENT, loc };
+            yield { id: tk.COMMENT, loc, s: i, e: next -1 };
             i=next;
             
         }
   
         if (isWS(_1)) {
             const [loc, next] = consumeWhileTrue(isWS, i)
-            yield { id: tk.WS, loc };
+            yield { id: tk.WS, loc, s: i, e: next -1 };
             i = next;
         }
         
@@ -111,7 +113,7 @@ module.exports = function* tokenize(src = '') {
             col++;
             const tok = consumeStringToken(src, _1, i + 1, end, advance);
             // correct for ("")
-            yield { id: tok.id, loc: range()}
+            yield { id: tok.id, loc: range(), s:i, e:tok.end}
             i = advance(src, tok.end);
         }
 
