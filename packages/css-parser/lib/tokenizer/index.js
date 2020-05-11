@@ -7,29 +7,113 @@ const consumeName = require('../tokenizer/consumers/name');
 const consumeNumber = require('../tokenizer/consumers/number');
 const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
 
-const charCodeDefinitions = require('./checks-and-definitions');
-const isName = charCodeDefinitions.isName;
-const isValidEscape = charCodeDefinitions.isValidEscape;
-const isNumberStart = charCodeDefinitions.isNumberStart;
-const isIdentifierStart = charCodeDefinitions.isIdentifierStart;
-const charCodeCategory = charCodeDefinitions.charCodeCategory;
-const isBOM = charCodeDefinitions.isBOM;
-
+const { isName, isEscapeStart, isNumberStart, isIdStart, isBOM, isNL, isCRLF, isWS } = require('./checks-and-definitions');
 const { findWhiteSpaceEnd } = require('./utils');
-
-
-
+const tk = require('./tokens')
 
 module.exports = function* tokenize(src = '') {
-    //start
-    //ensure source is a string
+    let col = 1
+    let row = 1
+    let i = 0;
+
     let end = src.length;
-    let start = isBOM(src[0]) ? 1 : 0;
-    let i = start;
-    // https://drafts.csswg.org/css-syntax-3/#consume-token
-    // § 4.3.1. Consume a token
+
+    function createRange() {
+        const s = { col, row };
+        return function () {
+            return {
+                s,
+                e: { col, row }
+            }
+        }
+    }
+
+    function modifyPos(str, start) {
+        if (isCRLF(str[start], str[start + 1])) {
+            row += 1;
+            col = 1;
+            start += 2;
+            return start;
+        }
+        if (isNL(str[start])) {
+            row += 1
+            col = 1;
+            return start + 1;
+        }
+        return start;
+    }
+
+    function consumeWhileTrue(func, start = 0, ) {
+        const range = createRange()
+        while (start <= end) {
+            if (func(src, start) === false) break;
+            const s2 = modifyPos(str, start)
+            start = s2+1;
+        }
+        return [range(), start]
+    }
+
+    function searchUntil(search, start = 0, length = search.length, ) {
+        while (src.startsWith(search, start) === false && start <= end) {
+            let start2 = modifyPos(str, start);
+            start = start2;
+            if (isWS(str[start])) {
+                col += 1;
+                start += 1;
+            }
+            col++;
+            start++;
+        }
+        if (src.startsWith(search, start)) {
+            col += length;
+            return start + length
+        }
+        return -1;
+    }
+
+    if (isBOM(src[0])) {
+        yield {
+            id: tk.BOM,
+            loc: {
+                s: { col, row },
+                e: { col, row }
+            }
+        }
+        col += 1;
+    }
     while (i <= end) {
-        let code = src[i];
+        const _1 = str[i];
+        const _2 = str[i + 1];
+        const _3 = str[i + 2];
+        // https://drafts.csswg.org/css-syntax-3/#consume-token
+        // § 4.3.1. Consume a token
+        // 1.consume comments
+        if (_1 === '\u002f' && _2 == '\u002a') {
+            // find next "*/"
+            const range = createRange()
+            let endIdx = searchUntil('*/', i + 2);
+            if (endIdx === -1) {
+                yield {
+                    id: tk.COMMENT,
+                    loc: range(),
+                }
+                return;
+            }
+            yield { id: tk.COMMENT, loc: range() };
+            i = endIdx + 1;
+            continue;
+        }
+  
+        if (isWS(_1)) {
+            const [loc, next] = consumeWhileTrue(isWs, i)
+            yield { id: tk.WS, loc };
+            if (next === end){
+                return;
+            }
+            i = next + 1;
+        }
+
+        /*let code = src[i];
         let cat = charCodeCategory(code);
         if (cat === charCodeCategory.WhiteSpace) {
             // Consume as much whitespace as possible. Return a <whitespace-token>.
@@ -78,9 +162,9 @@ module.exports = function* tokenize(src = '') {
         // U+0027 APOSTROPHE (')
         if (code === '\u0027') {
             const tok = consumeStringToken(src, code, i + 1, end);
-             // correct for ("")
-             tok.start--;
-             tok.end++;
+            // correct for ("")
+            tok.start--;
+            tok.end++;
             yield tok;
             i = tok.end + 1;
             continue;
@@ -158,23 +242,7 @@ module.exports = function* tokenize(src = '') {
             i++;
             continue;
         }
-        // U+002F SOLIDUS (/)
-        if (code === '\u002f') {
-            // is '*'
-            if (src[i + 1] === '\u002a') {
-                // find next "*/"
-                let endIdx = src.indexOf('*/', i + 2);
-                if (endIdx === -1) {
-                    endIdx = end - 1; // aborb everything i guess
-                }
-                yield { id: TYPE.Comment, start: i, end: endIdx + 1 };
-                i = endIdx + 2;
-                continue;
-            }
-            yield { id: TYPE.Delim, start: i, end: i };
-            i++;
-            continue;
-        }
+
         // U+003A COLON (:)
         if (code === '\u003a') {
             yield { id: TYPE.Colon, start: i, end: i };
@@ -257,7 +325,7 @@ module.exports = function* tokenize(src = '') {
         if (cat === charCodeCategory.Digit) {
             // Reconsume the current input code point, consume a numeric token, and return it.
             const tok = consumeNumber(src, i, end);
-            if (tok){
+            if (tok) {
                 yield tok;
                 i = tok.end + 1;
                 continue;
@@ -275,6 +343,7 @@ module.exports = function* tokenize(src = '') {
 
         yield { id: TYPE.Delim, start: i, end: i };
         i++;
+        */
     }
 }
 

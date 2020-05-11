@@ -41,11 +41,12 @@ const isNoPrint = code =>
 
 // we dont do preprocessing as described https://drafts.csswg.org/css-syntax-3/#input-preprocessing
 // so absorb form-feed and line-feed and cr
-const isNL = code => { return code === '\u000D' || //CR
+const isNL = code => 
+ code === '\u000D' || //CR
  code === '\u000C' ||// form feed             
  code === '\u000a'; // linefeed
-};
 
+const isCRLF = (code,code2) => code === '\u000D' && code2 === '\u000A';
 
 const isWS = code => isNL(code) || code === '\u0020' || code === '\u0009'
 
@@ -78,7 +79,7 @@ const isIdStart = (first, second, third) => {
     return (
       isNameStart(second) ||
       second === '\u002D' || // '-' // yes a vendor prefix can have "--" like --moz-xyz
-      isValidEscape(second, third) 
+      isEscapeStart(second, third) 
     );
   }
   // name-start code point
@@ -89,7 +90,7 @@ const isIdStart = (first, second, third) => {
   // U+005C REVERSE SOLIDUS (\)
   if (first === '\u005C') {
     // If the first and second code points are a valid escape, return true. Otherwise, return false.
-    return isValidEscape(first, second)
+    return isEscapeStart(first, second)
   }
   // anything else
   // Return false.
@@ -167,5 +168,6 @@ module.exports = {
   isEscapeStart,
   isIdStart,
   isNumberStart,
-  isBOM
+  isBOM,
+  isCRLF
 };
