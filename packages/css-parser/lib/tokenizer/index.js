@@ -16,7 +16,7 @@ module.exports = function* tokenize(src = '') {
     let row = 1
     let i = 0;
 
-    let end = src.length;
+    let end = src.length -1;
 
     function createRange() {
         const s = { col, row };
@@ -28,47 +28,46 @@ module.exports = function* tokenize(src = '') {
         }
     }
 
-    function modifyPos(str, start) {
+    function advance(str, start) {
         if (isCRLF(str[start], str[start + 1])) {
             row += 1;
             col = 1;
-            start += 2;
-            return start;
+            return start +2;
         }
         if (isNL(str[start])) {
             row += 1
             col = 1;
             return start + 1;
         }
-        return start;
+        col++;
+        return start+1;
     }
 
     function consumeWhileTrue(func, start = 0, ) {
         const range = createRange()
         while (start <= end) {
-            if (func(src, start) === false) break;
-            const s2 = modifyPos(str, start)
-            start = s2+1;
+            if (func(src[start]) === false) break;
+            if (start === end) {
+              return [range(), start+1]  
+            }
+            const s2 = advance(src, start)
+            start = s2;
         }
         return [range(), start]
     }
 
-    function searchUntil(search, start = 0, length = search.length, ) {
+    function searchUntil(search, start = 0, range, length = search.length ) {
         while (src.startsWith(search, start) === false && start <= end) {
-            let start2 = modifyPos(str, start);
+            let start2 = advance(src, start);
             start = start2;
-            if (isWS(str[start])) {
-                col += 1;
-                start += 1;
-            }
-            col++;
-            start++;
         }
         if (src.startsWith(search, start)) {
-            col += length;
-            return start + length
+            col += length -1;
+            const loc = range();
+            col++;
+            return [loc, start + length];
         }
-        return -1;
+        return [range(), end +1];
     }
 
     if (isBOM(src[0])) {
@@ -79,38 +78,29 @@ module.exports = function* tokenize(src = '') {
                 e: { col, row }
             }
         }
-        col += 1;
+        i = advance(src, 0)
     }
     while (i <= end) {
-        const _1 = str[i];
-        const _2 = str[i + 1];
-        const _3 = str[i + 2];
+        const _1 = src[i];
+        const _2 = src[i + 1];
+        const _3 = src[i + 2];
         // https://drafts.csswg.org/css-syntax-3/#consume-token
         // § 4.3.1. Consume a token
         // 1.consume comments
         if (_1 === '\u002f' && _2 == '\u002a') {
             // find next "*/"
             const range = createRange()
-            let endIdx = searchUntil('*/', i + 2);
-            if (endIdx === -1) {
-                yield {
-                    id: tk.COMMENT,
-                    loc: range(),
-                }
-                return;
-            }
-            yield { id: tk.COMMENT, loc: range() };
-            i = endIdx + 1;
-            continue;
+            col += 2;
+            let [loc, next] = searchUntil('*/', i + 2, range);
+            yield { id: tk.COMMENT, loc };
+            i=next;
+            
         }
   
         if (isWS(_1)) {
-            const [loc, next] = consumeWhileTrue(isWs, i)
+            const [loc, next] = consumeWhileTrue(isWS, i)
             yield { id: tk.WS, loc };
-            if (next === end){
-                return;
-            }
-            i = next + 1;
+            i = next;
         }
 
         /*let code = src[i];
@@ -341,9 +331,8 @@ module.exports = function* tokenize(src = '') {
             continue;
         }
 
-        yield { id: TYPE.Delim, start: i, end: i };
-        i++;
-        */
+        yield { id: TYPE.Delim, start: i, end: i };*/
+       
     }
 }
 
