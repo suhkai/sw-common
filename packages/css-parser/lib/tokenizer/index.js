@@ -116,15 +116,13 @@ module.exports = function* tokenize(src = '') {
             yield { id: tok.id, loc: range(), s:i, e:tok.end}
             i = advance(src, tok.end);
         }
-
-       /* // U+0023 NUMBER SIGN (#)
+        /* // U+0023 NUMBER SIGN (#)
+        // https://drafts.csswg.org/css-syntax-3/#hash-token-diagram
+        // inspirational source https://github.com/csstree/csstree/blob/master/lib/tokenizer/index.js
         if (code === '\u0023') {
             if (isValidEscape(src[i + 1], src[i + 2]) || isName(src[i + 1])) {
                 const it = consumeName(src, i + 1, end);
                 const tok = { id: TYPE.Hash, start: i, end: it };
-                if (isIdentifierStart(src[i + 1], src[i + 2], src[i + 3])) {
-                    tok.type = 'id';
-                }
                 yield tok;
                 i = it + 1;
                 continue;
