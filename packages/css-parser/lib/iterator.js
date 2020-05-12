@@ -3,11 +3,10 @@ module.exports = function createIterator(data) {
     let cursor = -1;
     let col = 1;
     let row = 1;
-
+    let value;
     return {
         [Symbol.iterator]: function () { return this },
         next() {
-            let value;
             if (cursor <= data.length - 1) {
                 if (cursor >= 0) {
                     if (data[cursor] === '\r' && data[cursor + 1] === '\n') {
@@ -44,7 +43,7 @@ module.exports = function createIterator(data) {
                 value: {
                     get: () => {
                         if (cursor <= data.length - 1) {
-                            return { d: value, col, row, o: cursor };
+                           return { d: value, col, row, o: cursor };
                         }
                         return undefined;
                     }
@@ -66,18 +65,19 @@ module.exports = function createIterator(data) {
             cursor = i - 1
         },
         peek() {
-            let value;
-            if (cursor > data.length - 1) {
-                return { done: true, value: undefined }
-            }
-            value = data[cursor];
-            if (value === '\r' || value === '\u000c') {
-                value = '\n'
-            }
-            return {
-                value: { d: value, col, row, o: cursor },
-                done
-            }
+            return Object.defineProperties(Object.create(null), {
+                value: {
+                    get: () => {
+                        if (cursor <= data.length - 1) {
+                           return { d: value, col, row, o: cursor };
+                        }
+                        return undefined;
+                    }
+                },
+                done: {
+                    get: () => cursor > data.length - 1
+                }
+            });
         }
     }
 }

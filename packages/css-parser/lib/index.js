@@ -6,6 +6,7 @@ const consumeStringToken = require('../tokenizer/consumers/string');
 const consumeName = require('../tokenizer/consumers/name');
 const consumeNumber = require('../tokenizer/consumers/number');
 const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
+const absorbComment = require('../lib/comments');
 
 const { isName, isEscapeStart, isNumberStart, isIdStart, isBOM, isNL, isCRLF, isWS } = require('./checks-and-definitions');
 const { findWhiteSpaceEnd } = require('./utils');
@@ -24,7 +25,7 @@ module.exports = function* tokenize(src = '') {
             iterator.next()
             let _2 = step.value;
             if (_2.d === '*') { // absorb comments
-                yield absorbComment(_1, iterator);
+                yield absorbComment(_1, _2, iterator);
                 continue
             }
         }

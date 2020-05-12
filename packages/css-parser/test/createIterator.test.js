@@ -2,6 +2,7 @@
 const chai = require('chai');
 const { expect } = chai;
 const createIterator = require('../lib/iterator');
+const absorbComments = require('../lib/comments');
 
 describe('createIterator', () => {
     it('test columns, row, follows css preprocessing rules', () => {
@@ -39,4 +40,20 @@ describe('createIterator', () => {
             { d: '\n', col: 8, row: 6, o: 29 }
           ])
     });
+    it('absorbCommenttest',()=>{
+        const data = 'some text\n\r\n/* some comment */';
+        const iter = createIterator(data);
+        const step = iter.next();
+        //ff
+        while(step.value.d !== '/'){
+            iter.next();
+        }
+        const _1 = step.value;
+        iter.next()
+        const _2 = step.value;
+        const result = absorbComments(_1,_2,iter);
+        iter.next()
+        console.log(result, step.done)
+    })
+    
 });
