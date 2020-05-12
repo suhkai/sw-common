@@ -1,8 +1,8 @@
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
-const escape = require('../../lib/tokenizer/consumers/escape');
-const { macp, isIdStart, isNumberStart, isBOM } = require('../../lib/tokenizer/checks-and-definitions')
+const escape = require('../../lib/consumers/escape');
+const { macp, isIdStart, isNumberStart, isBOM } = require('../../lib/checks-and-definitions')
 
 describe('definitions', () => {
   describe('BOM check', () => {

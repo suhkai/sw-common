@@ -3,7 +3,7 @@
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
-const consumeUrlToken = require('../../lib/tokenizer/consumers/url');
+const consumeUrlToken = require('../../lib/consumers/url');
 
 describe('consume url', () => {
   const d1 = 'url(./hello-world)';

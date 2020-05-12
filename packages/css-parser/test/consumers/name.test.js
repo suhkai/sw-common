@@ -1,7 +1,7 @@
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
-const consumeName = require('../../lib/tokenizer/consumers/name');
+const consumeName = require('../../lib/consumers/name');
 
 describe('consume name', () => {
     it('consume "hello world"', () => {

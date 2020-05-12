@@ -1,7 +1,7 @@
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
-const { findWhiteSpaceEnd } = require('../../lib/tokenizer/utils');
+const { findWhiteSpaceEnd } = require('../../lib/utils');
 
 describe('consume whitespace', () => {
   //          01é34

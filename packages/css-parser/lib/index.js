@@ -12,76 +12,112 @@ const { findWhiteSpaceEnd } = require('./utils');
 const tk = require('./tokens')
 
 module.exports = function* tokenize(src = '') {
-    let col = 1
-    let row = 1
-    let i = 0;
 
-    let end = src.length -1;
-
-    function createRange() {
-        const s = { col, row };
-        return function () {
-            return {
-                s,
-                e: { col, row }
+    const iterator = createIterator(src);
+    // enhanced iterator "step" run-time linked with current state of iterator 
+    // value and done are "getter" methods
+    const step = iterator.next(); 
+    while (!step.done) {
+        let _1 = step.value;
+        // comments
+        if (_1.d === '/') {
+            iterator.next()
+            let _2 = step.value;
+            if (_2.d === '*') { // absorb comments
+                yield absorbComment(_1, iterator);
+                continue
             }
         }
+        // whitespace
+        if (isWs(_1.d)) {
+            yield *absorbWS(_1, iterator);
+            continue;
+        }
+        // (") double quotation mark
+        if (_1.d === '"'){
+            yield *absorbString(_1, iterator);
+            continue;
+        }
+        // hashtoken
+        if (_1.d === '#'){
+            yield *absorbHashToken(_1, iterator);
+            continue;
+        }
+        // (') single quotation mark
+        if (_1.d === '\''){
+            yield *absorbString(_1, iterator);
+            continue;
+        }
+        // "(" left parenthesis
+        if (_1.d === '('){
+            yield _1;
+            iterator.next();
+            continue;
+        }
+        // ")" right parenthesis
+        if (_1.d === ')'){
+            yield _1;
+            iterator.next();
+            continue;
+        }
+        if (_1.d === '+'){
+            yield *absorbNumber(_1, iterator);
+            continue
+        }
+        if (_1.d === ','){
+            yield _1;
+            iterator.next();
+            continue
+        }
+        if (_1.d === '-'){
+            // check if the input stream starts with - and and idtokenStart
+            yield *absorbNumber(_1, iterator);
+            continue
+        }
+        if (_1.d === '.'){
+            // check if the input stream starts with - and and idtokenStart
+            yield *absorbNumber(_1, iterator);
+            continue
+        }
+        if (_1.d === ':'){
+         
+        }
+        if (_1.d === ';'){
+         
+        }
+        if (_1.d === '<'){
+         
+        }
+        if (_1.d === '@'){
+         
+        }
+        if (_1.d === '['){
+         
+        }
+        if (_1.d === '\\'){
+         
+        }
+        if (_1.d === ']'){
+         
+        }
+        if (_1.d === '{'){
+         
+        }
+        if (_1.d === '}'){
+         
+        }
+        if (isDigit(_1.d)){
+         
+        }
+        if (isIdStart(_1.d)){
+
+        }
+        // yield "delim token"
     }
 
-    function advance(str, start) {
-        if (isCRLF(str[start], str[start + 1])) {
-            row += 1;
-            col = 1;
-            return start +2;
-        }
-        if (isNL(str[start])) {
-            row += 1
-            col = 1;
-            return start + 1;
-        }
-        col++;
-        return start+1;
-    }
+    return;
 
-    function consumeWhileTrue(func, start = 0, ) {
-        const range = createRange()
-        while (start <= end) {
-            if (func(src[start]) === false) break;
-            if (start === end) {
-              return [range(), start+1]  
-            }
-            const s2 = advance(src, start)
-            start = s2;
-        }
-        return [range(), start]
-    }
 
-    function searchUntil(search, start = 0, range, length = search.length ) {
-        while (src.startsWith(search, start) === false && start <= end) {
-            let start2 = advance(src, start);
-            start = start2;
-        }
-        if (src.startsWith(search, start)) {
-            col += length -1;
-            const loc = range();
-            col++;
-            return [loc, start + length];
-        }
-        return [range(), end +1];
-    }
-
-    if (isBOM(src[0])) {
-        yield {
-            id: tk.BOM,
-            loc: {
-                s: { col, row },
-                e: { col, row }
-            },
-            s: 0,
-            e: 0
-        }
-        i = advance(src, 0)
-    }
 
     while (i <= end) {
         const _1 = src[i];
@@ -95,17 +131,17 @@ module.exports = function* tokenize(src = '') {
             const range = createRange()
             col += 2;
             let [loc, next] = searchUntil('*/', i + 2, range);
-            yield { id: tk.COMMENT, loc, s: i, e: next -1 };
-            i=next;
-            
+            yield { id: tk.COMMENT, loc, s: i, e: next - 1 };
+            i = next;
+
         }
-  
+
         if (isWS(_1)) {
             const [loc, next] = consumeWhileTrue(isWS, i)
-            yield { id: tk.WS, loc, s: i, e: next -1 };
+            yield { id: tk.WS, loc, s: i, e: next - 1 };
             i = next;
         }
-        
+
         // https://www.w3.org/TR/css-syntax-3/#consume-string-token
         // U+0022 QUOTATION MARK (")
         if (_1 === '\u0022') {
@@ -113,7 +149,7 @@ module.exports = function* tokenize(src = '') {
             col++;
             const tok = consumeStringToken(src, _1, i + 1, end, advance);
             // correct for ("")
-            yield { id: tok.id, loc: range(), s:i, e:tok.end}
+            yield { id: tok.id, loc: range(), s: i, e: tok.end }
             i = advance(src, tok.end);
         }
         /* // U+0023 NUMBER SIGN (#)
@@ -137,7 +173,7 @@ module.exports = function* tokenize(src = '') {
                 continue;
             }
         }
-
+    
         // https://www.w3.org/TR/css-syntax-3/#consume-string-token
         // U+0027 APOSTROPHE (')
         if (code === '\u0027') {
@@ -171,11 +207,11 @@ module.exports = function* tokenize(src = '') {
                 i = tok.end + 1;
                 continue;
             }
-
+    
             yield { id: TYPE.Delim, start: i, end: i };
             i++;
             continue;
-
+    
         }
         // U+002C COMMA (,)
         if (code === '\u002C') {
@@ -222,7 +258,7 @@ module.exports = function* tokenize(src = '') {
             i++;
             continue;
         }
-
+    
         // U+003A COLON (:)
         if (code === '\u003a') {
             yield { id: TYPE.Colon, start: i, end: i };
@@ -267,7 +303,7 @@ module.exports = function* tokenize(src = '') {
             i++;
             continue;
         }
-
+    
         // U+005C REVERSE SOLIDUS (\)
         if (code === '\u005C') {
             if (isValidEscape(code, src[i + 1])) {
@@ -280,28 +316,28 @@ module.exports = function* tokenize(src = '') {
             i++;
             continue;
         }
-
+    
         // U+005D RIGHT SQUARE BRACKET (])
         if (code === '\u005D') {
             yield { id: TYPE.RightSquareBracket, start: i, end: i };
             i++;
             continue;
         }
-
+    
         // U+007B LEFT CURLY BRACKET ({)
         if (code === '\u007b') {
             yield { id: TYPE.LeftCurlyBracket, start: i, end: i };
             i++;
             continue;
         }
-
+    
         // U+007B LEFT CURLY BRACKET (})
         if (code === '\u007d') {
             yield { id: TYPE.RightCurlyBracket, start: i, end: i };
             i++;
             continue;
         }
-
+    
         if (cat === charCodeCategory.Digit) {
             // Reconsume the current input code point, consume a numeric token, and return it.
             const tok = consumeNumber(src, i, end);
@@ -312,7 +348,7 @@ module.exports = function* tokenize(src = '') {
             }
             console.log('should not happen');
         }
-
+    
         // name-start code point
         if (cat === charCodeCategory.NameStart) {
             const tok = consumeIdentLikeToken(src, i, end);
@@ -320,9 +356,9 @@ module.exports = function* tokenize(src = '') {
             i = tok.end + 1;
             continue;
         }
-
+    
         yield { id: TYPE.Delim, start: i, end: i };*/
-       
+
     }
 }
 
