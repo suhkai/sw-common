@@ -1,3 +1,4 @@
+'use strict'
 const { WS } = require('./tokens')
 const { isWS } = require('./checks-and-definitions')
 module.exports = function (iterator) {

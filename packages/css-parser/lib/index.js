@@ -31,12 +31,12 @@ module.exports = function* tokenize(src = '') {
         }
         // whitespace
         if (isWs(_1.d)) {
-            yield *absorbWS(_1, iterator);
+            yield *absorbWS(iterator);
             continue;
         }
         // (") double quotation mark
         if (_1.d === '"'){
-            yield *absorbString(_1, iterator);
+            yield *absorbString(iterator);
             continue;
         }
         // hashtoken

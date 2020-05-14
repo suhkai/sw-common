@@ -1,3 +1,4 @@
+'use strict'
 module.exports = function createIterator(data) {
 
     let cursor = -1;

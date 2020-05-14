@@ -1,3 +1,4 @@
+'use strict'
 const { COMMENT } = require('./tokens')
 module.exports = function (_1, _2, iterator) {
     // first is / , second = "*"
