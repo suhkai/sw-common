@@ -1,0 +1,297 @@
+version: "2.3"
+services:
+  linux:
+    image: alpine-test
+    volumes:
+      - ./server:/var/app/server
+      - ./index.js:/var/app/index.js
+    expose:
+      - "8080"
+    ports:  
+      - "8080:8080"
+    networks:
+      - nimble  
+#
+#    expose:
+#      - "6020"
+#      - "9080"
+#    ports:
+#      - "6020:6020"
+#      - "9080:9080"
+#    networks:
+#      - nimble
+#  broker-peer1:
+#    image: nimble-services_broker_not_published
+#    depends_on:
+#      - redis
+#    volumes:
+#      - ./conf/permissions.yml:/usr/src/app/conf/permissions.yml
+#      - ./conf/broker1.yml:/usr/src/app/conf/config.yml
+#    expose:
+#      - "6020"
+#      - "9080"
+#    ports:
+#      - "6021:6020"
+#      - "9081:9080"  # interactive debugging purposes
+#    networks:
+#      - nimble
+#  broker-peer2:
+#    image: nimble-services_broker_not_published
+#    depends_on:
+#      - redis
+#    volumes:
+#      - ./conf/permissions.yml:/usr/src/app/conf/permissions.yml
+#      - ./conf/broker2.yml:/usr/src/app/conf/config.yml
+#    expose:
+#      - "6020"
+#      - "9080"
+#    ports:
+#      - "6022:6020"
+#      - "9082:9080"  # interactive debugging purposes
+#    networks:
+#      - nimble
+#  broker-peer3:
+#    image: nimble-services_broker_not_published
+#    depends_on:
+#      - redis
+#    volumes:
+#      - ./conf/permissions.yml:/usr/src/app/conf/permissions.yml
+#      - ./conf/broker3.yml:/usr/src/app/conf/config.yml
+#    expose:
+#      - "6020"
+#      - "9080"
+#    ports:
+#      - "6023:6020"
+#      - "9083:9080"  # interactive debugging purposes
+#    networks:
+#      - nimble        
+#  redis:
+#    image: redis:alpine
+#    command: redis-server --appendonly no
+#    expose:
+#      - "6379"
+#    ports: 
+#      - "6379:6379" #expose ports, sometime you need to interactivly debug
+#    networks:
+#      - nimble
+#  hooksponge:
+#    image: csimi/hooksponge
+#    depends_on:
+#      - redis
+#    volumes:
+#      - ./responder.js:/usr/src/app/src/responder.js
+#    ports:
+#      - "4040:4040"
+#    environment:
+#      - REDIS_HOST=redis
+#      - BIND_PORT=4040
+#    networks:
+#      - nimble
+#  client: # nimble-services_client
+#    build:
+#      context: ../nimble-client-repl
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ../nimble-client-repl/lib:/usr/src/app/lib
+#      - ./macro-definitions.js:/usr/src/app/lib/helpers/macro-definitions.js
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - nimble
+#
+#  blacklist:
+#    build:
+#      context: ./blackList
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./blackList/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./blackList/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./blackList/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  arma:
+#    build:
+#      context: ./arma
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./arma/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./arma/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./arma/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  camtocam:
+#    build:
+#      context: ./camToCam
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./camToCam/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./camToCam/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./camToCam/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  chat:
+#    build:
+#      context: ./chat
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./chat/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./chat/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./chat/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  fmsbridge:
+#    build:
+#      context: ./fmsBridge
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./fmsBridge/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./fmsBridge/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./fmsBridge/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  payment:
+#    build:
+#      context: ./payment
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./payment/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./payment/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./payment/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  pcl:
+#    build:
+#      context: ./pcl
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./pcl/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./pcl/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./pcl/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  privategames:
+#    build:
+#      context: ./privateGames
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./privateGames/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./privateGames/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./privateGames/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  privateshow:
+#    build:
+#      context: ./privateShow
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./privateShow/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./privateShow/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./privateShow/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  remotedevice:
+#    build:
+#      context: ./remoteDevice
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./remoteDevice/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./remoteDevice/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./remoteDevice/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  spamfilter:
+#    build:
+#      context: ./spamFilter
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./spamFilter/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./spamFilter/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./spamFilter/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  stream:
+#    build:
+#      context: ./stream
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./stream/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./stream/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./stream/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  translator:
+#    build:
+#      context: ./translator
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./translator/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./translator/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./translator/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  twowayaudio:
+#    build:
+#      context: ./twoWayAudio
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./twoWayAudio/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./twoWayAudio/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./twoWayAudio/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#
+#  vipshow:
+#    build:
+#      context: ./vipShow
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./vipShow/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./vipShow/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./vipShow/lib:/usr/src/app/lib
+#    networks:
+#      - nimble
+#      
+#  edsgateway:
+#    build:
+#      context: ./edsGateWay
+#    depends_on:
+#      - broker-peer1
+#    volumes:
+#      - ./edsGateWay/conf/config.example.json:/usr/src/app/conf/config.json
+#      - ./edsGateWay/conf/permissions.example.json:/usr/src/app/conf/permissions.json
+#      - ./edsGateWay/lib:/usr/src/app/lib
+#    networks:
+#      - nimble    
+networks:
+  nimble:
+    driver: bridge
+#
