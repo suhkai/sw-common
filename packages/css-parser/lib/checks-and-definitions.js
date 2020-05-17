@@ -46,9 +46,7 @@ const isNL = code =>
  code === '\u000C' ||// form feed             
  code === '\u000a'; // linefeed
 
-const isCRLF = (code,code2) => code === '\u000D' && code2 === '\u000A';
-
-const isWS = code => isNL(code) || code === '\u0020' || code === '\u0009'
+ const isWS = code => isNL(code) || code === '\u0020' || code === '\u0009'
 
 const macp = code => code <= '\u10FFFF'
 
@@ -59,11 +57,12 @@ const macp = code => code <= '\u10FFFF'
 // https://drafts.csswg.org/css-syntax-3/#starts-with-a-valid-escape
 // § 4.3.8. Check if two code points are a valid escape
 function isEscapeStart(first, second) {
-   if (first !== '\u005C') { /* (\) token */
+   if (first.d !== '\u005C') { /* (\) token */
     return false;
   }
   // Otherwise, if the second code point is a newline or EOF, return false.
-  if (!second || isNL(second)) {
+  // checking for crlf makes no sense because cr part already results to false
+  if (second && isNL(second.d)) {
     return false;
   }
   // Otherwise, return true.
@@ -168,6 +167,5 @@ module.exports = {
   isEscapeStart,
   isIdStart,
   isNumberStart,
-  isBOM,
-  isCRLF
+  isBOM
 };

@@ -21,7 +21,6 @@ describe('css ref test', () => {
      const str = stringify(result)
      //console.log(str)
   })
-
   it('serialize fixture',()=>{
     const serialized = stringify(result, { sourcemap: true})
     console.log(serialized.map)

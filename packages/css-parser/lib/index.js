@@ -8,7 +8,7 @@ const consumeNumber = require('../tokenizer/consumers/number');
 const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
 const absorbComment = require('../lib/comments');
 
-const { isName, isEscapeStart, isNumberStart, isIdStart, isBOM, isNL, isCRLF, isWS } = require('./checks-and-definitions');
+const { isName, isEscapeStart, isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
 const { findWhiteSpaceEnd } = require('./utils');
 const tk = require('./tokens')
 

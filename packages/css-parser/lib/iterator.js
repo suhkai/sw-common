@@ -7,6 +7,9 @@ module.exports = function createIterator(data) {
     let value;
     return {
         [Symbol.iterator]: function () { return this },
+        slice(a, b) {
+            return data.slice(a, b)
+        },
         next() {
             if (cursor <= data.length - 1) {
                 if (cursor >= 0) {
@@ -44,7 +47,7 @@ module.exports = function createIterator(data) {
                 value: {
                     get: () => {
                         if (cursor <= data.length - 1) {
-                           return { d: value, col, row, o: cursor };
+                            return { d: value, col, row, o: cursor };
                         }
                         return undefined;
                     }
@@ -55,6 +58,7 @@ module.exports = function createIterator(data) {
             });
         },
         reset(i = 0, c = !i ? 1 : undefined, l = !i ? 1 : undefined) {
+            let tvalue;
             if (i >= data.length || i < 0) {
                 throw new Error(`index out of bounds of data length, len=${data.length} i=${i}`)
             }
@@ -62,15 +66,20 @@ module.exports = function createIterator(data) {
             if (l) row = l;
             if (data[i] === '\n' && data[i - 1] === '\r') { // one step back
                 i--;
+                tvalue = '\n'
             }
-            cursor = i - 1
+            else if (data[i] === '\r' || data[i] === '\u000c') {
+                tvalue = '\n'
+            }
+            cursor = i;
+            value = tvalue || data[cursor]
         },
         peek() {
             return Object.defineProperties(Object.create(null), {
                 value: {
                     get: () => {
                         if (cursor <= data.length - 1) {
-                           return { d: value, col, row, o: cursor };
+                            return { d: value, col, row, o: cursor };
                         }
                         return undefined;
                     }

@@ -1,68 +1,53 @@
 'use strict'
 const { STRING, BADSTRING } = require('./tokens');
-const { isWS } = require('./checks-and-definitions');
+const { isNL, isEscapeStart } = require('./checks-and-definitions');
+const escape = require('./escape');
 
 // § 4.3.5. Consume a string token
 // https://www.w3.org/TR/css-syntax-3/#consume-string-token
-
-module.exports = function (iterator) {
-    const step = iterator.peek();
-    let cp = step.value;
-    iterator.next();
-    const start = { loc: { col: prev.col, row: prev.row }, o: prev.o }
+module.exports = function (iter) {
+    const step = iter.peek();
+    let f = step.value;
+    iter.next();
+    const start = { loc: { col: f.col, row: f.row }, o: f.o }
     let end;
+    let prev;
+    const replacements = [];
+    let type = STRING;
     while (!step.done) {
-        const _1 = step.value;
-        if (!isWS(_1.d)){
-            end = { loc: { col: prev.col, row: prev.row }, o: prev.o };
+        prev = step.value;
+        if (prev.d === '\\'){
+            iter.next();
+            const _2 = step.value;
+            if (isEscapeStart(prev,_2)){
+                const replace = escape(prev, iter);
+                replacements.push([prev,replace]);
+                continue;
+            }
+            prev = step.value;
+        }
+        if (prev.d === f.d){
+            end = { loc: { col: prev.col, row: prev.row } , o:prev.o };
+            iter.next();
             break;
         }
-        prev = _1;
-        iterator.next();
+        if (isNL(prev.d)){
+            end = { loc: { col: prev.col, row: prev.row }, o: prev.o };
+            type = BADSTRING;
+            iter.next();
+            break;
+        }
+        iter.next();
     }
-    if (!end) { // we hit the end of the stream
+    if (!end) { //We hit the end of the stream
         end = { loc: { col: prev.col, row: prev.row }, o: prev.o };
     }
-    return { id: WS, s: start, e:end };
-};
-
-
-'use strict';
-
-const { isEscapeStart } = require('../checks-and-definitions');
-const { STRING, BADSTRING } = require('../tokens');
-const consumeEscaped = require('./escape');
-
-// § 4.3.5. Consume a string token
-// https://www.w3.org/TR/css-syntax-3/#consume-string-token
-module.exports = function consumeStringToken(str, ecp /* ending code point */, start = 0, end = str.length - 1, advance = () => { }) {
-    // Repeatedly consume the next input code point from the stream:
-    let rc;
-    let i = start;
-    for (; i <= end; i++) {
-        let c = str[i];
-        if (i > start && c !== '\u000a') {
-            advance(str, i - 1)
-        }
-        if (ecp === c) {
-            rc = { id: STRING, start, end: i };
-            return rc;
-        }
-        if (i === end) {
-            // This is a parse error. Reconsume the current input code point,
-            rc = { id: STRING, start, end: i }; // this is a parse error but just return string token, maybe emit a warning somehow
-            return rc;
-        }
-        if (c === '\u000a') {
-            return { id: BADSTRING, start, end: i };
-        }
-        if (c === '\u005C') {
-            // If the next input code point is EOF, do nothing.
-            if (isEscapeStart(c, str[i + 1])) {
-                i = consumeEscaped(str, i, end, advance);
-                continue
-            }
-        }
-        // consume code point
+    // replace shit
+    let d = iter.slice(start.o, end.o + 1).split(''); // every char s
+    replacements.reverse()
+    for( const [_1,replace]  of replacements){
+        //{ s: '\uFFFD' , loc: { col: last.col, row: last.row }, o:last.o };
+        d.splice(_1.o, replace.o+1-_1.o, replace.s)
     }
-}
+    return { id: type, value: d.join(''), s: start, e:end };
+};

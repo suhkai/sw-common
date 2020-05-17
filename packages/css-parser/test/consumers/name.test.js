@@ -3,7 +3,7 @@ const chai = require('chai');
 const { expect } = chai;
 const consumeName = require('../../lib/consumers/name');
 
-describe('consume name', () => {
+xdescribe('consume name', () => {
     it('consume "hello world"', () => {
       const d = 'hello world'
       const endinc = consumeName(d);

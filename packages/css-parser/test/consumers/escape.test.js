@@ -4,7 +4,7 @@ const { expect } = chai;
 const escape = require('../../lib/consumers/escape');
 const { isEscapeStart } = require('../../lib/checks-and-definitions')
 
-describe('consume escaped', () => {
+xdescribe('consume escaped', () => {
   it(`invalid escape "\\\\n"`, () => {
     const res = isEscapeStart('\\', '\n');
     expect(res).to.be.false;

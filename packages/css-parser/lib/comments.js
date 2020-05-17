@@ -7,12 +7,19 @@ module.exports = function (_1, _2, iterator) {
     // consume next
     iterator.next();
     // absorp untill you find  */
-    const start = { loc: { col: _1.col, row: _1.row }, o: _1.o }
+    const start = { loc: { col: _1.col, row: _1.row }, o: _1.o };
     let end;
+    if (step.done) {
+        end = { loc: { col: _2.col, row: _2.row }, o: _2.o };
+        return { id: COMMENT, s: start, e: end };
+    }
     let s = 0;
+    _1 = undefined;
+    _2 = undefined;
     while (!step.done) {
         if (s == 0) {
             _1 = step.value;
+            _2 = undefined
         }
         else {
             _2 = step.value;
@@ -30,5 +37,6 @@ module.exports = function (_1, _2, iterator) {
     if (!end && _1) {
         end = { loc: { col: _1.col, row: _1.row }, o: _1.o };
     }
-    return { id: COMMENT, s: start, e:end };
+
+    return { id: COMMENT, s: start, e: end };
 };

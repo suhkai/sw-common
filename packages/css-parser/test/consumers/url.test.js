@@ -5,7 +5,7 @@ const chai = require('chai');
 const { expect } = chai;
 const consumeUrlToken = require('../../lib/consumers/url');
 
-describe('consume url', () => {
+xdescribe('consume url', () => {
   const d1 = 'url(./hello-world)';
   it(`consume "${d1}" as url-token`, () => {
     const t = consumeUrlToken(d1);
