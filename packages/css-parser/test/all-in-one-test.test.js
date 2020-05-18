@@ -4,9 +4,10 @@ const { expect } = chai;
 const createIterator = require('../lib/iterator');
 const absorbComments = require('../lib/comments');
 const absorbWhiteSpace = require('../lib/white-space');
-const { isWS, isEscapeStart } = require('../lib/checks-and-definitions')
+const { isWS, isEscapeStart, isIdcp } = require('../lib/checks-and-definitions')
 const escape = require('../lib/escape');
 const string = require('../lib/string');
+const hash = require('../lib/hash');
 
 describe('iterator', () => {
     describe('validate token stream', () => {
@@ -59,8 +60,8 @@ describe('iterator', () => {
             const data = 'hi';
             const it = createIterator(data);
             const step = it.next();
-            expect(()=>it.reset(100)).to.throw()
-            it.reset(1,2,1)
+            expect(() => it.reset(100)).to.throw()
+            it.reset(1, 2, 1)
             expect(step.value).to.deep.equal({ d: 'i', col: 2, row: 1, o: 1 });
         });
         it('reset within data bounds on a crlf boundery', () => {
@@ -68,11 +69,10 @@ describe('iterator', () => {
             const it = createIterator(data);
             const step = it.next();
             while (!step.done) it.next();
-            console.log(step.value)
             it.reset(3);
-            expect({ d:step.value.d, o:step.value.o}).to.deep.equal({ d: '\n', o: 2 });
+            expect({ d: step.value.d, o: step.value.o }).to.deep.equal({ d: '\n', o: 2 });
             it.next()
-            expect({ d:step.value.d, o:step.value.o}).to.deep.equal({ d: 't', o: 4 });
+            expect({ d: step.value.d, o: step.value.o }).to.deep.equal({ d: 't', o: 4 });
         });
         it('reset within data bounds on a crlf boundery', () => {
             const data = 'hi\r\nthere';
@@ -91,7 +91,6 @@ describe('iterator', () => {
             const step = it.next();
             while (!step.done) it.next();
             it.reset(2);
-            console.log(step.value)
             expect(step.value).to.deep.equal({ d: '\n', col: 6, row: 2, o: 2 })
         });
         it('reset within data bounds on a ff boundery', () => {
@@ -100,7 +99,7 @@ describe('iterator', () => {
             const step = it.next();
             while (!step.done) it.next();
             it.reset(2);
-            console.log(step.value)
+
             expect(step.value).to.deep.equal({ d: '\n', col: 6, row: 2, o: 2 })
         });
     });
@@ -423,4 +422,127 @@ describe('iterator', () => {
             expect(step.done).to.be.false;
         });
     });
+    describe('hash', () => {
+        it('hash from malformed id token "#--sometoken\\\n002d ame "', () => {
+            const data = '#--sometoken\\\n002d ame ';
+            const iter = createIterator(data);
+            const step = iter.next();
+            const _1 = step.value;
+            iter.next();
+            const _2 = step.value;
+            let ok = isIdcp(_2.d);
+            expect(ok).to.be.true;
+            const result = hash(_1, iter);
+            expect(result).to.deep.equal({
+                id: 6,
+                flag: 'id',
+                value: '--sometoken',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 12, row: 1 }, o: 11 }
+            });
+        });
+        it('hash of unrestricted type  "#8_idName"', () => {
+            // difference is the id starts with a number
+            const data = '#8_idName';
+            const iter = createIterator(data);
+            const step = iter.next();
+            const _1 = step.value;
+            iter.next();
+            const _2 = step.value;
+            let ok = isIdcp(_2.d);
+            expect(ok).to.be.true;
+            const result = hash(_1, iter);
+            expect(result).to.deep.equal({
+                id: 6,
+                flag: 'unrestricted',
+                value: '8_idName',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 9, row: 1 }, o: 8 }
+            });
+        });
+        it('hash near the end of file "#rt', () => {
+            // difference is the id starts with a number
+            const data = '#8_idName';
+            const iter = createIterator(data);
+            const step = iter.next();
+            const _1 = step.value;
+            iter.next();
+            const _2 = step.value;
+            let ok = isIdcp(_2.d);
+            expect(ok).to.be.true;
+            const result = hash(_1, iter);
+            expect(result).to.deep.equal({
+                id: 6,
+                flag: 'unrestricted',
+                value: '8_idName',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 9, row: 1 }, o: 8 }
+            });
+        });
+        it('hash with valid escape "#rt\\456 s"', () => {
+            // difference is the id starts with a number
+            const data = '#rt\\4456 s';
+            const iter = createIterator(data);
+            const step = iter.next();
+            const _1 = step.value;
+            iter.next();
+            const _2 = step.value;
+            let ok = isIdcp(_2.d);
+            expect(ok).to.be.true;
+            const result = hash(_1, iter);
+            expect(result).to.deep.equal({
+                id: 6,
+                flag: 'id',
+                value: 'rt䑖s',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 10, row: 1 }, o: 9 }
+            });
+        });
+        it('hash with valid escape "#rts"', () => {
+            // difference is the id starts with a number
+            const data = '#rts ';
+            const iter = createIterator(data);
+            const step = iter.next();
+            const _1 = step.value;
+            iter.next();
+            const _2 = step.value;
+            let ok = isIdcp(_2.d);
+            expect(ok).to.be.true;
+            const result = hash(_1, iter);
+            expect(result).to.deep.equal({
+                id: 6,
+                flag: 'id',
+                value: 'rts',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 4, row: 1 }, o: 3 }
+            });
+        });
+
+
+
+        /*
+                    if (_1.d === '#'){
+                        let ok = false;
+                        iterator.next();
+                        const _2 = step.value;
+                        // can be an escape
+                        if (_2.d === '\\'){
+                            iterator.next();
+                            const _3 = step.value;
+                            iterator.reset(_2.o,_2.col,_2.row); // reset back to _2
+                            if (isEscapeStart(_2, _3)){
+                                ok = true;
+                            }
+                        }
+                        if (isIdcp(_2)){
+                            ok = true;
+                        }
+                        // at this point, if "ok" is true, then 
+                        // fall through
+                        yield absorbHash(_1, iterator);
+                        continue;
+                    }
+        */
+
+    })
 });

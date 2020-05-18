@@ -55,7 +55,7 @@ describe('definitions', () => {
       expect(res).to.be.false;
     });
   });
-  describe('numberStart', () => {
+  xdescribe('numberStart', () => {
     it('+123 or -123', () => {
       let res = isNumberStart('+', '1')
       expect(res).to.equal(2);

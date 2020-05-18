@@ -47,7 +47,7 @@ module.exports = function (iter) {
     replacements.reverse()
     for( const [_1,replace]  of replacements){
         //{ s: '\uFFFD' , loc: { col: last.col, row: last.row }, o:last.o };
-        d.splice(_1.o, replace.o+1-_1.o, replace.s)
+        d.splice(_1.o - start.o, replace.o+1-_1.o, replace.s)
     }
     return { id: type, value: d.join(''), s: start, e:end };
 };

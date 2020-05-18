@@ -6,9 +6,13 @@ const consumeStringToken = require('../tokenizer/consumers/string');
 const consumeName = require('../tokenizer/consumers/name');
 const consumeNumber = require('../tokenizer/consumers/number');
 const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
-const absorbComment = require('../lib/comments');
+// new stuff
+const absorbComment = require('./comments');
+const absorbHash = require('./hash')
+const absorbString = require('./string')
+const absorbWS = require('./white-space');
 
-const { isName, isEscapeStart, isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
+const { isName, isEscapeStart, isIdcp,  isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
 const { findWhiteSpaceEnd } = require('./utils');
 const tk = require('./tokens')
 
@@ -31,33 +35,53 @@ module.exports = function* tokenize(src = '') {
         }
         // whitespace
         if (isWs(_1.d)) {
-            yield *absorbWS(iterator);
+            yield absorbWS(iterator);
             continue;
         }
         // (") double quotation mark
         if (_1.d === '"'){
-            yield *absorbString(iterator);
+            yield absorbString(iterator);
             continue;
         }
         // hashtoken
         if (_1.d === '#'){
-            yield *absorbHashToken(_1, iterator);
-            continue;
+            let ok = false;
+            iterator.next();
+            const _2 = step.value;
+            // can be an escape
+            if (_2.d === '\\'){
+                iterator.next();
+                const _3 = step.value;
+                iterator.reset(_2.o,_2.col,_2.row); // reset back to _2
+                if (isEscapeStart(_2, _3)){
+                    ok = true;
+                }
+            }
+            if (isIdcp(_2.d)){
+                ok = true;
+            }
+            // at this point, if "ok" is true, then process hash
+            if (ok){
+                yield absorbHash(_1, iterator);
+                continue;
+            }
         }
         // (') single quotation mark
         if (_1.d === '\''){
-            yield *absorbString(_1, iterator);
+            yield absorbString(iterator);
             continue;
         }
         // "(" left parenthesis
         if (_1.d === '('){
-            yield _1;
+            const l = { loc: { o: _1.o, col: _1.col, row: _1.row }};
+            yield { d: '(', s: l, e: l };
             iterator.next();
             continue;
         }
         // ")" right parenthesis
         if (_1.d === ')'){
-            yield _1;
+            const l = { loc: { o: _1.o, col: _1.col, row: _1.row }};
+            yield { d: ')', s: l, e: l };
             iterator.next();
             continue;
         }
@@ -362,4 +386,3 @@ module.exports = function* tokenize(src = '') {
 
     }
 }
-
