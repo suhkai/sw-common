@@ -520,18 +520,40 @@ describe('iterator', () => {
         });
     });
     describe('number', () => {
-        it('isNumberStart "12"', () => {
+        it('isNumberStart "1E" should be true', () => {
             const data = '1E';
-            const iter = createIterator(data);
-            const step = iter.next();
-            const _1 = step.value;
-            iter.next();
-            const _2 = step.value;
-            iter.next();
-            const _3 = step.value;
-            console.log(isNumberStart(_1, _2, _3))
-            console.log(_3);
-            // number()
+            const [_1,_2,_3] = Array.from(createIterator(data));
+            expect(isNumberStart(_1, _2, _3)).to.be.true;
+        });
+        it('isNumberStart "-1E+9" should be true', () => {
+            const data = '-1E+9';
+            const [_1,_2,_3] = Array.from(createIterator(data));
+            expect(isNumberStart(_1, _2, _3)).to.be.true;
+        });
+        it('isNumberStart "+" should be false', () => {
+            const data = '+';
+            const [_1,_2,_3] = Array.from(createIterator(data));
+            expect(isNumberStart(_1, _2, _3)).to.be.false;
+        });
+        it('isNumberStart "+.2" should be true', () => {
+            const data = '+.2';
+            const [_1,_2,_3] = Array.from(createIterator(data));
+            expect(isNumberStart(_1, _2, _3)).to.be.true;
+        });
+        it('isNumberStart "+.." should be false', () => {
+            const data = '+..';
+            const [_1,_2,_3] = Array.from(createIterator(data));
+            expect(isNumberStart(_1, _2, _3)).to.be.false;
+        });
+        it('isNumberStart "+." should be false', () => {
+            const data = '+.';
+            const [_1,_2,_3] = Array.from(createIterator(data));
+            expect(isNumberStart(_1, _2, _3)).to.be.false;
+        });
+        it('isNumberStart "+e" should be false', () => {
+            const data = '+e';
+            const [_1,_2,_3] = Array.from(createIterator(data));
+            expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
     });
 
