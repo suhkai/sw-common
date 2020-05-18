@@ -5,5 +5,6 @@ module.exports = {
     WS:3,
     BADSTRING:4,
     STRING:5,
-    HASH: 6
+    HASH: 6,
+    NUMBER: 7
 }

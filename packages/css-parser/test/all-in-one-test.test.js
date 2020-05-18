@@ -4,10 +4,11 @@ const { expect } = chai;
 const createIterator = require('../lib/iterator');
 const absorbComments = require('../lib/comments');
 const absorbWhiteSpace = require('../lib/white-space');
-const { isWS, isEscapeStart, isIdcp } = require('../lib/checks-and-definitions')
+const { isWS, isEscapeStart, isIdcp, isNumberStart } = require('../lib/checks-and-definitions')
 const escape = require('../lib/escape');
 const string = require('../lib/string');
 const hash = require('../lib/hash');
+const number = require('../lib/number');
 
 describe('iterator', () => {
     describe('validate token stream', () => {
@@ -517,32 +518,21 @@ describe('iterator', () => {
                 e: { loc: { col: 4, row: 1 }, o: 3 }
             });
         });
+    });
+    describe('number', () => {
+        it('isNumberStart "12"', () => {
+            const data = '1E';
+            const iter = createIterator(data);
+            const step = iter.next();
+            const _1 = step.value;
+            iter.next();
+            const _2 = step.value;
+            iter.next();
+            const _3 = step.value;
+            console.log(isNumberStart(_1, _2, _3))
+            console.log(_3)
+            // number()
+        });
+    });
 
-
-
-        /*
-                    if (_1.d === '#'){
-                        let ok = false;
-                        iterator.next();
-                        const _2 = step.value;
-                        // can be an escape
-                        if (_2.d === '\\'){
-                            iterator.next();
-                            const _3 = step.value;
-                            iterator.reset(_2.o,_2.col,_2.row); // reset back to _2
-                            if (isEscapeStart(_2, _3)){
-                                ok = true;
-                            }
-                        }
-                        if (isIdcp(_2)){
-                            ok = true;
-                        }
-                        // at this point, if "ok" is true, then 
-                        // fall through
-                        yield absorbHash(_1, iterator);
-                        continue;
-                    }
-        */
-
-    })
 });
