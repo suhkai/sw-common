@@ -530,7 +530,7 @@ describe('iterator', () => {
             iter.next();
             const _3 = step.value;
             console.log(isNumberStart(_1, _2, _3))
-            console.log(_3)
+            console.log(_3);
             // number()
         });
     });
