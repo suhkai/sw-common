@@ -1,7 +1,6 @@
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
-const escape = require('../../lib/consumers/escape');
 const { macp, isIdStart, isNumberStart, isBOM } = require('../../lib/checks-and-definitions')
 
 describe('definitions', () => {
