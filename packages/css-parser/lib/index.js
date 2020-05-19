@@ -11,17 +11,32 @@ const absorbComment = require('./comments');
 const absorbHash = require('./hash')
 const absorbString = require('./string')
 const absorbWS = require('./white-space');
+const absorbNumber = require('./number');
 
-const { isName, isEscapeStart, isIdcp,  isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
+const { isName, isEscapeStart, isIdcp, isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
 const { findWhiteSpaceEnd } = require('./utils');
 const tk = require('./tokens')
+
+function pick(iter, n) {
+    const step = iter.peek();
+    const rc = Array.from({ length: n });
+    for (let i = 0; i < rc.length; i++) {
+        rc[i] = step.value;
+    }
+    return rc;
+}
+
+function delimToken(_1){
+    const l = { loc: { o: _1.o, col: _1.col, row: _1.row } };
+    return { id: tk.DELIM, d: _1.d, s: l, e: l };
+}
 
 module.exports = function* tokenize(src = '') {
 
     const iterator = createIterator(src);
     // enhanced iterator "step" run-time linked with current state of iterator 
     // value and done are "getter" methods
-    const step = iterator.next(); 
+    const step = iterator.next();
     while (!step.done) {
         let _1 = step.value;
         // comments
@@ -39,102 +54,115 @@ module.exports = function* tokenize(src = '') {
             continue;
         }
         // (") double quotation mark
-        if (_1.d === '"'){
+        if (_1.d === '"') {
             yield absorbString(iterator);
             continue;
         }
         // hashtoken
-        if (_1.d === '#'){
+        if (_1.d === '#') {
             let ok = false;
             iterator.next();
             const _2 = step.value;
             // can be an escape
-            if (_2.d === '\\'){
+            if (_2.d === '\\') {
                 iterator.next();
                 const _3 = step.value;
-                iterator.reset(_2.o,_2.col,_2.row); // reset back to _2
-                if (isEscapeStart(_2, _3)){
+                iterator.reset(_2.o, _2.col, _2.row); // reset back to _2
+                if (isEscapeStart(_2, _3)) {
                     ok = true;
                 }
             }
-            if (isIdcp(_2.d)){
+            if (isIdcp(_2.d)) {
                 ok = true;
             }
             // at this point, if "ok" is true, then process hash
-            if (ok){
+            if (ok) {
                 yield absorbHash(_1, iterator);
                 continue;
             }
         }
         // (') single quotation mark
-        if (_1.d === '\''){
+        if (_1.d === '\'') {
             yield absorbString(iterator);
             continue;
         }
         // "(" left parenthesis
-        if (_1.d === '('){
-            const l = { loc: { o: _1.o, col: _1.col, row: _1.row }};
-            yield { d: '(', s: l, e: l };
+        if (_1.d === '(') {
+            yield delimToken(_1);
             iterator.next();
             continue;
         }
         // ")" right parenthesis
-        if (_1.d === ')'){
-            const l = { loc: { o: _1.o, col: _1.col, row: _1.row }};
-            yield { d: ')', s: l, e: l };
+        if (_1.d === ')') {
+            yield delimToken(_1);
             iterator.next();
             continue;
         }
-        if (_1.d === '+'){
-            yield *absorbNumber(_1, iterator);
-            continue
+        if (_1.d === '+') {
+            [_2, _3] = pick(iter, 3);
+            iter.reset(_1.o, _1.col, _1.row);
+            if (isNumberStart(_1, _2, _3)) {
+                yield absorbNumber(_1, iterator);
+                continue
+            }
         }
-        if (_1.d === ','){
-            yield _1;
+        if (_1.d === ',') {
+            yield delimToken(_1);
             iterator.next();
             continue
         }
-        if (_1.d === '-'){
+        if (_1.d === '-') {
+            [_2, _3] = pick(iter, 3);
+            iter.reset(_1.o, _1.col, _1.row);
+            if (isNumberStart(_1, _2, _3)) {
+                yield absorbNumber(_1, iterator);
+                continue
+            }
+            if (isCDCToken(_1,_2,_3)){
+                yield cdcToken(iter)
+                continue;
+            }
+            if (isIdStart(_1,_2,_3)){
+                yield identLike(iter);
+                continue;
+            }
+        }
+        if (_1.d === '.') {
             // check if the input stream starts with - and and idtokenStart
-            yield *absorbNumber(_1, iterator);
+            yield* absorbNumber(_1, iterator);
             continue
         }
-        if (_1.d === '.'){
-            // check if the input stream starts with - and and idtokenStart
-            yield *absorbNumber(_1, iterator);
-            continue
+        if (_1.d === ':') {
+
         }
-        if (_1.d === ':'){
-         
+        if (_1.d === ';') {
+
         }
-        if (_1.d === ';'){
-         
+        if (_1.d === '<') {
+
         }
-        if (_1.d === '<'){
-         
+        if (_1.d === '@') {
+
         }
-        if (_1.d === '@'){
-         
+        if (_1.d === '[') {
+
         }
-        if (_1.d === '['){
-         
+        if (_1.d === '\\') {
+
         }
-        if (_1.d === '\\'){
-         
+        if (_1.d === ']') {
+
         }
-        if (_1.d === ']'){
-         
+        if (_1.d === '{') {
+
         }
-        if (_1.d === '{'){
-         
+        if (_1.d === '}') {
+
         }
-        if (_1.d === '}'){
-         
+        if (isDigit(_1.d)) {
+
         }
-        if (isDigit(_1.d)){
-         
-        }
-        if (isIdStart(_1.d)){
+        if (isIdStart(_1.d)) {
 
         }
         // yield "delim token"
