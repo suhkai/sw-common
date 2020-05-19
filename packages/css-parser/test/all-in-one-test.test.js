@@ -10,6 +10,19 @@ const string = require('../lib/string');
 const hash = require('../lib/hash');
 const number = require('../lib/number');
 
+function createPicker(iter) {
+    const step = iter.peek();
+    return function pick(n) {
+        const rc = Array.from({ length: n });
+        for (let i = 0; i < rc.length; i++) {
+            iter.next();
+            rc[i] = step.value;
+        }
+        return rc;
+    }
+
+}
+
 describe('iterator', () => {
     describe('validate token stream', () => {
         it('test columns, row, follows css preprocessing rules', () => {
@@ -519,42 +532,178 @@ describe('iterator', () => {
             });
         });
     });
-    describe('number', () => {
+    describe('isNumberStart', () => {
         it('isNumberStart "1E" should be true', () => {
             const data = '1E';
-            const [_1,_2,_3] = Array.from(createIterator(data));
+            const [_1, _2, _3] = Array.from(createIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.true;
         });
         it('isNumberStart "-1E+9" should be true', () => {
             const data = '-1E+9';
-            const [_1,_2,_3] = Array.from(createIterator(data));
+            const [_1, _2, _3] = Array.from(createIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.true;
         });
         it('isNumberStart "+" should be false', () => {
             const data = '+';
-            const [_1,_2,_3] = Array.from(createIterator(data));
+            const [_1, _2, _3] = Array.from(createIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
         it('isNumberStart "+.2" should be true', () => {
             const data = '+.2';
-            const [_1,_2,_3] = Array.from(createIterator(data));
+            const [_1, _2, _3] = Array.from(createIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.true;
         });
         it('isNumberStart "+.." should be false', () => {
             const data = '+..';
-            const [_1,_2,_3] = Array.from(createIterator(data));
+            const [_1, _2, _3] = Array.from(createIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
         it('isNumberStart "+." should be false', () => {
             const data = '+.';
-            const [_1,_2,_3] = Array.from(createIterator(data));
+            const [_1, _2, _3] = Array.from(createIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
         it('isNumberStart "+e" should be false', () => {
             const data = '+e';
-            const [_1,_2,_3] = Array.from(createIterator(data));
+            const [_1, _2, _3] = Array.from(createIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
-    });
+        it('isNumberStart ".1e" should be true', () => {
+            const data = '.1e';
+            const args = Array.from(createIterator(data));
+            expect(isNumberStart(...args)).to.be.true;
 
+        });
+        it('isNumberStart ".e" should be false', () => {
+            const data = '.e';
+            const args = Array.from(createIterator(data));
+            expect(isNumberStart(...args)).to.be.false;
+        });
+        it('isNumberStart "." should be false', () => {
+            const data = '.';
+            const args = Array.from(createIterator(data));
+            expect(isNumberStart(...args)).to.be.false;
+        });
+    });
+    describe('number', () => {
+
+        function prepareTest(data) {
+            const iter = createIterator(data);
+            const pick = createPicker(iter);
+            const [_1, _2, _3] = pick(3);
+            const r1 = isNumberStart(_1, _2, _3);
+            if (r1) {
+                const rc = function executeTest() {
+                    iter.reset(_1.o, _1.col, _1.row);
+                    return number(iter);
+                }
+                rc.iter = iter;
+                return rc;
+            }
+        }
+
+        it('number "1E4"', () => {
+            {
+                const executeTest = prepareTest("1E4");
+                expect(executeTest).to.not.be.undefined;
+                const result = executeTest();
+                expect(result).to.deep.equal({
+                    id: 7,
+                    type: 'number',
+                    d: '1E4',
+                    s: { loc: { o: 0, col: 1, row: 1 } },
+                    e: { loc: { o: 2, col: 3, row: 1 } }
+                });
+            }
+            // lower case e
+            {
+                const executeTest = prepareTest("1e4");
+                expect(executeTest).to.not.be.undefined;
+                const result = executeTest();
+                expect(result).to.deep.equal({
+                    id: 7,
+                    type: 'number',
+                    d: '1e4',
+                    s: { loc: { o: 0, col: 1, row: 1 } },
+                    e: { loc: { o: 2, col: 3, row: 1 } }
+                });
+            }
+        });
+        it('number "1E+4"', () => {
+            const executeTest = prepareTest("1E+4");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            expect(result).to.deep.equal({
+                id: 7,
+                type: 'number',
+                d: '1E+4',
+                s: { loc: { o: 0, col: 1, row: 1 } },
+                e: { loc: { o: 3, col: 4, row: 1 } }
+            });
+        });
+        it('number "+1123"', () => {
+            const executeTest = prepareTest("+1123");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            expect(result).to.deep.equal({
+                id: 7,
+                type: 'integer',
+                d: '+1123',
+                s: { loc: { o: 0, col: 1, row: 1 } },
+                e: { loc: { o: 4, col: 5, row: 1 } }
+            })
+        });
+        it('number "+11.23"', () => {
+            const executeTest = prepareTest("+11.23");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            expect(result).to.deep.equal({
+                id: 7,
+                type: 'number',
+                d: '+11.23',
+                s: { loc: { o: 0, col: 1, row: 1 } },
+                e: { loc: { o: 5, col: 6, row: 1 } }
+            });
+        });
+        it('number "+11."', () => {
+            const executeTest = prepareTest("+11.");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            expect(result).to.deep.equal({
+                id: 7,
+                type: 'integer',
+                d: '+11',
+                s: { loc: { o: 0, col: 1, row: 1 } },
+                e: { loc: { o: 2, col: 3, row: 1 } }
+            })
+        });
+        it('number "+11.e-"', () => {
+            const executeTest = prepareTest("+11.e-");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            const step = executeTest.iter.peek();
+            expect(step.value.d).to.equal('.')
+            expect(result).to.deep.equal({
+                id: 7,
+                type: 'integer',
+                d: '+11',
+                s: { loc: { o: 0, col: 1, row: 1 } },
+                e: { loc: { o: 2, col: 3, row: 1 } }
+            });
+        });
+        it('number "+11e-"', () => {
+            const executeTest = prepareTest("+11e-");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            const step = executeTest.iter.peek();
+            expect(step.value.d).to.equal('e');
+            expect(result).to.deep.equal({
+                id: 7,
+                type: 'integer',
+                d: '+11',
+                s: { loc: { o: 0, col: 1, row: 1 } },
+                e: { loc: { o: 2, col: 3, row: 1 } }
+            });
+        });
+    });
 });

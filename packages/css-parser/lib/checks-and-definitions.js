@@ -112,7 +112,7 @@ const isNumberStart = (first, second, third) => {
       // Otherwise, if the second code point is a U+002E FULL STOP (.)
       // and the third code point is a digit, return true.
       // Otherwise, return false.
-      if (second.d === '\u002E') {
+      if (second.d === '.') {
         if (third) {
           if (isDigit(third.d)) {
             return true;
@@ -122,7 +122,7 @@ const isNumberStart = (first, second, third) => {
     }
   }
   // U+002E FULL STOP (.)
-  if (first.d === '\u002E') {
+  if (first.d === '.') {
     // If the second code point is a digit, return true. Otherwise, return false.
     if (second) {
       if (isDigit(second.d)) {
