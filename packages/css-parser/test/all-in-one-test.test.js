@@ -8,7 +8,7 @@ const { isWS, isEscapeStart, isIdcp, isNumberStart } = require('../lib/checks-an
 const escape = require('../lib/escape');
 const string = require('../lib/string');
 const hash = require('../lib/hash');
-const number = require('../lib/number');
+const numeric = require('../lib/numeric');
 
 function createPicker(iter) {
     const step = iter.peek();
@@ -586,7 +586,6 @@ describe('iterator', () => {
         });
     });
     describe('number', () => {
-
         function prepareTest(data) {
             const iter = createIterator(data);
             const pick = createPicker(iter);
@@ -595,13 +594,12 @@ describe('iterator', () => {
             if (r1) {
                 const rc = function executeTest() {
                     iter.reset(_1.o, _1.col, _1.row);
-                    return number(iter);
+                    return numeric(iter);
                 }
                 rc.iter = iter;
                 return rc;
             }
         }
-
         it('number "1E4"', () => {
             {
                 const executeTest = prepareTest("1E4");
@@ -611,8 +609,8 @@ describe('iterator', () => {
                     id: 7,
                     type: 'number',
                     d: '1E4',
-                    s: { loc: { o: 0, col: 1, row: 1 } },
-                    e: { loc: { o: 2, col: 3, row: 1 } }
+                    s: { loc: { col: 1, row: 1 }, o: 0 },
+                    e: { loc: { col: 3, row: 1 }, o: 2 }
                 });
             }
             // lower case e
@@ -624,8 +622,8 @@ describe('iterator', () => {
                     id: 7,
                     type: 'number',
                     d: '1e4',
-                    s: { loc: { o: 0, col: 1, row: 1 } },
-                    e: { loc: { o: 2, col: 3, row: 1 } }
+                    s: { loc: { col: 1, row: 1 }, o: 0, },
+                    e: { loc: { col: 3, row: 1 }, o: 2, }
                 });
             }
         });
@@ -637,8 +635,8 @@ describe('iterator', () => {
                 id: 7,
                 type: 'number',
                 d: '1E+4',
-                s: { loc: { o: 0, col: 1, row: 1 } },
-                e: { loc: { o: 3, col: 4, row: 1 } }
+                s: { loc: { col: 1, row: 1 }, o: 0, },
+                e: { loc: { col: 4, row: 1 }, o: 3, }
             });
         });
         it('number "+1123"', () => {
@@ -649,8 +647,8 @@ describe('iterator', () => {
                 id: 7,
                 type: 'integer',
                 d: '+1123',
-                s: { loc: { o: 0, col: 1, row: 1 } },
-                e: { loc: { o: 4, col: 5, row: 1 } }
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 5, row: 1 }, o: 4 }
             })
         });
         it('number "+11.23"', () => {
@@ -661,8 +659,8 @@ describe('iterator', () => {
                 id: 7,
                 type: 'number',
                 d: '+11.23',
-                s: { loc: { o: 0, col: 1, row: 1 } },
-                e: { loc: { o: 5, col: 6, row: 1 } }
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 6, row: 1 }, o: 5, }
             });
         });
         it('number "+11."', () => {
@@ -673,8 +671,8 @@ describe('iterator', () => {
                 id: 7,
                 type: 'integer',
                 d: '+11',
-                s: { loc: { o: 0, col: 1, row: 1 } },
-                e: { loc: { o: 2, col: 3, row: 1 } }
+                s: { loc: { col: 1, row: 1 }, o: 0, },
+                e: { loc: { col: 3, row: 1 }, o: 2, }
             })
         });
         it('number "+11.e-"', () => {
@@ -687,22 +685,56 @@ describe('iterator', () => {
                 id: 7,
                 type: 'integer',
                 d: '+11',
-                s: { loc: { o: 0, col: 1, row: 1 } },
-                e: { loc: { o: 2, col: 3, row: 1 } }
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 3, row: 1 }, o: 2 }
             });
         });
-        it('number "+11e-"', () => {
+        it('number dimension "+11e-"', () => {
             const executeTest = prepareTest("+11e-");
             expect(executeTest).to.not.be.undefined;
             const result = executeTest();
             const step = executeTest.iter.peek();
-            expect(step.value.d).to.equal('e');
+            expect(step.done).to.be.true;
             expect(result).to.deep.equal({
-                id: 7,
+                id: 9,
                 type: 'integer',
                 d: '+11',
-                s: { loc: { o: 0, col: 1, row: 1 } },
-                e: { loc: { o: 2, col: 3, row: 1 } }
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 5, row: 1 }, o: 4 },
+                dimension: 'e-',
+                neo: 2,
+                dso: 3
+            });
+        });
+        it('number "11pt"', () => {
+            const executeTest = prepareTest("11pt ");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            const step = executeTest.iter.peek();
+            expect(step.done).to.be.false;
+            expect(result).to.deep.equal({
+                id: 9,
+                type: 'integer',
+                d: '11',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 4, row: 1 }, o: 3 },
+                dimension: 'pt',
+                neo: 1,
+                dso: 2
+            });
+        });
+        it('number "11.34%"', () => {
+            const executeTest = prepareTest("11.34% ");
+            expect(executeTest).to.not.be.undefined;
+            const result = executeTest();
+            const step = executeTest.iter.peek();
+            expect(step.done).to.be.false;
+            expect(result).to.deep.equal({
+                id: 8,
+                type: 'number',
+                d: '11.34%',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 6, row: 1, o: 5 } }
             });
         });
     });

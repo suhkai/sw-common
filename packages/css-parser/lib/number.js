@@ -20,7 +20,7 @@ function consumeDigits(iter) {
 module.exports = function consumeNumber(iter) {
     const step = iter.peek();
     const _1 = step.value;
-    const start = { loc: { o: _1.o, col: _1.col, row: _1.row } };
+    const start = { loc: {  col: _1.col, row: _1.row } , o: _1.o,};
     let last
     //2
     let type = 'integer'
@@ -64,5 +64,5 @@ module.exports = function consumeNumber(iter) {
             }
         }
     }
-    return { id: NUMBER, type, d: iter.slice(_1.o, last.o + 1 - _1.o), s: start, e: { loc: { o: last.o, col: last.col, row: last.row } } };
+    return { id: NUMBER, type, d: iter.slice(_1.o, last.o + 1 - _1.o), s: start, e: { loc: {  col: last.col, row: last.row,  }, o: last.o } };
 }
