@@ -1,18 +1,20 @@
 'use strict'
 const { WS } = require('./tokens')
 const { isWS } = require('./checks-and-definitions')
-module.exports = function (iterator) {
+module.exports = function absorbWS(iterator, max = Infinity) {
     const step = iterator.peek();
     let prev = step.value;
     iterator.next();
     const start = { loc: { col: prev.col, row: prev.row }, o: prev.o }
     let end;
-    while (!step.done) {
+    let i = 0;
+    while (!step.done && i < max) {
         const _1 = step.value;
         if (!isWS(_1.d)){
             end = { loc: { col: prev.col, row: prev.row }, o: prev.o };
             break;
         }
+        i++;
         prev = _1;
         iterator.next();
     }

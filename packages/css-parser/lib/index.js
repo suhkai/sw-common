@@ -1,20 +1,13 @@
 'use strict';
-const constants = require('./const');
-const TYPE = constants.TYPE;
-
-const consumeStringToken = require('../tokenizer/consumers/string');
-const consumeName = require('../tokenizer/consumers/name');
-const consumeNumber = require('../tokenizer/consumers/number');
-const consumeIdentLikeToken = require('../tokenizer/consumers/ident');
-// new stuff
+const absorbNumeric = require('./numeric');
 const absorbComment = require('./comments');
 const absorbHash = require('./hash')
 const absorbString = require('./string')
 const absorbWS = require('./white-space');
-const absorbNumber = require('./number');
+const composeCDCToken = require('./cdc');
 
-const { isName, isEscapeStart, isIdcp, isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
-const { findWhiteSpaceEnd } = require('./utils');
+
+const { isEscapeStart, isIdcp, isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
 const tk = require('./tokens')
 
 function pick(iter, n) {
@@ -26,9 +19,9 @@ function pick(iter, n) {
     return rc;
 }
 
-function delimToken(_1){
+function delimToken(_1, token =tk.DEMIM ){
     const l = { loc: { o: _1.o, col: _1.col, row: _1.row } };
-    return { id: tk.DELIM, d: _1.d, s: l, e: l };
+    return { id: token, d: _1.d, s: l, e: l };
 }
 
 module.exports = function* tokenize(src = '') {
@@ -102,7 +95,7 @@ module.exports = function* tokenize(src = '') {
             [_2, _3] = pick(iter, 3);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
-                yield absorbNumber(_1, iterator);
+                yield absorbNumeric(iterator);
                 continue
             }
         }
@@ -115,25 +108,36 @@ module.exports = function* tokenize(src = '') {
             [_2, _3] = pick(iter, 3);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
-                yield absorbNumber(_1, iterator);
+                yield absorbNumeric(iterator);
                 continue
             }
-            if (isCDCToken(_1,_2,_3)){
-                yield cdcToken(iter)
+            const cdc =  composeCDCToken(_1,_2,_3);
+            if (cdc){
+                yield cdc;
+                iter.reset(_3.o,_3.col, _3.row);
+                iter.next();
                 continue;
             }
             if (isIdStart(_1,_2,_3)){
-                yield identLike(iter);
+                yield absorbIdentLike(iter); //function or ident
                 continue;
             }
         }
+        //
         if (_1.d === '.') {
-            // check if the input stream starts with - and and idtokenStart
-            yield* absorbNumber(_1, iterator);
-            continue
+            const [_2, _3] = pick(iter, 3);
+            iter.reset(_1.o, _1.col, _1.row);
+            if (isNumberStart(_1, _2, _3)) {
+                yield absorbNumeric(iterator);
+                continue
+            }
+            yield delimToken(_1);
+            iterator.next();
+            continue;
         }
+        // here 
         if (_1.d === ':') {
-
+            
         }
         if (_1.d === ';') {
 

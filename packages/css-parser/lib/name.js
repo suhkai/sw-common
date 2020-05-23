@@ -40,7 +40,7 @@ module.exports = function name(iter) {
     if (!end) {
         end = { loc: { col: prev.col, row: prev.row },  o: prev.o  };
     }
-    // replace shit
+    // replace escaped
     let d = iter.slice(_1.o, end.o + 1).split(''); // every char s
     replacements.reverse()
     for (const [_, replace] of replacements) {
