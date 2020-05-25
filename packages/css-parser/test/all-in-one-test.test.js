@@ -6,17 +6,17 @@ const { resolve } = require('path');
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
-const createIterator = require('../lib/iterator');
-const absorbComments = require('../lib/comments');
-const absorbIdent = require('../lib/ident');
-const absorbWhiteSpace = require('../lib/white-space');
-const { isWS, isEscapeStart, isIdcp, isNumberStart, isIdStart } = require('../lib/checks-and-definitions')
-const consumeEscape = require('../lib/escape');
-const string = require('../lib/string');
-const hash = require('../lib/hash');
-const numeric = require('../lib/numeric');
-const absorbATToken = require('../lib/attoken');
-const createLexer = require('../lib');
+const createIterator = require('../lib/lexer/iterator');
+const absorbComments = require('../lib/lexer/comments');
+const absorbIdent = require('../lib/lexer/ident');
+const absorbWhiteSpace = require('../lib/lexer/white-space');
+const { isWS, isEscapeStart, isIdcp, isNumberStart, isIdStart } = require('../lib/lexer/checks-and-definitions')
+const consumeEscape = require('../lib/lexer/escape');
+const string = require('../lib/lexer/string');
+const hash = require('../lib/lexer/hash');
+const numeric = require('../lib/lexer/numeric');
+const absorbATToken = require('../lib/lexer/attoken');
+const createLexer = require('../lib/lexer');
 
 
 function pick(iter, n) {

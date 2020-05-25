@@ -5,7 +5,7 @@ const { resolve } = require('path');
 const chai = require('chai');
 const { expect } = chai;
 const createPreprocessorOverlay = require('../lib/tokenizer/preprocess');
-const tokenizer = require('../lib')
+const tokenizer = require('../lib/lexer')
 
 const fixture = fs.readFileSync(require.resolve('./fixtures/main.css'), 'utf8');
 const source = createPreprocessorOverlay(fixture);

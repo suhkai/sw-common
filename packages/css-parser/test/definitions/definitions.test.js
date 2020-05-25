@@ -1,7 +1,7 @@
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
-const { macp, isIdStart, isNumberStart, isBOM } = require('../../lib/checks-and-definitions')
+const { macp, isIdStart, isNumberStart, isBOM } = require('../../lib/lexer/checks-and-definitions')
 
 describe('definitions', () => {
   describe('BOM check', () => {
