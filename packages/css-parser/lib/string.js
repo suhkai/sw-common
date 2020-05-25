@@ -1,7 +1,7 @@
 'use strict'
 const { STRING, BADSTRING } = require('./tokens');
 const { isNL, isEscapeStart } = require('./checks-and-definitions');
-const escape = require('./escape');
+const consumeEscape = require('./escape');
 
 // § 4.3.5. Consume a string token
 // https://www.w3.org/TR/css-syntax-3/#consume-string-token
@@ -20,8 +20,9 @@ module.exports = function (iter) {
             iter.next();
             const _2 = step.value;
             if (isEscapeStart(prev,_2)){
-                const replace = escape(prev, iter);
+                const replace = consumeEscape(prev, iter);
                 replacements.push([prev,replace]);
+                prev = replace;
                 continue;
             }
             prev = step.value;

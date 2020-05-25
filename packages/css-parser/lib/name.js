@@ -1,6 +1,6 @@
 'use strict';
 const { isEscapeStart, isName } = require('./checks-and-definitions');
-const escape = require('./escape');
+const consumeEscape = require('./escape');
 
 // consume name, this will be the "value" of the hash
 // § 4.3.11. Consume a name
@@ -20,14 +20,14 @@ module.exports = function name(iter) {
             iter.next();
             continue;
         }
-        // escape ??
+        // consumeEscape ??
         if (_next.d === '\\') {
             iter.next();
             const _2 = step.value;
             if (isEscapeStart(_next, _2)) {
-                const replace = escape(_next, iter);
+                const replace = consumeEscape(_next, iter);
                 replacements.push([_next, replace]);
-                prev = _next;
+                prev = replace;
                 continue;
             }
             else {

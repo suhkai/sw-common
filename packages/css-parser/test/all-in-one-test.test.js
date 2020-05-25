@@ -3,24 +3,24 @@ const chai = require('chai');
 const { expect } = chai;
 const createIterator = require('../lib/iterator');
 const absorbComments = require('../lib/comments');
+const absorbIdent = require('../lib/ident');
 const absorbWhiteSpace = require('../lib/white-space');
-const { isWS, isEscapeStart, isIdcp, isNumberStart } = require('../lib/checks-and-definitions')
-const escape = require('../lib/escape');
+const { isWS, isEscapeStart, isIdcp, isNumberStart, isIdStart } = require('../lib/checks-and-definitions')
+const consumeEscape = require('../lib/escape');
 const string = require('../lib/string');
 const hash = require('../lib/hash');
 const numeric = require('../lib/numeric');
+const absorbATToken = require('../lib/attoken');
 
-function createPicker(iter) {
+
+function pick(iter, n) {
     const step = iter.peek();
-    return function pick(n) {
-        const rc = Array.from({ length: n });
-        for (let i = 0; i < rc.length; i++) {
-            iter.next();
-            rc[i] = step.value;
-        }
-        return rc;
+    const rc = Array.from({ length: n });
+    for (let i = 0; i < rc.length; i++) {
+        rc[i] = step.value;
+        iter.next();
     }
-
+    return rc;
 }
 
 describe('iterator', () => {
@@ -244,7 +244,7 @@ describe('iterator', () => {
             });
         })
     });
-    describe('escape', () => {
+    describe('consumeEscape', () => {
         describe('isEscapeStart', () => {
             it('isEscapeStart \\"\\r\\n" should not signal false', () => {
                 const data = '\\\r\n';
@@ -299,7 +299,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(result).to.deep.equal({ s: 'ģ', loc: { col: 4, row: 1 }, o: 3 });
             });
             it('escape \\123', () => {
@@ -308,7 +308,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(result).to.deep.equal({ s: 'ģ', loc: { col: 4, row: 1 }, o: 3 });
             });
             it('escape \\123F', () => {
@@ -317,7 +317,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(result).to.deep.equal({ s: 'ሿ', loc: { col: 5, row: 1 }, o: 4 });
             })
             it('escape \\123 F', () => {
@@ -326,7 +326,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(result).to.deep.equal({ s: 'ģ', loc: { col: 5, row: 1 }, o: 4 });
             })
             it('escape \\00123 A F', () => {
@@ -335,7 +335,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(Number(result.s.codePointAt(0)).toString(16)).to.equal('123');
             })
             it('escape \\FF0000 A F will become maxcode point fffd', () => {
@@ -344,7 +344,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(Number(result.s.codePointAt(0)).toString(16)).to.equal('fffd')
             })
             it('escape "\\EOF" a "\\" at EOF', () => {
@@ -353,7 +353,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(result).to.deep.equal({ s: '�', loc: { col: 1, row: 1 }, o: 0 });
             })
             it('escape "\\x"', () => {
@@ -362,7 +362,7 @@ describe('iterator', () => {
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
-                const result = escape(_1, iter);
+                const result = consumeEscape(_1, iter);
                 expect(result).to.deep.equal({ s: 'x', loc: { col: 2, row: 1 }, o: 1 });
             })
         })
@@ -588,8 +588,8 @@ describe('iterator', () => {
     describe('number', () => {
         function prepareTest(data) {
             const iter = createIterator(data);
-            const pick = createPicker(iter);
-            const [_1, _2, _3] = pick(3);
+            iter.next();
+            const [_1, _2, _3] = pick(iter, 3);
             const r1 = isNumberStart(_1, _2, _3);
             if (r1) {
                 const rc = function executeTest() {
@@ -738,4 +738,236 @@ describe('iterator', () => {
             });
         });
     });
+    describe('identlike', () => {
+        it('bad url("something")', () => {
+            const iter = createIterator('url("something")');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 13,
+                d: 'url(',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 3, loc: { col: 4, row: 1 } }
+            });
+        });
+        it('bad url(    "something")', () => {
+            const iter = createIterator('url(    "something")');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 16, //BAD_URL
+                d: 'url(    "something")',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 19, loc: { col: 20, row: 1 } }
+            });
+        });
+        it('bad url(    "something"', () => {
+            const iter = createIterator('url(    "something"');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 16, //BAD_URL
+                d: 'url(    "something"',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 18, loc: { col: 19, row: 1 } }
+            });
+        })
+        it('bad url(    "\\001f47d lien"', () => {
+            const iter = createIterator('url(    "\\001f47d lien"');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                d: 'url(    "👽lien"',
+                id: 16, // BAD_URL
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 22, loc: { col: 23, row: 1 } }
+            });
+        })
+        it('bad escape url(    "som\\\\n lien")  ', () => {
+            const iter = createIterator('url(    "\\\nlien"');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 16,
+                d: 'url(    "\\\nlien"',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 15, loc: { col: 5, row: 2 } }
+            });
+        })
+        it('good url(some-alien)', () => {
+            const iter = createIterator('url(some-alien)');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 15, // URL
+                d: 'url(some-alien)',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 14, loc: { col: 15, row: 1 } }
+            });
+        })
+        it('good url(some\\alien)', () => {
+            const iter = createIterator('url(some\\alien)');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 15, // URL
+                d: 'url(some\nlien)',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 14, loc: { col: 15, row: 1 } }
+            });
+        })
+        it('invalid escape bad url(some\\\n lien)', () => {
+            const iter = createIterator('url(some\\\nlien)');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 16, // BAD URL
+                d: 'url(some\\\nlien)',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 14, loc: { col: 5, row: 2 } }
+            });
+        })
+        it('white space only allowed before ")" or EOF, => bad url(some alien)', () => {
+            const iter = createIterator('url(some alien)');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbIdent(iter);
+            expect(result).to.deep.equal({
+                id: 16, // URL
+                d: 'url(some alien)',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { o: 14, loc: { col: 15, row: 1 } }
+            });
+        })
+        describe('white space only allowed before ")" or EOF', () => {
+            it('url "url(some  "', () => {
+                const iter = createIterator('url(some  ');
+                iter.next();
+                const step = iter.peek();
+                const result = absorbIdent(iter);
+                expect(result).to.deep.equal({
+                    id: 15, // 
+                    d: 'url(some  ',
+                    s: { loc: { col: 1, row: 1 }, o: 0 },
+                    e: { o: 9, loc: { col: 10, row: 1 } }
+                });
+            });
+            it('url "url(some"', () => {
+                const iter = createIterator('url(some');
+                iter.next();
+                const step = iter.peek();
+                const result = absorbIdent(iter);
+                expect(result).to.deep.equal({
+                    id: 15, // 
+                    d: 'url(some',
+                    s: { loc: { col: 1, row: 1 }, o: 0 },
+                    e: { o: 7, loc: { col: 8, row: 1 } }
+                });
+            });
+            it('url "url(some   )"', () => {
+                const iter = createIterator('url(some   )');
+                iter.next();
+                const step = iter.peek();
+                const result = absorbIdent(iter);
+                expect(result).to.deep.equal({
+                    id: 15, // 
+                    d: 'url(some   )',
+                    s: { loc: { col: 1, row: 1 }, o: 0 },
+                    e: { o: 11, loc: { col: 12, row: 1 } }
+                });
+            });
+        });
+        describe('function tokens', () => {
+            it('"url(\'quoted value\')" is a function', () => {
+                const iter = createIterator('url("quoted value")');
+                iter.next();
+                const step = iter.peek();
+                const result = absorbIdent(iter);
+                expect(result).to.deep.equal({
+                    id: 13, // FUNCTION
+                    d: 'url(',
+                    s: { loc: { col: 1, row: 1 }, o: 0 },
+                    e: { o: 3, loc: { col: 4, row: 1 } }
+                });
+            });
+            it('"calc( 100% -2*4px )', () => {
+                const iter = createIterator('calc( 100% -2*4px )');
+                iter.next();
+                const step = iter.peek();
+                const result = absorbIdent(iter);
+                expect(result).to.deep.equal({
+                    id: 13, // FUNCTION
+                    d: 'calc(',
+                    s: { loc: { col: 1, row: 1 }, o: 0 },
+                    e: { o: 4, loc: { col: 5, row: 1 } }
+                });
+            });
+            it('"-moz-background" ident token', () => {
+                const iter = createIterator('-moz-background');
+                iter.next();
+                const step = iter.peek();
+                const result = absorbIdent(iter);
+                expect(result).to.deep.equal({
+                    id: 14, // IDENT 
+                    d: '-moz-background',
+                    s: { loc: { col: 1, row: 1 }, o: 0 },
+                    e: { loc: { col: 15, row: 1 }, o: 14 }
+                });
+            });
+        });
+    });
+    describe('AT Token', () => {
+        it('@font-face', () => {
+            const iter = createIterator('@font-face');
+            iter.next();
+            const step = iter.peek();
+            const result = absorbATToken(iter);
+            expect(result).to.deep.equal({
+                id: 19,
+                d: 'font-face',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 10, row: 1 }, o: 9 }
+            });
+        });
+
+        it('@\\f123font-face', () => {
+            const iter = createIterator('@\\123font-face');
+            iter.next();
+            const [_1, _2, _3, _4] = pick(iter, 4);
+            iter.reset(_1.o, _1.col, _1.row);
+            expect(isIdStart(_2, _3, _4)).to.be.true;
+            const step = iter.peek();
+            const result = absorbATToken(iter);
+            expect(result).to.deep.equal({
+                id: 19,
+                d: 'ሿont-face',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 14, row: 1 }, o: 13 }
+            })
+
+        });
+        it('@-\\f123font-face', () => {
+            const iter = createIterator('@-\\123font-face');
+            iter.next();
+            const [_1, _2, _3, _4] = pick(iter, 4);
+            iter.reset(_1.o, _1.col, _1.row);
+            expect(isIdStart(_2, _3, _4)).to.be.true;
+            const step = iter.peek();
+            const result = absorbATToken(iter);
+            expect(result).to.deep.equal({
+                id: 19,
+                d: '-ሿont-face',
+                s: { loc: { col: 1, row: 1 }, o: 0 },
+                e: { loc: { col: 15, row: 1 }, o: 14 }
+            });
+        });
+    })
 });

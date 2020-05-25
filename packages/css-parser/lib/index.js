@@ -5,9 +5,11 @@ const absorbHash = require('./hash')
 const absorbString = require('./string')
 const absorbWS = require('./white-space');
 const composeCDCToken = require('./cdc');
+const composeCDOToken = require('./cdo');
+const absorbIdentLike = require('./ident');
+const absorbAtToken = require('./attoken');
 
-
-const { isEscapeStart, isIdcp, isNumberStart, isIdStart, isWS } = require('./checks-and-definitions');
+const { isEscapeStart, isIdcp, isNumberStart, isIdStart, isWS, isDigit, isNameStart } = require('./checks-and-definitions');
 const tk = require('./tokens')
 
 function pick(iter, n) {
@@ -15,22 +17,27 @@ function pick(iter, n) {
     const rc = Array.from({ length: n });
     for (let i = 0; i < rc.length; i++) {
         rc[i] = step.value;
+        iter.next();
     }
     return rc;
 }
 
-function delimToken(_1, token =tk.DEMIM ){
+function createSingleCPToken(_1, token =tk.DEMIM ){
     const l = { loc: { o: _1.o, col: _1.col, row: _1.row } };
     return { id: token, d: _1.d, s: l, e: l };
 }
-
+// 4.3.1. Consume a token
+//https://www.w3.org/TR/css-syntax-3/#consume-token
 module.exports = function* tokenize(src = '') {
 
     const iterator = createIterator(src);
     // enhanced iterator "step" run-time linked with current state of iterator 
     // value and done are "getter" methods
     const step = iterator.next();
-    while (!step.done) {
+    for(;;){
+        if (step.done) {
+            return;
+        }
         let _1 = step.value;
         // comments
         if (_1.d === '/') {
@@ -81,18 +88,18 @@ module.exports = function* tokenize(src = '') {
         }
         // "(" left parenthesis
         if (_1.d === '(') {
-            yield delimToken(_1);
+            yield createSingleCPToken(_1);
             iterator.next();
             continue;
         }
         // ")" right parenthesis
         if (_1.d === ')') {
-            yield delimToken(_1);
+            yield createSingleCPToken(_1);
             iterator.next();
             continue;
         }
         if (_1.d === '+') {
-            [_2, _3] = pick(iter, 3);
+            [_2, _3] = pick(iter, 2);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
                 yield absorbNumeric(iterator);
@@ -100,12 +107,12 @@ module.exports = function* tokenize(src = '') {
             }
         }
         if (_1.d === ',') {
-            yield delimToken(_1);
+            yield createSingleCPToken(_1);
             iterator.next();
             continue
         }
         if (_1.d === '-') {
-            [_2, _3] = pick(iter, 3);
+            [_2, _3] = pick(iter, 2);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
                 yield absorbNumeric(iterator);
@@ -125,7 +132,7 @@ module.exports = function* tokenize(src = '') {
         }
         //
         if (_1.d === '.') {
-            const [_2, _3] = pick(iter, 3);
+            const [_2, _3] = pick(iter, 2);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
                 yield absorbNumeric(iterator);
@@ -137,284 +144,78 @@ module.exports = function* tokenize(src = '') {
         }
         // here 
         if (_1.d === ':') {
-            
+            yield createSingleCPToken(_1, tk.COLON);
+            iterator.next();
+            continue;
         }
         if (_1.d === ';') {
-
+            yield createSingleCPToken(_1, tk.SEMICOLON);
+            iterator.next();
+            continue;
         }
         if (_1.d === '<') {
-
+            const [_2, _3] = pick(iter, 2);
+            iter.reset(_1.o, _1.col, _1.row);
+            const tok = composeCDOToken(_1,_2,_3);
+            if (tok){
+                yield tok;
+                iter.reset(_3.o, _3.col, _3.row);
+                iter.next();
+                continue;
+            }
         }
         if (_1.d === '@') {
-
+            const [_2, _3, _4] = pick(iter, 3);
+            iter.reset(_1.o, _1.col, _1.row);
+            if(isIdStart(_2,_3,_4)){
+                yield absorbAtToken(iter);
+                continue;    
+            }
+            yield createSingleCPToken(_1);
+            iter.next();
+            continue;
         }
         if (_1.d === '[') {
-
+            yield createSingleCPToken(_1, tk.LEFTSB_TOKEN);
+            iter.next();
+            continue;
         }
         if (_1.d === '\\') {
-
-        }
-        if (_1.d === ']') {
-
-        }
-        if (_1.d === '{') {
-
-        }
-        if (_1.d === '}') {
-
-        }
-        if (isDigit(_1.d)) {
-
-        }
-        if (isIdStart(_1.d)) {
-
-        }
-        // yield "delim token"
-    }
-
-    return;
-
-
-
-    while (i <= end) {
-        const _1 = src[i];
-        const _2 = src[i + 1];
-        const _3 = src[i + 2];
-        // https://drafts.csswg.org/css-syntax-3/#consume-token
-        // § 4.3.1. Consume a token
-        // 1.consume comments
-        if (_1 === '\u002f' && _2 == '\u002a') {
-            // find next "*/"
-            const range = createRange()
-            col += 2;
-            let [loc, next] = searchUntil('*/', i + 2, range);
-            yield { id: tk.COMMENT, loc, s: i, e: next - 1 };
-            i = next;
-
-        }
-
-        if (isWS(_1)) {
-            const [loc, next] = consumeWhileTrue(isWS, i)
-            yield { id: tk.WS, loc, s: i, e: next - 1 };
-            i = next;
-        }
-
-        // https://www.w3.org/TR/css-syntax-3/#consume-string-token
-        // U+0022 QUOTATION MARK (")
-        if (_1 === '\u0022') {
-            const range = createRange()
-            col++;
-            const tok = consumeStringToken(src, _1, i + 1, end, advance);
-            // correct for ("")
-            yield { id: tok.id, loc: range(), s: i, e: tok.end }
-            i = advance(src, tok.end);
-        }
-        /* // U+0023 NUMBER SIGN (#)
-        // https://drafts.csswg.org/css-syntax-3/#hash-token-diagram
-        // inspirational source https://github.com/csstree/csstree/blob/master/lib/tokenizer/index.js
-        if (code === '\u0023') {
-            if (isValidEscape(src[i + 1], src[i + 2]) || isName(src[i + 1])) {
-                const it = consumeName(src, i + 1, end);
-                const tok = { id: TYPE.Hash, start: i, end: it };
-                yield tok;
-                i = it + 1;
+            const [_2, _3] = pick(2);
+            iter.reset(_1.o, _1.col, _1.row);
+            if (isIdStart(_1,_2,_3)){
+                yield absorbIdentLike(iter); //function or ident
                 continue;
             }
-            else {
-                yield {
-                    id: TYPE.Delim,
-                    start: i,
-                    end: i
-                }
-                i++;
-                continue;
-            }
-        }
-    
-        // https://www.w3.org/TR/css-syntax-3/#consume-string-token
-        // U+0027 APOSTROPHE (')
-        if (code === '\u0027') {
-            const tok = consumeStringToken(src, code, i + 1, end);
-            // correct for ("")
-            tok.start--;
-            tok.end++;
-            yield tok;
-            i = tok.end + 1;
+            // parse error
+            yield createSingleCPToken(_1);
+            iter.next();
             continue;
         }
-        // U+0028 LEFT PARENTHESIS  "("
-        if (code === '\u0028') {
-            const tok = { id: TYPE.LeftParenthesis, start: i, end: i };
-            yield tok;
-            i++;
+        if (_1.d === ']'){
+            yield createSingleCPToken(_1, tk.RIGHTSB_TOKEN);
+            iter.next();
             continue;
         }
-        // U+0029 LEFT PARENTHESIS  ")"
-        if (code === '\u0029') {
-            const tok = { id: TYPE.RightParenthesis, start: i, end: i };
-            yield tok;
-            i++;
+        if (_1.d === '{'){
+            yield createSingleCPToken(_1, tk.LEFTCB_TOKEN);
+            iter.next();
             continue;
         }
-        // U+002B PLUS SIGN (+)
-        if (code === '\u002B') {
-            const tok = consumeNumber(src, i, end);
-            if (tok) {
-                yield tok;
-                i = tok.end + 1;
-                continue;
-            }
-    
-            yield { id: TYPE.Delim, start: i, end: i };
-            i++;
-            continue;
-    
-        }
-        // U+002C COMMA (,)
-        if (code === '\u002C') {
-            yield { id: TYPE.Delim, start: i, end: i };
-            i++;
+        if (_1.d === '}'){
+            yield createSingleCPToken(_1, tk.RIGHTCB_TOKEN);
+            iter.next();
             continue;
         }
-        // U+002D HYPHEN-MINUS (-)
-        if (code === '\u002d') {
-            const tok = consumeNumber(src, i, end);
-            if (tok) {
-                yield tok;
-                i = tok.end + 1;
-                continue;
-            }
-            else {
-                if (src[i + 1] === '\u002d' && src[i + 2] === '\u003e') {
-                    const tok = { id: TYPE.CDC, start: i, end: i + 2 };
-                    i += 3;
-                    continue;
-                }
-                if (isIdentifierStart(src[i + 1], src[i + 2], src[i + 3])) {
-                    const tok = consumeIdentLikeToken(src, i, end);
-                    yield tok;
-                    i = tok.end + 1;
-                    continue;
-                }
-                yield { id: TYPE.Delim, start: i, end: i };
-                i++;
-                continue;
-            }
-        }
-        // U+002E FULL STOP (.)
-        if (code === '\u002e') {
-            if (isNumberStart(code, src[i + 1], src[i + 2])) {
-                const tok = consumeNumber(src, i, end);
-                if (tok) {
-                    yield tok;
-                    i = tok.end + 1;
-                    continue;
-                }
-            }
-            yield { id: TYPE.Delim, start: i, end: i };
-            i++;
+        if (isDigit(_1.d)){
+            yield absorbNumeric(iter);
             continue;
         }
-    
-        // U+003A COLON (:)
-        if (code === '\u003a') {
-            yield { id: TYPE.Colon, start: i, end: i };
-            i++;
+        if (isNameStart(_1.d)){
+            yield absorbIdentLike(iter)
             continue;
         }
-        // ';'
-        if (code === '\u003B') {
-            yield { id: TYPE.Semicolon, start: i, end: i };
-            i++;
-            continue;
-        }
-        //// U+003C LESS-THAN SIGN (<)
-        if (code === '\u003c') {
-            // <!-- ?  // this is from css 2.1
-            if (src[i + 1] === '\u0021' && src[i + 2] === '\u002d' && src[i + 3] === '\u002d') {
-                yield { id: TYPE.CDO, start: i, end: i + 3 };
-                i += 4;
-                continue;
-            }
-            yield { id: TYPE.Delim, start: i, end: i };
-            i++;
-            continue;
-        }
-        //// U+0040 COMMERCIAL AT (@)
-        if (code === '\u0040') {
-            if (isIdentifierStart(src[i + 1], src[i + 2], src[i + 3])) {
-                const tok = consumeIdentLikeToken(src, i, end);
-                tok.id = TYPE.AtKeyword;
-                yield tok;
-                i = tok.end + 1;
-                continue;
-            }
-            // If the next 3 input code points would start an identifier, ...
-            yield { id: TYPE.Delim, start: i, end: i };
-            i++;
-            continue;
-        }
-        // U+005B LEFT SQUARE BRACKET ([)
-        if (code === '\u005B') {
-            yield { id: TYPE.LeftSquareBracket, start: i, end: i };
-            i++;
-            continue;
-        }
-    
-        // U+005C REVERSE SOLIDUS (\)
-        if (code === '\u005C') {
-            if (isValidEscape(code, src[i + 1])) {
-                const tok = consumeIdentLikeToken(src, i, end);
-                yield tok;
-                i = tok.end + 1;
-                continue;
-            }
-            yield { id: TYPE.LeftSquareBracket, start: i, end: i };
-            i++;
-            continue;
-        }
-    
-        // U+005D RIGHT SQUARE BRACKET (])
-        if (code === '\u005D') {
-            yield { id: TYPE.RightSquareBracket, start: i, end: i };
-            i++;
-            continue;
-        }
-    
-        // U+007B LEFT CURLY BRACKET ({)
-        if (code === '\u007b') {
-            yield { id: TYPE.LeftCurlyBracket, start: i, end: i };
-            i++;
-            continue;
-        }
-    
-        // U+007B LEFT CURLY BRACKET (})
-        if (code === '\u007d') {
-            yield { id: TYPE.RightCurlyBracket, start: i, end: i };
-            i++;
-            continue;
-        }
-    
-        if (cat === charCodeCategory.Digit) {
-            // Reconsume the current input code point, consume a numeric token, and return it.
-            const tok = consumeNumber(src, i, end);
-            if (tok) {
-                yield tok;
-                i = tok.end + 1;
-                continue;
-            }
-            console.log('should not happen');
-        }
-    
-        // name-start code point
-        if (cat === charCodeCategory.NameStart) {
-            const tok = consumeIdentLikeToken(src, i, end);
-            yield tok;
-            i = tok.end + 1;
-            continue;
-        }
-    
-        yield { id: TYPE.Delim, start: i, end: i };*/
-
+        yield createSingleCPToken(_1);
+        iter.next();
     }
 }

@@ -174,5 +174,6 @@ const nonPrintable =
     isEscapeStart,
     isIdStart,
     isNumberStart,
-    isBOM
+    isBOM,
+    isNameStart
   };

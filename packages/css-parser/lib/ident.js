@@ -34,7 +34,7 @@ module.exports = function identLike(iter) {
     */
 
     let cp = step.value;
-    if (name.value.tolowerCase() === 'url' && cp && cp.d === '(') {
+    if (name.value.toLowerCase() === 'url' && cp && cp.d === '(') {
         iter.next() // consume '(' token
         // optional
         if (step.value && isWS(step.value.d)){

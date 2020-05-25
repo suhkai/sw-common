@@ -8,7 +8,7 @@ module.exports = function absorbWS(iterator, max = Infinity) {
     const start = { loc: { col: prev.col, row: prev.row }, o: prev.o }
     let end;
     let i = 0;
-    while (!step.done && i < max) {
+    while (!step.done && i < max-1) {
         const _1 = step.value;
         if (!isWS(_1.d)){
             end = { loc: { col: prev.col, row: prev.row }, o: prev.o };
