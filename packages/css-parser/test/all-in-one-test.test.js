@@ -1,3 +1,8 @@
+'use strict'
+
+const fs = require('fs');
+const { resolve } = require('path');
+
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
@@ -11,6 +16,7 @@ const string = require('../lib/string');
 const hash = require('../lib/hash');
 const numeric = require('../lib/numeric');
 const absorbATToken = require('../lib/attoken');
+const createLexer = require('../lib');
 
 
 function pick(iter, n) {
@@ -969,5 +975,10 @@ describe('iterator', () => {
                 e: { loc: { col: 15, row: 1 }, o: 14 }
             });
         });
+    })
+    describe('css stylesheet tesets', ()=>{
+        const esri = fs.readFileSync(resolve(__dirname, './fixtures/esri.css'), 'utf-8');
+        const tokens = Array.from(createLexer(esri));
+        console.log(tokens);
     })
 });

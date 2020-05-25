@@ -2,9 +2,9 @@
 const { CDO } = require('./tokens');
 
 module.exports = function composeCDOToken(_1, _2, _3) {
-    if (_1 && _1.d === '-') {
+    if (_1 && _1.d === '<') {
         if (_2 && _2.d === '-') {
-            if (_2 && _2.d === '>') {
+            if (_3 && _3.d === '-') {
                 return {
                     id: CDO, 
                     d: '<--', 

@@ -8,12 +8,14 @@ const composeCDCToken = require('./cdc');
 const composeCDOToken = require('./cdo');
 const absorbIdentLike = require('./ident');
 const absorbAtToken = require('./attoken');
+const createIterator = require('./iterator');
 
 const { isEscapeStart, isIdcp, isNumberStart, isIdStart, isWS, isDigit, isNameStart } = require('./checks-and-definitions');
 const tk = require('./tokens')
 
 function pick(iter, n) {
     const step = iter.peek();
+    iter.next();
     const rc = Array.from({ length: n });
     for (let i = 0; i < rc.length; i++) {
         rc[i] = step.value;
@@ -30,10 +32,10 @@ function createSingleCPToken(_1, token =tk.DEMIM ){
 //https://www.w3.org/TR/css-syntax-3/#consume-token
 module.exports = function* tokenize(src = '') {
 
-    const iterator = createIterator(src);
-    // enhanced iterator "step" run-time linked with current state of iterator 
+    const iter = createIterator(src);
+    // enhanced iter "step" run-time linked with current state of iter 
     // value and done are "getter" methods
-    const step = iterator.next();
+    const step = iter.next();
     for(;;){
         if (step.done) {
             return;
@@ -41,33 +43,33 @@ module.exports = function* tokenize(src = '') {
         let _1 = step.value;
         // comments
         if (_1.d === '/') {
-            iterator.next()
+            iter.next()
             let _2 = step.value;
             if (_2.d === '*') { // absorb comments
-                yield absorbComment(_1, _2, iterator);
+                yield absorbComment(_1, _2, iter);
                 continue
             }
         }
         // whitespace
-        if (isWs(_1.d)) {
-            yield absorbWS(iterator);
+        if (isWS(_1.d)) {
+            yield absorbWS(iter);
             continue;
         }
         // (") double quotation mark
         if (_1.d === '"') {
-            yield absorbString(iterator);
+            yield absorbString(iter);
             continue;
         }
         // hashtoken
         if (_1.d === '#') {
             let ok = false;
-            iterator.next();
+            iter.next();
             const _2 = step.value;
             // can be an escape
             if (_2.d === '\\') {
-                iterator.next();
+                iter.next();
                 const _3 = step.value;
-                iterator.reset(_2.o, _2.col, _2.row); // reset back to _2
+                iter.reset(_2.o, _2.col, _2.row); // reset back to _2
                 if (isEscapeStart(_2, _3)) {
                     ok = true;
                 }
@@ -77,45 +79,45 @@ module.exports = function* tokenize(src = '') {
             }
             // at this point, if "ok" is true, then process hash
             if (ok) {
-                yield absorbHash(_1, iterator);
+                yield absorbHash(_1, iter);
                 continue;
             }
         }
         // (') single quotation mark
         if (_1.d === '\'') {
-            yield absorbString(iterator);
+            yield absorbString(iter);
             continue;
         }
         // "(" left parenthesis
         if (_1.d === '(') {
             yield createSingleCPToken(_1);
-            iterator.next();
+            iter.next();
             continue;
         }
         // ")" right parenthesis
         if (_1.d === ')') {
             yield createSingleCPToken(_1);
-            iterator.next();
+            iter.next();
             continue;
         }
         if (_1.d === '+') {
-            [_2, _3] = pick(iter, 2);
+            const [_2, _3] = pick(iter, 2);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
-                yield absorbNumeric(iterator);
+                yield absorbNumeric(iter);
                 continue
             }
         }
         if (_1.d === ',') {
             yield createSingleCPToken(_1);
-            iterator.next();
+            iter.next();
             continue
         }
         if (_1.d === '-') {
-            [_2, _3] = pick(iter, 2);
+            const [_2, _3] = pick(iter, 2);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
-                yield absorbNumeric(iterator);
+                yield absorbNumeric(iter);
                 continue
             }
             const cdc =  composeCDCToken(_1,_2,_3);
@@ -135,22 +137,22 @@ module.exports = function* tokenize(src = '') {
             const [_2, _3] = pick(iter, 2);
             iter.reset(_1.o, _1.col, _1.row);
             if (isNumberStart(_1, _2, _3)) {
-                yield absorbNumeric(iterator);
+                yield absorbNumeric(iter);
                 continue
             }
-            yield delimToken(_1);
-            iterator.next();
+            yield createSingleCPToken(_1);
+            iter.next();
             continue;
         }
         // here 
         if (_1.d === ':') {
             yield createSingleCPToken(_1, tk.COLON);
-            iterator.next();
+            iter.next();
             continue;
         }
         if (_1.d === ';') {
             yield createSingleCPToken(_1, tk.SEMICOLON);
-            iterator.next();
+            iter.next();
             continue;
         }
         if (_1.d === '<') {
@@ -181,7 +183,7 @@ module.exports = function* tokenize(src = '') {
             continue;
         }
         if (_1.d === '\\') {
-            const [_2, _3] = pick(2);
+            const [_2, _3] = pick(iter,2);
             iter.reset(_1.o, _1.col, _1.row);
             if (isIdStart(_1,_2,_3)){
                 yield absorbIdentLike(iter); //function or ident
