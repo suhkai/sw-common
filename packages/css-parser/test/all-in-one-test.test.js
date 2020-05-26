@@ -16,7 +16,7 @@ const string = require('../lib/lexer/string');
 const hash = require('../lib/lexer/hash');
 const numeric = require('../lib/lexer/numeric');
 const absorbATToken = require('../lib/lexer/attoken');
-const createLexer = require('../lib/lexer');
+const tokenize = require('../lib/lexer');
 
 
 function pick(iter, n) {
@@ -978,7 +978,8 @@ describe('iterator', () => {
     })
     describe('css stylesheet tesets', ()=>{
         const esri = fs.readFileSync(resolve(__dirname, './fixtures/esri.css'), 'utf-8');
-        const tokens = Array.from(createLexer(esri));
-        console.log(tokens);
+        const iter = createIterator(esri);
+        const tokens = tokenize(iter);
+        //console.log(tokens);
     })
 });

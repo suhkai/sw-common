@@ -8,7 +8,7 @@ const composeCDCToken = require('./cdc');
 const composeCDOToken = require('./cdo');
 const absorbIdentLike = require('./ident');
 const absorbAtToken = require('./attoken');
-const createIterator = require('./iterator');
+
 
 const { isEscapeStart, isIdcp, isNumberStart, isIdStart, isWS, isDigit, isNameStart } = require('./checks-and-definitions');
 const tk = require('./tokens')
@@ -30,9 +30,9 @@ function createSingleCPToken(_1, token =tk.DEMIM ){
 }
 // 4.3.1. Consume a token
 //https://www.w3.org/TR/css-syntax-3/#consume-token
-module.exports = function* tokenize(src = '') {
+module.exports = function* tokenize( iter ) {
 
-    const iter = createIterator(src);
+    
     // enhanced iter "step" run-time linked with current state of iter 
     // value and done are "getter" methods
     const step = iter.next();
@@ -90,13 +90,13 @@ module.exports = function* tokenize(src = '') {
         }
         // "(" left parenthesis
         if (_1.d === '(') {
-            yield createSingleCPToken(_1);
+            yield createSingleCPToken(_1, tk.RIGHTP_TOKEN);
             iter.next();
             continue;
         }
         // ")" right parenthesis
         if (_1.d === ')') {
-            yield createSingleCPToken(_1);
+            yield createSingleCPToken(_1, tk.RIGHTP_TOKEN);
             iter.next();
             continue;
         }
@@ -109,7 +109,7 @@ module.exports = function* tokenize(src = '') {
             }
         }
         if (_1.d === ',') {
-            yield createSingleCPToken(_1);
+            yield createSingleCPToken(_1, tk.COMMA_TOKEN);
             iter.next();
             continue
         }

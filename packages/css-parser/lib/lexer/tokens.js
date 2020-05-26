@@ -27,4 +27,8 @@ module.exports = {
     RIGHTSB_TOKEN: 21,
     LEFTCB_TOKEN: 22,
     RIGHTCB_TOKEN: 23,
+    //
+    LEFTP_TOKEN:24,
+    RIGHTP_TOKEN:25,
+    COMMA_TOKEN:26
 }
