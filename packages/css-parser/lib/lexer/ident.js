@@ -1,3 +1,5 @@
+// 4.3.4. Consume an ident-like token
+// https://www.w3.org/TR/css-syntax-3/#consume-ident-like-token
 'use strict';
 const { isWS } = require('./checks-and-definitions');
 const consumeName = require('./name')
@@ -6,8 +8,7 @@ const absorbWS = require('./white-space')
 const absorbURL = require('./url');
 
 
-// 4.3.4. Consume an ident-like token
-// https://www.w3.org/TR/css-syntax-3/#consume-ident-like-token
+
 
 module.exports = function identLike(iter) {
     const step = iter.peek();

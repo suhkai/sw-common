@@ -1,10 +1,12 @@
+// consume name, this will be the "value" of the hash
+// § 4.3.11. Consume a name
+// https://www.w3.org/TR/css-syntax-3/#consume-a-name
+
 'use strict';
 const { isEscapeStart, isName } = require('./checks-and-definitions');
 const consumeEscape = require('./escape');
 
-// consume name, this will be the "value" of the hash
-// § 4.3.11. Consume a name
-// https://www.w3.org/TR/css-syntax-3/#consume-a-name
+
 
 module.exports = function name(iter) {
     const step = iter.peek();

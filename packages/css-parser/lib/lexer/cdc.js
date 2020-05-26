@@ -1,3 +1,4 @@
+// https://drafts.csswg.org/css-syntax-3/#typedef-cdc-token
 'use strict'
 const { CDC } = require('./tokens');
 

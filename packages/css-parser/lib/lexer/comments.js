@@ -1,3 +1,5 @@
+// 4.3.2. Consume comments
+// https://drafts.csswg.org/css-syntax-3/#consume-comment
 'use strict'
 const { COMMENT } = require('./tokens')
 module.exports = function (_1, _2, iterator) {

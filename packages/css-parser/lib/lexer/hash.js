@@ -1,3 +1,6 @@
+//https://www.w3.org/TR/css-syntax-3/#consume-token
+// -> see consume hash section under this link
+
 'use strict'
 const { HASH } = require('./tokens');
 const { isIdStart } = require('./checks-and-definitions');
@@ -8,8 +11,7 @@ const absorbName = require('./name');
 // - "id"
 //
 
-//https://www.w3.org/TR/css-syntax-3/#consume-token
-// -> see consume hash section under this link
+
 module.exports = function hash(_1, iter) {
     const step = iter.peek();
     const _2 = step.value;

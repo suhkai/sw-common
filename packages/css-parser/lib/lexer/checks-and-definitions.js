@@ -1,10 +1,6 @@
-'use strict';
-// code points
-// code points
-// code points
-// https://drafts.csswg.org/css-syntax-3/
+// https://drafts.csswg.org/css-syntax-3/#tokenizer-definitions
 // § 4.2. Definitions
-
+'use strict';
 const isDigit = code => code >= '\u0030' && code <= '\u0039';
 
 const isHexDigit = code => isDigit(code) ||

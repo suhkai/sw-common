@@ -1,3 +1,6 @@
+// §4.3.12. Consume a number
+// isNumberStart makes a lot of sanity checks before trying to consume a number
+
 'use strict'
 const { isDigit } = require('./checks-and-definitions');
 const { NUMBER } = require('./tokens');
@@ -15,8 +18,7 @@ function consumeDigits(iter) {
     return prev;
 }
 
-// §4.3.12. Consume a number
-// isNumberStart makes a lot of sanity checks before trying to consume a number
+
 module.exports = function consumeNumber(iter) {
     const step = iter.peek();
     const _1 = step.value;

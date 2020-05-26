@@ -1,3 +1,4 @@
+// https://drafts.csswg.org/css-syntax-3/#typedef-cdo-token
 'use strict'
 const { CDO } = require('./tokens');
 

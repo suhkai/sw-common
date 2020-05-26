@@ -1,10 +1,11 @@
+// § 4.3.7. Consume an escaped code point
+// the token it emit is an internal substitution token
+// https://www.w3.org/TR/css-syntax-3/#consume-escaped-code-point
 'use strict'
 const { STRING, BADSTRING } = require('./tokens');
 const { isWS, isEscapeStart, isHexDigit  } = require('./checks-and-definitions');
 const maxAllowed = parseInt('0x10FFFF');
-// § 4.3.7. Consume an escaped code point
-// the token it emit is an internal substitution token
-// https://www.w3.org/TR/css-syntax-3/#consume-escaped-code-point
+
 module.exports = function consumeEscaped(_1, iterator) {
     const step = iterator.peek();
     //_1 is the '\' token and the currect cp is a valid escape

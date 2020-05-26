@@ -2,7 +2,7 @@
 
 // NOTE: this is not the same as https://www.w3.org/TR/css-syntax-3/#consume-a-number
 // NOTE: this is not the same as https://www.w3.org/TR/css-syntax-3/#consume-a-number
-
+'use strict'
 const consumeNumber = require('./number');
 const { PERCENTAGE , DIMENSION } = require('./tokens');
 const { isIdStart } = require('./checks-and-definitions');
