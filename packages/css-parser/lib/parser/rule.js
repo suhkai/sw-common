@@ -16,6 +16,9 @@ module.exports = function consumeQualifiedRule(iter) {
     while (!iter.done) {
         const step = iter.next();
         const tk = step.value;
+        if (tk.id === WS || tk.id === COMMENT){ // skip it
+            continue;
+        }
         if (tk.id === RIGHTSB_TOKEN) {
             block = absorbBlock(tk, iter);
             break;
