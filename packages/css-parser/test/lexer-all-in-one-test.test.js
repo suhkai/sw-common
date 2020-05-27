@@ -1,11 +1,10 @@
 'use strict'
 
-const fs = require('fs');
-const { resolve } = require('path');
-
 // describe it expect
 const chai = require('chai');
 const { expect } = chai;
+
+//
 const createIterator = require('../lib/lexer/iterator');
 const absorbComments = require('../lib/lexer/comments');
 const absorbIdent = require('../lib/lexer/ident');
@@ -28,99 +27,100 @@ function pick(iter, n) {
     }
     return rc;
 }
+describe('lexer', () => {
+    describe('iterator', () => {
+        describe('validate token stream', () => {
+            it('test columns, row, follows css preprocessing rules', () => {
+                const data = '\uFFFE\r\n\n\n/* a comment */\n\rzigbats\u000c';
+                const result = Array.from(createIterator(data));
+                expect(result).to.deep.equal([
+                    { d: '\uFFFE', col: 1, row: 1, o: 0 },
+                    { d: '\n', col: 2, row: 1, o: 1 },
+                    { d: '\n', col: 1, row: 2, o: 3 },
+                    { d: '\n', col: 1, row: 3, o: 4 },
+                    { d: '/', col: 1, row: 4, o: 5 },
+                    { d: '*', col: 2, row: 4, o: 6 },
+                    { d: ' ', col: 3, row: 4, o: 7 },
+                    { d: 'a', col: 4, row: 4, o: 8 },
+                    { d: ' ', col: 5, row: 4, o: 9 },
+                    { d: 'c', col: 6, row: 4, o: 10 },
+                    { d: 'o', col: 7, row: 4, o: 11 },
+                    { d: 'm', col: 8, row: 4, o: 12 },
+                    { d: 'm', col: 9, row: 4, o: 13 },
+                    { d: 'e', col: 10, row: 4, o: 14 },
+                    { d: 'n', col: 11, row: 4, o: 15 },
+                    { d: 't', col: 12, row: 4, o: 16 },
+                    { d: ' ', col: 13, row: 4, o: 17 },
+                    { d: '*', col: 14, row: 4, o: 18 },
+                    { d: '/', col: 15, row: 4, o: 19 },
+                    { d: '\n', col: 16, row: 4, o: 20 },
+                    { d: '\n', col: 1, row: 5, o: 21 },
+                    { d: 'z', col: 1, row: 6, o: 22 },
+                    { d: 'i', col: 2, row: 6, o: 23 },
+                    { d: 'g', col: 3, row: 6, o: 24 },
+                    { d: 'b', col: 4, row: 6, o: 25 },
+                    { d: 'a', col: 5, row: 6, o: 26 },
+                    { d: 't', col: 6, row: 6, o: 27 },
+                    { d: 's', col: 7, row: 6, o: 28 },
+                    { d: '\n', col: 8, row: 6, o: 29 }
+                ]);
+            });
+            it('step beyond data bounds', () => {
+                const data = 'hi';
+                const it = createIterator(data);
+                const step = it.next();
+                it.next();
+                it.next();
+                it.next();
+                it.next();
+                expect(step.done).to.equal(true);
+            })
+            it('reset beyond data bounds and within data bounds', () => {
+                const data = 'hi';
+                const it = createIterator(data);
+                const step = it.next();
+                expect(() => it.reset(100)).to.throw()
+                it.reset(1, 2, 1)
+                expect(step.value).to.deep.equal({ d: 'i', col: 2, row: 1, o: 1 });
+            });
+            it('reset within data bounds on a crlf boundery', () => {
+                const data = 'hi\r\nthere';
+                const it = createIterator(data);
+                const step = it.next();
+                while (!step.done) it.next();
+                it.reset(3);
+                expect({ d: step.value.d, o: step.value.o }).to.deep.equal({ d: '\n', o: 2 });
+                it.next()
+                expect({ d: step.value.d, o: step.value.o }).to.deep.equal({ d: 't', o: 4 });
+            });
+            it('reset within data bounds on a crlf boundery', () => {
+                const data = 'hi\r\nthere';
+                const it = createIterator(data);
+                const step = it.next();
+                while (!step.done) it.next();
+                it.reset(0);
+                expect(step.value).to.deep.equal({ d: 'h', col: 1, row: 1, o: 0 })
+                it.next();
+                it.reset();
+                expect(step.value).to.deep.equal({ d: 'h', col: 1, row: 1, o: 0 })
+            });
+            it('reset within data bounds on a cr boundery', () => {
+                const data = 'hi\rthere';
+                const it = createIterator(data);
+                const step = it.next();
+                while (!step.done) it.next();
+                it.reset(2);
+                expect(step.value).to.deep.equal({ d: '\n', col: 6, row: 2, o: 2 })
+            });
+            it('reset within data bounds on a ff boundery', () => {
+                const data = 'hi\u000cthere';
+                const it = createIterator(data);
+                const step = it.next();
+                while (!step.done) it.next();
+                it.reset(2);
 
-describe('iterator', () => {
-    describe('validate token stream', () => {
-        it('test columns, row, follows css preprocessing rules', () => {
-            const data = '\uFFFE\r\n\n\n/* a comment */\n\rzigbats\u000c';
-            const result = Array.from(createIterator(data));
-            expect(result).to.deep.equal([
-                { d: '\uFFFE', col: 1, row: 1, o: 0 },
-                { d: '\n', col: 2, row: 1, o: 1 },
-                { d: '\n', col: 1, row: 2, o: 3 },
-                { d: '\n', col: 1, row: 3, o: 4 },
-                { d: '/', col: 1, row: 4, o: 5 },
-                { d: '*', col: 2, row: 4, o: 6 },
-                { d: ' ', col: 3, row: 4, o: 7 },
-                { d: 'a', col: 4, row: 4, o: 8 },
-                { d: ' ', col: 5, row: 4, o: 9 },
-                { d: 'c', col: 6, row: 4, o: 10 },
-                { d: 'o', col: 7, row: 4, o: 11 },
-                { d: 'm', col: 8, row: 4, o: 12 },
-                { d: 'm', col: 9, row: 4, o: 13 },
-                { d: 'e', col: 10, row: 4, o: 14 },
-                { d: 'n', col: 11, row: 4, o: 15 },
-                { d: 't', col: 12, row: 4, o: 16 },
-                { d: ' ', col: 13, row: 4, o: 17 },
-                { d: '*', col: 14, row: 4, o: 18 },
-                { d: '/', col: 15, row: 4, o: 19 },
-                { d: '\n', col: 16, row: 4, o: 20 },
-                { d: '\n', col: 1, row: 5, o: 21 },
-                { d: 'z', col: 1, row: 6, o: 22 },
-                { d: 'i', col: 2, row: 6, o: 23 },
-                { d: 'g', col: 3, row: 6, o: 24 },
-                { d: 'b', col: 4, row: 6, o: 25 },
-                { d: 'a', col: 5, row: 6, o: 26 },
-                { d: 't', col: 6, row: 6, o: 27 },
-                { d: 's', col: 7, row: 6, o: 28 },
-                { d: '\n', col: 8, row: 6, o: 29 }
-            ]);
-        });
-        it('step beyond data bounds', () => {
-            const data = 'hi';
-            const it = createIterator(data);
-            const step = it.next();
-            it.next();
-            it.next();
-            it.next();
-            it.next();
-            expect(step.done).to.equal(true);
-        })
-        it('reset beyond data bounds and within data bounds', () => {
-            const data = 'hi';
-            const it = createIterator(data);
-            const step = it.next();
-            expect(() => it.reset(100)).to.throw()
-            it.reset(1, 2, 1)
-            expect(step.value).to.deep.equal({ d: 'i', col: 2, row: 1, o: 1 });
-        });
-        it('reset within data bounds on a crlf boundery', () => {
-            const data = 'hi\r\nthere';
-            const it = createIterator(data);
-            const step = it.next();
-            while (!step.done) it.next();
-            it.reset(3);
-            expect({ d: step.value.d, o: step.value.o }).to.deep.equal({ d: '\n', o: 2 });
-            it.next()
-            expect({ d: step.value.d, o: step.value.o }).to.deep.equal({ d: 't', o: 4 });
-        });
-        it('reset within data bounds on a crlf boundery', () => {
-            const data = 'hi\r\nthere';
-            const it = createIterator(data);
-            const step = it.next();
-            while (!step.done) it.next();
-            it.reset(0);
-            expect(step.value).to.deep.equal({ d: 'h', col: 1, row: 1, o: 0 })
-            it.next();
-            it.reset();
-            expect(step.value).to.deep.equal({ d: 'h', col: 1, row: 1, o: 0 })
-        });
-        it('reset within data bounds on a cr boundery', () => {
-            const data = 'hi\rthere';
-            const it = createIterator(data);
-            const step = it.next();
-            while (!step.done) it.next();
-            it.reset(2);
-            expect(step.value).to.deep.equal({ d: '\n', col: 6, row: 2, o: 2 })
-        });
-        it('reset within data bounds on a ff boundery', () => {
-            const data = 'hi\u000cthere';
-            const it = createIterator(data);
-            const step = it.next();
-            while (!step.done) it.next();
-            it.reset(2);
-
-            expect(step.value).to.deep.equal({ d: '\n', col: 6, row: 2, o: 2 })
+                expect(step.value).to.deep.equal({ d: '\n', col: 6, row: 2, o: 2 })
+            });
         });
     });
     describe('comments', () => {
@@ -975,11 +975,5 @@ describe('iterator', () => {
                 e: { loc: { col: 15, row: 1 }, o: 14 }
             });
         });
-    })
-    describe('css stylesheet tesets', ()=>{
-        const esri = fs.readFileSync(resolve(__dirname, './fixtures/esri.css'), 'utf-8');
-        const iter = createIterator(esri);
-        const tokens = tokenize(iter);
-        //console.log(tokens);
     })
 });

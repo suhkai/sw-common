@@ -24,8 +24,8 @@ function pick(iter, n) {
     return rc;
 }
 
-function createSingleCPToken(_1, token =tk.DEMIM ){
-    const l = { loc: { o: _1.o, col: _1.col, row: _1.row } };
+function createSingleCPToken(_1, token =tk.DELIM ){
+    const l = { loc: { col: _1.col, row: _1.row }, o: _1.o,  };
     return { id: token, d: _1.d, s: l, e: l };
 }
 // 4.3.1. Consume a token

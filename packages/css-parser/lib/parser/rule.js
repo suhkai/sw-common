@@ -8,6 +8,7 @@ const {
 
 const absorbBlock = require('./simple-block');
 const { RIGHTSB_TOKEN } = require('../lexer/tokens')
+const absorbComponentValue = require('./component');
 
 
 module.exports = function consumeQualifiedRule(iter) {
@@ -25,7 +26,7 @@ module.exports = function consumeQualifiedRule(iter) {
         }
         this.stream.reset(tk.s.o, tk.s.loc.col, tk.s.loc.row);
         const cvalues = absorbComponentValue(iter);
-        Array.prototype.apply(sbtokens, cvalues);
+        Array.prototype.push.apply(prelude, cvalues);
     }
     return { prelude, block }
 }

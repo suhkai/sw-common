@@ -5,6 +5,27 @@ module.exports = function createIterator(data) {
     let col = 1;
     let row = 1;
     let value;
+
+    function createStep(){
+        return Object.defineProperties(Object.create(null), {
+            value: {
+                get: () => {
+                    if (cursor === -1){
+                        return undefined;
+                    }
+                    if (cursor <= data.length - 1) {
+                        return { d: value, col, row, o: cursor };
+                    }
+                    return undefined;
+                }
+            },
+            done: {
+                get: () => cursor > data.length - 1
+            }
+        });
+
+    }
+
     return {
         [Symbol.iterator]: function () { return this },
         slice(a, b) {
@@ -43,19 +64,7 @@ module.exports = function createIterator(data) {
                     value = '\n'
                 }
             }
-            return Object.defineProperties(Object.create(null), {
-                value: {
-                    get: () => {
-                        if (cursor <= data.length - 1) {
-                            return { d: value, col, row, o: cursor };
-                        }
-                        return undefined;
-                    }
-                },
-                done: {
-                    get: () => cursor > data.length - 1
-                }
-            });
+            return createStep();
         },
         reset(i = 0, c = !i ? 1 : undefined, l = !i ? 1 : undefined) {
             let tvalue;
@@ -75,19 +84,7 @@ module.exports = function createIterator(data) {
             value = tvalue || data[cursor]
         },
         peek() {
-            return Object.defineProperties(Object.create(null), {
-                value: {
-                    get: () => {
-                        if (cursor <= data.length - 1) {
-                            return { d: value, col, row, o: cursor };
-                        }
-                        return undefined;
-                    }
-                },
-                done: {
-                    get: () => cursor > data.length - 1
-                }
-            });
+            return createStep();
         }
     }
 }
