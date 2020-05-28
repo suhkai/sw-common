@@ -7,6 +7,22 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "client-socket",
+            "program": "${workspaceFolder}/packages/mock-socket-test/client.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}/packages/mock-socket-test"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "server-socket",
+            "program": "${workspaceFolder}/packages/mock-socket-test/server.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}/packages/mock-socket-test"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "mocha spider-engine-test",
             "program": "${workspaceFolder}/packages/spider/index.js",
             "internalConsoleOptions": "openOnSessionStart",
