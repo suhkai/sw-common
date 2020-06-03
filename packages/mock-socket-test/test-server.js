@@ -2,17 +2,34 @@ var net = require('net');
 
 var server = net.createServer(function (s) {
     let cnt = 0;
+    console.log('connected',s.address());
     s.write('Echo server\r\n');
+    
     //s.pipe(s);
     s.on('end', () => {
-        console.log('end')
-    })
+        console.log('end event received')
+        console.log(`destroyed flag:${s.destroyed}`); // true when it is end
+        //s.write('some test'); // -> this will fire an error event before close event
+    });
+
     s.on('close', err => {
-        console.log('close', err)
-    })
+        console.log('close event received', err)
+        console.log(`destroyed flag:${s.destroyed}`); // true when it is end
+        // lets strip the "error" event handler from the socket first
+        // s.removeAllListeners('error'); , if this is done before there s.write, a global EPIPE error is emitted
+        //s.write('some test'); // -> still error event will be called after the close
+    });
+
+    s.on('finish', err => {
+        console.log('finish event received', err)
+        // lets strip the "error" event handler from the socket first
+        // s.removeAllListeners('error'); , if this is done before there s.write, a global EPIPE error is emitted
+        //s.write('some test'); // -> still error event will be called after the close
+    });
+
     s.on('error', err => {
-        console.log('error', err)
-    })
+        console.log(`error event "${err.message}", errno="${err.errno}", code="${err.code}"`)
+    });
 
     s.on('data', data => {
         cnt++;
@@ -35,6 +52,7 @@ var server = net.createServer(function (s) {
     s.on('timeout', () => {
         console.log('timeout')
     })
+    //setTimeout(()=>s.end(),500);
 });
 
 server.listen(8080, '0.0.0.0', function () {
@@ -42,39 +60,13 @@ server.listen(8080, '0.0.0.0', function () {
 });
 
 server.on('error', errO => {
-    const port = 8080;
-    const host ='0.0.0.0';
-    const err = new Error();
-    Object.defineProperties(err,{
-        code:{
-           value: 'EADDRINUSE',
-           writeble: false
-        },
-        err:{
-            value: 'EADDRINUSE',
-           writeble: false
-        },
-        syscall: {
-            value: 'listen',
-            writeble: false
-        },
-        address: {
-            value: host,
-            writeable: false
-        },
-        message: {
-            value: 'listen EADDRINUSE: address already in use 0.0.0.0:8080',
-            writable: false
-        }
-    });
-    console.log(err);
-        //console.log(`${err.code}, ${err.errno}, ${err.syscall}, ${err.address}, ${err.message}, ${String(err)}`);
-      //  console.log(Object.getPrototypeOf(err).constructor.name)
-    //EADDRINUSE, 
-    //EADDRINUSE, 
-    //listen, 
-    //0.0.0.0, 
-    //listen EADDRINUSE: address already in use 0.0.0.0:8080, 
-    //Error: listen EADDRINUSE: address already in use 0.0.0.0:8080
-})
+    console.log(`server error ${String(err0)}`);
+});
+
+//console.log(Object.getOwnPropertyDescriptors(server));
+/*
+server.connect(80, 'www.jacob-bogers.com', () => {
+    console.log('ok connect works')
+});
+*/
 
