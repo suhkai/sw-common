@@ -2,9 +2,9 @@ var net = require('net');
 
 var server = net.createServer(function (s) {
     let cnt = 0;
-    console.log('connected',s.address());
+    console.log('connected', s.address());
     s.write('Echo server\r\n');
-    
+
     //s.pipe(s);
     s.on('end', () => {
         console.log('end event received')
@@ -55,11 +55,21 @@ var server = net.createServer(function (s) {
     //setTimeout(()=>s.end(),500);
 });
 
-server.listen(8080, '0.0.0.0', function () {
-    console.log('listening', this === server)
-});
+try {
+    server.listen(8080, '0.0.0.0',  () => {
+        console.log('listening', this === server)
+    });
+}
+catch (err) {
+    console.log(err.constructor.name);
+    console.log(Object.getOwnPropertyDescriptors(err));
+    const e = new RangeError('dsdfef');
+    // 'Port should be >= 0 and < 65536. Received 8080.3.'
+    // code ERR_SOCKET_BAD_PORT
 
-server.on('error', errO => {
+}
+
+server.on('error', err0 => {
     console.log(`server error ${String(err0)}`);
 });
 

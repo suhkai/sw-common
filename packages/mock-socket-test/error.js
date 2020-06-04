@@ -7,7 +7,7 @@ module.exports = class NetworkError extends Error {
         this._aux = aux;
     }   
     toString(){
-        super.toString();
+        return super.toString();
     }
 }
 
@@ -76,4 +76,4 @@ error event received Error: connect ECONNREFUSED 127.0.0.1:8080
   syscall: 'connect',
   address: '127.0.0.1',
   port:
- */
+  */

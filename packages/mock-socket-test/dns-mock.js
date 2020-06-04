@@ -2,6 +2,8 @@ class DNS {
     constructor(){
         this.aRecords = new Map();
         this.pRecords= new Map();
+        // register default i guess
+        this.register('localhost','127.0.0.1');
     }
     register(name, ip){
         if (typeof name !== 'string'){
@@ -10,10 +12,14 @@ class DNS {
         if (typeof ip !== 'string'){
             throw new Error('"ip" not a string');
         }
-        const ips = this.aRecords.get(name.toLocaleLowerCase()) || new Set();
-        ips.add(ip.toLocaleLowerCase());
-        const hosts = this.pRecords.get(ip.toLocaleLowerCase()) || new Set();
-        hosts.add(name);
+        const ntc = name.toLocaleLowerCase();
+        const ipn = ip.toLocaleLowerCase();
+        const ips = this.aRecords.get(ntc) || new Set();
+        this.aRecords.set(ntc, ips)
+        ips.add(ipn);
+        const hosts = this.pRecords.get(ipn) || new Set();
+        this.pRecords.set(ipn, hosts);
+        hosts.add(ntc);
     }
     nsLookupBy(nameOrIp){
         const ips = this.aRecords.get(nameOrIp.toLocaleLowerCase());

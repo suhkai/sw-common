@@ -8,7 +8,7 @@ module.exports = function createDefer(delay = 0) {
                     fn(...args);
                 }
                 catch(err){
-                    
+                    console.log(err)
                 }
             });
         }

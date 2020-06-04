@@ -1,8 +1,10 @@
 'use strict';
 // for later
+//const ServerSocket = require('./server-socket');
 const NError = require('./error');
 
-function assertHostPort(port, host) {
+
+function assertHostPort(host, port) {
     if (host === 'localhost' || host === '127.0.0.1') {
         throw new Error('localhost or 127.0.0.1 not allowed')
     }
@@ -17,23 +19,28 @@ module.exports = class NetInterface {
         this._claimedPorts = new Map();
         // listen is as in posix "listen" not event listeners
     }
+    nsLookupBy(host){
+        return this._dns.nsLookupBy(host);
+    }
     claimPort(port, host, socket) {
         assertHostPort(host, port);
         // get ip of host
         const ips = this._dns.nsLookupBy(host);
         if (!ips.length) {
-            throw new Error(`Lookop "${host}" failed, does not resolve to an ip`)
+            return -1; // lookup failed host not registered
         }
         // pick the first 
         const ports = this._claimedPorts.get(ips[0]) || new Map();
+        this._claimedPorts.set(ips[0], ports);
         if (port === 0) { // chose random port between 16384 and 32768
             for (; ports.has(port);) {
                 port = 16384 + Math.trunc((32768 - 16384) * Math.random());
             }
         }
         if (ports.has(port)) { /// in this case listen claimed the port
-            return 0; // port not claimed
+            return 0; // reserved port
         }
+       // console.log(socket instanceof  ServerSocket);
         ports.set(port, socket);
         return port;//claimed port
     }
@@ -55,15 +62,18 @@ module.exports = class NetInterface {
     }
     getRemoteSocket(port, host) {
         assertHostPort(host, port);
-        const ips = this._dns.nsLookupBy(host);
-        if (!ips.length) {
-            return undefined;
+        const ips = this._dns.nsLookupBy(host)
+        for (const ip of ips){
+            const ports = this._claimedPorts.get(ip);
+            if (!ports.has(port)){
+                continue;
+            }
+            // found it
+            const socket = ports.get(port);
+            //console.log(socket instanceof  ServerSocket);
+            return socket;
         }
-        const ports = this._claimedPorts.get(ips[0]);
-        if (!ports) {
-            return undefined;
-        }
-        return ports.get(port); // if it is there it is there
+        return undefined;
     }
     
 };

@@ -7,8 +7,8 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "client-socket",
-            "program": "${workspaceFolder}/packages/mock-socket-test/client.js",
+            "name": "test-socket-mock",
+            "program": "${workspaceFolder}/packages/mock-socket-test/tsome.js",
             "internalConsoleOptions": "openOnSessionStart",
             "cwd": "${workspaceFolder}/packages/mock-socket-test"
         },
