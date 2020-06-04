@@ -16,16 +16,20 @@ const network = new Network(dns);
 const socket = new Socket({}, network, 'node1')
 const server = new ServerSocket({}, network, 'node2');
 
-server.listen(123, function() {
-    console.log('server listening');
+server.listen(123, '0.0.0.0', function() {
+    console.log('server listening', JSON.stringify(server.address()));
+    console.log('client connect attempt');
     socket.connect(123, 'node2');
 });
 
-server.on('connection', socket => {
-    console.log(`connecting: ${socket._connecting}`);
-    console.log(`destroyed: ${socket._destroyed}`);
-    socket.on('connected', ()=>{
+server.on('connection', cs => {
+    console.log('Server connection event');
+    console.log(`2.connecting: ${cs._connecting}`);
+    console.log(`2.destroyed: ${cs._destroyed}`);
+    cs.on('connected', ()=>{
         console.log('2.socket connected')
+        console.log(`2.socket address:  ${JSON.stringify(cs.address())}`)
+        server.close(); // dont accept any other connections
     });
 });
 
@@ -49,5 +53,11 @@ socket.on('finnish', () => {
     console.log(`finnish Event`);
 });
 
+server.close();
+
+socket.on('connected', ()=>{
+    console.log('1.socket connected')
+    console.log(`1.socket address: ${JSON.stringify(socket.address())}`)
+});
 
 

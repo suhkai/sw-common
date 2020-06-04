@@ -10,13 +10,7 @@ class ServerSocket extends EventEmitter {
         super(options);
         this._options = options;
         this._nw = network;
-        this._buffer = Buffer.alloc(16384);
         // some stats
-        this._bytesRead = 0;
-        this._bytesWritten = 0;
-        this._connecting = false;
-        this._destroyed = false;
-        this._connected = false;
         this._listening = false;
         const ips = network.nsLookupBy(fromHost);
         if (ips.length === 0) {
@@ -25,39 +19,41 @@ class ServerSocket extends EventEmitter {
         // normalize
         this._host = network.nsLookupBy(ips[0])[0];
         this._cp = undefined; // counterparty socket
+        this._connections = new Set(); // all client sockets forked by this server
     }
     address() {
-        return { port: this._port, family: 'IPv4', address: this._fromHost };
+        return { port: this._port, family: 'IPv4', address: this._host };
     }
-    get bufferSize() {
-        return this._buffer.byteLength;
+    close(cb) {
+        this._blockNewConnections = true;
+        if (cb) {
+            this._closeCB = cb;
+        }
+        if (this._connections.size === 0) {
+           
+            // there are no connection can close immediatly
+            defer(() => {
+                // first we emit close
+                this.emit('close');
+                if (cb) {
+                    const err = new NetworkError('ERR_SERVER_NOT_RUNNING', '', '[ERR_SERVER_NOT_RUNNING]: Server not running');
+                    cb.apply(this, err);
+                }
+            });
+            return;
+        }
     }
-    get bytesRead() {
-        return this._bytesRead;
-    }
-    get bytesWritten() {
-        return this._bytesWritten;
-    }
-    get connecting() {
-        return this._connecting;
-    }
-    get destroyed() {
-        return this._destroyed;
-    }
-    // only for outgoing connections
-    // incomming connections use "this.accept call" (like posix counterpart)
-    connect(port, host, cb) {
-        //`this._port = this._nw.claimPort(0, this._fromHost);
-        // does the remote host exist and is listened to
-        //this._nw.dns.
-
-    }
-    destroy(error) {
-
+    getConnections(fn) {
+        if (typeof fn === 'function') {
+            defer(() => {
+                fn.call(this, undefined, this._connections.size);
+            });
+        }
+        return this; // what to do here?
     }
     syn(remoteSocket, fn) {
         //(options, network, fromHost) {
-        if (!this._listening) {
+        if (!this._listening || this._blockNewConnections) {
             // send back error
             defer(fn, true); // send back an true in the error field
             return;
@@ -69,61 +65,15 @@ class ServerSocket extends EventEmitter {
         socket._remoteHost = remoteSocket._host;
         socket._remotePort = remoteSocket._port;
         socket._connecting = true; // a bit useless in this context but lets set it
-        socket.cp = remoteSocket;
-        defer(fn, undefined, socket); // sync
+        socket._cp = remoteSocket;
+        this._connections.add
+        defer(fn, false, socket); // sync
         return;
-    }
-    end(data, encoding, callback) {
-        // data
-        // data callback
-        // data encoding
-        // data encoding callback
-    }
-    get destroyed() {
-
-    }
-    get localPort() {
-
-    }
-    pause(error) {
-
-    }
-    get pending() {
-
     }
     ref() {
 
     }
-    get remoteAddress() {
-
-    }
-    get remoteFamily() {
-
-    }
-    get remotePort() {
-
-    }
-    setEncoding(encoding) {
-
-    }
-    setKeepAlive(enable, initialDelay) {
-        // enable
-        // initialDelay
-        // enable, initialDelay
-    }
-    setNoDelay(noDelay) {
-        // noDelay
-        // initialDelay
-        // enable, initialDelay
-    }
-    setTimeout(timeout, callback) {
-        // timeout
-        // timeout, callback
-    }
     unref() {
-
-    }
-    _accept() {
 
     }
     listen(port, host /*ipv4 address*/, cb) {
@@ -196,7 +146,7 @@ class ServerSocket extends EventEmitter {
             });
             return;
         }
-        if (_cb){
+        if (_cb) {
             this.once('listening', () => {
                 _cb.apply(this);
             });
@@ -279,7 +229,7 @@ class Socket extends EventEmitter {
         // reserve port on this socket
         // 1. claim local port (randomly chosen).
         this._port = this._nw.claimPort(0, this._host, this);
-        serverSocket.syn(this, /*synack*/ (err, socket) => {
+        serverSocket.syn(this, /*synack*/(err, socket) => {
             // from here on its all sync
             if (err) {
                 const error = new NetworkError('ECONNREFUSED', 'ECONNREFUSED', `connect ECONNREFUSED ${host}:${port}`);
@@ -306,6 +256,7 @@ class Socket extends EventEmitter {
         this._connected = true;
         if (this._server) {
             this._server.emit('connection', this);
+            this._cp.ack();
         }
         defer(() => {
             this.emit('connected');
