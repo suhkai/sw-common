@@ -8,7 +8,7 @@ let serverClosed = false;
 var server = net.createServer(function (s) {
     let cnt = 0;
     console.log('connected', s.address());
-    s.write('Echo server\r\n');
+    
 
     server.getConnections((err, count)=>{
         if (serverClosed) return;
@@ -21,17 +21,18 @@ var server = net.createServer(function (s) {
                 setTimeout(()=>console.log('stopped', logs), 4000);
             });
         }
+
     });
     
     //s.pipe(s);
     s.on('end', () => {
-        console.log('end event received')
+        console.log('2. end event received')
         console.log(`destroyed flag:${s.destroyed}`); // true when it is end
         //s.write('some test'); // -> this will fire an error event before close event
     });
 
     s.on('close', err => {
-        console.log('close event received', err)
+        console.log('2. close event received', err)
         console.log(`destroyed flag:${s.destroyed}`); // true when it is end
         // lets strip the "error" event handler from the socket first
         // s.removeAllListeners('error'); , if this is done before there s.write, a global EPIPE error is emitted
@@ -41,14 +42,14 @@ var server = net.createServer(function (s) {
     });
 
     s.on('finish', err => {
-        console.log('finish event received', err)
+        console.log('2. finish event received', err)
         // lets strip the "error" event handler from the socket first
         // s.removeAllListeners('error'); , if this is done before there s.write, a global EPIPE error is emitted
         //s.write('some test'); // -> still error event will be called after the close
     });
 
     s.on('error', err => {
-        console.log(`error event "${err.message}", errno="${err.errno}", code="${err.code}"`)
+        console.log(`2. error event  received: "${err.message}", errno="${err.errno}", code="${err.code}"`)
     });
 
     s.on('data', data => {
@@ -66,13 +67,14 @@ var server = net.createServer(function (s) {
     });
 
     s.on('ready', () => {
-        console.log('ready')
+        console.log('2. ready event received')
     })
 
     s.on('timeout', () => {
-        console.log('timeout')
+        console.log('2. timeout event received')
     })
-    //setTimeout(()=>s.end(),500);
+    s.write('Echo server\r\n');
+    //setTimeout(()=>s.end(),50);
 });
 
 server.listen(8080, '0.0.0.0', () => {

@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "test-socket-mock/debug real client",
+            "program": "${workspaceFolder}/packages/mock-socket-test/test-client.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}/packages/mock-socket-test"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "test-socket-mock",
             "program": "${workspaceFolder}/packages/mock-socket-test/tsome.js",
             "internalConsoleOptions": "openOnSessionStart",

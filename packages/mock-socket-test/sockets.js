@@ -37,7 +37,7 @@ class ServerSocket extends EventEmitter {
                 this.emit('close');
                 if (cb) {
                     const err = new NetworkError('ERR_SERVER_NOT_RUNNING', '', '[ERR_SERVER_NOT_RUNNING]: Server not running');
-                    cb.apply(this, err);
+                    cb.call(this, err);
                 }
             });
             return;
@@ -184,10 +184,6 @@ class Socket extends EventEmitter {
         this._cp = undefined; // counterparty socket
         this._server = server;
     }
-
-    address() {
-        return { port: this._port, family: 'IPv4', address: this._host };
-    }
     get bufferSize() {
         return this._buffer.byteLength;
     }
@@ -202,6 +198,24 @@ class Socket extends EventEmitter {
     }
     get destroyed() {
         return this._destroyed;
+    }
+    get localPort() {
+
+    }
+    get pending() {
+
+    }
+    get remoteAddress() {
+
+    }
+    get remoteFamily() {
+
+    }
+    get remotePort() {
+
+    }
+    address() {
+        return { port: this._port, family: 'IPv4', address: this._host };
     }
     // only for outgoing connections
     // incomming connections use "this.accept call" (like posix counterpart)
@@ -269,36 +283,30 @@ class Socket extends EventEmitter {
         }
         // close immediatly  
     }
+    end(data, encoding, cb) {
+        // there should always be data
+        if (data){
 
-    end(data, encoding, callback) {
+        }
+        let _cb;
+        if (cb && typeof cb === 'function'){
+            _cb = cb;
+        }
+        if (encoding){
+            if (typeof encoding === 'function'){
+                _cb = cb;
+            }
+        }
+
         // data
         // data callback
         // data encoding
         // data encoding callback
-
-    }
-    get destroyed() {
-
-    }
-    get localPort() {
-
     }
     pause(error) {
 
     }
-    get pending() {
-
-    }
     ref() {
-
-    }
-    get remoteAddress() {
-
-    }
-    get remoteFamily() {
-
-    }
-    get remotePort() {
 
     }
     setEncoding(encoding) {
@@ -321,12 +329,53 @@ class Socket extends EventEmitter {
     unref() {
 
     }
-
     _accept() {
 
     }
-}
+    write(data, encoding, callback){
+        let _protoName;
+        let _endocing;
+        if (data === null){
+            defer(()=>{
+               const err = new TypeError('[ERR_STREAM_NULL_VALUES]: May not write null values to stream');
+               this.emit('error', err);
+            });
+            return true;
+        }
+        if (data === undefined){
+            _protoName = 'undefined';
+        }
+        if (!_protoName){
+            const proto = Object.getPrototypeOf(data);
+            if (proto){
+                _protoName = proto.constructor && proto.constructor.name;
+            }
+            _protoName = '[unknown type]';
+        }
+        // check data
+        if (!(_protoName === 'string' || _protoName === 'Uint8Array' || _protoName === 'Buffer')){
+            defer(()=>{
+                const err = new TypeError(`[ERR_INVALID_ARG_TYPE]: The "chunk" argument must be of type string or an instance of Buffer. Received an instance of ${_protoName}`);
+                this.emit('error', err);
+            });
+            return true; // nothing stuck in userspace
+        }
+        // check encoding
+        if (typeof data === 'string'){
+            _endcoding = 'utf8';
+            if (typeof encoding === 'string'){
+                _encoding = encoding;
+            }
+        }
+        // check callback
+        if (arguments.length === 2 && typeof encoding === 'function'){
+            _cb = encoding;
+        }
+        // 
 
+        
+    }
+}
 
 module.exports = { ServerSocket, Socket };
 
