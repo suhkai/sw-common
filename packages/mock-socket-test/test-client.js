@@ -6,10 +6,6 @@ const defer = createDefer();
 
 const tracer = [];
 
-
-
-
-
 const socket = net.createConnection(8080, 'localhost', function () {
     console.log('1.connected', this === socket)
     console.log('1.destoyed', this.destroyed)
@@ -29,13 +25,13 @@ socket.on('end', () => {
     console.log(`1. end event received`);
     console.log('trying to write something to the stream')
     //socket.write(new Uint16Array(24)); // lets save some weird object
-})
+});
 
 socket.on('close', () => {
     tracer.push('close event start');
     //defer(() => tracer.push('defer: from close event'))
     tracer.push('close event end');
-})
+});
 
 socket.on('error', err => {
     console.log('error event received')
@@ -45,11 +41,11 @@ socket.on('error', err => {
     tracer.push('   error event start');
     //defer(() => tracer.push('defer: from error event'))
     tracer.push('   error event end');
-})
+});
 
 socket.on('finish', () => {
     console.log(`finish event received`);
-})
+});
 
 //socket.connect(8080);
 //defer(() => tracer.push('defer:connect has been called'))
@@ -62,5 +58,4 @@ socket.on('data', chunk =>{
 });
 
 socket.setEncoding('utf8')
-
 console.log(socket.eventNames());
