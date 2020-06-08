@@ -3,7 +3,7 @@ const net = require('net');
 
 const socket = new net.Socket();
 
-socket.connect(8080, 'localhost', function () {
+socket.connect(8088, 'localhost', function () {
     console.log('1/connected/ socket this=socket?', this === socket)
     console.log('1/connected/ destoyed=', this.destroyed)
     console.log('1/connected/ connecting=', this.connecting)
