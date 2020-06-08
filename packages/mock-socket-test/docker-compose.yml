@@ -1,0 +1,14 @@
+version: "2.3"
+services:
+  dev-node:
+    user: root
+    build:
+      context: .
+    volumes:
+      - ./package.json:/var/app/package.json
+      - ./test-client.js:/var/app/test-client.js
+      - ./test-server.js:/var/app/test-server.js
+      - ./defer.js:/var/app/defer.js
+    expose:
+      - "6020"
+      - "9080"
