@@ -13,6 +13,12 @@ socket.connect(8080, 'localhost', function () {
 })
 
 // not firing
+socket.on('data', err => {
+    console.log('1/data received', data);
+})
+
+
+// not firing
 socket.on('end', () => {
     console.log('1/end event received');
 })
