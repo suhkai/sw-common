@@ -13,8 +13,8 @@ socket.connect(8088, 'localhost', function () {
 })
 
 // not firing
-socket.on('data', err => {
-    console.log('1/data received', data);
+socket.on('data', chunk => {
+    console.log('1/data received', chunk);
 })
 
 
