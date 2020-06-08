@@ -22,7 +22,6 @@ server.listen(123, '0.0.0.0', function() {
     socket.connect(123, 'node2');
 });
 
-
 server.on('connection', cs => {
     console.log('Server connection event');
     console.log(`2.connecting: ${cs._connecting}`);
@@ -34,6 +33,7 @@ server.on('connection', cs => {
             cs.end();
         });
     });
+    // more callbacks
 });
 
 server.on('error', err => {

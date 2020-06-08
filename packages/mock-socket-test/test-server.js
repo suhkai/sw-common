@@ -1,15 +1,18 @@
 const net = require('net');
 
+const createDeferSeq = require('./defer-sequence');
+
+const sched = createDeferSeq();
+
 const server = net.createServer(function (s) {
-   
     console.log('2/connected event received', s.address());
-    
+   
     // just close the client socket after 2 sec of connecting
-    setTimeout(()=>{
+    /*setTimeout(()=>{
         s.end(()=>{
             console.log('2/socket.end called (after)')
         });
-    }, 2000);
+    }, 2000);*/
     
     //s.pipe(s);
     s.on('end', () => {
@@ -33,13 +36,12 @@ const server = net.createServer(function (s) {
         console.log(`2/error event  received: "${JSON.stringify(err)}"`)
     });
 
-    s.on('data', data => {
+    /*s.on('data', data => {
         console.log('2/data/ received', data)
-        s.write(data, ()=>{
-            console.log('2/data/ received (after echo)')
-        });
-    })
-    s.write('Echo server\r\n');
+        
+    })*/
+    // if you write, make sure the "client" counterparty has a on("data") event otherwise "end" and "close" will not fire properly
+    //s.write('Echo server\r\n');
 });
 
 server.listen(8088, '0.0.0.0', () => {
@@ -53,4 +55,3 @@ server.on('error', err0 => {
 server.on('close', err0 => {
     console.log(`server close ${String(err0)}`);
 });
-

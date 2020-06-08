@@ -30,7 +30,7 @@ class ServerSocket extends EventEmitter {
             this._closeCB = cb;
         }
         if (this._connections.size === 0) {
-           
+
             // there are no connection can close immediatly
             defer(() => {
                 // first we emit close
@@ -167,14 +167,17 @@ class Socket extends EventEmitter {
         super(options);
         this._options = options;
         this._nw = network;
-        this._buffer = Buffer.alloc(16384);
+        this._buffers = [];
         // some stats
         this._bytesRead = 0;
         this._bytesWritten = 0;
         this._connecting = false;
         this._destroyed = false;
         this._connected = false;
+        this._closed = false;
         this._writable = false;
+        this._pending = true;
+        this._closing = false;
         const ips = network.nsLookupBy(fromHost);
         if (ips.length === 0) {
             throw Error(`unknown host "${fromHost}"`);
@@ -185,7 +188,7 @@ class Socket extends EventEmitter {
         this._server = server;
     }
     get bufferSize() {
-        return this._buffer.byteLength;
+        return this._buffers.reduce((c, b) => { c += b.byteLength; return b; }, 0);
     }
     get bytesRead() {
         return this._bytesRead;
@@ -203,7 +206,7 @@ class Socket extends EventEmitter {
 
     }
     get pending() {
-
+        return this._pending;
     }
     get remoteAddress() {
 
@@ -267,7 +270,8 @@ class Socket extends EventEmitter {
     ack() {
         // only need to set the remote host etc
         this._connecting = false;
-        this._connected = true;
+        this._destroyed = false;
+        this._pending = false;
         if (this._server) {
             this._server.emit('connection', this);
             this._cp.ack();
@@ -285,15 +289,15 @@ class Socket extends EventEmitter {
     }
     end(data, encoding, cb) {
         // there should always be data
-        if (data){
+        if (data) {
 
         }
         let _cb;
-        if (cb && typeof cb === 'function'){
+        if (cb && typeof cb === 'function') {
             _cb = cb;
         }
-        if (encoding){
-            if (typeof encoding === 'function'){
+        if (encoding) {
+            if (typeof encoding === 'function') {
                 _cb = cb;
             }
         }
@@ -332,48 +336,140 @@ class Socket extends EventEmitter {
     _accept() {
 
     }
-    write(data, encoding, callback){
-        let _protoName;
-        let _endocing;
-        if (data === null){
-            defer(()=>{
-               const err = new TypeError('[ERR_STREAM_NULL_VALUES]: May not write null values to stream');
-               this.emit('error', err);
+    write(data, encoding, callback) {
+        let _protoName; // this value is set if there is an error
+        let _encoding;
+        if (arguments.length === 2 && typeof data === 'string') {
+            _encoding = 'utf8';
+            if (typeof encoding === 'string') {
+                _encoding = endcoding;
+            }
+        }
+        let _cb = arguments.length === 2 && typeof encoding === 'function' ? encoding :
+            arguments.length === 3 && typeof callback === 'function' ? callback : undefined;
+        // not connected, not connecting, and never destroyed = never initialized
+        if (this._pending === true && this._destroyed === false && this._connecting === false) {
+            defer(() => {
+                const err = new NetworkError('ERR_SOCKET_CLOSED', undefined, '[ERR_SOCKET_CLOSED]: Socket is closed');
+                this.emit('error', err);
+                if (_cb) {
+                    defer(() => {
+                        _cb.call(this, err);
+                    })
+                }
+            });
+            return;
+        }
+        if (this._closing) {
+            if (this._fin) { // end called
+                defer(() => {
+                    const err = new Error('ERR_STREAM_WRITE_AFTER_END: write after end');
+                    err.code = 'ERR_STREAM_WRITE_AFTER_END'
+                    this.emit('error', err);
+                    if (_cb) {
+                        defer(() => {
+                            _cb.call(this, err);
+                        })
+                    }
+                });
+                return;
+            }
+            if (this._ackfin) { // finished
+                defer(() => {
+                    const err = new Error('ERR_STREAM_WRITE_AFTER_END: write after end');
+                    err.code = 'ERR_STREAM_WRITE_AFTER_END'
+                    this.emit('error', err);
+                    if (_cb) {
+                        defer(() => {
+                            _cb.call(this, err);
+                        })
+                    }
+                });
+                return;
+            }
+            if (this._ackfin2 || this._ackfin3) { // ended
+                defer(() => {
+                    const err = new Error('EPIPE: This socket has been ended by the other party');
+                    err.code = 'EPIPE'
+                    this.emit('error', err);
+                    if (_cb) {
+                        defer(() => {
+                            _cb.call(this, err);
+                        })
+                    }
+                });
+                return;
+            }
+        }
+        // can we actually send though?
+        if (data === null) {
+            defer(() => {
+                const err = new TypeError('[ERR_STREAM_NULL_VALUES]: May not write null values to stream');
+                this.emit('error', err);
             });
             return true;
         }
-        if (data === undefined){
+        if (data === undefined) {
             _protoName = 'undefined';
         }
-        if (!_protoName){
+        if (!_protoName) {
             const proto = Object.getPrototypeOf(data);
-            if (proto){
+            if (proto) {
                 _protoName = proto.constructor && proto.constructor.name;
             }
             _protoName = '[unknown type]';
         }
         // check data
-        if (!(_protoName === 'string' || _protoName === 'Uint8Array' || _protoName === 'Buffer')){
-            defer(()=>{
+        if (!(_protoName === 'string' || _protoName === 'Uint8Array' || _protoName === 'Buffer')) {
+            defer(() => {
                 const err = new TypeError(`[ERR_INVALID_ARG_TYPE]: The "chunk" argument must be of type string or an instance of Buffer. Received an instance of ${_protoName}`);
                 this.emit('error', err);
             });
             return true; // nothing stuck in userspace
         }
-        // check encoding
-        if (typeof data === 'string'){
-            _endcoding = 'utf8';
-            if (typeof encoding === 'string'){
-                _encoding = encoding;
-            }
+        //
+        // buffer it sync-ly, guarantees insertion order
+        if (_protoName === 'Buffer') {
+            this._buffers.push(data);
         }
-        // check callback
-        if (arguments.length === 2 && typeof encoding === 'function'){
-            _cb = encoding;
+        if (_protoName === 'string') {
+            this._buffers.push(Buffer.from(data, _encoding));
         }
-        // 
+        if (_protoName === 'Uint8Array') {
+            this._buffers.push(Buffer.from(data));
+        }
+        this._throttleSend(_cb);
+    }
 
-        
+    _throttleSend(cb) {
+        let prevSendCount = this._bytesWritten;
+        defer(() => { // will fire data and stuff
+            if (prevSendCount > this._bytesWritten) { // re-queue
+                this._throttleSend(cb);
+                return;
+            }
+            this._options.transmitChunk;
+            let i = 0;
+            for (; i < this._buffers.length; i++) {
+                const bytelen = this._buffers[i].byteLength;
+                cnt += bytelen;
+                if (cnt > this._options.transmitChunk) {
+                    // split the buffers at index "i"
+                    const split = this._buffers[i].byteLength - (cnt - this._options.transmitChunk)
+                    const lower = this._buffers[i].slice(0, split);
+                    const upper = this._buffers[i].slice(split)
+                    this._buffers.splice(i, 1, lower, upper);
+                    cnt -= bytelen;
+                    cnt += this._buffers[i].byteLength;
+                    i++;
+                    break;
+                }
+            }
+            const toSend = Buffers.from(this._buffers.splice(0, i));
+            this._buffers.splice(i);
+            this._cp.send(toSend);
+            cb.call(this);
+        });
     }
 }
 
