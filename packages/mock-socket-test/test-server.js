@@ -6,6 +6,9 @@ const sched = createDeferSeq();
 
 const server = net.createServer(function (s) {
     console.log('2/connected event received', s.address());
+
+    
+
    
     // just close the client socket after 2 sec of connecting
     /*setTimeout(()=>{
@@ -36,10 +39,12 @@ const server = net.createServer(function (s) {
         console.log(`2/error event  received: "${JSON.stringify(err)}"`)
     });
 
-    /*s.on('data', data => {
-        console.log('2/data/ received', data)
+    s.on('data', data => {
+        console.log('2/data/ received', data.length, data);
         
-    })*/
+    });
+    
+    s.setEncoding('awyz');
     // if you write, make sure the "client" counterparty has a on("data") event otherwise "end" and "close" will not fire properly
     //s.write('Echo server\r\n');
 });

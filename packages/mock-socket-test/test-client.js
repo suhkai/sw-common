@@ -1,6 +1,9 @@
 'use strict';
 const net = require('net');
 const socket = new net.Socket();
+const createDefer = require('./defer');
+
+const defer = createDefer();
 
 
 
@@ -49,13 +52,10 @@ setTimeout(() => {
             //{"code":"ERR_STREAM_WRITE_AFTER_END"} write after end
         });*/
     })
-}, 2**31-1)
+}, 2 ** 31 - 1)
 
-// not yet connected ?
-console.log('connected?', socket.connecting, socket.pending);
-const rc = socket.write('hello-tit-for-tat', (err) => {
-    console.log('1/write after "hello-tit-for-tat" data has been sent', rc,err);
-});
+
+
 
 socket.connect(8088, 'localhost', function () {
     console.log('1/connected/ socket this=socket?', this === socket)
@@ -65,4 +65,19 @@ socket.connect(8088, 'localhost', function () {
     //const rc = this.write(() => {
     //    console.log('1/connected after "hello" data has been sent', rc);
     //});
+    // whne you are connected start sending radnom data and see how messages are called
+    function sendRandom() {
+        defer(() => {
+            let count = 1000 + Math.trunc(Math.random() * 1000);
+            const buffer = Buffer.alloc(count);
+            for (let i = 0; i < count; i++) {
+                buffer[i] = Math.trunc(Math.random() * 255);
+            }
+            socket.write(buffer, err => {
+                console.log(`1/written data of length ${count}, with error=${JSON.stringify(err)}`);
+                sendRandom(); // kick off next send
+            });
+        });
+    }
+    sendRandom();
 })

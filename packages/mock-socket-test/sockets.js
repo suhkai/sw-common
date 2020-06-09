@@ -8,7 +8,10 @@ const defer = createDefer();
 class ServerSocket extends EventEmitter {
     constructor(options, network, fromHost) {
         super(options);
-        this._options = options;
+        this._options = options || {};
+        if (!isFinite(this._options.transmitChunk)){
+            this._options.transmitChunk = 1024*4;
+        }
         this._nw = network;
         // some stats
         this._listening = false;
@@ -358,10 +361,10 @@ class Socket extends EventEmitter {
                     })
                 }
             });
-            return;
+            return true;
         }
         if (this._closing) {
-            if (this._fin) { // end called
+            if (this._closeState === 'fin') { // end called
                 defer(() => {
                     const err = new Error('ERR_STREAM_WRITE_AFTER_END: write after end');
                     err.code = 'ERR_STREAM_WRITE_AFTER_END'
@@ -372,9 +375,9 @@ class Socket extends EventEmitter {
                         })
                     }
                 });
-                return;
+                return true;
             }
-            if (this._ackfin) { // finished
+            if (this._closeState === 'ackfin') { // finished
                 defer(() => {
                     const err = new Error('ERR_STREAM_WRITE_AFTER_END: write after end');
                     err.code = 'ERR_STREAM_WRITE_AFTER_END'
@@ -385,9 +388,9 @@ class Socket extends EventEmitter {
                         })
                     }
                 });
-                return;
+                return true;
             }
-            if (this._ackfin2 || this._ackfin3) { // ended
+            if (this._closeState = 'ackfin2' || this._closeState === 'ackfin3') { // ended
                 defer(() => {
                     const err = new Error('EPIPE: This socket has been ended by the other party');
                     err.code = 'EPIPE'
@@ -398,9 +401,35 @@ class Socket extends EventEmitter {
                         })
                     }
                 });
-                return;
+                return true;
             }
         }
+        // check counterparty status?
+        if (this._cp._destroyed || this._cp._closing){
+            defer(()=>{
+                const err = new NetworkError('ERR_SOCKET_CLOSED', 'write', '[ERR_SOCKET_CLOSED]: Socket is closed');
+                this.emit('error', err);
+                if (_cb) {
+                    defer(() => {
+                        _cb.call(this, err);
+                    })
+                }
+            })
+            return true;
+        }
+        if (this._destroyed){
+            defer(()=>{
+                const err = new NetworkError('ERR_STREAM_DESTROYED', 'write', '[ERR_STREAM_DESTROYED]: Cannot call write after a stream was destroyed');
+                this.emit('error', err);
+                if (_cb) {
+                    defer(() => {
+                        _cb.call(this, err);
+                    })
+                }
+            })
+            return true;
+        }
+        
         // can we actually send though?
         if (data === null) {
             defer(() => {
@@ -429,35 +458,60 @@ class Socket extends EventEmitter {
         }
         //
         // buffer it sync-ly, guarantees insertion order
+        data = _protoName === 'Buffer' ? data : Buffer.from(data, _encoding);
+        if (data.byteLength === 0 && _cb){
+            defer(()=>{
+                _cb.call(this);
+            });
+            return;
+        }
         if (_protoName === 'Buffer') {
             this._buffers.push(data);
         }
+       
         if (_protoName === 'string') {
-            this._buffers.push(Buffer.from(data, _encoding));
+            this._buffers.push(data);
         }
         if (_protoName === 'Uint8Array') {
-            this._buffers.push(Buffer.from(data));
+            this._buffers.push(data);
         }
-        this._throttleSend(_cb);
+        this._throttleSend(_cb, data.byteLength);
     }
 
-    _throttleSend(cb) {
+    _throttleSend(cb, length) {
         let prevSendCount = this._bytesWritten;
         defer(() => { // will fire data and stuff
-            if (prevSendCount > this._bytesWritten) { // re-queue
-                this._throttleSend(cb);
+            // make check
+            if (!this._cp || this._cp._destroyed || this._cp._closing){
+                defer(()=>{
+                    const err = new NetworkError('ERR_STREAM_DESTROYED', 'write', '[ERR_STREAM_DESTROYED]: Cannot call write after a stream was destroyed');
+                    this.emit('error', err);
+                    if (cb) {
+                        defer(() => {
+                            cb.call(this, err);
+                        })
+                    }
+                });
+                // flush everything from cache immediatly
+                this._buffers.splice(0);
+                return; // return;
+            }
+            // re-queue if we have reached/exceeded quota of transmitChunk
+            if ((this._bytesWritten - prevSendCount) >= this._options.transmitChunk) { 
+                this._throttleSend(cb, length); // "re-queue"
                 return;
             }
-            this._options.transmitChunk;
             let i = 0;
+            let cnt = 0;
+            const len = Math.min(length, this._options.transmitChunk);
             for (; i < this._buffers.length; i++) {
                 const bytelen = this._buffers[i].byteLength;
                 cnt += bytelen;
-                if (cnt > this._options.transmitChunk) {
+                if (cnt > len) {
                     // split the buffers at index "i"
-                    const split = this._buffers[i].byteLength - (cnt - this._options.transmitChunk)
+                    const split = this._buffers[i].byteLength - (cnt - len);
                     const lower = this._buffers[i].slice(0, split);
-                    const upper = this._buffers[i].slice(split)
+                    const upper = this._buffers[i].slice(split);
                     this._buffers.splice(i, 1, lower, upper);
                     cnt -= bytelen;
                     cnt += this._buffers[i].byteLength;
@@ -467,13 +521,30 @@ class Socket extends EventEmitter {
             }
             const toSend = Buffers.from(this._buffers.splice(0, i));
             this._buffers.splice(i);
-            this._cp.send(toSend);
-            cb.call(this);
-        });
+            this._cp._send(toSend); // deposit it on the counterparty plate
+            this._bytesWritten += toSend.byteLength;
+            if (cb){
+                cb.call(this);
+            }
+        }); // defer
+    }
+    // receiving data from counterparty
+    _send(data){
+        // if not encoding is set by "setEncoding" then you will receive
+        this._bytesRead += data.byteLength;
+        if (this.listenerCount('data')){
+            if (this._encoding){
+                this.emit('data',data.toString(this._encoding));
+            }
+            else {
+                this.emit('data', data);
+            }
+        }
+    }
+    setEndcoding(name){
+           Buffer.from('', name); // with through, DONT CATCH IT, socket throws here if name is wrong
+           this._encoding = name; 
     }
 }
 
 module.exports = { ServerSocket, Socket };
-
-
-
