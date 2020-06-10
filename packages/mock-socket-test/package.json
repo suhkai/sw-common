@@ -1,16 +1,16 @@
 {
-  "name": "mock-socket-test",
-  "version": "1.0.0",
+  "name": "@facede/net",
+  "version": "0.0.9",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "echo \"this is a library\" there is no start"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^26.0.1",
-    "mock-socket": "^9.0.3"
+    "@csimi/eslint-config": "^3.0.0",
+    "jest": "^26.0.1"
   }
 }
