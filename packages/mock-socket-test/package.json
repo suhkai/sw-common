@@ -1,8 +1,8 @@
 {
-  "name": "@facede/net",
+  "name": "@facade/net",
   "version": "0.0.9",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "echo \"this is a library\" there is no start"
   },
