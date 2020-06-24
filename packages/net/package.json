@@ -1,0 +1,16 @@
+{
+  "name": "@facade/net",
+  "version": "0.0.9",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "echo \"this is a library\" there is no start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@csimi/eslint-config": "^3.0.0",
+    "jest": "^26.0.1"
+  }
+}

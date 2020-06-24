@@ -3,6 +3,8 @@
  *  for later
  * const ServerSocket = require('./server-socket');
  */
+const NError = require('./error');
+
 
 function assertHostPort (host, port) {
 	if (host === 'localhost' || host === '127.0.0.1') {
