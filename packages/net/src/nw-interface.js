@@ -72,7 +72,7 @@ module.exports = class NetInterface {
 		const ips = this._dns.nsLookupBy(host);
 		for (const ip of ips) {
 			const ports = this._claimedPorts.get(ip);
-			if (!ports) {
+			if (!ports){
 				continue;
 			}
 			if (!ports.has(port)) {
