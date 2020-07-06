@@ -91,8 +91,19 @@ function mkdirp (pathString, done) {
 }
 
 
-const pattern = '{{prefix}}-{{date}}-{{domain}}-{{seq}}.csv';
+const pattern = '{{prefix}}-{{tzone}}-{{date}}-{{time}}-{{domain}}-{{seq}}.csv';
 
+/*
+ * done: 1. am I a directory, else create dir (recursive)
+ *      date should be  yyyy_mm_dd_hh
+ *      time should be  hh24:mi:ss
+ *      tzone is +## or -##,   # = numerical digit
+ *
+ * 2. scan this directory for files with pattern data-[date]-[domain]-00000.csv
+ * 3. pick the last one, and add one to it, for new file,
+ * 4. fails file creation (race condition, retry next + 1)
+ */
+ 
 function reserveNewFile () {
 	
 }
@@ -105,10 +116,6 @@ function reserveNewFile () {
  *function pickNewFile(base, options = { nrLogBuffers: 2, logBufferSize: 8192, domain }) {
  *    //fullpath, taken into account workdir
  *    const fullPath = path.resolve(fileName);
- *    // done: 1. am I a directory, else create dir (recursive)
- *    // 2. scan this directory for files with pattern data-[date]-[domain]-00000.csv
- *    // 3. pick the last one, and add one to it, for new file,
- *    // 4. fails file creation (race condition, retry next + 1)
  *
  *    let statsObj;
  *    try {
