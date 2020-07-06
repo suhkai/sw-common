@@ -39,11 +39,12 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "mocha spider-engine-test",
-            "program": "${workspaceFolder}/packages/spider/index.js",
+            "name": "logwriter-test",
+            "program": "${workspaceFolder}/packages/spider/logwriter.js",
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
-                "NODE_PATH":"${workspaceFolder}/packages/spider/lib"
+                "NODE_PATH":"${workspaceFolder}/packages/spider/lib",
+                "testpath": "/jacob/repos/eds"
             },
             "cwd": "${workspaceFolder}/packages/spider"
         },
