@@ -79,15 +79,21 @@ function private_mkdirp (dirs, done, cursor = 0) {
 	});
 }
 
-function mkdirp (pathString, done) {
+function mkdirp (pathString) {
 	pathString = (typeof pathString === 'string') ? lexPath(pathString) : pathString;
 	if (pathString.firstError) {
 		const te = new TypeError(`parsing the path gave errors, check "fe" property on this Error object`);
-		te.fe = pathString.firstError;
-		done(te);
+		return Promise.resolve([te.fe = pathString.firstError]);
 	}
-	// all ok
-	private_mkdirp(pathString, done);
+	return new Promise((resolve) => {
+		private_mkdirp(pathString, (err) => {
+			if (err) {
+				resolve([err]);
+				return;
+			}
+			resolve([]);
+		});
+	});
 }
 
 
@@ -98,14 +104,43 @@ const pattern = '{{prefix}}-{{tzone}}-{{date}}-{{time}}-{{domain}}-{{seq}}.csv';
  *      date should be  yyyy_mm_dd_hh
  *      time should be  hh24:mi:ss
  *      tzone is +## or -##,   # = numerical digit
- *
+ * 1a, check if you have access to the dir, maybe it exist (in mkdirp) but later rights have been revoked or something
  * 2. scan this directory for files with pattern data-[date]-[domain]-00000.csv
  * 3. pick the last one, and add one to it, for new file,
  * 4. fails file creation (race condition, retry next + 1)
  */
+
+function isWritableReadable (dir) {
+	return new Promise((resolve) => {
+		fs.access(dir, fs.constants.W_OK + fs.constants.R_OK, (err) => {
+			if (err) {
+				resolve([err]);
+				return;
+			}
+			resolve([]);
+		});
+	});
+}
+
  
-function reserveNewFile () {
-	
+async function reserveNewFile (dir) { //basedir should have already existed
+	const [err] = await isWritableReadable(dir);
+	if (err) {
+	  const [err2] = await mkdirp(dir);
+	  if (err2) { // couldnt do much
+		
+	  }
+	}
+	else { // check if it is an actual directory
+	  const stat = await lstat(dir);
+	  if (!stat.isDirectory()) {
+		 // couldnt nothing to do
+	  }
+	}
+	/*
+	 *
+	 * now we can reserve a fileName in this dir
+	 */
 }
 
 /*
