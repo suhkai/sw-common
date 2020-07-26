@@ -44,7 +44,7 @@ module.exports = function (iter) {
         end = { loc: { col: prev.col, row: prev.row }, o: prev.o };
     }
     // replace shit
-    let d = iter.slice(start.o, end.o + 1).split(''); // every char s
+    let d = iter.slice(start.o, end.o + 1); // every char s
     replacements.reverse()
     for( const [_1,replace]  of replacements){
         //{ s: '\uFFFD' , loc: { col: last.col, row: last.row }, o:last.o };

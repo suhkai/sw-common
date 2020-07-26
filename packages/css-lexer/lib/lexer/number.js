@@ -66,5 +66,5 @@ module.exports = function consumeNumber(iter) {
             }
         }
     }
-    return { id: NUMBER, type, d: iter.slice(_1.o, last.o + 1), s: start, e: { loc: {  col: last.col, row: last.row,  }, o: last.o } };
+    return { id: NUMBER, type, d: iter.slice(_1.o, last.o + 1).join(''), s: start, e: { loc: {  col: last.col, row: last.row,  }, o: last.o } };
 }

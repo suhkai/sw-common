@@ -43,7 +43,7 @@ module.exports = function name(iter) {
         end = { loc: { col: prev.col, row: prev.row },  o: prev.o  };
     }
     // replace escaped
-    let d = iter.slice(_1.o, end.o + 1).split(''); // every char s
+    let d = iter.slice(_1.o, end.o + 1); // every char s
     replacements.reverse()
     for (const [_, replace] of replacements) {
         //{ s: '\uFFFD' , loc: { col: last.col, row: last.row }, o:last.o };
