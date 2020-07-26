@@ -20,8 +20,6 @@ function createExtendedLexer(fileName) {
     return { extendedLexer, lexer, iter, fixture }
 }
 
-const logO = o => console.log(JSON.stringify(o, null, 2));
-
 describe('parser', () => {
 
     describe('extended lexer iterator', () => {

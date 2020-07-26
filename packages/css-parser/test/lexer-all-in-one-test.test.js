@@ -15,7 +15,6 @@ const string = require('../lib/lexer/string');
 const hash = require('../lib/lexer/hash');
 const numeric = require('../lib/lexer/numeric');
 const absorbATToken = require('../lib/lexer/attoken');
-const tokenize = require('../lib/lexer');
 
 
 function pick(iter, n) {
