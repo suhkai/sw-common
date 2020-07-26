@@ -111,4 +111,9 @@ describe('parser', () => {
             expect(step.value).to.be.undefined;
         })
     });
+    xdescribe('rules',()=>{
+        xit('@rule',()=>{
+
+        })
+    })
 });
