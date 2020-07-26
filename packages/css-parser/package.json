@@ -1,19 +1,20 @@
 {
-  "name": "css-parser",
-  "version": "1.0.0",
+  "name": "css-lexer",
+  "version": "0.0.1-alpha",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
     "coverage": "nyc --reporter=html --reporter=text  mocha"
   },
+  "files":[
+    "lib/**/*.js",
+    "index.js",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "css-tree": "^1.0.0-alpha.39",
-    "source-map-resolve": "^0.6.0",
-    "urix": "^0.1.0"
-  },
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^7.1.1",
