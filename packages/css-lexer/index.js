@@ -6,7 +6,7 @@ const atrule = require('./lib/parser/atrule');
 const component = require('./lib/parser/component');
 const cssFunction = require('./lib/parser/function');
 const rule = require('./lib/parser/rule');
-const simpleBlock = require('./lib/parse/simple-block')
+const simpleBlock = require('./lib/parser/simple-block')
 
 module.exports = {
     lexer: {
