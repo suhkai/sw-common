@@ -1,7 +1,6 @@
 #distribution dirs
 dist/
 package-lock.json
-.vscode
 
 # Logs
 logs

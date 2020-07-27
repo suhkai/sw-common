@@ -7,6 +7,18 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "demo-lex",
+            "program": "${workspaceFolder}/demo.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}",
+            "args":[
+                "packages/css-lexer/test/fixtures/main"
+            ]
+
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "test-socket-mock/debug real server",
             "program": "${workspaceFolder}/packages/mock-socket-test/test-server.js",
             "internalConsoleOptions": "openOnSessionStart",
