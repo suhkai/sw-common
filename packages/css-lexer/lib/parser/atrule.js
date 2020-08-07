@@ -9,7 +9,6 @@ const {
 } = require('../lexer/tokens');
 
 const absorbBlock = require('./simple-block');
-const { RIGHTSB_TOKEN } = require('../lexer/tokens')
 const absorbComponentValue = require('./component')
 
 module.exports = function consumeQualifiedRule(iter) {

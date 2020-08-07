@@ -5,7 +5,7 @@ const chai = require('chai');
 const { expect } = chai;
 
 //
-const createIterator = require('../lib/lexer/iterator');
+const StringIterator = require('../lib/lexer/cachedStringiterator');
 const absorbComments = require('../lib/lexer/comments');
 const absorbIdent = require('../lib/lexer/ident');
 const absorbWhiteSpace = require('../lib/lexer/white-space');
@@ -15,7 +15,6 @@ const string = require('../lib/lexer/string');
 const hash = require('../lib/lexer/hash');
 const numeric = require('../lib/lexer/numeric');
 const absorbATToken = require('../lib/lexer/attoken');
-const tokenize = require('../lib/lexer');
 
 
 function pick(iter, n) {
@@ -31,16 +30,17 @@ describe('lexer', () => {
     describe('iterator', () => {
         describe('validate token stream', () => {
             it('test columns, row, follows css preprocessing rules', () => {
-                const data = '\uFFFE\r\n\n\n/* a comment */\n\rzigbats\u000c';
-                const result = Array.from(createIterator(data));
+                const data = '\uFFFE\r\n\n\n/* a comment */\n\rzigbats\u000c'[Symbol.iterator]();
+                const stri = new StringIterator(data)
+                const result = Array.from(stri);
                 expect(result).to.deep.equal([
                     { d: '\uFFFE', col: 1, row: 1, o: 0 },
                     { d: '\n', col: 2, row: 1, o: 1 },
                     { d: '\n', col: 1, row: 2, o: 3 },
                     { d: '\n', col: 1, row: 3, o: 4 },
-                    { d: '/', col: 1, row: 4, o: 5 },
-                    { d: '*', col: 2, row: 4, o: 6 },
-                    { d: ' ', col: 3, row: 4, o: 7 },
+                    { d: '/', col: 1, row: 4, o: 5 }, 
+                    { d: '*', col: 2, row: 4, o: 6 }, 
+                    { d: ' ', col: 3, row: 4, o: 7 },  
                     { d: 'a', col: 4, row: 4, o: 8 },
                     { d: ' ', col: 5, row: 4, o: 9 },
                     { d: 'c', col: 6, row: 4, o: 10 },
@@ -66,8 +66,8 @@ describe('lexer', () => {
                 ]);
             });
             it('step beyond data bounds', () => {
-                const data = 'hi';
-                const it = createIterator(data);
+                const data = 'hi'[Symbol.iterator]();;
+                const it = new StringIterator(data)
                 const step = it.next();
                 it.next();
                 it.next();
@@ -76,16 +76,17 @@ describe('lexer', () => {
                 expect(step.done).to.equal(true);
             })
             it('reset beyond data bounds and within data bounds', () => {
-                const data = 'hi';
-                const it = createIterator(data);
+                const data = 'hi'[Symbol.iterator]();
+                const it = new StringIterator(data)
                 const step = it.next();
-                expect(() => it.reset(100)).to.throw()
+                it.reset(100);
+                
                 it.reset(1, 2, 1)
                 expect(step.value).to.deep.equal({ d: 'i', col: 2, row: 1, o: 1 });
             });
             it('reset within data bounds on a crlf boundery', () => {
-                const data = 'hi\r\nthere';
-                const it = createIterator(data);
+                const data = 'hi\r\nthere'[Symbol.iterator]();
+                const it = new StringIterator(data)
                 const step = it.next();
                 while (!step.done) it.next();
                 it.reset(3);
@@ -94,8 +95,8 @@ describe('lexer', () => {
                 expect({ d: step.value.d, o: step.value.o }).to.deep.equal({ d: 't', o: 4 });
             });
             it('reset within data bounds on a crlf boundery', () => {
-                const data = 'hi\r\nthere';
-                const it = createIterator(data);
+                const data = 'hi\r\nthere'[Symbol.iterator]();;
+                const it = new StringIterator(data);
                 const step = it.next();
                 while (!step.done) it.next();
                 it.reset(0);
@@ -105,16 +106,16 @@ describe('lexer', () => {
                 expect(step.value).to.deep.equal({ d: 'h', col: 1, row: 1, o: 0 })
             });
             it('reset within data bounds on a cr boundery', () => {
-                const data = 'hi\rthere';
-                const it = createIterator(data);
+                const data = 'hi\rthere'[Symbol.iterator]();;
+                const it = new StringIterator(data);
                 const step = it.next();
                 while (!step.done) it.next();
                 it.reset(2);
                 expect(step.value).to.deep.equal({ d: '\n', col: 6, row: 2, o: 2 })
             });
             it('reset within data bounds on a ff boundery', () => {
-                const data = 'hi\u000cthere';
-                const it = createIterator(data);
+                const data = 'hi\u000cthere'[Symbol.iterator]();;
+                const it = new StringIterator(data);
                 const step = it.next();
                 while (!step.done) it.next();
                 it.reset(2);
@@ -126,7 +127,7 @@ describe('lexer', () => {
     describe('comments', () => {
         it('absorbComment', () => {
             const data = 'some text\n\r\n/* some comment */';
-            const iter = createIterator(data);
+            const iter = new StringIterator(data[Symbol.iterator]());
             const step = iter.next();
             //ff
             while (step.value.d !== '/') {
@@ -147,8 +148,8 @@ describe('lexer', () => {
             });
         })
         it('absorb unclosed comment', () => {
-            const data = '/* \n\nsome comment ';
-            const iter = createIterator(data);
+            const data = '/* \n\nsome comment '[Symbol.iterator]();;
+            const iter = new StringIterator(data);
             const step = iter.next();
             //ff
             while (step.value.d !== '/') {
@@ -166,8 +167,8 @@ describe('lexer', () => {
             expect(step.done).to.be.true
         })
         it('absorb partly unclosed comment', () => {
-            const data = '/* \n\nsome comment *';
-            const iter = createIterator(data);
+            const data = '/* \n\nsome comment *'[Symbol.iterator]();;
+            const iter = new StringIterator(data);
             const step = iter.next();
             //ff
             while (step.value.d !== '/') {
@@ -184,8 +185,8 @@ describe('lexer', () => {
             });
         })
         it('/* at end of string, no comment body', () => {
-            const data = '/*';
-            const iter = createIterator(data);
+            const data = '/*'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             //ff
             while (step.value.d !== '/') {
@@ -204,8 +205,8 @@ describe('lexer', () => {
     });
     describe('whitespace', () => {
         it('absorb space at EOF', () => {
-            const data = 's \n\u000C\r\n  ';
-            const iter = createIterator(data);
+            const data = 's \n\u000C\r\n  '[Symbol.iterator]();;
+            const iter = new StringIterator(data);
             const step = iter.next();
             while (!isWS(step.value.d)) {
                 iter.next();
@@ -218,8 +219,8 @@ describe('lexer', () => {
             });
         });
         it('absorbLFCR tokens', () => {
-            const data = ' some text\n\r\n/* some comment */';
-            const iter = createIterator(data);
+            const data = ' some text\n\r\n/* some comment */'[Symbol.iterator]();;
+            const iter = new StringIterator(data);
             const step = iter.next();
             while (!isWS(step.value.d)) {
                 iter.next();
@@ -253,8 +254,8 @@ describe('lexer', () => {
     describe('consumeEscape', () => {
         describe('isEscapeStart', () => {
             it('isEscapeStart \\"\\r\\n" should not signal false', () => {
-                const data = '\\\r\n';
-                const iter = createIterator(data);
+                const data = '\\\r\n'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -262,8 +263,8 @@ describe('lexer', () => {
                 expect(isEscapeStart(_1.d, _2.d)).to.be.false;
             })
             it('isEscapeStart \\"\\r" should not signal false', () => {
-                const data = '\\\r';
-                const iter = createIterator(data);
+                const data = '\\\r'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -271,8 +272,8 @@ describe('lexer', () => {
                 expect(isEscapeStart(_1, _2)).to.be.false;
             })
             it('isEscapeStart \\a should not signal false', () => {
-                const data = '\\a';
-                const iter = createIterator(data);
+                const data = '\\a'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -280,8 +281,8 @@ describe('lexer', () => {
                 expect(isEscapeStart(_1, _2)).to.be.true;
             })
             it('isEscapeStart \\ at EOF should signal true', () => {
-                const data = '\\';
-                const iter = createIterator(data);
+                const data = '\\'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -289,8 +290,8 @@ describe('lexer', () => {
                 expect(isEscapeStart(_1, _2)).to.be.true;
             })
             it('isEscapeStart \\ at EOF should signal true', () => {
-                const data = 'e';
-                const iter = createIterator(data);
+                const data = 'e'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -300,8 +301,8 @@ describe('lexer', () => {
         });
         describe('escape replacement', () => {
             it('escape \\123', () => {
-                const data = '\\123';
-                const iter = createIterator(data);
+                const data = '\\123'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -309,8 +310,8 @@ describe('lexer', () => {
                 expect(result).to.deep.equal({ s: 'ģ', loc: { col: 4, row: 1 }, o: 3 });
             });
             it('escape \\123', () => {
-                const data = '\\123';
-                const iter = createIterator(data);
+                const data = '\\123'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -318,8 +319,8 @@ describe('lexer', () => {
                 expect(result).to.deep.equal({ s: 'ģ', loc: { col: 4, row: 1 }, o: 3 });
             });
             it('escape \\123F', () => {
-                const data = '\\123F';
-                const iter = createIterator(data);
+                const data = '\\123F'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -327,8 +328,8 @@ describe('lexer', () => {
                 expect(result).to.deep.equal({ s: 'ሿ', loc: { col: 5, row: 1 }, o: 4 });
             })
             it('escape \\123 F', () => {
-                const data = '\\123 F';
-                const iter = createIterator(data);
+                const data = '\\123 F'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -336,8 +337,8 @@ describe('lexer', () => {
                 expect(result).to.deep.equal({ s: 'ģ', loc: { col: 5, row: 1 }, o: 4 });
             })
             it('escape \\00123 A F', () => {
-                const data = '\\00123 A F';
-                const iter = createIterator(data);
+                const data = '\\00123 A F'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -345,8 +346,8 @@ describe('lexer', () => {
                 expect(Number(result.s.codePointAt(0)).toString(16)).to.equal('123');
             })
             it('escape \\FF0000 A F will become maxcode point fffd', () => {
-                const data = '\\FF0000 A F';
-                const iter = createIterator(data);
+                const data = '\\FF0000 A F'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -354,8 +355,8 @@ describe('lexer', () => {
                 expect(Number(result.s.codePointAt(0)).toString(16)).to.equal('fffd')
             })
             it('escape "\\EOF" a "\\" at EOF', () => {
-                const data = '\\';
-                const iter = createIterator(data);
+                const data = '\\'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -363,8 +364,8 @@ describe('lexer', () => {
                 expect(result).to.deep.equal({ s: '�', loc: { col: 1, row: 1 }, o: 0 });
             })
             it('escape "\\x"', () => {
-                const data = '\\x';
-                const iter = createIterator(data);
+                const data = '\\x'[Symbol.iterator]();
+                const iter = new StringIterator(data);
                 const step = iter.next();
                 const _1 = step.value;
                 iter.next()
@@ -375,8 +376,8 @@ describe('lexer', () => {
     });
     describe('string', () => {
         it('vanilla string "\\123"', () => {
-            const data = '"\\123"';
-            const iter = createIterator(data);
+            const data = '"\\123"'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const result = string(iter);
             expect(step.done).to.be.true;
@@ -389,8 +390,8 @@ describe('lexer', () => {
         });
         // globe glyph
         it('above max coidpoint value "hello w\\1F310 rld"', () => {
-            const data = '"hello w\\1F310 rld"';
-            const iter = createIterator(data);
+            const data = '"hello w\\1F310 rld"'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const result = string(iter);
             expect(step.done).to.be.true;
@@ -402,8 +403,8 @@ describe('lexer', () => {
             });
         });
         it('newline in string should return bad string', () => {
-            const data = '"hello \n world"';
-            const iter = createIterator(data);
+            const data = '"hello \n world"'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const result = string(iter);
             expect(step.done).to.be.false;
@@ -415,8 +416,8 @@ describe('lexer', () => {
             });
         });
         it('string does not terminate before EOF', () => {
-            const data = '"hello world';
-            const iter = createIterator(data);
+            const data = '"hello world'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const result = string(iter);
             expect(step.done).to.be.true;
@@ -428,8 +429,8 @@ describe('lexer', () => {
             });
         });
         it('string with invalid escape', () => {
-            const data = '"hello\\\n world';
-            const iter = createIterator(data);
+            const data = '"hello\\\n world'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const result = string(iter);
             expect(result).to.deep.equal(
@@ -444,8 +445,8 @@ describe('lexer', () => {
     });
     describe('hash', () => {
         it('hash from malformed id token "#--sometoken\\\n002d ame "', () => {
-            const data = '#--sometoken\\\n002d ame ';
-            const iter = createIterator(data);
+            const data = '#--sometoken\\\n002d ame '[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const _1 = step.value;
             iter.next();
@@ -463,8 +464,8 @@ describe('lexer', () => {
         });
         it('hash of unrestricted type  "#8_idName"', () => {
             // difference is the id starts with a number
-            const data = '#8_idName';
-            const iter = createIterator(data);
+            const data = '#8_idName'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const _1 = step.value;
             iter.next();
@@ -482,8 +483,8 @@ describe('lexer', () => {
         });
         it('hash near the end of file "#rt', () => {
             // difference is the id starts with a number
-            const data = '#8_idName';
-            const iter = createIterator(data);
+            const data = '#8_idName'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const _1 = step.value;
             iter.next();
@@ -501,8 +502,8 @@ describe('lexer', () => {
         });
         it('hash with valid escape "#rt\\456 s"', () => {
             // difference is the id starts with a number
-            const data = '#rt\\4456 s';
-            const iter = createIterator(data);
+            const data = '#rt\\4456 s'[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const _1 = step.value;
             iter.next();
@@ -520,8 +521,8 @@ describe('lexer', () => {
         });
         it('hash with valid escape "#rts"', () => {
             // difference is the id starts with a number
-            const data = '#rts ';
-            const iter = createIterator(data);
+            const data = '#rts '[Symbol.iterator]();
+            const iter = new StringIterator(data);
             const step = iter.next();
             const _1 = step.value;
             iter.next();
@@ -540,60 +541,60 @@ describe('lexer', () => {
     });
     describe('isNumberStart', () => {
         it('isNumberStart "1E" should be true', () => {
-            const data = '1E';
-            const [_1, _2, _3] = Array.from(createIterator(data));
+            const data = '1E'[Symbol.iterator]();
+            const [_1, _2, _3] = Array.from(new StringIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.true;
         });
         it('isNumberStart "-1E+9" should be true', () => {
-            const data = '-1E+9';
-            const [_1, _2, _3] = Array.from(createIterator(data));
+            const data = '-1E+9'[Symbol.iterator]();
+            const [_1, _2, _3] = Array.from(new StringIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.true;
         });
         it('isNumberStart "+" should be false', () => {
-            const data = '+';
-            const [_1, _2, _3] = Array.from(createIterator(data));
+            const data = '+'[Symbol.iterator]();
+            const [_1, _2, _3] = Array.from(new StringIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
         it('isNumberStart "+.2" should be true', () => {
-            const data = '+.2';
-            const [_1, _2, _3] = Array.from(createIterator(data));
+            const data = '+.2'[Symbol.iterator]();
+            const [_1, _2, _3] = Array.from(new StringIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.true;
         });
         it('isNumberStart "+.." should be false', () => {
-            const data = '+..';
-            const [_1, _2, _3] = Array.from(createIterator(data));
+            const data = '+..'[Symbol.iterator]()
+            const [_1, _2, _3] = Array.from(new StringIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
         it('isNumberStart "+." should be false', () => {
-            const data = '+.';
-            const [_1, _2, _3] = Array.from(createIterator(data));
+            const data = '+.'[Symbol.iterator]();
+            const [_1, _2, _3] = Array.from(new StringIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
         it('isNumberStart "+e" should be false', () => {
-            const data = '+e';
-            const [_1, _2, _3] = Array.from(createIterator(data));
+            const data = '+e'[Symbol.iterator]();
+            const [_1, _2, _3] = Array.from(new StringIterator(data));
             expect(isNumberStart(_1, _2, _3)).to.be.false;
         });
         it('isNumberStart ".1e" should be true', () => {
-            const data = '.1e';
-            const args = Array.from(createIterator(data));
+            const data = '.1e'[Symbol.iterator]();
+            const args = Array.from(new StringIterator(data));
             expect(isNumberStart(...args)).to.be.true;
 
         });
         it('isNumberStart ".e" should be false', () => {
-            const data = '.e';
-            const args = Array.from(createIterator(data));
+            const data = '.e'[Symbol.iterator]();
+            const args = Array.from(new StringIterator(data));
             expect(isNumberStart(...args)).to.be.false;
         });
         it('isNumberStart "." should be false', () => {
-            const data = '.';
-            const args = Array.from(createIterator(data));
+            const data = '.'[Symbol.iterator]();
+            const args = Array.from(new StringIterator(data));
             expect(isNumberStart(...args)).to.be.false;
         });
     });
     describe('number', () => {
         function prepareTest(data) {
-            const iter = createIterator(data);
+            const iter = new StringIterator(data[Symbol.iterator]());
             iter.next();
             const [_1, _2, _3] = pick(iter, 3);
             const r1 = isNumberStart(_1, _2, _3);
@@ -746,7 +747,7 @@ describe('lexer', () => {
     });
     describe('identlike', () => {
         it('bad url("something")', () => {
-            const iter = createIterator('url("something")');
+            const iter = new StringIterator('url("something")'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -758,7 +759,7 @@ describe('lexer', () => {
             });
         });
         it('bad url(    "something")', () => {
-            const iter = createIterator('url(    "something")');
+            const iter = new StringIterator('url(    "something")'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -770,7 +771,7 @@ describe('lexer', () => {
             });
         });
         it('bad url(    "something"', () => {
-            const iter = createIterator('url(    "something"');
+            const iter = new StringIterator('url(    "something"'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -782,7 +783,7 @@ describe('lexer', () => {
             });
         })
         it('bad url(    "\\001f47d lien"', () => {
-            const iter = createIterator('url(    "\\001f47d lien"');
+            const iter = new StringIterator('url(    "\\001f47d lien"'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -794,7 +795,7 @@ describe('lexer', () => {
             });
         })
         it('bad escape url(    "som\\\\n lien")  ', () => {
-            const iter = createIterator('url(    "\\\nlien"');
+            const iter = new StringIterator('url(    "\\\nlien"'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -806,7 +807,7 @@ describe('lexer', () => {
             });
         })
         it('good url(some-alien)', () => {
-            const iter = createIterator('url(some-alien)');
+            const iter = new StringIterator('url(some-alien)'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -818,7 +819,7 @@ describe('lexer', () => {
             });
         })
         it('good url(some\\alien)', () => {
-            const iter = createIterator('url(some\\alien)');
+            const iter = new StringIterator('url(some\\alien)'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -830,7 +831,7 @@ describe('lexer', () => {
             });
         })
         it('invalid escape bad url(some\\\n lien)', () => {
-            const iter = createIterator('url(some\\\nlien)');
+            const iter = new StringIterator('url(some\\\nlien)'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -842,7 +843,7 @@ describe('lexer', () => {
             });
         })
         it('white space only allowed before ")" or EOF, => bad url(some alien)', () => {
-            const iter = createIterator('url(some alien)');
+            const iter = new StringIterator('url(some alien)'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbIdent(iter);
@@ -855,7 +856,7 @@ describe('lexer', () => {
         })
         describe('white space only allowed before ")" or EOF', () => {
             it('url "url(some  "', () => {
-                const iter = createIterator('url(some  ');
+                const iter = new StringIterator('url(some  '[Symbol.iterator]());
                 iter.next();
                 const step = iter.peek();
                 const result = absorbIdent(iter);
@@ -867,7 +868,7 @@ describe('lexer', () => {
                 });
             });
             it('url "url(some"', () => {
-                const iter = createIterator('url(some');
+                const iter = new StringIterator('url(some'[Symbol.iterator]());
                 iter.next();
                 const step = iter.peek();
                 const result = absorbIdent(iter);
@@ -879,7 +880,7 @@ describe('lexer', () => {
                 });
             });
             it('url "url(some   )"', () => {
-                const iter = createIterator('url(some   )');
+                const iter = new StringIterator('url(some   )'[Symbol.iterator]());
                 iter.next();
                 const step = iter.peek();
                 const result = absorbIdent(iter);
@@ -893,7 +894,7 @@ describe('lexer', () => {
         });
         describe('function tokens', () => {
             it('"url(\'quoted value\')" is a function', () => {
-                const iter = createIterator('url("quoted value")');
+                const iter = new StringIterator('url("quoted value")'[Symbol.iterator]());
                 iter.next();
                 const step = iter.peek();
                 const result = absorbIdent(iter);
@@ -905,7 +906,7 @@ describe('lexer', () => {
                 });
             });
             it('"calc( 100% -2*4px )', () => {
-                const iter = createIterator('calc( 100% -2*4px )');
+                const iter = new StringIterator('calc( 100% -2*4px )'[Symbol.iterator]());
                 iter.next();
                 const step = iter.peek();
                 const result = absorbIdent(iter);
@@ -917,7 +918,7 @@ describe('lexer', () => {
                 });
             });
             it('"-moz-background" ident token', () => {
-                const iter = createIterator('-moz-background');
+                const iter = new StringIterator('-moz-background'[Symbol.iterator]());
                 iter.next();
                 const step = iter.peek();
                 const result = absorbIdent(iter);
@@ -932,7 +933,7 @@ describe('lexer', () => {
     });
     describe('AT Token', () => {
         it('@font-face', () => {
-            const iter = createIterator('@font-face');
+            const iter = new StringIterator('@font-face'[Symbol.iterator]());
             iter.next();
             const step = iter.peek();
             const result = absorbATToken(iter);
@@ -945,7 +946,7 @@ describe('lexer', () => {
         });
 
         it('@\\f123font-face', () => {
-            const iter = createIterator('@\\123font-face');
+            const iter = new StringIterator('@\\123font-face'[Symbol.iterator]());
             iter.next();
             const [_1, _2, _3, _4] = pick(iter, 4);
             iter.reset(_1.o, _1.col, _1.row);
@@ -961,7 +962,7 @@ describe('lexer', () => {
 
         });
         it('@-\\f123font-face', () => {
-            const iter = createIterator('@-\\123font-face');
+            const iter = new StringIterator('@-\\123font-face'[Symbol.iterator]());
             iter.next();
             const [_1, _2, _3, _4] = pick(iter, 4);
             iter.reset(_1.o, _1.col, _1.row);

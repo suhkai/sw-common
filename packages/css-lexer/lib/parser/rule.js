@@ -2,10 +2,6 @@
 // https://drafts.csswg.org/css-syntax-3/#consume-qualified-rule
 
 'use strict';
-const { 
-    RIGHTSB_TOKEN, 
-} = require('../lexer/tokens');
-
 const absorbBlock = require('./simple-block');
 const { RIGHTSB_TOKEN } = require('../lexer/tokens')
 const absorbComponentValue = require('./component');

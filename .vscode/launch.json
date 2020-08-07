@@ -7,6 +7,18 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "demo-lex",
+            "program": "${workspaceFolder}/demo.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}",
+            "args":[
+                "packages/css-lexer/test/fixtures/main"
+            ]
+
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "test-socket-mock/debug real server",
             "program": "${workspaceFolder}/packages/mock-socket-test/test-server.js",
             "internalConsoleOptions": "openOnSessionStart",
@@ -62,9 +74,9 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "mocha css-parser-test",
-            "program": "${workspaceFolder}/packages/css-parser/node_modules/mocha/bin/_mocha",
-            "cwd": "${workspaceFolder}/packages/css-parser"
+            "name": "css-lexer-test",
+            "program": "${workspaceFolder}/packages/css-lexer/node_modules/mocha/bin/_mocha",
+            "cwd": "${workspaceFolder}/packages/css-lexer"
         },
         {
             "type": "node",

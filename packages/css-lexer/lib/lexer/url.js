@@ -52,7 +52,7 @@ module.exports = function url(name, iter) {
           prev = step.value;
           iter.next()
         }
-        let d = iter.slice(name.s.o, end.o + 1).split(''); // every char s
+        let d = iter.slice(name.s.o, end.o + 1); // every char s
         replacements.reverse()
         for (const [_, replace] of replacements) {
             //{ s: '\uFFFD' , loc: { col: last.col, row: last.row }, o:last.o };
@@ -114,7 +114,7 @@ module.exports = function url(name, iter) {
         iter.next();
     }
     // replace escaped
-    let d = iter.slice(name.s.o, end.o + 1).split(''); // every char s
+    let d = iter.slice(name.s.o, end.o + 1); // every char s
     replacements.reverse()
     for (const [_, replace] of replacements) {
         //{ s: '\uFFFD' , loc: { col: last.col, row: last.row }, o:last.o };
