@@ -1,0 +1,209 @@
+<html>
+
+<head>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    #container {
+      display: inline-flex;
+      border: 3px solid orange;
+      /* Lay out each item using flex layout */
+      flex-flow: row;
+      flex-wrap: wrap;
+      /* Lay out item’s contents vertically  */
+      height: 600px;
+      justify-content: flex-start;
+      align-items:  baseline;
+      align-content: space-around;
+      flex-direction: column;
+      
+
+     /* align-items: space-around;*/
+      /*align-content: baseline;
+      align-items: baseline;*/
+      /*justify-items: flex-start;*/
+    }
+
+    /*
+    justify-content: only for items on a single line at a time(flex-start | flex-end | center | space-between | space-around)
+    
+    align-content: simular to justify-content, has no effect on single line flex container (flex-start | flex-end | center | space-between | space-around | stretch)
+      - align-content value "stretch" only works if align-items is set to "space-between" "space-around" 
+      - align-content value "stretch" does not work if the size in the bloc axis is definite 
+    align-items: sets the default align-self for all items (auto | flex-start | flex-end | center | baseline | stretch)
+    - note: will distribute the spaces between lines equally, when value is "flex-start","flex-end","center", "baseline",
+    - note: "stretch" value will look the same if align-content is set to "stretch"
+    - value of "stetch" is ignored if the flex items in the block axis have a definite size
+    
+    align-self: overrides the align-items for a single flex-item
+    */
+
+    body {
+      white-space:pre;
+    }
+
+    .flex-item {
+      height: 100px;
+      white-space: nowrap;
+      /*flex: 1 1 AUTO;*/
+      /*justify-self:  appliccable not to flex items, but block-level boxes, absolutely-positioned boxes, and grid items */
+    }
+
+    .flex-item:nth-child(2n) {
+      border: 2px solid green;
+    } 
+
+    .flex-item:nth-child(2n + 1) {
+      border: 2px solid blue;
+    
+    } 
+    
+
+    .flex-item> img {
+      object-fit: cover;
+      height: 50px;
+      /* 
+         This is not 50% of the the flex-item if the height is definite (length-percentage), if its height of the parent is not set, otherwise would create circular dependency
+      */
+    }
+
+    .i {
+     
+      width:0;
+      padding:10px;
+      border: 4px solid blue;
+    }
+
+    span {
+      white-space: normal;
+      border: 3px dotted red;
+    }
+
+  </style>
+</head>
+
+<body>
+  <span>Hello world</span><div id="container">
+    <!-- flex item: block child -->
+    <div class="flex-item">V<img src="https://ih1.redbubble.net/cover.1240433.2400x600.jpg"><span>ABC XYZ</span></div>
+    <div class="flex-item">V<img src="https://ih1.redbubble.net/cover.1240433.2400x600.jpg">DEF</div>
+    <div class="flex-item">V<img src="https://ih1.redbubble.net/cover.1240433.2400x600.jpg">GHI</div>
+    <span>Hello</span>
+    <div class="i"></div>
+    <!--div class="flex-item">
+      <img src="https://ih1.redbubble.net/cover.1240433.2400x600.jpg">CDE
+    </div-->
+  </div>
+
+  <script>
+    var gridElement = document.getElementById("grid");
+    var s = getComputedStyle(gridElement).gridTemplateAreas;
+    // [a] 50px [b] 320px [b c d e] 40px [e] 40px 0px 0px 0px 0px 50px
+    console.log(s)
+  </script>
+</body>
+
+</html>
+<!--
+
+- hypothetical cross size: layout along main axes and treat "auto" as fit-content.
+- align-xxx: cross axis alignments
+- justify-xxx: main axis alignments
+@cross axis
+- align-contents: aligns "flex-lines" (parallel to main axis) "main-axe parallel bands" (multiline only), default "stretch"
+- align-items/align-self: aligns items in parallel to the cross-axis, (like justify-content in the main axis), but clamped to a a "main-axe parallel bands"
+@main axis
+- justify-contents: alignment of items accross the main-axis
+- IGNORED IN FLEX: justify-items/justify-self: (ignored in flexbox layout)
+
+## Alignment
+
+1. during calculations "auto" margins are treated as 0
+2. before "justify-content" or "align-self", positive free space is distributed to auto margins
+3. overlflow boxes ignore auto margins in the direction of the overflow, and overflow in end direction
+4. alignment does not have any effect in the direction of the auto-margin, because automargin eats up all space in the "end" direction
+  -- this makes  margin: 0 auto; -> margin-left: 0, margin-right: auto
+
+# 8.2 "justify-content"
+   justify along the main axis (everything except "stretch" and "baseline")  flex-start|end, center
+   - flex-start: nomen est omen.
+   - flex-end: like flex-start but reverse
+   - center: packed towards center, 
+      - overflow in both directions if there is negative space
+   - "space-between" items (equally distributed)
+      - IF space is negative OR only 1 line THEN this is same as "flex-start"
+      - first item is flush with "main-start" edge, last item is flush with "main-end"
+        space between is equally distributed, (what happens with negavtive space?, ==> will just overflow in the main-end direction)
+   - "space-around" 
+      - only one item, flush with "center"
+      - negative or zero free space (because margin auto consumed all, or flex-container not big enough to hold all items) then overflow in main-end direction
+      - postive free space and nr items >= 2 then <total freespace> = 2*d + d*(n-1);
+
+# 8.3 "align-items"/"align-self" (all except, "space-between" and "space-around"), so flex-start|end, baseline, stretch, center
+     - "auto" (only for align-self), defers to parent box align-items value
+     -  "flex-start": speaks for itself
+     -  "flex-end": 
+        - (nowrap): will flush with cross end
+        - wrap && nnegative free space: flush with flex-start
+        - wrap && postive free space: multiline flus at cross-end on each line
+     -  "center": if single line(no-wrap) will overflow on both sides (cross start|cross end) if free space is negative
+     -  "center": if multiline and freespace is negative will flush with cross start
+     -  "center" && positive freespace and multiline, will flush at the center of each flex-line
+     -  stretch, if no freespace was consumed by margin auto in the cross axis and there is freespace, will stretch, respecting min-height/max-height
+
+# 8.4 "align-content" packing flex lines (flex-start, )
+    -flex-start, pack the flex lines at the start, (respecting min-content)
+    -flex-end, pack the flex lines at the end, (respecting min-content, size)
+    -space-between, note if free space is negatve is 
+    -space-around,
+
+#8.5 Flex Container Baselines
+    - Flex container participates in flex-item alignment
+    - derives the baseline from shared inter-item baselines
+    - when display is "inline-flex" this baseline can be aligned with other elements outside the flex container
+  
+    - IF inline-axis = main-axis
+        - alignment baseline of the container, is created from the inner baseline alignment "align-items:baseline"
+        - if the flex-container has at least 1 item take the baseline from that item (after positioned internally)
+        - flexbos has no items, synthesize baseline accourding to "https://www.w3.org/TR/css-align-3/#alignment-baseline"
+  
+    - IF inline-axis = cross-axis
+        - baseline (of the flex-container) is begotted from the baseline first flexitem 
+        - if the container has no itemes then synthesize according to rules of "https://www.w3.org/TR/css-align-3/#alignment-baseline"
+    - 
+#9 Flex Layout Algorithm
+
+# Steps
+
+1 (9.1) "anonymous block container flex item", = yes placeholders for ambient "textnodes" etc
+
+2 (9.2) "line length determination"
+     Determine the available space for "main" and "cross" space
+      - if dimension is definite size, use that
+      - if dimension is min-content or max content contstraint use that
+      - else: substract flex containers margin, border and padding from the space avail for flex container in that dimension, use this value
+
+3 (9.2) determine for flex-item:
+        - flex-base size
+        - hypotetical main size
+      
+      Steps to do the above:
+        3.A If item has "definite" flex-basis, use that
+        3.B If item has 
+          + intrinsic aspect ratio       
+          + flex-basis: content -> almost equivalent to "max-content"
+          + definite cross-size 
+          THEN
+          flex-basis = aspect-ratio*cross-size
+        3.C IF
+            - flex-basis:content
+               OR 
+            - depens on available space and is sized undr min/max constraints
+            THEN
+             calc "main size"
+             flex-basis= main size
+        3.D IF 
+            flex-basis:content
+-->
