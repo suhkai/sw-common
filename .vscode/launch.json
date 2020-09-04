@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "redis-lex",
+            "program": "${workspaceFolder}/packages/redis-pr/client-list.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "demo-lex",
             "program": "${workspaceFolder}/demo.js",
             "internalConsoleOptions": "openOnSessionStart",
@@ -14,7 +22,6 @@
             "args":[
                 "packages/css-lexer/test/fixtures/main"
             ]
-
         },
         {
             "type": "node",
