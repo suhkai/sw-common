@@ -87,9 +87,9 @@
 <body>
   <span>Hello world</span><div id="container">
     <!-- flex item: block child -->
-    <div class="flex-item">V<img src="https://ih1.redbubble.net/cover.1240433.2400x600.jpg"><span>ABC XYZ</span></div>
-    <div class="flex-item">V<img src="https://ih1.redbubble.net/cover.1240433.2400x600.jpg">DEF</div>
-    <div class="flex-item">V<img src="https://ih1.redbubble.net/cover.1240433.2400x600.jpg">GHI</div>
+    <div class="flex-item">V<img src="UV_Grid_Lrg.jpg"><span>ABC XYZ</span></div>
+    <div class="flex-item">V<img src="UV_Grid_Lrg.jpg">DEF</div>
+    <div class="flex-item">V<img src="UV_Grid_Lrg.jpg">GHI</div>
     <span>Hello</span>
     <div class="i"></div>
     <!--div class="flex-item">
@@ -199,11 +199,17 @@
           flex-basis = aspect-ratio*cross-size
         3.C IF
             - flex-basis:content
-               OR 
+              OR 
             - depens on available space and is sized undr min/max constraints
             THEN
              calc "main size"
              flex-basis= main size
         3.D IF 
-            flex-basis:content
+            - flex-basis:content
+              OR
+            - depends on available space
+            AND
+            -     
+
+            a
 -->
