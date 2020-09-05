@@ -13,12 +13,11 @@
       flex-flow: row;
       flex-wrap: wrap;
       /* Lay out item’s contents vertically  */
-      height: 600px;
-      justify-content: flex-start;
-      align-items:  baseline;
-      align-content: space-around;
-      flex-direction: column;
-      
+      justify-content: space-between;
+      align-items: center;
+      align-content:stretch;
+      flex-direction: row;
+      width: 80%;
 
      /* align-items: space-around;*/
       /*align-content: baseline;
@@ -41,12 +40,11 @@
     */
 
     body {
-      white-space:pre;
+      height:auto;
     }
 
     .flex-item {
-      height: 100px;
-      white-space: nowrap;
+      height: min-content;
       /*flex: 1 1 AUTO;*/
       /*justify-self:  appliccable not to flex items, but block-level boxes, absolutely-positioned boxes, and grid items */
     }
@@ -59,6 +57,13 @@
       border: 2px solid blue;
     
     } 
+
+    ._v {
+      visibility: collapse;
+      min-width: 100px;
+      max-width: 200px;
+     /*white-space: wrap !important;*/
+    }
     
 
     .flex-item> img {
@@ -88,7 +93,10 @@
   <span>Hello world</span><div id="container">
     <!-- flex item: block child -->
     <div class="flex-item">V<img src="UV_Grid_Lrg.jpg"><span>ABC XYZ</span></div>
-    <div class="flex-item">V<img src="UV_Grid_Lrg.jpg">DEF</div>
+    <div class="flex-item _v">V<img src="UV_Grid_Lrg.jpg">Lorem Ipsum is simply dummy text of the printing
+       and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+        when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived 
+        not only five centuries, but also the leap into electronic typesetting, remaining e</div>
     <div class="flex-item">V<img src="UV_Grid_Lrg.jpg">GHI</div>
     <span>Hello</span>
     <div class="i"></div>
@@ -207,9 +215,141 @@
         3.D IF 
             - flex-basis:content
               OR
-            - depends on available space
+            - flex-basis depends on available space (auto?)
             AND
-            -     
+            - if available space size is infinite (main-axis is along the block-axis)
+            THEN
+              item layout is like "box in an ortogonal flow" (CSS-3 Writing modes)
+              flex-base size is max-content in the "main-axis"  
+        3.E ELSE
+          size item into available space with "used flex basis" in place o main size
+          treat flex-basis:content as "max-content"
+          IF 
+            cross-size is needed (because flow-direction is column) to determine main size is block-direction
+          AND
+            cross-size is "auto"(not definite) use fit-content as the flex-item cross-size
+          THEN
+            flex-base size is items main-size
+        
+          determening FLEX-BASE:
+            - min/max main size ignored (no clamping)  
+            - box sizing that floor content box at zero are ignored
+   
+   HYPOTHETICAL MAIN SIZE: = flex base size clamped to min/max main-size
 
-            a
+4. Determine main-size of flex container: 
+     make all auto margins on flex-items 0  
+
+    #9.3 Main size determination
+5.  Collect flex items into flex line
+    - single line: all flex items on the same line
+    - multiline (soly determined by flex-wrap: wrap)
+      collect consecutive items until an item doesnt fit and move it to the next flex-line
+
+6 Resolve the flexible length
+   + in case (5) was not a snug fit and there is freespace
+   + ofc there must be at least 1 item wich can resolve to flex length
+   + Resolve Flexible Length  (see §9.7)
+ 
+   §9.4 Cross size determination
+ 
+7 determine "hypothetical cross size" for each item
+    + take into account main-size of each item
+    + treat "auto" cross size as "fit-content"
+ 
+8 Calculate cross-size of each flex line
+    - for single line, easy,the cross-size is the flex-contaner cross size (min/max/definite)
+    - for each flex-line do steps:
+       1. -- collect all flex-items
+          (baseline, main-axes=inline-axis)
+          IF
+          -- whose inline-axis parallel to main-axis (English , not Japanese etc)
+          -- align-self is "baseline" (explicitly set or copied from align-items in parent container)
+          -- cross-axis margins are non-auto (both)
+          THEN
+          CALCULATE SUM:
+            -- measure distance between baseline and "cross-start"
+            -- measure distance between baseline and "cross-end" 
+       2. -- for all items not picked in (1), find item with largest outer "hypothetical cross size" (see point 7)
+
+       3. cross size of flex-line is largest of 8.1 and 8.2
+
+       post-production:
+       If single-line flex-line then clamp cross-size to container min/max cross-size
+
+9 Handle "align-content":"stretch" (this is the default, flex lines take up available space)
+    IF
+    + the cross-size of the container is definite
+    + there is available space left in the cross dimenion (after substracting sum of all cross size of all flex-lines)
+    THEN
+      spread out flex-lines in cross-axis by equal amounts
+
+10 flex-items with visibility: collapse
+    1. note the cross-size as the strut size and restart layout
+    2. on second run (restart layout)
+      A. treat "collapsed" items as having '0' main-size (when collecting in (5.))
+      B. for the rest of the algorithem ignore collapsed size entirely (as if display: none)
+        -- except when reaching point 8 , if any of the cross-sizes is less then the largest strut size , set
+           cross-size of the flex-line to the strut size.
+    3. skip on "second round" step 10.2
+
+11 Determine the used cross size of each flex-item 
+   A.IF 
+     + align-self:"stretch" (default)  then "cross-size" is auto
+     + NO margins in the cross direction is auto
+  THEN
+     1. used outer cross-size = cross cross size of flex line
+     2. clamped at used min/max cross sizes
+  ELSE
+    cross size = hypothetical cross size   
+ 
+  B.IF 
+    the align-self is "stretch", 
+  THEN
+    1.redo layout for its contents, 
+    2.treat "used size" as definite cross size.
+    3.layout % sized children with the definite cross size
+
+  § 9.5 Main axis alignment   
+
+12. Distribute remaining free space for each flex line
+   1. if at least one margin is auto, distribute the free space amongst these margins
+   2. Align the items along the main axis per "justify-content"
+
+  $ 9.6 Cross-Axis alignment
+
+13. resolve cross-axis automargins
+   IF flex item cross-size (set auto margins to '0') < flex-line cross size
+      extend auto margins (equally) to fill up to flex-size:   
+   
+   ELSE (no free space left to distribute)
+      1.SET any block-start/inline-start margin (whatever is in cross-size) is auto, set to zero
+      2.SET opposite margin at (block-end/inline-end) so that the outer cross size of the item equals the cross size of flex-line.
+        (Most likely this will be negative)
+   
+14. For the other flex-items with no margins: 
+     1. Allign all flex items to the cross axis per "align-self"  
+
+15. Determine the flex containers used cross size:
+   IF cross size is definite size, 
+   THEN use that (clamped by used min/max cross size of the flex-container)
+   ELSE use sum of the flex lines cross sizes, clamped by used min/max cross sizes of flex container
+
+16. Align all flex-lines per "align content"
+
+
+END
+
+
+$9.7 Resolving Flexible Length
+
+
+
+
+
+ 
+
+
+   
+
 -->
