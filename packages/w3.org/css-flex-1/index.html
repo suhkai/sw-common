@@ -340,10 +340,202 @@
 
 END
 
+SUFFIX:
 
 $9.7 Resolving Flexible Length
 
+1. Determine the used flex-factor
+  A.sum = all 'hypothetical main sizes' (see point 3 in Flex Layout Algorithm )
+  B.IF
+      sum > "inner main size"
+    THEN
+      flex-factor = "flex-grow"  
+    ELSE
+      flex-factor = "flex-shrink"
 
+2.Size inflexible items
+  IF
+    flex-item has flex factor '0'
+    OR
+    using flex-factor=flex-grow  && flex-base > "hypothetical main size"
+    OR
+    using flex-factor=flex-shrink && flex-base < "hypthetical main size"
+  THEN
+    FREEZE, target main size = hypothetical main size
+
+3.Calculate initial free space (this can be negative)
+  1.(for every flex-line) Sum outer sizes of all flex-items
+      - for frozen flex-items use "hypothetical main size" (2)
+      - for not-frozen flex-items use outer "flex-basis" size
+  2. substract (3.1) from container inner "main-size"
+
+4. LOOP:
+
+  A. EXIT LOOP IF all flex-items are frozen
+
+  B. CALCULATE REMAINING FREE SPACE (same as 3) (note this can be negative)
+     1. calculate sum of the used flex-factors (see 2.)
+     IF 
+       sum (4.B.1) < 1
+     THEN
+       RFS = inital free space * sum (4.B.1)
+     ELSE
+       RFS = same as (3.1-3.2) but use current list of frozen flex  items
+
+  C. DISTRIBUTE FREE SPACE AMONGST unfrozen items
+      EXIT LOOP IF RFS = 0
+      LOOP FOR EACH NOT-FROZEN flex-item     
+        IF
+          flex-factor=flex-grow
+        THEN
+          flex-factor-ratio = flex-factor/(sum of all not-frozen flex-factors) 
+          SET target main-size = flex-base size + RFS*flex-factor-ratio
+        ELSEIF flex-factor=flex-shrink
+          (for flex-shrink)
+          scaled-flex-shrink-factor = flex-shrink*flex-base-size
+          ratio = scaled-flex-shrink-factor/(sum of all not-frozen scaled-flex-shrink-factor)
+          set target main-size = flex-base size - ratio*RFS
+        ELSE
+          do nothing
+      END LOOP
+
+  D. FIX MIN/MAX violations
+      CLAMP each items target main-size to used min/max main-size
+      IF 
+        target-main-size was < min-main-size 
+      THEN
+        mark as MIN VIOLATION
+        total-violations += min-main-size - target-main-size (this is positive)
+        target-main-size = min-main-size
+      IF 
+        target-main-size > max-main-size
+      THEN
+        mark as MAX VIOLATION
+        total-violations += max-main-size - target-main-size (this is negative)   
+        target-main-size = max-main-size
+    
+  E.
+     IF
+       total-violations = 0
+     THEN
+       FREEZE ALL ITEMS
+       EXIT LOOP
+     
+     IF
+       total-violations < 0 (overshoot) (more "max violations" then "min violations")
+     THEN  
+       FREEZE all MAX violations
+     ELSE
+       FREEZE ALL MIN VIOLATIONS
+
+  F.Return to START LOOP
+
+5. set each items main-size to TARGET-MAIN-SIZE
+
+§9.8 Definite and indefinite sizes
+
+1. IF
+      - fl-container is single-line 
+      AND
+      - fl-container has definite outer cross-size
+   THEN
+     all stretched items in the cross-size are definite
+
+2. IF 
+    - fl-container has definite main-size
+   THEN 
+    - post-flexed main-size of items are definite
+3. Once cross-size of flex-line is determined,
+   items IN auto-size-flex-containers are considered definite (see 11)
+
+§9.9 INTRINSIC SIZES (see also css-sizing-3)
+
+§ 9.9.1 Flex container instrinsic main sizes (read §9.9.3 first)
+    
+  A.DEFINITION: "max-content main size" size of flex container
+   - "smallest"!!! main-size, that can satisfy the (§9.9.3.2) "max-content distribution" of the flex-items
+   - insofar as it is allowed by the items own flexibility
+     1. calculate "max-content flex fraction"
+       IF 
+         ("max-content-contribution" > flex-base)
+       THEN
+         flex-grow-factor = value of flex-grow
+       ->  max-content-flex-fraction = ("max-content-contribution" - flex-base)/flex-grow-factor
+       
+       IF 
+         ("max-content-contribution" < flex-base)
+       THEN
+         flex-shrink-factor = value of flex-shrink
+         scaled-flex-shrink-factor = flex-shrink-factor*flex-base-size
+       ->  max-content-flex-fraction = ("max-content-contribution" - flex-base)/scaled-flex-shrink-factor 
+       
+      2. Place flex-items into lines of infinite length (undefinite)
+
+      3. within each line, find largest "max-content-flex-fraction"
+        for each item:
+         flex base + (flex-grow or scaled-flex-shrink )*"max-content-flex-franction" (9.9.1.1)
+      
+      4. clamp result of (3 above) to max/min main-size
+
+  B.DEFINITION "min-content main-size" 
+    1. For a single line flex container: is the same as 9.9.1.A except that flex item's "min-content-contribution" is used.
+    2. For multiline flex container: simply the largest "min-content-contribution" of all the flex-items in the container.
+
+
+§ 9.9.2 Flex container instrinsic cross sizes
+
+1. IF
+     single-line container,
+   THEN
+     largerst min-content distribution of its flex-item
+   
+   IF 
+     multi-line container
+   THEN
+     sum of flex-line cross-sizes (sized under min-content/max-content constraint
+     
+   IF 
+     multi-line flex-wrap: column wrap;
+   THEN
+     1.find max of (flex-line) min-content/max-content cross-size
+     2.use (1) (above) for "available space" (css-sizing-3) in the cross-axis during layout 
+
+
+
+§ 9.9.3 Flex ITEM instrinsic size contributions
+
+1. the main-size "min-content-contribution" of a flex-item is the
+   1. min-content-contribution = max( outer "min-content" main-size , outer "preferred-size", aka "width"/"height" properties, if it is not "auto")
+   2. above max clamped (if it is not growable) by flex-base size.
+   3. above min clamped (if it is not shrinkable) by the flex-base size.
+   4. further claimped by "min/max" main size
+
+2. the main-size "max-content-contribution" of a flex-item is the
+   1. max-content-contribution = max( outer "max-content" main-size, outer perferred size, aka "width"/"height" properties, if it is not "auto")
+   2. above max clamped (if it is not growable) by the flex-base size
+   3. above min clamped (if it is not shrinkable) by the flex-base size
+   4. further claimped by "min/max" main size
+   
+     
+   
+       
+
+         
+
+
+
+           
+        
+     
+
+
+
+
+set flex-item "target main size" to "hypothetical main size" (see point 3 in Flex Layout algorithm)
+
+
+          
+   
 
 
 
