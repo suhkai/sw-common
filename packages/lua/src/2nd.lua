@@ -147,7 +147,8 @@ end
 -- reschedule
 
 sched = redis.call("zadd", KEYS[1], "CH", nextTs, jobId);
-jinbody = { history = {{ state = "executing", time=ARGV[1]}} };
+jinbody = { history = {{ state = "executing", time=ARGV[1]}} , jobdescr = jobdescr };
+
 redis.call("set", jin, cjson.encode(jinbody));
 return cjson.encode(jobdescr); -- return body for execution;
 -- done
@@ -157,3 +158,38 @@ end
 --' 2 "sjobregistry" "sjobExec"  "+inf" 45
 
 -- local candidate = redis.call("zrangebyscore", KEYS[1], "-inf", ARGV[1], "")
+
+function jobPostExecution() -- use JobId and JobResult (as json value)
+
+  -- find the jobinstance record
+    -- if it doesnt exist , exit with error
+  -- if it exist, remove the jobinst from the jobexecute sorted setx
+  -- make sure the jobinst is in your "state" (execution) otherwise report error, and clean up all (excpet jobinst)
+  -- if the executionCount is lower then yours discard result, and report this error , clean out entry in jobexec
+  -- if executionCount is higher or equal then yours, set it to your execCount, clean out entry in jobexec add state to history and insert into jobResult sorted set
+  -- 
+
+
+
+  do -- scope 
+    local jobdescrRaw = redis.call("get",jobId);
+    if jobdescrRaw ~= false then
+       jobdescr = cjson.decode(jobdescrRaw);
+       local delta = jobdescr.info.interval or jobdescr.info.oneshot;
+       nextTs = ts + math.floor(delta/3);
+    else
+       nextTs = ARGV[1] + 1000;  
+    end;  
+    --2. job execution instance
+    jin = jobId.."Instance"
+    local jsonstr = redis.call("get", jin);
+    if jsonstr ~= false then
+        jinbody = cjson.decode(jsonstr);
+        local lastIdx = #jinbody.history;
+        lastState = jinbody.history[lastIdx].state;
+        lastTs = jinbody.history[lastIdx].time;
+    end;
+ end 
+
+
+end
