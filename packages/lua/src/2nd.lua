@@ -1,4 +1,5 @@
 -- eval 'local jobschedules = redis.call("zrangebyscore",KEYS[1], "-inf", ARGV[1], "WITHSCORES", "LIMIT", 0, 1); if #jobschedules == 0 then  return "no jobs available" end; local jobId = jobschedules[1]; local ts = jobschedules[2]; local jobdescr = redis.call("get",jobId); if (type(jobdescr) ~= 'string') then redis.call("zrem", KEYS[1], jobId ); return "jobdescrnotfound job "..jobId.." removed" end; local json = cjson.decode(jobdescr); local nextTs = json.info.interval + ts ; local sched = redis.call("zadd", KEYS[1], "CH", nextTs, jobId); local submit = redis.call("zadd", KEYS[2],"CH", nextTs, jobId); return sched, submit;' 2 "sjobregistry" "sjobExec"  "+inf" 45
+function JobPicker()
 
 local jobschedules = redis.call("zrangebyscore",KEYS[1], "-inf", ARGV[1], "WITHSCORES", "LIMIT", 0, 1);
 if #jobschedules == 0 then 
@@ -8,21 +9,21 @@ end;
 local jobId = jobschedules[1]; 
 local ts = jobschedules[2]; 
 local jobdescr = redis.call("get",jobId); 
-if (type(jobdescr) ~= 'string') then 
+if type(jobdescr) ~= 'string' then 
     redis.call("zrem", KEYS[1], jobId ); 
     return "jobdescrnotfound job "..jobId.." removed" 
 end; 
 
 local json = cjson.decode(jobdescr); 
 
-if (json.info.interval) then
+if type(json.info.interval) == "number" then
   local nextTs = json.info.interval + ts ; 
   local sched = redis.call("zadd", KEYS[1], "CH", nextTs, jobId); 
   local submit = redis.call("zadd", KEYS[2],"CH", nextTs, jobId); 
   return sched, submit;
 end
 
-if (json.info.onshot) then
+if type(json.info.onshot) == "number" then
    local submit = redis.call("zadd", KEYS[2],"CH", nextTs, jobId); 
    local remov = redis.call("zrem", KEYS[1], jobId );
    -- redis.call("del", jobId);
@@ -31,7 +32,8 @@ end
 
 return "no [interval] or [oneshot] property found in json";
 
--- execution in 2 parts
+end
+--[[ execution in 2 parts
 
 -- part1
 
@@ -56,17 +58,102 @@ return "no [interval] or [oneshot] property found in json";
   -- new entry in for this state
   -- update score to ts+intervaltime/3
   -- return "ok to execute"
-   
-    
+--]]  
+function pickNextForExecution()
+local execJobs = redis.call("zrangebyscore",KEYS[1], "-inf", ARGV[1], "WITHSCORES", "LIMIT", 0, 1);
 
+if #execJobs == 0 then 
+    return "no jobs available";
+end;
 
--- update job sta
+local jobId = execJobs[1];
+local ts = execJobs[2]
 
+-- fetch the state from redis
+local jobdescr = false;
+local jin = false;
+local jinbody = false;
+local lastState = false;
+local lastTs = false;
+local nextTs = false; -- ts + math.floor(delta/3);
+do -- scope 
+   local jobdescrRaw = redis.call("get",jobId);
+   if jobdescrRaw ~= false then
+      jobdescr = cjson.decode(jobdescrRaw);
+      local delta = jobdescr.info.interval or jobdescr.info.oneshot;
+      nextTs = ts + math.floor(delta/3);
+   else
+      nextTs = ARGV[1] + 1000;  
+   end;  
+   --2. job execution instance
+   jin = jobId.."Instance"
+   local jsonstr = redis.call("get", jin);
+   if jsonstr ~= false then
+       jinbody = cjson.decode(jsonstr);
+       local lastIdx = #jinbody.history;
+       lastState = jinbody.history[lastIdx].state;
+       lastTs = jinbody.history[lastIdx].time;
+   end;
+end   
+-- some checks
+--1. no job description or execution record?
+if jobdescr == false and jinbody == false then
+  redis.call(zrem, KEYS[1], jobId );
+  return "next"; -- same as "yield"
+end
 
+--2. no job description, but lingering execution record?
+if jobdescr == false and jinbody ~= false then
+  -- check if the state is "execution"
+ if lastState ~= "executing" then -- in this context job was deleted
+    redis.call(zrem, KEYS[1], jobId);
+    return "next";
+  else
+    jinbody.execCount = (jinbody.execCount or 0) + 1;
+    -- remove 4 is hardcoded count,
+    if jinbody.execCount > 4 then
+       redis.call("zrem", KEYS[1], jobId);
+       return "next";
+    end
+    -- reschedule
+    sched = redis.call("zadd", KEYS[1], "CH", nextTs, jobId);
+    return "next";
+end;
 
+--3. we have a job-description and a lingering record
+if jobdescr ~= false and jinbody ~= false then
+  -- process is stuck in this state?, because process crashed, rpc taking to long?
+  if lastState == "executing" then 
+    jinbody.execCount = (jinbody.execCount or 0) + 1;
+    if jinbody.execCount > 2 then
+        -- process crashed, remove the job instance
+        redis.call("del", jin);
+        jinbody = false;
+        -- fall through
+    else
+      -- reschedule
+      redis.call("zadd", KEYS[1], "CH", nextTs, jobId);
+      return 'next'
+    end
+  else  
+    -- remove entry, previous jobinstance did not finish running
+    -- skip it
+    reddis.call("zrem", KEYS[1], jobId);
+    return "next";
+  end
+end 
 
+--4. we have jobdescr and no lingering job instance record (this could be a restart/or the first execution)
+-- reschedule
+
+sched = redis.call("zadd", KEYS[1], "CH", nextTs, jobId);
+jinbody = { history = {{ state = "executing", time=ARGV[1]}} };
+redis.call("set", jin, cjson.encode(jinbody));
+return cjson.encode(jobdescr); -- return body for execution;
+-- done
+end
 
 
 --' 2 "sjobregistry" "sjobExec"  "+inf" 45
 
-local candidate = redis.call("zrangebyscore", KEYS[1], "-inf", ARGV[1], "")
+-- local candidate = redis.call("zrangebyscore", KEYS[1], "-inf", ARGV[1], "")
