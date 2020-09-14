@@ -1,13 +1,13 @@
 -- eval 'local jobschedules = redis.call("zrangebyscore",KEYS[1], "-inf", ARGV[1], "WITHSCORES", "LIMIT", 0, 1); if #jobschedules == 0 then  return "no jobs available" end; local jobId = jobschedules[1]; local ts = jobschedules[2]; local jobdescr = redis.call("get",jobId); if (type(jobdescr) ~= 'string') then redis.call("zrem", KEYS[1], jobId ); return "jobdescrnotfound job "..jobId.." removed" end; local json = cjson.decode(jobdescr); local nextTs = json.info.interval + ts ; local sched = redis.call("zadd", KEYS[1], "CH", nextTs, jobId); local submit = redis.call("zadd", KEYS[2],"CH", nextTs, jobId); return sched, submit;' 2 "sjobregistry" "sjobExec"  "+inf" 45
-function JobPicker()
+function PreparePrimary()
 
 local jobschedules = redis.call("zrangebyscore",KEYS[1], "-inf", ARGV[1], "WITHSCORES", "LIMIT", 0, 1);
 if #jobschedules == 0 then 
-    return "no jobs available" 
+    return "no jobs available";
 end; 
 
-local jobId = jobschedules[1]; 
-local ts = jobschedules[2]; 
+local jobId = jobschedules[1];
+local ts = jobschedules[2];
 local jobdescr = redis.call("get",jobId); 
 if type(jobdescr) ~= 'string' then 
     redis.call("zrem", KEYS[1], jobId ); 
@@ -23,7 +23,7 @@ if type(json.info.interval) == "number" then
   return sched, submit;
 end
 
-if type(json.info.onshot) == "number" then
+if type(json.info.oneshot) == "number" then
    local submit = redis.call("zadd", KEYS[2],"CH", nextTs, jobId); 
    local remov = redis.call("zrem", KEYS[1], jobId );
    -- redis.call("del", jobId);
@@ -59,7 +59,7 @@ end
   -- update score to ts+intervaltime/3
   -- return "ok to execute"
 --]]  
-function pickNextForExecution()
+function execPrimary()
 local execJobs = redis.call("zrangebyscore",KEYS[1], "-inf", ARGV[1], "WITHSCORES", "LIMIT", 0, 1);
 
 if #execJobs == 0 then 
@@ -161,7 +161,7 @@ end
 
 -- local candidate = redis.call("zrangebyscore", KEYS[1], "-inf", ARGV[1], "")
 
-function jobPostExecution() -- use JobId and JobResult (as json value)
+function prepareSecondary() -- use JobId and JobResult (as json value)
   -- find the jobinstance record
   -- if it doesnt exist , exit with error
   -- if it exist, remove the jobinst from the jobexecute sorted setx
@@ -217,7 +217,7 @@ function jobPostExecution() -- use JobId and JobResult (as json value)
   return 'ok:advanced';
 end;
 
-function jobProcessResults() 
+function executeSecondary() 
 
   --[[
      use JobId and JobResult (as json value)
@@ -372,3 +372,51 @@ redis.call("set", cjson.encode(jinBody));
 return cjson.encode({ response = execResult, handler=handler });
 end -- function
 
+
+function prepareStatistics()
+  local jobId = KEYS[1]
+  local ts = tonumber(ARGV[1])
+  local wasError = ARGV[2];
+  local secundaryJobExec = KEYS[2] -- "secondary-execution";
+  local jin = KEYS[3]; -- jobId..Instance (must be passed as keys for cluster to work correctly);
+  
+  if ts == nil then
+    return "error:timestamp is not a number"..ARGV[1];
+  end  
+  -- some cleanup and normalization of input values
+  if (wasError == "true") then
+    wasError = true;
+  else
+    wasError = false;
+  end;
+
+  local currentTime;
+  local jinBody = false;
+  local lastTs = false;
+  local lastState = false;
+  
+  -- init
+  do 
+    local time = redis.call('time');
+    currentTime = time[1] + math.trunc(time[2]/1000);
+  
+    local jsonStr = redis.call("get", jin);
+    if jsonstr ~= false then
+      jinBody = cjson.decode(jsonstr);
+     
+      local lastIdx = #jinBody.history;
+      lastState = jinBody.history[lastIdx].state;
+      lastTs = jinBody.history[lastIdx].time;
+    end; -- if
+  end -- do
+
+ -- check state
+ -- change states of a lot of things
+ if lastState ~= "executingSecundary" then
+
+ end;
+
+  
+   
+   
+end;
