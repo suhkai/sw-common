@@ -3,39 +3,79 @@
 
 <head>
     <style>
-       .container {
-           display: block;
-           justify-content: safe right;
-           width: 500px;
-           border: 4px solid green;
-       }
-       .items {
-           display: inline-block;
-           width: 100px;
-           height: 100px;
-           border: 4px solid red;
-           padding: 0;
-           margin:0;
-       }
-       
+        /*
+        A:
+        IF col-width = auto THEN
+            N = col-count
+        END IF
+        B:
+        IF ( col-count = auto) AND (col-size is definite) THEN
+            // not "gap-width" value is defaulted to 1em or is otherwise made definite
+            1. "container width" = "col-count" *(col-width) + (col-count-1) * gap-width
+            2. "container width" = "col-count" ("col-width"+"gap-width") - "gap-width"
+            3. QED: ("container width" + "gap-width")/("col-width"+"gap-width") = "col-count"
+            4. post: N = max(1, col-count) .. in case of fractions
+        END IF
+        C:
+        IF col-count is definite and col-width is definite THEN
+           1 estimate N as in B.
+           2. N is lower constrained by definite col-count value 
+              -- aka N = min(col-count, value B.4) 
+        END IF
+            (used W used column-width) =>
+                1. W := (U + column-gap)/N - column-gap)
+                (W + gap)*N = (U + gap)
+                QED: (W+gap)*N - gap = U (makes total sense)
+        */
+        .logo {
+            display: block;
+            width: 100%;
+        }
+
+        article {
+            border:1px blue solid;
+            column-fill: balanced;
+            columns: 4;
+            width: 60em;
+            column-gap: 2em;
+            column-rule: orange 1px solid;
+            height: auto;
+        }
+
+        body {
+            font-family: monospace;
+        }
+
+        img {
+            display: block;
+            max-width: calc(10em / 2);
+            float: right;
+            column-span: 100%;
+        }
+
+        section {
+            border: 4px solid orange;
+        }
+
+        h2 {
+            column-span: none;
+            font-size: larger;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container"><div class="items"></div><div class="items"></div><div class="items"></div></div>
+    <article>In this example, an article only has one short paragrap.</article>
 </body>
+
 </html>
 <!--
-    justify-content: main-line/inline applies to bloc containersn flex, 
+    justify-content: main-line/inline applies to bloc container flex, 
     https://www.w3.org/TR/css-align-3/#terms
-
-
-    
 
     justify-xxx    justify-content, justify-items
     align-xxx      align-content    align-items
 
     xxx-content
     xxx-items
-
 -->
