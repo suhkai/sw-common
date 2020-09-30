@@ -33,13 +33,13 @@
         }
 
         article {
-            border:1px blue solid;
-            column-fill: balanced;
-            columns: 4;
-            width: 60em;
-            column-gap: 2em;
-            column-rule: orange 1px solid;
-            height: auto;
+            border: 1px blue solid;
+            columns: 3;
+            width: 460px;
+            column-width: 90px;
+            column-gap: 2px;
+            column-rule: 1px solid orange;
+            justify-content: space-between;
         }
 
         body {
@@ -47,25 +47,37 @@
         }
 
         img {
-            display: block;
-            max-width: calc(10em / 2);
-            float: right;
-            column-span: 100%;
+
+            max-width: 60px;
+            break-inside: avoid;
+            /*column-span:all;*/
         }
 
-        section {
-            border: 4px solid orange;
-        }
+        .itms {
+            width: 50px;
+            height: 50px;
+            border: red solid 3px;
+            break-inside: avoid;
 
-        h2 {
-            column-span: none;
-            font-size: larger;
+        }
+        span {
+            width: 120px;
+            border: 2px dotted green;
         }
     </style>
 </head>
 
 <body>
-    <article>In this example, an article only has one short paragrap.</article>
+    <article>
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and
+<div class="itms"></div><div class="itms"></div><div class="itms"></div>Scrambled it to make a type specimen book. <img src="./UV_Grid_Lrg.jpg"> It has survived not only five
+        centuries, but also the leap into
+        electronic typesetting, remaining essentially<p>Hello</p> unchanged. It was popularised in the 1960s with the
+        release of
+        Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like
+        Aldus PageMaker including versions of Lorem Ipsum.one short paragrap.
+    </article>
 </body>
 
 </html>

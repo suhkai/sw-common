@@ -7,6 +7,14 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "manifest-w3.org",
+            "program": "${workspaceFolder}/packages/w3.org/css-manifest/server.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "redis-lex",
             "program": "${workspaceFolder}/packages/redis-pr/client-list.js",
             "internalConsoleOptions": "openOnSessionStart",

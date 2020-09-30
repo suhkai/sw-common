@@ -1,0 +1,19 @@
+{
+  "name": "css-manifest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "http": "http-server ./dist 8080"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^0.12.3",
+    "parse-path": "^4.0.2",
+    "path-parse": "^1.0.6",
+    "path-parser": "^6.1.0"
+  }
+}
