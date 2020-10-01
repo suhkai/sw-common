@@ -11,7 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "http-server": "^0.12.3",
+    "mimetypes": "^0.1.1",
     "parse-path": "^4.0.2",
     "path-parse": "^1.0.6",
     "path-parser": "^6.1.0"
