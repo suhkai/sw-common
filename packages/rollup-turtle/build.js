@@ -1,8 +1,10 @@
 const rollup = require('rollup');
 const { terser } = require('rollup-plugin-terser')
 const json = require('@rollup/plugin-json');
-const { nodeResolve } = require('@rollup/plugin-node-resolve');
-const  commonjs = require('@rollup/plugin-commonjs');
+const { default: resolve } = require('@rollup/plugin-node-resolve');
+const   commonjs  = require('@rollup/plugin-commonjs');
+
+
 const nodePolyfills  = require('rollup-plugin-node-polyfills');
 const html = require('@rollup/plugin-html');
 
@@ -21,8 +23,9 @@ const inputOptions = {
     plugins: [
         //html(),
         json(),
-        //nodeResolve(),
-        //commonjs(),
+        resolve(),
+        commonjs(),
+        
       //  nodePolyfills()
     ]
 };
@@ -43,16 +46,30 @@ const outputOptions = {
     banner: '/* some fuckin banner */',
     footer: '/* foot loose */',
     chunkFileNames(info){
-        console.log(JSON.stringify(info, null, 4));
+        const { name, type} = info;
+        console.log(JSON.stringify({ name, type }, null, 4));
         return '[name]-[hash].js';
     },
     entryFileNames(info){
         cnt++;
+        //const { name, type} = info;
         console.log(JSON.stringify(info, null, 4));
-        return '[name]-entry-[hash].js';
+        return '[name]-entry.js';
         
     },
-    compact: true
+    compact: false,
+    extend: true,
+    inlineDynamicImports: false,
+    //interop: 'esModule',
+    intro: "const env = 'production'",
+    /*manualChunks(id) {
+        if (id.includes('lodash')){
+            return 'vender';
+        }
+    },*/
+    preserveModules: true,
+    preserveModulesRoot: './',
+    sourcemap: true,
 };
 
 

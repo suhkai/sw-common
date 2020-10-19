@@ -2,11 +2,19 @@
 
 import { add } from 'computations';
 
+import('lodash/get').then(({get})=>{
+    const b = get({}, 'hello');
+
+    console.log(b);
+    
+});
+
 console.log(add(1, 2));
 
-import('./some.json').then(({default:defaultExp}) => console.log(defaultExp));
-let hello;
-//import { hello } from './some.json'
+
+//import('./some.json').then(({default:defaultExp}) => console.log(defaultExp));
+//let hello;
+import { hello } from './some.json'
 
 import { count, increment } from './incrementer.js';
 
