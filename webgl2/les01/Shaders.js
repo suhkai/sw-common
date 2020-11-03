@@ -17,7 +17,6 @@ class ShaderUtil{
 			gl.deleteShader(shader);
 			return null;
 		}
-
 		return shader;
 	}
 

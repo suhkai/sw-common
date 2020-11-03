@@ -134,21 +134,51 @@ function selfStatus(text){
   return result;
 }
 
+function buddyInfo(){
+
+}
+
+function loadAverage(){
+
+}
+
+function memInfo(){
+
+}
+
+function netDev(){
+
+}
+
+function uptime(){
+
+}
+
+function memInfo(){
+
+}
+
+function selfStat(){
+
+}
+
+function selfLimits(){
+
+}
+
 const handlers = {
   '/proc/cpuinfo': { info: cpuInfo() },
-  '/prof/self/io': { io: selfIo },
-  //'/proc/self/map_files': noop,
-  //'/proc/self/pagemap': noop,
+  '/proc/self/io': { io: selfIo },
   '/proc/self/smaps': { smaps: selfSmaps },
   '/proc/self/statm': { statm: selfStatm },
   '/proc/self/status': { status: selfStatus },
-  '/proc/self/buddyinfo': { noop,
-  '/proc/loadavg': noop,
-  '/proc/meminfo': noop,
-  '/proc/self/net/dev': noop,
-  '/proc/uptime': noop,
-  '/proc/self/stat': noop,
-  '/proc/self/limits': noop
+  '/proc/self/buddyinfo': { buddy: buddyInfo },
+  '/proc/loadavg': { loadavg: loadAverage },
+  '/proc/meminfo': { meminfo: memInfo },
+  '/proc/self/net/dev': { netDev: netDev },
+  '/proc/uptime': { uptime: uptime},
+  '/proc/self/stat': { stat: selfStat },
+  '/proc/self/limits': { limits: selfLimits }
 };
 
 module.exports = handlers;

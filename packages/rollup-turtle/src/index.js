@@ -2,14 +2,11 @@
 
 import { add } from 'computations';
 
-import('lodash/get').then(({get})=>{
-    const b = get({}, 'hello');
-
-    console.log(b);
-    
-});
+//import get  from 'lodash/get';
 
 console.log(add(1, 2));
+
+//console.log(get());
 
 
 //import('./some.json').then(({default:defaultExp}) => console.log(defaultExp));

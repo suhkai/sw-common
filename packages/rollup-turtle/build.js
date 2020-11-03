@@ -3,7 +3,7 @@ const { terser } = require('rollup-plugin-terser')
 const json = require('@rollup/plugin-json');
 const { default: resolve } = require('@rollup/plugin-node-resolve');
 const   commonjs  = require('@rollup/plugin-commonjs');
-
+const myPlugin = require('./src/plugin');
 
 const nodePolyfills  = require('rollup-plugin-node-polyfills');
 const html = require('@rollup/plugin-html');
@@ -15,16 +15,14 @@ const path = require('path');
 const inputOptions = {
     input: 'src/index.js',
     external: ['computations'],
-    /*onwarn(warning, warn){
-        console.log(JSON.stringify(warning));
-        warn(warning);
-    },*/
-   
     plugins: [
         //html(),
+        myPlugin(), // this plugin will be run first
         json(),
-        resolve(),
-        commonjs(),
+        //resolve(),
+        //commonjs(),
+        
+        //myPlugin()
         
       //  nodePolyfills()
     ]
@@ -33,33 +31,17 @@ let cnt = 0;
 const outputOptions = {
     dir: 'dist',
     entryFileNames: '[name].js',
-    format: 'es',
+    format: 'iife',
     name: 'somevar',
-    exports: 'named',
     globals:{
         computations: 'globalThis.$$'
     },
-    assetFileNames(info){
-        //console.log(JSON.stringify(info));
-        return 'assets/[name]-[hash][extname]';
-    },
     banner: '/* some fuckin banner */',
     footer: '/* foot loose */',
-    chunkFileNames(info){
-        const { name, type} = info;
-        console.log(JSON.stringify({ name, type }, null, 4));
-        return '[name]-[hash].js';
-    },
-    entryFileNames(info){
-        cnt++;
-        //const { name, type} = info;
-        console.log(JSON.stringify(info, null, 4));
-        return '[name]-entry.js';
-        
-    },
     compact: false,
     extend: true,
-    inlineDynamicImports: false,
+    exports: 'named',
+    //inlineDynamicImports: false,
     //interop: 'esModule',
     intro: "const env = 'production'",
     /*manualChunks(id) {
@@ -67,8 +49,8 @@ const outputOptions = {
             return 'vender';
         }
     },*/
-    preserveModules: true,
-    preserveModulesRoot: './',
+    //reserveModules: true,
+   // preserveModulesRoot: './',
     sourcemap: true,
 };
 
