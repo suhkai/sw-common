@@ -54,11 +54,31 @@ async function init() {
         console.log(`${paths[i]}>${map[paths[i]]}`);
         promises[i] = loadFile(map[paths[i]]);
     }
-    Promise.allSettled(promises).then(resolved => {
-        console.log(resolved.filter(v => v.status === 'rejected'));
-    })
+
+    return Promise.allSettled(promises).then(resolved => {
+        // process all raw data
+        const result = {};
+        resolved.reduce((final,{ status, value, reason }, i)=>{
+            const [ [shortName, handler] ] = Object.entries(handlers[paths[i]]);
+            if (status === 'rejected'){
+                final[shortName] = String(reason);
+            }
+            else {
+                console.log(handlers[paths[i]]);
+               const resultObj = handler(value);
+               if (resultObj){
+                   final[shortName] = resultObj;
+               }
+            }
+            return final;
+        },result);
+        return result;
+    });
 }
 
-init().catch(err => {
+init()
+.then(report => console.log(report))
+.catch(err => {
     console.log(`There was an error ${String(err)}`);
 });
+

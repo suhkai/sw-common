@@ -14,13 +14,13 @@ function cpuInfo(keys = [
 ]) {
   return function (text) {
     const results = [];
-    for (const processor of text.slit('\n\n')) {
+    for (const processor of text.split('\n\n')) {
       const entryLines = processor.split('\n');
       const cpu = {};
       for (const line of entryLines) {
         const [key, value] = line.split(':').map(s => s.trim())
         if (keys.includes(key)) {
-          cpy[key] = value;
+          cpu[key] = value;
         }
       }
       results.push(cpu);
@@ -49,23 +49,23 @@ function selfSmaps(text){
 
   const lines = text.split('\n').filter(f=>f);
 
-  const regExpHeaders = /^([0-9A-Za-z]+\-[0-9A-Za-z]+)\s+([rwxsp-]+)\s([0-9A-Za-z]+)\s+([0-9:]+)\s+([0-9]+)\s+([^\s]+)/;
+  const regExpHeaders = /^([0-9A-Za-z]+\-[0-9A-Za-z]+)\s+([rwxsp-]+)\s([0-9A-Za-z]+)\s+([0-9:]+)\s+([0-9]+)\s+([^\s]+)?/;
 
   const mods = [];
 
   function* moduleLines(){
     while (cursor < lines.length && lines[cursor]){
-      if (lines[start].match(regExpHeaders) === null){
+      if (lines[cursor].match(regExpHeaders) !== null){
          return;
       }
-      const [key, value] = lines[start].split(':').map(s=>s.trim().toLowerCase());
+      const [key, value] = lines[cursor].split(':').map(s=>s.trim().toLowerCase());
       yield [key,value];
       cursor++;
     }
   }
 
   while(cursor < lines.length && lines[cursor]){
-    const mod = lines.match(regExpHeaders);
+    const mod = lines[cursor].match(regExpHeaders);
     if (mod !== null){
       const info = {
         address: mod[1],

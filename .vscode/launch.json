@@ -11,6 +11,14 @@
             "program": "${workspaceFolder}/packages/rollup-turtle/build.js",
             "internalConsoleOptions": "openOnSessionStart",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "proc-metrics",
+            "program": "${workspaceFolder}/packages/proc/test.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}/packages/proc/"
         }
     ]
 }
