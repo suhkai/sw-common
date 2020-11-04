@@ -1,0 +1,16 @@
+* text=auto
+*.md text
+*.xml text
+*.ini text
+*.json text
+*.yml text
+# not a text file
+*.png -text
+*.jpg -text
+node -text
+*.xz -text
+*.tar -text
+# makefils have no crlf in windows 
+*.sh text eol=lf
+Makefile text eol=lf
+Dockerfile text eol=lf
