@@ -11,12 +11,12 @@ const loadavg = require('./loadavg');
 const meminfo = require('./meminfo');
 const netDev = require('./netDev');
 const uptime = require('./uptime');
-const limits = require('./loadavg');
+const limits = require('./limits');
 
 const C = {};
 C.CPUINFO = '/proc/cpuinfo';
-C.LOADAVG = '/proc/self/status';
-C.MEMINFO = '/proc/loadavg';
+C.MEMINFO = '/proc/meminfo';
+C.LOADAVG = '/proc/loadavg';
 C.UPTIME = '/proc/uptime';
 
 C.SELF = {};
@@ -46,11 +46,7 @@ const handlerMap = {
 };
 
 
-function createProcLoader(handlers) {
-  return function loadFile(path) {
-    if (!(path in handlers)) {
-      return;
-    }
+function loadFile(path) {
     const readable = fs.createReadStream(path, { flags: 'r', emitClose: true, start: 0 });
     readable.setEncoding('utf8');
     return new Promise((resolve, reject) => {
@@ -68,21 +64,23 @@ function createProcLoader(handlers) {
         reject(err);
       });
     });
-  };
 }
 
-function getProcReports(procFileLoader, ...procList = Object.keys(handlerMap)) {
+function getProcReports(handlers, ...procList) {
   const promises = [];
+  if (procList.length === 0){
+    procList = Object.keys(handlers);
+  }
 
   for (let i = 0; i < procList.length; i++) {
-    promises.push(procFileLoader(procList[i]));
+    promises.push(loadFile(procList[i]));
   }
 
   return Promise.allSettled(promises).then(resolved => {
     // process all raw data
     const result = {};
     resolved.reduce((final, { status, value, reason }, i) => {
-      const [[shortName, handler]] = Object.entries(handlers[paths[i]]);
+      const [[shortName, handler]] = Object.entries(handlers[procList[i]]);
       if (status === 'rejected') {
         final[shortName] = String(reason);
       }
@@ -100,7 +98,6 @@ function getProcReports(procFileLoader, ...procList = Object.keys(handlerMap)) {
 
 module.exports = {
   constants: C,
-  createProcLoader,
   getProcReports,
   handlerMap
 };

@@ -7,6 +7,25 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/packages/proc/node_modules/mocha/bin/_mocha",
+            "cwd": "${workspaceFolder}/packages/proc/",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/packages/proc/test"
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "rollup",
             "program": "${workspaceFolder}/packages/rollup-turtle/build.js",
             "internalConsoleOptions": "openOnSessionStart",
