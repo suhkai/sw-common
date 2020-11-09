@@ -14,7 +14,8 @@ test('mock', function(done) {
 test('mock return values', function(done) {
   const mock = jest.fn();
 
-  mock.mockReturnValue(10,11);
+  mock.mockReturnValue(10,
+    11);
   console.log(mock(), mock())
   
   done();
