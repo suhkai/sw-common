@@ -332,4 +332,8 @@ describe('proc', () => {
             }
         });
     });
+    it('multiple reports, /proc/self/dev/net and /proc/self/limits', async () => {
+        const result = await getProcReports(fixtureMap, C.SELF.NET.DEV, C.SELF.LIMITS);
+        console.log(results);
+    });
 })
