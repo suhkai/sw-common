@@ -1,14 +1,19 @@
 const { features } = require('./dictionary');
-
-const $optional = Symbol.for('optional');
-const clone = require('clone');
+const isObject = require('../isObject');
 
 const {
-    tokens,
-    formatPath
-} = require('../jspath/tokenizer');
+    tokens
+} = require('@mangos/jxpath/internals');
 
-const ifArrayNotZero = require('../if-length-zero');
+const formatPath = require('../jspath/format');
+
+const isLenZero = require('../isLenZero');
+
+function IfNotZeroLen(data){
+    if (!isLenZero(data)){
+        return data;
+    }
+}
 
 features.set('object', {
     factory: 2,
@@ -45,7 +50,10 @@ features.set('object', {
             function checkMissingProps(partition, data, errors) {
                 for (const key of props[partition]) {
                     if (!(key in data)) {
-                        if (schema[key][$optional] === false) {
+                        // could be optional, need to check now
+                        // FIX it  here
+                        const [,err,final] = schema[key](undefined);
+                        if (!(final && !err)){ 
                             errors.push(`[${String(key)}] is manditory but absent from the object`);
                         }
                     }
@@ -57,15 +65,15 @@ features.set('object', {
                 const errors = [];
                 for (const key of props[partition]) {
                     const value = data[key];
-                    if (value === undefined) {
+                    if (value === undefined) { // it was optional
                         continue; // skip it
                     }
                     // clone the context
-                    const ctxNew = { data: ctx.data, location: clone(ctx.location) };
+                    const ctxNew = { data: ctx.data, location: ctx.location.slice() };
                     ctxNew.location.push({ token: tokens.SLASH, value: '/' }, { token: tokens.PATHPART, value: key });
-                    const [result, err, final] = schema[key](value, ctxNew);
+                    const [result, err] = schema[key](value, ctxNew);
                     if (!err) {
-                        data[key] = result; // allow for transforms
+                        data[key] = isObject(result) ? result: result[0]; // allow for transforms
                         continue;
                     }
                     // error, we have to add the path info
@@ -74,7 +82,7 @@ features.set('object', {
                         continue;
                     }
                     if (!err.frozen){
-                        errors.push({ frozen:true, errorMsg:`validation error at path:${formatPath(ctxNew.location)}, error: ${err}`});
+                        errors.push(`object is frozen, validation error at path:${formatPath(ctxNew.location)}, error: ${err}`);
                         continue;
                     }
                     errors.push(err); // pass through
@@ -83,16 +91,16 @@ features.set('object', {
                 if (errors.length){
                     // are we nested object?
                     if (ctx.location.length){
-                        return [undefined, ifArrayNotZero(errors), undefined];
+                        return [undefined, IfNotZeroLen(errors), undefined];
                     }
-                    return [undefined, ifArrayNotZero(errors), undefined];
+                    return [undefined, IfNotZeroLen(errors), undefined];
                 }
                 return [data, undefined, undefined];
             }
             //
             return function validateObject(obj, ctx = { data: obj, location: [] }) { // Return dummy validator
                 // validation for optional and missing props etc
-                if (typeof obj !== 'object'){
+                if (!isObject(obj)){
                     return [undefined, `data is not an object`];
                 }
                 const errors = [];
@@ -104,7 +112,7 @@ features.set('object', {
                         }
                     }
                     if (errors.length) {
-                        return [null, errors, null];
+                        return [undefined, errors, undefined];
                     }
                 }
 
@@ -112,7 +120,7 @@ features.set('object', {
                 checkMissingProps('symbols', obj, errors);
 
                 if (errors.length) {
-                    return [null, errors, null];
+                    return [undefined, errors, undefined];
                 }
                 // deep validation
                 const [result1, errors1] = deepValidate('strings', obj, ctx);
@@ -124,7 +132,7 @@ features.set('object', {
                     return [undefined, errors2, undefined];
                 }
                 // all done
-                return [result2, undefined, undefined]
+                return [[result2], undefined, undefined]
             }
         };
     }

@@ -1,32 +1,12 @@
-/* usage:
-/ v.object({
-   .
-   name: v.ref('/newlyhired/persons/name').exists,
-   tasks: v.ref('/tasks/taskNames').absent,
-   // other things you can think of
-   such as:
-      v.ref('/tasks/taskname/[key=value]/some/thing/else')
-      v.ref('/tasks/taskname/[=value]/some/thing/else')
-      v.ref('/tasks/taskname/[key=/regexp/]/some/thing/else')
-      v.ref('/tasks/taskname/[regexp=exgexp]/some/thing/else')
-   .
-});
-
-*/
-// partition data, ctx
-
-const {
-   getTokens,
-   resolve,
-   tokens,
-   formatPath
-} = require('../jspath/tokenizer');
+const resolve = require('../jspath/resolve');
+const formatPath = require('../jspath/format');
 
 const {
    features
 } = require('./dictionary');
 
-const objectSlice = require('../jspath/objectSlice');
+const { jxpathUseTokens: jxpath, pathAbsorber, tokens } = require('@mangos/jxpath/internals');
+
 const { equals } = require('../equals');
 
 const predicateMap = {
@@ -40,66 +20,64 @@ const predicateMap = {
    }
 }
 
-function valueExist(value, target){
+function valueExist(value, target) {
    // all elements from src must exist in target
    const found = target.find(m => equals(value, m));
-   if (!found) return [ undefined, `element ${JSON.stringify(value)} could not be found`]; // fast exit 
+   if (!found) return [undefined, `element ${JSON.stringify(value)} could not be found`]; // fast exit 
    return [value, undefined];
 }
 
-function valueAbsent(value, target){
+function valueAbsent(value, target) {
    // all elements from src must exist in target
    const found = target.find(m => equals(value, m));
-   if (found) return [ undefined, `element ${JSON.stringify(value)} was found`]; // fast exit 
+   if (found) return [undefined, `element ${JSON.stringify(value)} was found`]; // fast exit 
    return [value, undefined];
 }
 
-function arrayExist(valueItems, target){
-    // all elements from src must exist in target
-    for (const value of valueItems){
-       const found = target.find(m => equals(value, m));
-       if (!found) return [ undefined, `element ${JSON.stringify(value)} could not be found`]; // fast exit 
-    }
-    return [valueItems, undefined];
-}
-
-function arrayAbsent(valueItems, target){
+function arrayExist(valueItems, target) {
    // all elements from src must exist in target
-   for (const value of valueItems){
+   for (const value of valueItems) {
       const found = target.find(m => equals(value, m));
-      if (found) return [undefined, `element ${JSON.stringify(value)} was found`]; 
+      if (!found) return [undefined, `element ${JSON.stringify(value)} could not be found`]; // fast exit 
    }
    return [valueItems, undefined];
 }
 
+function arrayAbsent(valueItems, target) {
+   // all elements from src must exist in target
+   for (const value of valueItems) {
+      const found = target.find(m => equals(value, m));
+      if (found) return [undefined, `element ${JSON.stringify(value)} was found`];
+   }
+   return [valueItems, undefined];
+}
 
-function createRef(path) {
-   //  lex the path and validate (needs to be somehting usefull),
-   const to = getTokens(path); // could throw 
-   if (to.length === 0) {
+function createRef(path, ignore) {
+   if (typeof path !== 'string' || path.trim().length === 0) {
       throw new TypeError(`path:"${path}" was not a valid for the create ref featur`);
    }
-   if (to[0].token !== tokens.SLASH) { // relative
+
+   const to = Array.from(pathAbsorber(path));
+   const errors = to.filter(p => p.error).map(m => m.error).join('|');
+   if (errors) {
+      throw new TypeError(`the path contained errors: ${errors}`);
+   }
+   
+   if (to[0].token !== tokens.SLASH){
       to.unshift({
-         token: tokens.SLASH,
-         value: '..'
-      });
-      to.unshift({
-         token: tokens.PARENT,
-         value: '..'
+         value: '..',
+         token: tokens.PARENT
       });
    }
-   // preducate
-   // - exists // the singular value (any type, object, array, scalar) should match something in the nodelist  (use deepequal in this case)
-   // - absent // the negation of exists
-   // - later to be extended
+   
    return function (predicate) {
       if (predicate !== 'exist' && predicate !== 'absent') {
          throw new TypeError(`the "ref" feature should be finalized with "exist" or "absent"`);
       }
       return function sliceAndValidate(partition, ctx) {
-         const selector = resolve(ctx.location, to);
-         const nodelist = objectSlice(ctx.data, selector);
+       const selector = resolve(ctx.location, to);
+         const iterator = jxpath(selector, ctx.data, ignore);
+         const nodelist = Array.from(iterator);
          // depending on the "type" of the partition argument, we should do a number of things 
          // 1. if it is an array?
          //     1.a if predicate === 'exist' all elements of the array need to be accounted for
@@ -107,13 +85,13 @@ function createRef(path) {
          // 2. if it is a scalar 
          //     2.a if predicate === 'exist' the value must exist in nodelist
          //     2.b if predicate === 'absent' the value must not exist in nodelist 
-         const s1 = Array.isArray(partition) ? 'array':'nonarray';
+         const s1 = Array.isArray(partition) ? 'array' : 'nonarray';
          const fn = predicateMap[s1][predicate];
-         const  [result, error] = fn(partition, nodelist);
-         if (error){
-            return [result, `${error} at ${formatPath(selector)}`];
+         const [result, error] = fn(partition, nodelist);
+         if (error) {
+            return [undefined, `${error} at ${formatPath(selector)}`];
          }
-         return [result, undefined];
+         return [[result], undefined];
       };
    };
 }

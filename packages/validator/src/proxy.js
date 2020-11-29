@@ -1,16 +1,6 @@
 'use strict';
-const clone = require('clone');
 const { features } = require('./features/dictionary');
-const $optional = Symbol.for('optional');
-const $marker = Symbol.for('ladybug');
-function primer() {
-    /* noop primer  */
-    throw new TypeError(`Internal Error: you reached a dead-stop function, please file this Error on as an issue on github: `)
-}
-
-const excludeSymbols = [
-    Symbol.for('nodejs.util.inspect.custom'),
-];
+const isObject = require('./isObject');
 
 require('./features/boolean');
 require('./features/object');
@@ -24,107 +14,124 @@ require('./features/function');
 require('./features/regexp');
 require('./features/any');
 require('./features/ifFalsy');
-require('./features/filename');
+require('./features/optional');
+require('./features/filepath');
+require('./features/url');
+
+function defaultHandler() {
+    return {
+        getPrototypeOf: () => { }, //there is no prototype
+        setPrototypeOf: () => false, // cannot set prototype
+        isExtensible: () => false, // not extendable
+        preventExtensions: () => true, // prevent extensions
+        getOwnPropertyDescriptor: () => undefined, // no property descriptor in format {...}
+        defineProperty: () => false,// definitions always fail, in strict mode will throw a TypedError exception
+        has: () => false, // has no properties via "in"
+        get: () => undefined, // "override" most likely
+        set: () => false, // setting failed and in strict mode will though prototype exception
+        deleteProperty: () => false, // deletions not possible
+        ownKeys: () => [], // no keys
+        apply: () => { throw new TypeError(`Validator not finalized`); }, // "override" most likely
+        construct: () => { } // return emoty object
+    };
+}
+
+
+// the the validator is finalized and only needs to be called
+function onlyCall(prevProxy) {
+    const proto = defaultHandler();
+    const onlyCall = Object.assign(proto, {
+        getPrototypeOf: () => Object.getPrototypeOf(Function),
+        apply: function (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
+            // "only call" the call sequence it is reversed
+            let [data, err, sortcircuitfinal] = target(...argumentList);
+            if (err || sortcircuitfinal) { // immediatly stop
+                return [data, err, sortcircuitfinal];
+            }
+            return prevProxy(...data); // call up the chain first
+        }
+    });
+    return onlyCall;
+}
+
+function selectOrCall(prevProxy) { // people can still add optional to this!!
+    const proto = defaultHandler();
+    const selectOrCallingHandler = Object.assign(proto, {
+        getPrototypeOf: () => Object.getPrototypeOf(Function), //there is no prototype
+        apply: function (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
+            if (prevProxy) {
+                const [data, err, final] = prevProxy(...argumentList); // call up the chain first
+                if (err || final) { // imediatly stop
+                    return [data, err, final];
+                }
+                return target(...data);
+            }
+            return [[...argumentList], undefined, undefined];
+        },
+        get: function (target, prop, receiver) {
+            const found = features.get(prop);
+            if (!found) {
+                throw new TypeError(`[${prop}] <- this feature is unknown`);
+            }
+            const { factory, name, fn, final } = found;
+            if (factory > 0) {
+                const o = { factory, name, fn, final };
+                return new Proxy(fn, construct(o, receiver));
+            }
+            if (final) { // there 
+                if (prevProxy) {
+                    return new Proxy(fn, onlyCall(receiver));
+                }
+                throw new TypeError(`finalizing validators like ${prop} cannot be used by themselves`);
+            }
+            return new Proxy(found.fn, selectOrCall(receiver));
+        }
+    });
+    return selectOrCallingHandler;
+}
+
+function construct(propContext, prevProxy) {
+    const proto = defaultHandler();
+    const constructionHandler = Object.assign(proto, {
+        get: function (target /**/, prop, /*receiver Proxy */) {
+            const { factory, name, fn, final } = propContext;
+            const o = { factory, name, fn, final };
+            o.fn = o.fn(prop); // this could throw
+            o.factory--;
+            if (o.factory === 0) {
+                if (final){
+                    return new Proxy(fn, onlyCall(prevProxy));
+                } 
+                return new Proxy(o.fn, selectOrCall(prevProxy)); //  //passon the prev prxyif the construction is done, so the handler must be select or call
+            }
+            return new Proxy(o.fn, construct(o, prevProxy)); //  //pa
+        },
+        apply: function (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
+            const { factory, name, fn, final } = propContext;
+            const o = { factory, name, fn, final };
+            o.fn = o.fn(...argumentList); // this could throw
+            o.factory--;
+            if (o.factory === 0) {
+                if (final){
+                    return new Proxy(fn, onlyCall(prevProxy));
+                } 
+                return new Proxy(o.fn, selectOrCall(prevProxy)); //  //passon the prev prxyif the construction is done, so the handler must be select or call
+            }
+            return new Proxy(o.fn, construct(o, prevProxy));
+        }
+    });
+    return constructionHandler;
+}
+
+// how to implement optional, well optional should be the first call
+
 
 function createValidatorFactory() {
-    function createHandler(propContext, parentAssembler) {
-        let optional = false;
-        const handler = Object.freeze({
-            get: function (target /* the primer, or fn in the chain */, prop, receiver /* Proxy */) {
-                // completling partials
-                if (propContext && propContext.factory) {
-                    propContext.fn = propContext.fn(prop); // this could throw
-                    propContext.factory--;
-                    if (propContext.factory === 0) {
-                        const assembly = new Proxy(propContext.fn, createHandler(undefined, parentAssembler /*dont use reciver*/)); // skip the isolated chain where we finalized a curried function
-                        propContext = undefined;
-                        return assembly;
-                    }
-                    return receiver;
-                }
-                if (propContext && propContext.factory === 0) {
-                    const erMsg = `[${propContext.name}] <- this feature is not fully configured, call it as a function (with or without arguments as needed)`;
-                    throw new TypeError(erMsg);
-                }
-                if (prop === Symbol.toPrimitive) {
-                    return this[prop];
-                }
-                if (excludeSymbols.includes(prop)) {
-                    return undefined;
-                }
-                if (prop === $optional) {
-                    return optional;
-                }
-                if (optional) { // closed!!
-                    throw new TypeError(`this validator has been finalized, extend with property "internal"`);
-                }
-                if (prop === 'optional' && parentAssembler === undefined) {
-                    throw new TypeError(`to early to specify "optional" marker, there is no validator`);
-                }
-                // this is akin to setting it
-                if (prop === 'optional' && optional === false) {
-                    optional = true;
-                    return receiver;
-                }
-                const found = features.get(prop);
-                if (!found) {
-                    const erMsg = `[${String(prop)}] <- this validator feature is unknown`;
-                    throw new TypeError(erMsg);
-                }
-                if (found.factory > 0) {
-                    return new Proxy(primer /*use dummy just in case*/, createHandler(clone(found), parentAssembler || receiver));
-                    // V.object({..., a:V.hello, ...});
-                    // V.object
-                }
-                // this validator needs no constructing
-                return new Proxy(found.fn, createHandler(this, receiver)); // create parent-child-chain of handlers for callback
-            },
-            set: function () {
-                throw new TypeError(`cannot use assignment in this context`);
-            },
-            apply: function (target /* the primer, or fn in the chain */, thisArg /* the proxy object */, argumentList) {
-                // finalizing a feature via completing calling the curried function
-                if (propContext && propContext.factory > 0) {
-                    if (thisArg === undefined){
-                        throw new TypeError(`feature "${propContext.name}" has not been finalized`);
-                    }
-                    const temp = {
-                        ...propContext,
-                        fn: propContext.fn(...argumentList) // this can throw!!
-                    };
-                    Object.assign(propContext, temp);
-                    propContext.factory--;
-                    if (propContext.factory > 0) {
-                        return new Proxy(temp.fn, createHandler(propContext, parentAssembler || thisarg)); //not done yet with finalizing
-                    }
-                    const assembly = new Proxy(temp.fn, createHandler(undefined, parentAssembler || thisArg)); // create parent-child-chain of handlers for callback
-                    return assembly;
-                }
-                //
-                // actual calling the validator
-                //
-                if (parentAssembler === rootAssembler) {
-                    return target(...argumentList); // for debugging a seperate rc
-                }
-                const [data, err, final] = parentAssembler(...argumentList);
-                if (err || final) { // imediatly stop
-                    return [data, err || null, final || null];
-                }
-                const result2 = target(...argumentList);
-                return result2;
-                //}
-            },
-            [Symbol.toPrimitive]: function ( /*hint*/) {
-                return 'Object [validator]'; // TODO: replace this string by a usefull DAG
-            },
-            [$marker]: true
-        });
-        return handler;
-    }
-    // bootstrap
-    const rootAssembler = new Proxy(primer, createHandler());
-    /* maybe do some tests here */
-    return rootAssembler;
+    const primer = () => {
+        throw new TypeError(`Internal Error: you reached a dead-stop function, please file this Error on as an issue on github: `);
+    };
+    const handler = selectOrCall();
+    return new Proxy(primer, handler);
 }
 
 function addFeature(feature) {

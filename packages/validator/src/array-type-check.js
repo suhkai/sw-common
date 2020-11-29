@@ -1,9 +1,9 @@
 function fullTypeArrayCheck(typeFn, _type, arr) {
     if (!Array.isArray(arr)) {
-            return [null, `collection is not a array ${arr}`];
+            return [undefined, `collection is not a array ${arr}`];
     }
     if (arr.length === 0) {
-            return [null, 'collection is not an empty array'];
+            return [undefined, 'collection is not an empty array'];
     }
     let error = false;
     for (const elt of arr) {
@@ -13,9 +13,9 @@ function fullTypeArrayCheck(typeFn, _type, arr) {
             }
     }
     if (error) {
-            return [null, 'not all elements were strings'];
+            return [undefined, 'not all elements were strings'];
     }
-    return [arr, null];
+    return [arr];
 }
 
 module.exports = fullTypeArrayCheck;
