@@ -1,3 +1,5 @@
+const prettyFormat = require('pretty-format');
+
 test('mock', function(done) {
   const myMock = jest.fn();
 
@@ -6,7 +8,7 @@ test('mock', function(done) {
   const bound = myMock.bind(b);
   bound();
 
-  console.log(myMock.mock.instances[1] === b);
+  console.log(prettyFormat(a));
   // > [ <a>, <b> ]
   done();
 });
