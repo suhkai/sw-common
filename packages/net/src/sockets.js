@@ -9,7 +9,7 @@ class ServerSocket extends EventEmitter {
 	constructor(options, network, fromHost) {
 		super(options);
 		this._options = options || {};
-		
+
 		this._nw = network;
 		// some stats
 		this._listening = false;
@@ -21,6 +21,7 @@ class ServerSocket extends EventEmitter {
 		this._host = network.nsLookupBy(ips[0])[0];
 
 		this._connections = new Set(); // all client sockets forked by this server
+		this._deferTasks = [];
 	}
 
 	address() {
@@ -31,22 +32,76 @@ class ServerSocket extends EventEmitter {
 		};
 	}
 
+	/**
+	 * Sequnce of events
+	  server.close.. no connection 
+	 ===server.close called====
+        after calling 2 closes
+        /server/event/close 1 event has (optional) error:[], listening=false
+        /server/callback/close1:
+        /server/callback/close2: Error [ERR_SERVER_NOT_RUNNING]: Server is not running.     
+        /server/event/close 2 event has (optional) error:[], listening=false
+        defer from event.close 1
+        defer from callback server.close:1
+        defer from callback server.close:2
+		defer from event.close 2
+		
+	== close called, then client closes,	
+	    after calling 2 closes
+        /server/event/close 1 event has (optional) error:[], listening=false
+        /server/callback/close1:
+        /server/callback/close2: Error [ERR_SERVER_NOT_RUNNING]: Server is not running.     
+        defer from event.close 1
+        defer from callback server.close:1
+        defer from callback server.close:2	
+	 */
 	close(cb) {
-		this._blockNewConnections = true;
-		if (cb) {
-			this._closeCB = cb;
-		}
+		const wasListening = this._listening;
+		this._listening = false;// block new connections
 		if (this._connections.size === 0) {
-			// there are no connection can close immediatly
-			defer(() => {
-				// first we emit close
-				this.emit('close');
-				if (cb) {
-					const err = new NetworkError('ERR_SERVER_NOT_RUNNING', '', '[ERR_SERVER_NOT_RUNNING]: Server not running');
-					cb.call(this, err);
-				}
-			});
+			if (wasListening) {
+				defer(() => {
+					this.emit('close');
+					if (cb) {
+						cb.call(this);
+					}
+				})
+			}
+			else {
+				defer(() => {
+					if (cb) {
+						const err = new NetworkError('ERR_SERVER_NOT_RUNNING', '', '[ERR_SERVER_NOT_RUNNING]: Server not running');
+						cb.call(this, err)
+					}
+					this.emit('close');
+				})
+			}
+			return;
 		}
+		// there are still connections so defer till connections are closed
+		const self = this;
+		this._deferTasks.push({
+			fn(cb, wasListening) {
+			    if (!self._closeEmitted) {
+					self._closeEmitted = true;
+					this.emit('close');
+				}
+				if (wasListening) {
+					if (cb) {
+						defer(() => cb.call(self));
+					}
+				}
+				else {
+					if (cb) {
+						defer(() => {
+							const err = new NetworkError('ERR_SERVER_NOT_RUNNING', '', '[ERR_SERVER_NOT_RUNNING]: Server not running');
+							cb.call(self, err)
+						})
+					}
+				}
+			},
+			args: [cb, wasListening]
+		})
 	}
 
 	getConnections(fn) {
@@ -60,7 +115,7 @@ class ServerSocket extends EventEmitter {
 
 	syn(remoteSocket, fn) {
 		//(options, network, fromHost) {
-		if (!this._listening || this._blockNewConnections) {
+		if (!this._listening) {
 			// send back error
 			defer(fn, true); // send back an true in the error field
 			return;
@@ -171,6 +226,33 @@ class ServerSocket extends EventEmitter {
 			this.emit('listening');
 		});
 	}
+	_deListConnection(socket) {
+		if (this._connections.has(socket)){
+			this._connections.delete(socket);
+			if (this._connections.size) {
+				return;
+			}
+			if (!this._delisting){
+				this._delisting = true
+				defer(() => this._runSyncServerTasks());
+			}
+		}
+	}
+	_runSyncServerTasks() {
+		const task = this._deferTasks.shift();
+		if (task === undefined) {
+			this._delisting = false
+			return 
+		}
+		const { fn, args } = task;
+		try {
+			fn.apply(this, args);
+		}
+		catch(e){
+
+		}
+		this._runSyncServerTasks();
+	}
 }
 
 class Socket extends EventEmitter {
@@ -200,6 +282,12 @@ class Socket extends EventEmitter {
 		if (!isFinite(this._options.transmitChunk)) {
 			this._options.transmitChunk = 1024 * 4;
 		}
+		this._closeSeq = this._closeSeq.bind(this);
+		this.ack = this.ack.bind(this);
+	}
+
+	get writableFinished(){
+		return !!this._writableFinished;
 	}
 
 	get bufferSize() {
@@ -313,6 +401,7 @@ class Socket extends EventEmitter {
 		this._destroyed = false;
 		this._pending = false;
 		if (this._server) {
+			this._server._connections.add(this);
 			this._server.emit('connection', this);
 			this._cp.ack();
 		}
@@ -323,6 +412,10 @@ class Socket extends EventEmitter {
 
 	_closeSeq(cb) {
 		this._closing = true;
+		this._writableFinished = true;
+		if (this._server) {
+			this._server._deListConnection(this);
+		}
 		defer(() => {
 			if (this._closeState === 'fin') {
 				this.emit('finish');
@@ -487,7 +580,7 @@ class Socket extends EventEmitter {
 		 */
 	}
 
-	_setupTimeout(){
+	_setupTimeout() {
 		if (this._toTime) {
 			clearTimeout(this._toId);
 			this._toId = setTimeout(() => {
@@ -504,24 +597,24 @@ class Socket extends EventEmitter {
 	}
 
 	setTimeout(timeout, callback) {
-		if (typeof timeout !== 'number' || !isFinite(timeout)){
+		if (typeof timeout !== 'number' || !isFinite(timeout)) {
 			throw new TypeError('[ERR_INVALID_ARG_TYPE]: The "msecs" argument must be of type number. Received type string');
 		}
-		if (timeout < 0){
+		if (timeout < 0) {
 			throw new RangeError(`[ERR_OUT_OF_RANGE]: The value of "msecs" is out of range. It must be a non-negative finite number. Received ${timeout}`);
 		}
-		if (timeout > 2**31-1) {
-			timeout = 2**31-1
+		if (timeout > 2 ** 31 - 1) {
+			timeout = 2 ** 31 - 1
 		}
 		this._toTime = timeout;
 		clearTimeout(this._toId);
-		if (timeout === 0){
+		if (timeout === 0) {
 			this._toTime = undefined;
 			this._tocb = undefined;
 			return;
 		}
 		this._tocb = undefined;
-		if (typeof callback === 'function'){
+		if (typeof callback === 'function') {
 			this._tocb = callback;
 		}
 		this._setupTimeout();
