@@ -26,9 +26,12 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "rollup",
-            "program": "${workspaceFolder}/packages/rollup-turtle/build.js",
+            "name": "cli-turtle",
+            "program": "${workspaceFolder}/packages/cli-test/node_modules/.bin/create-cli-turtle",
+            "runtimeExecutable":"npm",
+            "runtimeArgs": ["run", "runme"],
             "internalConsoleOptions": "openOnSessionStart",
+            "stopOnEntry": true,
             "cwd": "${workspaceFolder}"
         },
         {
