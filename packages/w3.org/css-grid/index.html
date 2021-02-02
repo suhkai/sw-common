@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<body>
+    <div style="display: grid">
+
+        <!-- grid item: block child -->
+        <div id="item1">block</div>
+
+        <!-- grid item: floated element; floating is ignored -->
+        <div id="item2" style="float: left;">float</div>
+
+        <!-- grid item: anonymous block box around inline content -->
+        anonymous item 3
+
+        <!-- grid item: inline child -->
+        <span>
+      item 4
+      <!-- grid items do not split around blocks -->
+      <q style="" id=not-an-item>item 4</q>
+      item 4
+    </span>
+    </div>
+</body>
+
+</html>
