@@ -29,3 +29,33 @@
     /* 4 */ 1fr
     /* 5 */ auto;
 ```
+
+# Overview Grid (just skip for now)
+
+examples (no formal spec, just show usage loosy foosy)
+
+# 2.1 example
+
+```css
+  main {
+     grid:  "H   H "
+            "A   B "
+            "F   F " 30px  
+      /     auto 1fr;  
+  }
+
+```
+# 2.2 Placing items
+
+Placing with items with the following css directive:
+
+- `grid-area`
+- `grid-row`
+- `grid-column`
+
+
+# 2.3 Sizing the grid
+
+"geid tracks" = 
+
+Makes no sense at all better to jump to §7
