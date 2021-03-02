@@ -1,85 +1,100 @@
-
 @import './fonts.css';
+
 /* everything */
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 html {
-  border: 4px solid green;
-  height: auto;
-  min-height:100%; /* the viewport */
-  font-stretch: ultra-expanded;
-  overflow-y: auto;
+    border: 4px solid green;
+    height: auto;
+    min-height: 100%;
+    /* the viewport */
+    font-stretch: ultra-expanded;
+    overflow-y: auto;
 }
 
 body {
-  border: 4px solid red;
-  margin: 0;
-  padding: 0;
-  height: 100%; /* if the html width is "auto" its a circular dependency and height will go to that of the view port*/
-  font-size: 15px;
-  display: flex;
-  flex-direction: column;
-  font-family: "Open Sans Condensed";
-  padding-left: 1em;
+    border: 4px solid red;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    /* if the html width is "auto" its a circular dependency and height will go to that of the view port*/
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    font-family: "Open Sans Condensed";
+    padding-left: 1em;
+}
+
+.osc {
+  font-family: sans-serif;
 }
 
 p {
-  border: 5px solid orange;
-  margin:0;
+    border: 5px solid orange;
+    margin: 0;
 }
 
 .xxs {
-  font-size: xx-small;
-  font-weight: 300;
-  font-style: italic;
+    font-size: xx-small;
+    font-weight: 300;
+    font-style: italic;
 }
 
 .xs {
-  font-weight: bold;
-  font-size: x-small;
+    font-weight: bold;
+    font-size: x-small;
 }
 
 .s {
-  font-size: small;
+    font-size: small;
 }
 
 .m {
-  font-size: medium;
+    font-size: medium;
 }
 
 .l {
-  font-size: large;
+    font-size: large;
 }
 
 .xl {
-  font-size: x-large;
+    font-size: x-large;
 }
 
 .xxl {
-  font-size: xx-large;
-  font: caption;
+    font-size: xx-large;
+    font: caption;
 }
+
 
 /*.xx1, .xxl, .xl, .l, .m, .s,.xs,.xxs {
   font-weight: bold;
 }*/
 
-h1,h2,h3,h4,h5,h6 {
-  border: 2px solid;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    border: 2px solid;
 }
 
 .it {
     font-style: italic;
-    font-synthesis: none; /* doesnt work in chrome/firefox? */
+    font-synthesis: none;
+    /* doesnt work in chrome/firefox? */
 }
 
 .ob {
     font-style: oblique;
-    font-synthesis: none; /* doesnt work in chrome/firefox */
-    font-size-adjust: 0.5; /* only firefox? https://caniuse.com/?search=font-size-adjust */
+    font-synthesis: none;
+    /* doesnt work in chrome/firefox */
+    font-size-adjust: 0.5;
+    /* only firefox? https://caniuse.com/?search=font-size-adjust */
 }
 
 .caption {
@@ -104,4 +119,88 @@ h1,h2,h3,h4,h5,h6 {
 
 .status-bar {
     font: status-bar;
+}
+
+@font-face {
+    font-family: "bof";
+    src: local(Baskerville Old Face);
+}
+
+@font-face {
+    font-family: "algerian";
+    src: local(Algerian);
+}
+
+.bask {
+    font-family: bof;
+    /*font-size: 16px;*/
+}
+
+.alg {
+    font-family: algerian;
+    /*font-size: 16px;*/
+}
+
+@supports ( font-variant-position: sub) {
+    .sub {
+        font-variant-position: sub;
+        /* works in firefox but not in chrome? */
+    }
+}
+
+@supports not ( font-variant-position: sub) {
+    .sub {
+        vertical-align: sub;
+        font-size: smaller;
+        line-height: normal;
+    }
+}
+
+.small {
+    font-variant-caps: small-caps;
+    font-feature-settings: 'smcp' 0;
+}
+
+.all-small {
+    font-variant-caps: all-small-caps;
+}
+
+.petite {
+    font-variant-caps: petite-caps;
+}
+
+.all-petite {
+    font-variant-caps: all-petite-caps;
+}
+
+.unicase {
+  font-variant-caps: unicase;
+}
+
+.titling-caps {
+  font-variant-caps:titling-caps
+}
+
+.lining-nums {
+  font-variant-numeric: lining-nums;
+}
+
+.oldstyle-nums {
+  font-variant-numeric: oldstyle-nums;
+}
+
+.proportional-nums {
+  font-variant-numeric: proportional-nums;
+}
+
+.diagonal-fractions {
+  font-variant-numeric: diagonal-fractions;
+}
+
+.ordinal {
+  font-variant-numeric: ordinal;
+}
+
+.east-easian {
+  font-variant-east-asian: jis78;
 }
