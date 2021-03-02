@@ -56,6 +56,31 @@ Placing with items with the following css directive:
 
 # 2.3 Sizing the grid
 
-"geid tracks" = 
+"grid tracks" = 
 
-Makes no sense at all better to jump to §7
+# 7 Defining the grid
+
+- `grid-template-columns`
+- `grid-template-rows`
+
+values: <track-list>|<auto-track-list>| subgrid <line-name-list>?
+
+
+# 7.0.a `<track-list>`
+
+- <track-list>        = [ <line-names>? [ <track-size> | <track-repeat> ] ]+ <line-names>?
+- <line-names>        = '[' <custom-ident>* ']'  // because of '*' <custom-ident> can be empty?
+- <track-size>        = <track-breadth> | minmax( <inflexible-breath>, <track-breath>) | fit-content (<length-percentage>)
+- <line-names>        = '[' <custom-ident>* ']'  // because of '*' <custom-ident> can be empty?
+- <track-repeat>      = repeat( [ <integer [1,∞]> ] , [ <line-names>? <track-size> ]+ <line-names>? )
+- <track-breadth>     = <length-percentage> |<flex>|min-content | max-content | auto
+- <inflexible-breath> = <length-percentage> |       min-content | max-content | auto
+- <flex> =  fr unit
+- <length-percentage> = <length>|<percentage>
+
+# 7.0.b `<auto-track-list>`
+
+**Notes:**
+- the `width: fit-content();` (function) is not supported on most browsers
+- the `width: fit-content;` value is supported in most browsers
+
