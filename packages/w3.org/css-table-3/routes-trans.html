@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>loadavg</title>
+    <style>
+        html {
+            font-family: sans-serif;
+        }
+        
+        table {
+            font-size: 12px;
+            border-collapse: collapse;
+            letter-spacing: 1px;
+        }
+        
+        td,
+        th {
+            border: 2px solid gray;
+            padding: 10px 20px;
+        }
+        
+        th {
+            background: rgba(255, 200, 190, 1);
+        }
+        
+        tr.l>td,
+        tr.l>th,
+        th,
+        td {
+            text-align: left;
+        }
+
+        th.l,
+        td.l {
+            text-align: left !important;
+        }
+        
+        tr.r>td,
+        tr.r>th,
+        th,
+        td {
+            text-align: right;
+        }
+
+        th.r,
+        td.r {
+            text-align: right !important;
+        }
+        
+        tr.c>td,
+        tr.c>th,
+        tr,
+        td {
+            text-align: center;
+        }
+
+        th.c,
+        td.c {
+            text-align: center !important;
+        }
+        
+        caption {
+            padding: 10px;
+        }
+        
+        tbody {
+            font-size: 80%;
+        }
+
+        img {
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr class="r">
+                <!-- one col for host, then app, routes -->
+                <th colspan="2">&nbsp;</th>
+                <th scope="col"><span style="writing-mode: vertical-rl; font-size: 14px;">jsm-api-eds-lukyl-1</span></th>
+                <th scope="col">received</th>
+                <th scope="col">jsm-api-eds-lubet-0</th>
+                <th scope="col">jsm-api-eds-lubet-1</th>
+                <th scope="col">jsm-fe-eds-lubet-0</th>
+                <th scope="col">jsm-relay-eds-lukyl-1</th>
+                <th scope="col">jsm-relay-eds-lukyl-0</th>
+                <th scope="col">jsm-relay-eds-lubet-0</th>
+                <th scope="col">jsm-relay-eds-lubet-1</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="r">
+                <th scope="row" class="c"><span style="writing-mode: vertical-rl; font-size: 14px;">received</span></th>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+                <td><img src="./received.png"></td>
+            </tr>
+            <tr class="r">
+                <th scope="row" class="c"><span style="writing-mode: vertical-rl; font-size: 14px;">transmit</span></th>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+                <td><img src="./transmit.png"></td>
+            </tr>
+           
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>loadavg</title>
+    <style>
+        html {
+            font-family: sans-serif;
+        }
+        
+        table {
+            font-size: 12px;
+            border-collapse: collapse;
+            letter-spacing: 1px;
+        }
+        
+        td,
+        th {
+            border: 2px solid gray;
+            padding: 10px 20px;
+        }
+        
+        th {
+            background: rgba(255, 200, 190, 1);
+        }
+        
+        tr.l>td,
+        tr.l>th,
+        th,
+        td {
+            text-align: left;
+        }
+
+        th.l,
+        td.l {
+            text-align: left !important;
+        }
+        
+        tr.r>td,
+        tr.r>th,
+        th,
+        td {
+            text-align: right;
+        }
+
+        th.r,
+        td.r {
+            text-align: right !important;
+        }
+        
+        tr.c>td,
+        tr.c>th,
+        tr,
+        td {
+            text-align: center;
+        }
+
+        th.c,
+        td.c {
+            text-align: center !important;
+        }
+        
+        caption {
+            padding: 10px;
+        }
+        
+        tbody {
+            font-size: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr class="r">
+                <th colspan="2">&nbsp;</th>
+                <th scope="col">pid</th>
+                <th scope="col">read from storage</th>
+                <th scope="col">written to disk</th>
+                <th scope="col">nr of read io calls</th>
+                <th scope="col">nr of write io calls</th>
+                <th scope="col">really read</th>
+                <th scope="col">really written</th>
+                <th scope="col">cancelled write</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="r">
+                <th scope="rowgroup" rowspan="10" class="c"><span style="writing-mode: vertical-rl; font-size: 14px;">jsm-fe-backconn-lubet-0</span></th>
+                <th scope="rowgroup" rowspan="3" class="c"><span style="writing-mode: vertical-rl; font-size: 14px;">jsm-mailer</span></th>
+                <td class="r">1111</td>
+                <td class="r">4292</td>
+                <td class="r">0</td>
+                <td class="r">13</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+            </tr>
+            <tr class="r">
+                <td class="r">2222</td>
+                <td class="r">4292</td>
+                <td class="r">0</td>
+                <td class="r">13</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+            </tr>
+            <tr class="r">
+                <td class="r">3333</td>
+                <td class="r">4292</td>
+                <td class="r">0</td>
+                <td class="r">13</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+            </tr>
+            <tr class="r">
+                <th scope="rowgroup" rowspan="3" class="c"  ><span style="writing-mode: vertical-lr;  font-size: 14px;">jsm-gap</span></th>
+                <td class="r">4444</td>
+                <td class="r">4292</td>
+                <td class="r">0</td>
+                <td class="r">13</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+            </tr>
+            <tr class="r">
+                <td class="r">55555</td>
+                <td class="r">4292</td>
+                <td class="r">0</td>
+                <td class="r">13</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+            </tr>
+            <tr class="r">
+                <td class="r">6666</td>
+                <td class="r">4292</td>
+                <td class="r">0</td>
+                <td class="r">13</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+                <td class="r">0</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

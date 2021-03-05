@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>loadavg</title>
+    <style>
+        html {
+            font-family: sans-serif;
+        }
+        
+        table {
+            font-size: 12px;
+            border-collapse: collapse;
+            letter-spacing: 1px;
+        }
+        
+        td,
+        th {
+            border: 2px solid gray;
+            padding: 10px 20px;
+        }
+        
+        th {
+            background: rgba(255, 200, 190, 1);
+        }
+        
+        tr.l>td,
+        tr.l>th,
+        th,
+        td {
+            text-align: left;
+        }
+
+        th.l,
+        td.l {
+            text-align: left !important;
+        }
+        
+        tr.r>td,
+        tr.r>th,
+        th,
+        td {
+            text-align: right;
+        }
+
+        th.r,
+        td.r {
+            text-align: right !important;
+        }
+        
+        tr.c>td,
+        tr.c>th,
+        tr,
+        td {
+            text-align: center;
+        }
+
+        th.c,
+        td.c {
+            text-align: center !important;
+        }
+        
+        caption {
+            padding: 10px;
+        }
+        
+        tbody {
+            font-size: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr class="r">
+                <th colspan="2">&nbsp;</th>
+                <th scope="col">max cpu time</th>
+                <th scope="col">max file size</th>
+                <th scope="col">max data size</th>
+                <th scope="col">max stack size</th>
+                <th scope="col">max core file size</th>
+                <th scope="col">max resident set</th>
+                <th scope="col">max processes</th>
+                <th scope="col">max open files</th>
+                <th scope="col">max locked memory</th>
+                <th scope="col">max address space</th>
+                <th scope="col">max file locks</th>
+                <th scope="col">max pending signals</th>
+                <th scope="col">max msgqueue size</th>
+                <th scope="col">max nice priority</th>
+                <th scope="col">max realtime prio</th>
+                <th scope="col">max realtime timeout</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="r">
+                <th scope="rowgroup" rowspan="10" class="c"><span style="font-size: 14px;">jsm-fe-backconn-lubet-0</span></th>
+                <th scope="rowgroup" rowspan="1" class="c"><span style="font-size: 14px;">soft</span></th>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">8388608</td>
+                <td scope="col">0</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">11182</td>
+                <td scope="col">1048576</td>
+                <td scope="col">67108864</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">11182</td>
+                <td scope="col">819200</td>
+                <td scope="col">0</td>
+                <td scope="col">0</td>
+                <td scope="col">unlimited</td>
+            </tr>
+            <tr class="r">
+                <th scope="rowgroup" rowspan="1" class="c"  ><span style="font-size: 14px;">hard<span></th>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">11182</td>
+                <td scope="col">1048576</td>
+                <td scope="col">67108864</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">unlimited</td>
+                <td scope="col">11182</td>
+                <td scope="col">819200</td>
+                <td scope="col">0</td>
+                <td scope="col">0</td>
+                <td scope="col">unlimited</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
