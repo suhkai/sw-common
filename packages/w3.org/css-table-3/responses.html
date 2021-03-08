@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>loadavg</title>
+    <style>
+        html {
+            font-family: sans-serif;
+        }
+        
+        table {
+            font-size: 12px;
+            border-collapse: collapse;
+            letter-spacing: 1px;
+        }
+        
+        td,
+        th {
+            border: 2px solid gray;
+            padding: 10px 20px;
+        }
+        
+        th {
+            background: rgba(255, 200, 190, 1);
+        }
+        
+        tr.l>td,
+        tr.l>th,
+        th,
+        td {
+            text-align: left;
+        }
+
+        th.l,
+        td.l {
+            text-align: left !important;
+        }
+        
+        tr.r>td,
+        tr.r>th,
+        th,
+        td {
+            text-align: right;
+        }
+
+        th.r,
+        td.r {
+            text-align: right !important;
+        }
+        
+        tr.c>td,
+        tr.c>th,
+        tr,
+        td {
+            text-align: center;
+        }
+
+        th.c,
+        td.c {
+            text-align: center !important;
+        }
+        
+        caption {
+            padding: 10px;
+        }
+        
+        tbody {
+            font-size: 80%;
+        }
+
+        img {
+            width: 200px;
+        }
+
+        tr.diagonal-fractions > td:not(.notdf),
+        tr.diagonal-fractions > th:not(.notdf) {
+            font-variant-numeric: diagonal-fractions;
+            font-size: 16px;
+        }
+
+        tr.diagonal-fractions > td:not(.notdf) > span:last-of-type,
+        tr.diagonal-fractions > th:not(.notdf) > span:last-of-type {
+            color:red;
+        }
+
+        tr.diagonal-fractions > td:not(.notdf) > span:first-of-type,
+        tr.diagonal-fractions > th:not(.notdf) > span:first-of-type {
+            color:green;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr class="r">
+                <td rowspan="2" style="border: none;">&nbsp;</td>
+                <th rowspan="2" scope="col">host</th>
+                <th rowspan="2" scope="col">pid</th>
+                <th rowspan="2" scope="col">route</th>
+                <th scope="colgroup" colspan="4" class="c">rejects/accepted</th>
+            </tr>
+            <tr class="r">
+                <th rowspan="1" scope="col">last 30 min</th>
+                <th rowspan="1" scope="col">last 15 min</th>
+                <th rowspan="1" scope="col">last 5 min</th>
+                <th rowspan="2" scope="col">last 5 min</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="r diagonal-fractions">
+                <th rowspan="28" scope="row" class="c notdf"><span style="writing-mode: vertical-rl; font-size: 14px;">relay-notification</span></th>
+                <td rowspan="12" scope="rowgroup" class="c notdf"><span style="writing-mode: vertical-rl; font-size: 14px;">jsm-relay-eds-lubet-0</span></td>
+                <td rowspan="6"  scope="rowgroup" class="c notdf"><span style="writing-mode: vertical-rl; font-size: 14px;">4004444</span></td>
+                <td class="notdf">notification.delivery</td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+                <td><span>500</span>/<span>49</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td  class="notdf">notification.endpoint</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.endpoint.delete</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.history</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.call.ringing</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.events</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td rowspan="6"  scope="rowgroup" class="c notdf"><span style="writing-mode: vertical-rl; font-size: 14px;">4004445</span></td>
+                <td class="notdf">notification.delivery</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.endpoint</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.endpoint.delete</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.history</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.call.ringing</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+            <tr class="r diagonal-fractions">
+                <td class="notdf">notification.events</td>
+                <td><span>23423</span>/<span>39737</span></td>
+                <td><span>100</span>/<span>2000</span></td>
+                <td><span>500</span>/<span>87354</span></td>
+                <td><span>1000</span>/<span>9999</span></td>
+            </tr>
+        <!-- second host  -->    
+        <tr class="r diagonal-fractions">
+            <td rowspan="12" scope="row" class="c notdf"><span style="writing-mode: vertical-rl; font-size: 14px;">jsm-relay-eds-lubet-1</span></td>
+            <td rowspan="6"  scope="row" class="c notdf"><span style="writing-mode: vertical-rl; font-size: 14px;">4004444</span></td>
+            <td class="notdf">notification.delivery</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.endpoint</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.endpoint.delete</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.history</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf" >notification.call.ringing</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.events</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td rowspan="6"  scope="row" class="notdf"><span style="writing-mode: vertical-rl; font-size: 14px;">4004444</span></td>
+            <td class="notdf">notification.delivery</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.endpoint</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.endpoint.delete</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.history</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.call.ringing</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        <tr class="r diagonal-fractions">
+            <td class="notdf">notification.events</td>
+            <td><span>23423</span>/<span>39737</span></td>
+            <td><span>100</span>/<span>2000</span></td>
+            <td><span>500</span>/<span>87354</span></td>
+            <td><span>1000</span>/<span>9999</span></td>
+        </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
