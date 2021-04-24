@@ -8,11 +8,28 @@
   </body>
   <script>
       var importObject = {
-          imports: { imported_func: arg => console.log(arg) }
+        simple: { Mlog: arg => Math.log(arg) }
       };
-      fetch('simple.wasm')
+      fetch('simple2.wasm')
       .then(resp => resp.arrayBuffer())
       .then(bytes => WebAssembly.instantiate(bytes, importObject))
-      .then(results => console.log(results.instance.exports.exported_func()));
+      .then(results => {
+          {
+            const d = Date.now();
+            const rc = results.instance.exports.cntMany(1E9);
+            const delay = Math.trunc((Date.now()-d)/1000)
+            console.log(`result=${rc}, time=${delay}s`);
+          }
+        //2
+        {
+            const d = Date.now();
+            var s = 0;
+            for(let i=1; i < 1E9;i++) {
+                s+=Math.log(i)/i;
+            } 
+            const delay = Math.trunc((Date.now()-d)/1000)
+            console.log(`result=${s}, time=${delay}s`);
+        }
+      });
   </script>
 </html>
