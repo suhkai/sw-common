@@ -2,6 +2,9 @@
 
 ## Headers
 
+### If-Range = entity-tag / HTTP-date
+
+
 ### Vary
 
 https://tools.ietf.org/html/rfc7231#section-7.1.4
