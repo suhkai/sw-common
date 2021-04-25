@@ -1,6 +1,182 @@
+### Content-Disposition
 
+Reponse header for the mainbody
+```bash
+Content-Disposition: inline
+Content-Disposition: attachment
+Content-Disposition: attachment; filename="filename.jpg"
+```
+
+Post request in "multipart/form-data" as part of the body
+
+```bash
+----boundery-id
+Content-Disposition: form-data; name="fieldName"
+Content-Disposition: form-data; name="fieldName"; filename="filename.jpg"
+```
+
+-- **name**: is the name of the `<input name="..">` field member of the form
+-- **filename**: orginal filename being stransmitted
+
+### Content-Type in the context of multipart messaging
+
+`Content-Type: multipart/<mediatype> ; bounder=something`
+
+##### partial content response
+https://tools.ietf.org/html/rfc7233#section-4.1
+
+
+```bash
+HTTP/1.1 206 Partial Content
+Date: Wed, 15 Nov 1995 06:25:24 GMT
+Last-Modified: Wed, 15 Nov 1995 04:58:08 GMT
+Content-Range: bytes 21010-47021/47022           # in the message body when multipart
+Content-Length: 26012
+Content-Type: image/gif
+<empty line>
+<body>
+```
+
+#### partial content response with multipart
+
+Request example: `Range: bytes 400-1000/2000`
+
+Response (does not accept range request):
+```bash
+HTTP/1.1 206 Partial Content
+Accept-Ranges: none
+```
+#### multipart media type
+https://tools.ietf.org/html/rfc2046#section-5.1
+
+##### mulitpart media types (IANA)
+https://tools.ietf.org/html/rfc6838#section-4.2.6
+
+subtypes:
+- multipart/text            (used in emails)
+- multipart/mixed           (used in emails)
+- multipart/parallel        (same as mixed but hardware try to show media in parallel)
+- multipart/form-data       (used in POST messages to upload (for example files)
+- multipart/byteranges      (used with "206 Partial Content")
+
+
+Example: Request with multipart
+
+`<form action="<url>" method="post" enctype="multipart/form-data">`
+
+```bash
+POST / HTTP/1.1
+Host: localhost:8000
+User-Agent: Mozilla/5.0 ....
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+## it was orginal an http request, server can upgrade to http for this 
+## request via redirect "Location: https://.." heaeder
+Upgrade-Insecure-Requests: 1        
+Content-Type: multipart/form-data; boundery=-----------------------------8721656041911415653955004498
+Content-Length: 465
+
+<preamble data before the first bounder>
+-----------------------------8721656041911415653955004498
+Content-Disposition: form-data; name="myFile"; filename="readme.txt"
+ ## absent Content-Type header so  text/plain is assumed
+
+Hello world
+-----------------------------8721656041911415653955004498
+Content-Disposition: form-data; name="myTextField"
+
+Test
+-----------------------------8721656041911415653955004498
+Content-Disposition: form-data; name="myCheckBox"
+
+on
+-----------------------------8721656041911415653955004498
+Content-Disposition: form-data; name="myFile"; filename="test.txt"
+Content-Type: text/plain
+
+Simple file.
+## not the extta "--" after the bounder
+-----------------------------8721656041911415653955004498--
+```
+
+Example: Multipart Partial content 206 response
+
+```bash
+HTTP/1.1 206 Partial Content
+Accept-Ranges: bytes                                        #yes, server accepts byte range request
+#Accept-Ranges: none                                        #incase the server does not honer range request
+Content-Type: multipart/byteranges; boundary=3d6b6a416f9b5
+Content-Length: 385
+
+<preamble data>
+--3d6b6a416f9b5
+Content-Type: text/html
+Content-Range: bytes 100-200/1270    #format  <unit> <start>-<end>/<size>, size=* (unknown size)
+<data>
+--3d6b6a416f9b5
+Content-Type: video/mp4
+Content-Range: bytes 400-500/3270    #format  <unit> <start>-<end>/<size>, size=* (unknown size)
+<most probably octet data>
+--3d6b6a416f9b5--
+```
+
+- body part preceded by a boundery delimiter
+- if only single part is returned, `Content-Range` header must be in the 206 response
+- the bounder (in the body) stats with "--<boundery-delimiter>"
+- the multipart transfer ends with "--<boundery-delimiter>--"
+- all data in the bode before the first "--<boundery-delimter> is a preamble and not part of the actual data
 
 ## Headers
+
+### TE (transfer encoding request header)
+
+Maybe should have been called _ACCEPT-TRANSFER-ENCODING_
+
+```bash
+# full list, weird, so client cannot preference "chuncked"
+TE: compress
+TE: deflate
+TE: gzip
+TE: trailers # client willing to accept trailer fields
+
+TE: trailers, gzip;q=0.5  # add quality parameter specifying preference
+```
+
+### Transfer-encoding (response)
+
+`Transfer-Encoding` values:
+- `chunked`   
+- `compress` LZW
+- `deflate` zlib
+- `gzip` Z77
+- `identity`
+
+#### Transfer Encoding Chunked
+
+https://tools.ietf.org/html/rfc7230#section-4.1
+
+```bash
+.
+Transfer-Encoding: gzip, chunked
+Trailer: .. specify this if you are going to use trailer-part
+.
+.<last-header>
+\r\n  # empty line
+<chunk size in hex>\r\n     # repeat these 2 lines undlessly till ed
+<chunk data> (octets)\r\n
+0\r\n                       # end
+<trailer-part>              # see https://tools.ietf.org/html/rfc7230#section-4.1.2
+```
+
+About trailer-header, if trailer headers are critical to the data send, the sender
+should not generate trailer part unless `TE: trailer` was specified.
+
+Clients can ignore trailer messages, if `TE: trailer` was not specified in request
+
+
+
 
 ### If-Range = entity-tag / HTTP-date
 
@@ -78,7 +254,7 @@ If-None-Match: *
 
 ```bash
 Accept-Encoding: gzip ##Z77
-Accept-Encoding: compress ## lZW
+Accept-Encoding: compress ## LZW
 Accept-Encoding: deflate ## zlib
 Accept-Encoding: br ##broti
 Accept-Encoding: identity # content as-is, always implicitly specified
