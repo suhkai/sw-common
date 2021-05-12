@@ -1,8 +1,12 @@
+#!/usr/bin/env node
+
 import arg from 'arg';
 import inquirer from 'inquirer';
 import { createProject } from './main';
 
+// slice arguments
 function parseArgumentsIntoOptions(rawArgs) {
+    
     const args = arg({
         '--git': Boolean,
         '--yes': Boolean,
@@ -58,6 +62,7 @@ async function promptForMissingOptions(options) {
     };
 }
 
+// main here it start
 export async function cli(args) {
     let options = parseArgumentsIntoOptions(args);
     options = await promptForMissingOptions(options);
