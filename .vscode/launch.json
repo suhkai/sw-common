@@ -41,6 +41,15 @@
             "program": "${workspaceFolder}/packages/proc/test.js",
             "internalConsoleOptions": "openOnSessionStart",
             "cwd": "${workspaceFolder}/packages/proc/"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "bitfinex-book",
+            "program": "${workspaceFolder}/packages/bitfinex/index.js",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}/packages/bitfinex/"
         }
+    ]
     ]
 }
