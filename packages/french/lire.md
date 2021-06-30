@@ -1,0 +1,8 @@
+# lire (reading)
+
+- je lis
+- tu lis
+- il/elle lit
+- nous lisons
+- vous lisez
+- ils/elles lisent
