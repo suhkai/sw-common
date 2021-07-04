@@ -37,3 +37,39 @@ switch(str.toLowerCase()){
 }
 ```
 
+## local classes
+
+- defined with a `{` `}` block, like `if` `while`, or method
+- simular to inner classes, they have restriction on static methods, they must be `final` and not an expression (constant value)
+- no static initializer or interfaces within local classes
+- interface can only be defined in a top level class or in a static context
+- can access local var (outside the local class) if they are "final" or "effectivly final" (value doesnt change)
+
+## Anonymous classes
+
+- anonymous classes are expressions
+
+Example:
+
+```java
+
+interface HelloWorld {
+        public void greet();
+        public void greetSomeone(String someone);
+}
+
+
+HelloWorld frenchGreeting = new HelloWorld() {
+    
+    String name = "tout le monde";
+
+    public void greet() {
+        greetSomeone("tout le monde");
+    }
+
+    public void greetSomeone(String someone) {
+        name = someone;
+        System.out.println("Salut " + name);
+    }
+};
+```
