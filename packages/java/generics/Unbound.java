@@ -20,13 +20,34 @@ class WildcardError {
 }
 
 class WildcardErrorBad {
-    void swapFirst(List<? extends Number> l1, List<? extends Number> l2) {
+    void swapFirst(List<? extends Number> l1, List<? super Number> l2) {
       Number temp = l1.get(0);
-      l1.set(0, l2.get(0)); // expected a CAP#1 extends Number,
+      //l1.set(0, l2.get(0)); // expected a CAP#1 extends Number,
                             // got a CAP#2 extends Number;
                             // same bound, but different types
       l2.set(0, temp);	    // expected a CAP#1 extends Number,
                             // got a Number
+    }
+}
+
+class Node<T> {
+
+    public T data;
+
+    public Node(T data) { this.data = data; }
+
+    public void setData(T data) {
+        System.out.println("Node.setData");
+        this.data = data;
+    }
+}
+
+class MyNode extends Node<Integer> {
+    public MyNode(Integer data) { super(data); }
+
+    public void setData(Integer data) {
+        System.out.println("MyNode.setData");
+        super.setData(data);
     }
 }
 
@@ -46,5 +67,17 @@ public class Unbound {
         List<? extends Integer> lb = ln;
         List<? extends Number> la = lb;
         System.out.println("extends Number:"+lb.get(0));
-    }
+
+        MyNode mn = new MyNode(5);
+        Node<?> n = mn;            // A raw type - compiler throws an unchecked warning
+        mn.setData(4);
+        Object y = n.data;
+        int x = mn.data;  
+        System.out.println("y:"+y);
+       
+        }
+
+     <E> void excute(List<E> jobs){
+
+     }   
 }
