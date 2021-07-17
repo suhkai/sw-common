@@ -3,6 +3,47 @@ import java.io.File;
 import java.util.Map;
 import java.io.BufferedReader;
 
+
+tasks.register("loops-1") {
+    doLast {
+      var a = 2  
+      var b = 1
+      var max = 1  
+      val r0 = if (a < b ) a else b
+      println(r0)
+      println(r0::class)
+
+      max = if (a < b) {
+                    println("choose a")
+                    a
+                }
+                else {
+                    println("choose b")
+                    b
+                }
+      println(max);
+
+      val arr = arrayOf(1,2,3,4,5);
+      for (x in arr){
+          when(x){
+              1 -> println("x == 1")
+              2 -> println("x == 2")
+              3,4 -> println("x is 3 or 4")
+              else -> {
+                  println("x is something else (${x})")
+              }
+          }
+      }
+      
+      for (xx: String in listOf<String>("1","2","3", "4.2") ){
+        val num: Int? =  try { xx.toInt() } catch (e: NumberFormatException) { null }
+        println(if (num is Int) num else "not converted ${xx}")
+      }
+      
+
+    }
+}
+
 fun readDictionary(file: File): Map<String, *> = file.inputStream().use {
     TODO("Read a mapping of strings to arbitrary elements.")
 }
