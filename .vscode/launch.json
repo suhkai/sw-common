@@ -6,9 +6,13 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch Java Program",
+            "name": "mvn run",
             "request": "launch",
-            "mainClass": ""
+            "mainClass": "com.mycompany.app.App",
+            "classPaths": [
+                "target/my-app-1.0-SNAPSHOT.jar"
+            ],
+            "cwd": "${workspaceFolder}/packages/mvn-t"
         },
         {
             "type": "node",
