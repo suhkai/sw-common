@@ -67,7 +67,6 @@ public class App {
         anArray[0] = 100;
         anArray[1] = 200;
         anArray[2] = 300;
-
         anArray[5] = 600;
 
         System.out.println("Element at index 0: " + anArray[0]);
@@ -81,14 +80,6 @@ public class App {
             {"Mr. ", "Mrs. ", "Ms. "},
             {"Smith", "Jones"}
         };
-
-        names.map()
-        stream1.flatMap(
-            Function<? super T,? extends Stream<? extends R>> mapper)
-        
-        System.out.println(numArr);
-        System.out.println(names.flatMap())
-
     }
 
     public int doIt(int p) {
