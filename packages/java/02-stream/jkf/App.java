@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.concurrent.ForkJoinPool;
 
 class Bar {
     String name;
@@ -235,9 +236,18 @@ public class App {
                         return sum1 + sum2;
                     });
             // i am here https://winterbe.com/posts/2014/07/31/java8-stream-tutorial-examples/#parallel-streams
-            
-                
+            ForkJoinPool commonPool = ForkJoinPool.commonPool();
+            System.out.println(commonPool.getParallelism()); 
 
+            var set = new Set<String>();
+
+            IntStream.range(1, 140)
+              .parallel()
+              .peek()
+              .forEach(s -> {
+                    System.out.format("filter: %s [%s]\n", s, Thread.currentThread().getName());
+              });
+              
     }// doit
     public static void main(String... argv) {
         var app = new App();
