@@ -6,8 +6,8 @@
 
 - Collection: ok
   - Set: ok
-    - NavigableSet
-    - SortedSet
+    - SortedSet:
+      - NavigableSet:
   - List: ok
   - Queue: ok
   - Deque: ok
@@ -189,7 +189,26 @@ E           remove();//[head], removes, throws
 E           removeFirst();//[head], remove, throws
 E           removeLast();//[last], remove, throws
 bool        removeLastOccurrence(Object o);//[last] removes element equal to "o", throws
-
-
 ```
 
+## `SortedSet<E>`
+
+`public interface SortedSet<E> extends Set<E>
+
+Set + ordering:
+
+- natural ordering
+- provide `Comparitor<E>`
+
+```java
+Comperator<? super E> comperator();// returns comperator used
+E                     first();//[head], remove ,throws
+SortedSet<E>          headSet(E toElement)//[head]s, returns a VIEW (same storage) of all elements strictly less then to `toElement`.
+E                     last();//[tail], remove, throws
+default Spliterator<E> spliterator();// 
+SortedSet<E>          subSet(E fromElement, E toElement);// VIEW, fromElement (inclusive) to toElement (exclusive), can throws
+
+SortedSet<E>          tailSet(E fromElement);// VIEW, from "fromElements" onwards, can throw
+```
+
+```
