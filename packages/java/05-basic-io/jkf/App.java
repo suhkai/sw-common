@@ -1,75 +1,150 @@
 package jkf;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
+import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.nio.file.Paths;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
 import java.io.BufferedWriter;
-import java.nio.file.Files;
+//
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.BufferedReader;
+//
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 
-// new ZipFile(zipFileName);
-
-import jkf.ListOfNumbers;
+import jkf.CloseSafe;
 
 public class App {
 
     final static String NS = System.getProperty("line.separator");
 
-    public App() {
-    }
+    final CloseSafe closeSafe = new CloseSafe();
 
-    public void showEntry(ZipEntry entry){
-        if (entry.isDirectory()){
-            return;
-        }
-        var name = entry.getName();
-        var len = name.length();
-        var size = entry.getSize();
-        var compressedSize = entry.getCompressedSize();
-        // ellipsis for long names
-        var shortName = name.length() > 30 ? "..." + name.substring(len-27, len): name;
-        var ratio = size == 0 ? 0 : (double)compressedSize/size;
-        System.out.println(String.format("[%30s]\t%10d\t%f", shortName, size, ratio));
-    }
+    void copyBytesBuffered(String iname, String oname) {
 
-    public void getEntries(String zipFileName, String outputFileName) throws IOException, IndexOutOfBoundsException {
-
-        var cwd = System.getProperty("user.dir");
-        var zipfilePath = Paths.get(cwd, zipFileName);
-        var outputFilePath = Paths.get(cwd, outputFileName);
-
-        System.out.println(String.format("inp: %s", zipfilePath));
-        System.out.println(String.format("out: %s", outputFilePath));
-
-        try (
-             var zf = new ZipFile(zipfilePath.toString());
-             var writer = Files.newBufferedWriter(outputFilePath, StandardCharsets.US_ASCII)
-             ) {
-            for (var entries = zf.entries(); entries.hasMoreElements();) {
-                  var entry = entries.nextElement();
-                  this.showEntry(entry);
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+        
+        try {
+            in = new BufferedInputStream(new FileInputStream(iname));
+            out = new BufferedOutputStream(new FileOutputStream(oname));
+            int c;
+            for (;;) {
+                c = in.read();
+                System.out.println((char)c);
+                if (c < 0)
+                    break;
+                out.write(c);
             }
-        } // try
-    } // main
+            out.flush();
+        } catch (IOException ioe) {
+            System.out.println(String.format("%s", ioe.getMessage()));
+        } finally {
+            System.out.println(String.format("input file: %s", in.getClass().getName()));
+            System.out.println(String.format("output file: %s", out.getClass().getName()));
+            closeSafe.close(in);
+            closeSafe.close(out);
+        }
+    }
+
+    void copyBytes(String iname, String oname) {
+
+        FileInputStream in = null;
+        FileOutputStream out = null;
+
+        try {
+            in = new FileInputStream(iname);
+            out = new FileOutputStream(oname);
+            int c;
+            for (;;) {
+                c = in.read();
+                System.out.println(c);
+                if (c < 0)
+                    break;
+                out.write(c);
+            }
+        } catch (IOException ioe) {
+            System.out.println(String.format("%s", ioe.getMessage()));
+        } finally {
+            System.out.println(String.format("input file: %s", in.getClass().getName()));
+            System.out.println(String.format("output file: %s", out.getClass().getName()));
+            closeSafe.close(in);
+            closeSafe.close(out);
+        }
+    }
+
+
+    void copyCharacters(String iname, String oname) {
+
+        FileReader in = null;
+        FileWriter out = null;
+
+        try {
+            in = new FileReader(iname);
+            out = new FileWriter(oname);
+            int c;
+            for (;;) {
+                c = in.read();
+                System.out.println(c);
+                if (c < 0)
+                    break;
+                out.write(c);
+            }
+        } catch (IOException ioe) {
+            System.out.println(String.format("%s", ioe.getMessage()));
+        } finally {
+            System.out.println(String.format("input file: %s", in.getClass().getName()));
+            System.out.println(String.format("output file: %s", out.getClass().getName()));
+            closeSafe.close(in);
+            closeSafe.close(out);
+        }
+    }
+
+    public void copyLines(String iname, String oname) {
+
+        BufferedReader in = null;
+        PrintWriter out = null;
+
+        try {
+            in = new BufferedReader(new FileReader(iname));
+            out = new PrintWriter(new FileWriter(oname));
+
+            for (;;) {
+                var l = in.readLine();
+                if (l == null)
+                    break;
+                out.println(l);
+            }
+        } 
+        catch(FileNotFoundException  fnfe){
+
+        }
+        catch(IOException  ioe){
+
+        }
+        finally {
+            System.out.println(String.format("input file: %s", in.getClass().getName()));
+            System.out.println(String.format("output file: %s", out.getClass().getName()));
+            closeSafe.close(in);
+            closeSafe.close(out);
+        }
+        
+    }
+
+    public App() {
+
+    }
 
     public static void main(String... argv) {
         var app = new App();
-        //
-        var file = new ListOfNumbers();
-        try {
-            file.writeList();
-        } catch (IOException ioe) {
-        }
-
-        try {
-            app.getEntries("toolbox.zip", "zipentries.txt");
-        } catch (IOException|IndexOutOfBoundsException ioe) {
-        }
+        var src = "xanadu.txt";
+       
+        app.copyBytes(src, "outgoing.txt");
+        app.copyCharacters(src,"outgoing_char.txt");
+        app.copyLines(src, "outgoingLines.txt");
+        app.copyBytesBuffered(src, "outgoingBuffered.txt" );
     }
 }
