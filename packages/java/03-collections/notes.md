@@ -364,4 +364,3 @@ SortedMap<K,V>            subMap(K fromKey, K toKey); //View: toKey is exclusive
 SortedMap<K,V>            tailMap(K fromKey); //View: stricly greater then "fromKey".
 Collection<V>             values();//View:
 ```
-
