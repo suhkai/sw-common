@@ -21,7 +21,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
-
+import java.nio.charset.Charset;
 
 import jkf.CloseSafe;
 
@@ -197,17 +197,21 @@ public class App {
         // some data
         int[] ints = { 1, 3, 34, 2342, 42435 };
         double[] doubles = { 30.23, 234.23, -890.01 };
-        String text = "✋"; //"✋🌍";
-        
+        String text = "✋🌍"; // hello world
+        //System.out.println(text);
+        System.out.println(String.format("file.encoding: %s", System.getProperty("file.encoding")));
+        System.out.println(String.format("defaultCharset: %s", Charset.defaultCharset().name()));
+
         var cwd = System.getProperty("user.dir");
-        var filePath = Paths.get(cwd, iname);        
-        
-        try (FileOutputStream fos = new FileOutputStream(filePath.toString()); DataOutputStream dos = new DataOutputStream(fos)) {
+        var filePath = Paths.get(cwd, iname);
+
+        try (FileOutputStream fos = new FileOutputStream(filePath.toString());
+                DataOutputStream dos = new DataOutputStream(fos)) {
             for (int i : ints) {
-                //dos.writeInt(i);
+                // dos.writeInt(i);
             }
             for (double d : doubles) {
-                //dos.writeDouble(d);
+                // dos.writeDouble(d);
             }
             dos.writeUTF(text);
 
@@ -219,17 +223,18 @@ public class App {
             System.out.println(ioe);
         }
 
-        try (FileInputStream fis = new FileInputStream(filePath.toString()); DataInputStream dis = new DataInputStream(fis)) {
+        try (FileInputStream fis = new FileInputStream(filePath.toString());
+                DataInputStream dis = new DataInputStream(fis)) {
             for (int i : ints) {
-                //var result = dis.readInt();
-                //System.out.println(result);
+                // var result = dis.readInt();
+                // System.out.println(result);
             }
             for (double d : doubles) {
-                //var result = dis.readDouble();
-                //System.out.println(result);
+                // var result = dis.readDouble();
+                // System.out.println(result);
             }
             var string = dis.readUTF();
-            System.out.format("%s%n", string);
+            System.out.format(">>%s%n", string);
         } catch (FileNotFoundException fnfe) {
             System.out.println("fnfe error happened");
             System.out.println(fnfe);
@@ -237,7 +242,6 @@ public class App {
             System.out.println("ioe error happened");
             System.out.println(ioe);
         }
-
 
     }
 
