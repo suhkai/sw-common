@@ -22,8 +22,52 @@ import java.io.DataOutputStream;
 import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.Charset;
-
 import jkf.CloseSafe;
+
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+class Address implements Serializable {
+    private String zip;
+    private String city;
+    private String provinceOrState;
+    private String country;
+
+    Address(String zip, String city, String pos, String country){
+        this.zip = zip;
+        this.city = city;
+        this.provinceOrState = pos;
+        this.country = country;
+    }
+    @Override
+    public String toString(){
+        return String.format("zip:%s, city:%s, provice:%s, country:%s%n",
+           this.zip,
+           this.city,
+           this.provinceOrState,
+           this.country);
+    }
+}
+
+class Person implements Serializable {
+    private String firstName;
+    private String lastName;
+        
+    private Address address;
+    Person(String firstName, String lastName, Address address){
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+    }
+    @Override
+    public String toString(){
+        return String.format("name:%s, sirname:%s, address:(%s)%n",
+           this.firstName,
+           this.lastName,
+           this.address);
+    }
+}
 
 public class App {
 
@@ -245,6 +289,53 @@ public class App {
 
     }
 
+    public void writeObjects(String iname){
+        var cwd = System.getProperty("user.dir");
+        var filePath = Paths.get(cwd, iname);
+        try (
+             FileOutputStream fos = new FileOutputStream(filePath.toString());
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+             var maryJane = new Person("Mary", "Jane",
+             new Address(
+                    "LM 1311",
+                    "Luxembourg-ville",
+                    "Luxembourg-Canton",
+                    "Luxembourg"
+                )
+             );
+             oos.writeObject(maryJane);    
+
+                    //...
+        }
+        catch(FileNotFoundException fnfe){
+            System.out.format("[💣 :err] %s%n", fnfe);
+        }
+        catch(IOException ioerr){
+            System.out.format("[💣 :err] %s%n", ioerr);
+        }
+
+    }
+
+    public void readObjects(String iname){
+        var cwd = System.getProperty("user.dir");
+        var filePath = Paths.get(cwd, iname);
+        try (
+            FileInputStream fis = new FileInputStream(filePath.toString());
+            ObjectInputStream ois = new ObjectInputStream(fis)) {
+            var person = ois.readObject();
+            System.out.println(person);
+
+                    //...
+        }
+        catch(FileNotFoundException|ClassNotFoundException fnfe){
+            System.out.format("[💣 :err] %s%n", fnfe);
+        }
+        catch(IOException ioerr){
+            System.out.format("[💣 :err] %s%n", ioerr);
+        }
+
+    }
+
     public App() {
 
     }
@@ -261,5 +352,7 @@ public class App {
         // app.scanSum("usnumbers.txt");
         // app.readConsole();
         app.readWriteDataStream("datastream.bin");
+        app.writeObjects("objectstream.bin");
+        app.readObjects("objectstream.bin");
     }
 }
