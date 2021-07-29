@@ -4,6 +4,17 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+        {
+            "type": "java",
+            "name": "(Debug) Java Program",
+            "request": "launch",
+            "mainClass": "jkf.App",
+            "args": [
+                "-cp",
+                "${workspaceFolder}/packages/java/05-file-nio2"
+            ]
+        },
         {
             "type": "java",
             "name": "mvn run",
