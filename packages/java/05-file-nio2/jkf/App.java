@@ -17,11 +17,7 @@ import java.nio.file.attribute.DosFileAttributes;
 import java.time.ZoneId;
 import java.util.Random;
 import java.nio.ByteBuffer;
-
-import java.util.Set;
-
-import java.nio.file.attribute.*;
-
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 
 //import java.awt.*;
@@ -37,6 +33,32 @@ public class App {
 
         System.out.format(fmt, args);
 
+    }
+
+    public boolean recursiveDelete(Path p) throws IOException {
+        var file = p.toFile();
+        try (var stream = Files.newDirectoryStream(p)){
+            for (var entry: stream){
+                var sub = entry.toFile();
+                if (sub.isDirectory()){
+                    if (this.recursiveDelete(entry)){
+                        System.err.format("could not recursively delete:(dir) %s%n", sub.getName());
+                    }
+                }
+                var rc = sub.delete();
+                if (!rc){
+                    System.err.format(
+                        "could not delete (%s): %s%n",
+                        sub.isDirectory() ? "dir":"file",
+                        sub.getAbsolutePath().toString()
+                    );
+                }
+            }
+        }
+        catch(IOException ioe){
+            System.err.format("ERR:(recursiveDelete) %s%n", ioe);
+        }
+        return file.delete();
     }
 
     public void fileSystems() {
@@ -60,19 +82,19 @@ public class App {
 
         var dirs = defaultFileSystem.getRootDirectories();
 
-        for (var rootDir: dirs){
+        for (var rootDir : dirs) {
             System.out.format("rootDir: %s%n", rootDir);
             System.out.format("class: %s%n", rootDir.getClass().getName());
         }
         // create a directory
 
         var createDir = Paths.get("testData/createdDir/subDir2");
+        var testData = Paths.get("testData");
 
         try {
             var createdDir = Files.createDirectories(createDir);
             Files.setAttribute(createdDir, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
-        }
-        catch(IOException ioe){
+        } catch (IOException ioe) {
             System.err.format("ERR36: createDir failed:%s%n", ioe);
         }
 
@@ -85,32 +107,71 @@ public class App {
 
         // create temporary directory
         try {
-            Files.createTempDirectory(Paths.get("testData"), "prefix");
             // in windows temp dir, mostly this will nbe
             // C:\Users\<USERNAME>\AppData\Local\Temp
-            Files.createTempDirectory("prefix"); 
-            
+            var tempDir = Files.createTempDirectory(testData, "prefix-v2-");
+            System.out.format("temp dir created at %s%n", tempDir.getFileName());
+            var tempFile = Files.createTempFile(tempDir, "temp-file-", ".tmp");
+            System.out.format("temp file created at %s%n", tempFile.getFileName());
         }
-        /*catch(InterruptedException ie){
-            System.err.format("ERR37:Thread interrupted:%s%n", ie);
-        }*/
-        catch(IOException ioe){
+        /*
+         * catch(InterruptedException ie){
+         * System.err.format("ERR37:Thread interrupted:%s%n", ie); }
+         */
+        catch (IOException ioe) {
             System.err.format("ERR38:IOException:%s%n", ioe);
         }
-        
+
         // contents of a directory as a sream
-        try (  
-            var stream = Files.newDirectoryStream(Paths.get("testData"));
-        ){
-            for(var entry: stream){
-                System.out.format("entry: %s%n", entry.getFileName());
+        try (var stream = Files.newDirectoryStream(testData)) {
+            for (var entry : stream) {
+                var uri = entry.toUri();
+                var file = entry.toFile();
+                var name = file.getName();
+                var isDir = file.isDirectory();
+                var isPlainFile = file.isFile();
+                var isHidden = file.isHidden();
+                var info = String.format(
+                    "{%nname=%s, isDir=%s, isPlain=%s, hidden=%s%nuri=%s%n}%n",
+                    name,
+                    isDir,
+                    isPlainFile,
+                    isHidden,
+                    uri
+                );
+                System.out.print(info);
             }
-        }
-        catch(IOException ioe){
+        } catch (IOException ioe) {
             System.err.format("ERR39:IOException:%s%n", ioe);
         }
 
+        // filter
+        var filter = new DirectoryStream.Filter<Path>() {
+            public boolean accept(Path p) throws IOException{
+                var name = p.getName(p.getNameCount()-1).toString();
+                return name.startsWith("prefix");
+            }
+        };
 
+        System.out.println("====start show filter");
+        try (var stream = Files.newDirectoryStream(testData, filter)) {
+            for (var entry: stream){
+                var file = entry.toFile();
+                boolean deleted;
+                if (file.isDirectory()){
+                    deleted = this.recursiveDelete(entry);
+                }
+                else {
+                    deleted = file.delete();
+                }
+                System.out.format("%b deleted, %s%n", deleted, entry.getName(entry.getNameCount()-1));
+            }
+        } catch (IOException ieo) {
+            // Failed to determine if it's a directory.
+            System.err.println(ieo);
+        }
+        System.out.println("====end show filter");
+    
     }
 
     public void smallFileOperations() {
@@ -382,7 +443,7 @@ public class App {
     public static void main(String... argv) throws IOException {
         var app = new App();
         // app.pathSamples();
-        app.fileOperations();
+        //app.fileOperations();
         // app.smallFileOperations();
         app.fileSystems();
 
