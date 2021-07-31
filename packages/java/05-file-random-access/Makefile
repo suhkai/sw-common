@@ -5,10 +5,13 @@ javaFiles := $(wildcard jkf/*.java)
 
 
 # run is phone because it doesnt create a file
-run: $(classFiles)
-	java -Dfile.encoding=UTF8 -cp . jkf.App
+run: build
+	java "-Dfile.encoding=UTF8" -cp . "jkf.App"
 
-$(classFiles) build: $(javaFiles)
+$(classFiles): $(javaFiles)
+	javac -encoding utf8 $(javaFiles)
+
+build: $(javaFiles)
 	javac -encoding utf8 $(javaFiles)
 
 clean:
