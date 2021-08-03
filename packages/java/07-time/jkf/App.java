@@ -1,8 +1,12 @@
 package jkf;
 
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Locale;
 import java.time.Month; // enums
@@ -14,7 +18,17 @@ import java.time.LocalTime;
 import java.time.LocalDateTime;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Instant;
 
 public class App {
 
@@ -115,6 +129,97 @@ public class App {
         
     }
 
+    public void timeZones(){
+
+        var allZones = ZoneId.getAvailableZoneIds(); // returns set, nothing we can do about it
+        var zoneList = new ArrayList<String>(allZones);
+        Collections.sort(zoneList);
+        var dt = LocalDateTime.now();
+
+        for (var zoneStr: zoneList){
+            ZoneId zone = ZoneId.of(zoneStr);
+            var zdt = dt.atZone(zone);
+            var offset = zdt.getOffset();
+            var seconds = offset.getTotalSeconds();
+            var hourSec = seconds % 3600;
+            if (hourSec != 0 || zoneStr.startsWith("America/Caracas")) {
+                App.println("zoneStr:%-30s%-10shours%15s sec", zoneStr, offset, seconds);    
+            }
+        }
+    }
+
+    public void flightTime(){
+        var format = DateTimeFormatter.ofPattern("MMM dd yyyy  hh:mm a");
+        // Leaving from San Francisco on July 20, 2013, at 7:30 p.m.
+        var leaving = LocalDateTime.of(2013, Month.JULY, 20, 19, 30);
+        var leavingZone = ZoneId.of("America/Los_Angeles");
+        var departure = ZonedDateTime.of(leaving, leavingZone);
+        try {
+            var leaveMessage = departure.format(format);
+            App.println("LEAVING: %s (%s)", leaveMessage, leavingZone);
+        }
+        catch(DateTimeException dte){
+            App.println("Error(date.format) for date (departure): %s, format:%s", departure, format);
+        }
+
+        //Flight is 10 hours and 50 minutes, or 650 minutes
+        var arrivingZone = ZoneId.of("Asia/Tokyo");
+        var arrival = departure // departure
+                        .withZoneSameInstant(arrivingZone) //arrival zimezone
+                        .plusMinutes(650); // add travel time
+        try {
+            var arrivalMessage = arrival.format(format);
+            App.println("ARRIVING: %s (%s)", arrivalMessage, arrivingZone);
+        }
+        catch(DateTimeException dte){
+            App.println("Error(date.format) for date (arrival) : %s, format:%s", arrival, format);
+        }
+    }
+
+    public void offSetDateTimes(){
+        var format = DateTimeFormatter.ISO_DATE_TIME;
+
+        //App.println("%s", format);
+        
+        // Find the last Thursday in July 2013.
+        var localDate = LocalDateTime.of(2013, Month.JULY, 20, 19, 30);
+        App.println("%s", localDate.format(format));
+        var offset = ZoneOffset.of("-08:00");
+        App.println("%s", offset);
+        var offsetDate = OffsetDateTime.of(localDate, offset);
+        App.println("%s", offsetDate.format(format));
+        var lastThursday = offsetDate.with(TemporalAdjusters.lastInMonth(DayOfWeek.THURSDAY));
+        App.println("%s", lastThursday);
+    }
+
+    public void offSetTimes(){
+        var format = DateTimeFormatter.ofPattern("hh:mm:ss a");
+
+       // App.println("%s", format);
+        
+        // Find the last Thursday in July 2013.
+        var localTime = LocalTime.now();
+        App.println("%s", localTime.format(format));
+        var offset = ZoneOffset.of("-08:00");
+        App.println("%s", offset);
+        var offsetTime = OffsetTime.of(localTime, offset);
+        App.println("%s", offsetTime.format(format));
+        App.println("%s", localTime.toEpochSecond(LocalDate.now(),  ZoneOffset.of("+00:00")));
+        App.println("%s", localTime.toEpochSecond(LocalDate.now(), offset));
+        //var lastThursday = offsetDate.with(TemporalAdjusters.lastInMonth(DayOfWeek.THURSDAY));
+        //App.println("%s", lastThursday);
+    }
+
+    public void instantTime(){
+        var instant = Instant.now();
+        App.println("%s", instant);
+        var instant2 = Instant.ofEpochSecond(0L);
+        App.println("%s", instant2);
+        var seconds = instant2.until(instant, ChronoUnit.SECONDS);
+        App.println("%s", seconds);
+        App.println("tz:%s", ZoneId.systemDefault());
+    }
+
     public static void main(String... argv) throws IOException, InterruptedException {
         var app = new App();
         app.localTimeFn();
@@ -122,5 +227,12 @@ public class App {
         app.dateArthimatic();
         app.dateAndDateClasses();
         app.localDateTime();
+        app.timeZones();
+        app.flightTime();
+        app.offSetDateTimes();
+        App.println("offset_times====");
+        app.offSetTimes();
+        app.instantTime();
+
     }
 }
