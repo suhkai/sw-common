@@ -1,15 +1,13 @@
 package jkf;
 
 import java.io.IOException;
+
 import java.time.DateTimeException;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
-import java.util.Locale;
 import java.time.Month;
-// enums
+
 import java.time.format.TextStyle;
 import java.time.YearMonth;
 import java.time.MonthDay;
@@ -19,13 +17,90 @@ import java.time.LocalDateTime;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Locale;
+
 import java.time.format.DateTimeFormatter;
 import java.time.ZonedDateTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.temporal.IsoFields;
+
+import java.time.temporal.TemporalQuery;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalUnit;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.TemporalQueries;
+
+import java.time.Period;
+
+import java.time.chrono.JapaneseDate;
+import java.time.chrono.HijrahDate;
+import java.time.chrono.MinguoDate;
+import java.time.chrono.ThaiBuddhistDate;
+import java.time.chrono.Chronology;
+import java.time.chrono.ChronoLocalDate;
+import java.time.chrono.IsoChronology;
+import java.time.chrono.JapaneseChronology;
+import java.time.format.DecimalStyle;
+import java.time.format.FormatStyle;
+
+import java.util.function.BiFunction;
+
+import java.time.format.DateTimeFormatterBuilder;
+
+// Returns true if the passed-in date is the same as one of the
+// family birthdays. Because the query compares the month and day only,
+// the check succeeds even if the Temporal types are not the same.
+class FamilyBirthDays implements TemporalQuery<Boolean> {
+    public Boolean queryFrom(TemporalAccessor date) {
+        int month = date.get(ChronoField.MONTH_OF_YEAR);
+        int day = date.get(ChronoField.DAY_OF_MONTH);
+
+        // Angie's birthday is on April 3.
+        if ((month == Month.APRIL.getValue()) && (day == 3))
+            return Boolean.TRUE;
+
+        // Sue's birthday is on June 18.
+        if ((month == Month.JUNE.getValue()) && (day == 18))
+            return Boolean.TRUE;
+
+        // Joe's birthday is on May 29.
+        if ((month == Month.MAY.getValue()) && (day == 29))
+            return Boolean.TRUE;
+
+        return Boolean.FALSE;
+    }
+}
+
+class FamilyVacations implements TemporalQuery<Boolean> {
+
+    // Returns true if the passed-in date occurs during one of the
+    // family vacations. Because the query compares the month and day only,
+    // the check succeeds even if the Temporal types are not the same.
+    public Boolean queryFrom(TemporalAccessor date) {
+        int month = date.get(ChronoField.MONTH_OF_YEAR);
+        int day = date.get(ChronoField.DAY_OF_MONTH);
+
+        int aug = Month.AUGUST.getValue();
+        int april = Month.AUGUST.getValue();
+
+        // Disneyland over Spring Break
+        if ((month == april) && ((day >= 3) && (day <= 8)))
+            return Boolean.TRUE;
+
+        // Smith family reunion on Lake Saugatuck
+        if ((month == aug) && ((day >= 8) && (day <= 14)))
+            return Boolean.TRUE;
+
+        return Boolean.FALSE;
+    }
+}
 
 public class App {
 
@@ -247,7 +322,7 @@ public class App {
         App.println("%s is on a %s", date, dotw);
         App.println("first Day of Month:%s", date.with(TemporalAdjusters.firstDayOfMonth()));
         App.println("first Monday of Month: %s", date.with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY)));
-        
+
         {
             var dateAdj = date.with(TemporalAdjusters.lastDayOfMonth());
             App.println("last day of Month: %s on a %s", dateAdj, dateAdj.getDayOfWeek());
@@ -276,16 +351,15 @@ public class App {
         {
             // pick day
             var date1 = LocalDate.from(LocalDateTime.now()); // delete time section0
-            var day = (date1.getDayOfMonth() < 15) ? 
-                15: 
-                date1.with(TemporalAdjusters.lastDayOfMonth()).getDayOfMonth();
-            // create date    
+            var day = (date1.getDayOfMonth() < 15) ? 15
+                    : date1.with(TemporalAdjusters.lastDayOfMonth()).getDayOfMonth();
+            // create date
             date1 = date1.withDayOfMonth(day);
-            // adjust for weekend, 
+            // adjust for weekend,
             var dow = date1.getDayOfWeek();
             // get last bizz day if it was on a weekend
             App.println("Dat of week: %s", dow);
-            if ( dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY ) {
+            if (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY) {
                 App.println("dow is on weekend, correcting %s", date1);
                 date1 = date1.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
             }
@@ -294,8 +368,153 @@ public class App {
     }
 
     public void temporalQuery() {
+        App.println("%n%n====Temporal Query====");
 
-    } 
+        var date = LocalDate.of(2021, Month.AUGUST, 5);
+
+        var query = TemporalQueries.precision();
+        App.println("LocalDate precision is: %s", LocalDate.now().query(query));
+        App.println("LocalDateTime precision is %s", LocalDateTime.now().query(query));
+        App.println("Year precision is %s", Year.now().query(query));
+        App.println("YearMonth precision is %s", YearMonth.now().query(query));
+
+        // queryFrom test
+        var dateTime = LocalDateTime.now();
+        var moy = dateTime.get(ChronoField.MONTH_OF_YEAR);
+        App.println("month of year:%s", moy);
+
+        TemporalQuery<Boolean> familyVacations = d -> {
+            int month = date.get(ChronoField.MONTH_OF_YEAR);
+            int day = date.get(ChronoField.DAY_OF_MONTH);
+
+            int aug = Month.AUGUST.getValue();
+            int april = Month.AUGUST.getValue();
+
+            // Disneyland over Spring Break
+            if ((month == april) && ((day >= 3) && (day <= 8)))
+                return Boolean.TRUE;
+
+            // Smith family reunion on Lake Saugatuck
+            if ((month == aug) && ((day >= 8) && (day <= 14)))
+                return Boolean.TRUE;
+
+            return Boolean.FALSE;
+        };
+
+        boolean isFamilyVacation1 = date.query(new FamilyVacations());
+        boolean isFamilyVacation2 = date.query(familyVacations);
+
+        App.println("isFamilyVacations1: %b", isFamilyVacation1);
+        App.println("isFamilyVacations2: %b", isFamilyVacation2);
+    }
+
+    public void periodAndDuration() {
+        // Duration class uses seconds and nanoseconds
+        // Period class uses Years, Months, days
+        // ChronoUnit.between method
+
+        // PS: Duration of day is normally 24h except if it happens on Timezone changes
+        // (23h or 25h)
+
+        // Duration
+        // Duration
+        // Duration
+
+        var t1 = Instant.now();
+        var t2 = t1.plus(1, ChronoUnit.DAYS);
+
+        var sec = Duration.between(t1, t2).toSeconds();
+        App.println("24 hour difference in seconds: %s", sec);
+
+        var gap = Duration.ofSeconds(10);
+
+        App.println("10 sec gap: %s (toString), %s (toSeconds)", gap, gap.toSeconds());
+
+        App.println("24 hours later instant time:%s", t2);
+        App.println("24 hours later instant time:%s", t2.plus(gap));
+
+        // ChronoUnit
+
+        // t2 > t1
+        var gap2 = ChronoUnit.MINUTES.between(t1, t2);
+
+        App.println("24 hours in minutes:%s", gap2);
+
+        // Period
+        var ldNow = LocalDate.now();
+        var birthday = LocalDate.of(1968, Month.JULY, 22);
+
+        var p = Period.between(birthday, ldNow);
+        App.println("Period.between, years:%s, month:%s, days:%s", p.getYears(), p.getMonths(), p.getDays());
+        var p2 = ChronoUnit.DAYS.between(birthday, ldNow);
+        App.println("Period.between, days:%s", p2);
+
+        // same value for "birthday"
+        var thisYearBD = birthday.withYear(LocalDate.now().getYear());
+        var alreadyHappened = LocalDate.now().isAfter(thisYearBD);
+        App.println("your birthday %s %s", alreadyHappened ? "(next year)" : "be on",
+                alreadyHappened ? thisYearBD.plusYears(1) : thisYearBD);
+    }
+
+    public void nonIsoDateConversion() {
+        LocalDateTime date = LocalDateTime.of(2013, Month.JULY, 20, 19, 30);
+        var jdate = JapaneseDate.from(date);
+        App.println("Japanese date:%s", jdate);
+
+        var hdate = HijrahDate.from(date);
+        App.println("HijrahDate date:%s", hdate);
+
+        var mdate = MinguoDate.from(date);
+        App.println("MinguoDate date:%s", mdate);
+
+        var tdate = ThaiBuddhistDate.from(date);
+        App.println("MinguoDate date:%s", tdate);
+
+        final BiFunction<Temporal, Chronology, String> toNonISO = (Temporal localDate, Chronology chrono) -> {
+            if (localDate == null) {
+                return "";
+            }
+
+            Locale locale = Locale.getDefault(Locale.Category.FORMAT);
+            Temporal cDate;
+            if (chrono == null) {
+                chrono = IsoChronology.INSTANCE;
+            }
+            try {
+                cDate = chrono.date(localDate);
+            } catch (DateTimeException ex) {
+                System.err.println(ex);
+                chrono = IsoChronology.INSTANCE;
+                cDate = localDate;
+            }
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale)
+                    .withChronology(chrono).withDecimalStyle(DecimalStyle.of(locale));
+            String pattern = "M/d/yyyy GGGGG";
+            return dateFormatter.format(cDate);
+        };
+
+        final BiFunction<String, Chronology, Temporal> toISO = (String text, Chronology chrono) -> {
+            if (text != null && !text.isEmpty()) {
+                Locale locale = Locale.getDefault(Locale.Category.FORMAT);
+                if (chrono == null) {
+                    chrono = IsoChronology.INSTANCE;
+                }
+                String pattern = "M/d/yyyy GGGGG";
+                DateTimeFormatter df = new DateTimeFormatterBuilder().parseLenient().appendPattern(pattern)
+                        .toFormatter().withChronology(chrono).withDecimalStyle(DecimalStyle.of(locale));
+                TemporalAccessor temporal = df.parse(text);
+                ChronoLocalDate cDate = chrono.date(temporal);
+                return LocalDate.from(cDate);
+            }
+            return null;
+        };
+
+        LocalDate date4 = LocalDate.of(1996, Month.OCTOBER, 29);
+        App.println("towards Japanese form:%s", toNonISO.apply(date4, JapaneseChronology.INSTANCE));
+
+        App.println("towards ISO %s", toISO.apply("10/29/0008 H", JapaneseChronology.INSTANCE));
+
+    }
 
     public static void main(String... argv) throws IOException, InterruptedException {
         var app = new App();
@@ -314,5 +533,7 @@ public class App {
         app.temporals();
         app.temporalAdjuster();
         app.temporalQuery();
+        app.periodAndDuration();
+        app.nonIsoDateConversion();
     }
 }
