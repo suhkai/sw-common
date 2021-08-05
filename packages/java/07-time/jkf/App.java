@@ -7,9 +7,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.time.temporal.TemporalUnit;
 import java.util.Locale;
-import java.util.Locale.IsoCountryCode;
 import java.time.Month;
 // enums
 import java.time.format.TextStyle;
@@ -28,7 +26,6 @@ import java.time.ZonedDateTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.temporal.IsoFields;
-import java.time.temporal.TemporalAccessor;
 
 public class App {
 
@@ -242,7 +239,7 @@ public class App {
 
     }
 
-    public void temporalsAdjuster() {
+    public void temporalAdjuster() {
         // Predefined adjusters
         App.println("%n%n====Predefined adjusters====");
         var date = LocalDate.of(2021, Month.AUGUST, 5);
@@ -296,6 +293,10 @@ public class App {
         }
     }
 
+    public void temporalQuery() {
+
+    } 
+
     public static void main(String... argv) throws IOException, InterruptedException {
         var app = new App();
         app.localTimeFn();
@@ -311,6 +312,7 @@ public class App {
         app.instantTime();
         app.parsing();
         app.temporals();
-        app.temporalsAdjuster();
+        app.temporalAdjuster();
+        app.temporalQuery();
     }
 }
