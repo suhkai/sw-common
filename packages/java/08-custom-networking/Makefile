@@ -5,6 +5,10 @@ javaFiles := $(wildcard jkf/*.java)
 
 
 # run is phone because it doesnt create a file
+
+run_echo: build $(classFiles)
+	java "-Dfile.encoding=UTF8" -cp . jkf.EchoServer 8086
+
 run: build $(classFiles)
 	java "-Dfile.encoding=UTF8" -cp . jkf.App
 

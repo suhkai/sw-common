@@ -5,6 +5,7 @@ import java.net.URL;
 
 import java.net.*;
 import java.io.*;
+import java.util.*;
 
 public class App {
 
@@ -46,33 +47,28 @@ public class App {
         URL oracle;
         try {
             oracle = new URL("https://www.oracle.com/");
-        }
-        catch(MalformedURLException mfe){
+        } catch (MalformedURLException mfe) {
             App.println("ERR:%s", mfe);
             return;
         }
-        try (
-                var isr = new InputStreamReader(oracle.openStream());
-                var in = new BufferedReader(isr)
-        ){
-            for (int i = 1;; i++){
+        try (var isr = new InputStreamReader(oracle.openStream()); var in = new BufferedReader(isr)) {
+            for (int i = 1;; i++) {
                 String inputLine = in.readLine();
-                if (inputLine == null){
+                if (inputLine == null) {
                     break;
                 }
                 App.println("%-4d: %s", i, inputLine);
             }
-        }
-        catch(IOException ioe){
+        } catch (IOException ioe) {
             App.println("ERR:%s", ioe);
         }
     }
 
-    public void connectingToUrl(){
+    public void connectingToUrl() {
         try {
             var url = new URL("https://file-metadata-micro-service.herokuapp.com");
-            var connection = url.openConnection();      
-            connection.setDoOutput(true);      
+            var connection = url.openConnection();
+            connection.setDoOutput(true);
             connection.connect();
             App.println("connected");
             var os = connection.getOutputStream();
@@ -89,10 +85,59 @@ public class App {
                 System.out.println(inputLine);
             }
             br.close();
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             App.println("%s", e);
-        }   
+        }
+    }
+
+    public void echoSocket() {
+        try (
+                // create socket
+                var clientSocket = new Socket("127.0.0.1", 8086);
+
+                // input
+                // input socket
+                var is = clientSocket.getInputStream();
+                var isr = new InputStreamReader(is);
+                var br = new BufferedReader(isr);
+                // input stdin
+                var stdinStreamReader = new InputStreamReader(System.in);
+                var stdinReader = new BufferedReader(stdinStreamReader);
+                // output
+                var os = clientSocket.getOutputStream();
+                var pw = new PrintWriter(os, true)
+
+        ) {
+            String userInput;
+            while ((userInput = stdinReader.readLine()) != null) {
+                pw.println(userInput); // send to echo server
+                System.out.println("echo: " + br.readLine()); // wait for answer from echo server
+            }
+        } catch (IOException ioe) {
+            App.println("err: %s", ioe);
+        }
+    }
+
+    public void listNIFs() {
+        try {
+            var nets = NetworkInterface.getNetworkInterfaces();
+            for (var netIf : Collections.list(nets)) {
+                App.println("Display name: %s", netIf.getDisplayName());
+                App.println("Name: %s", netIf.getName());
+                
+                var subNets = netIf.getSubInterfaces();
+
+                for (var subIf : Collections.list(subNets)) {
+                    App.println("SUB|Display name: %s", subIf.getDisplayName());
+                    App.println("Sub|Name: %s", subIf.getName());
+                }
+               
+            }
+
+        } catch (IOException ioe) {
+
+        }
+
     }
 
     public App() {
@@ -101,8 +146,10 @@ public class App {
 
     public static void main(String... argv) {
         var app = new App();
-        //app.testURLs();
-        //app.readingFromUrl();
-        app.connectingToUrl();
+        // app.testURLs();
+        // app.readingFromUrl();
+        // app.connectingToUrl();
+        //app.echoSocket();
+        app.listNIFs();
     }
 }
