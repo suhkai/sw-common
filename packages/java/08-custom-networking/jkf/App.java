@@ -131,7 +131,6 @@ public class App {
                     App.println("SUB|Display name: %s", subIf.getDisplayName());
                     App.println("Sub|Name: %s", subIf.getName());
                 }
-               
             }
 
         } catch (IOException ioe) {

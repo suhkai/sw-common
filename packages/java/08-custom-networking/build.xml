@@ -1,0 +1,28 @@
+<project name="network-program" default="jar" basedir=".">
+    <property name="version" value="0.0.1-alpha" />
+    <property name="src" value="./jkf" />
+
+    <target name="clean" description="clean up">
+        <delete dir="build"/>
+    </target>
+
+    <description>
+     Ye ol Anty
+    </description>
+
+    <target name="compile" description="compile the source">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="${src}" destdir="build/classes"/>
+    </target>
+
+    <target name="jar">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/MyProject-${version}.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="oata.HelloWorld" />
+            </manifest>
+        </jar>
+    </target>
+
+    
+</project>
