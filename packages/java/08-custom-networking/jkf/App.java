@@ -145,10 +145,10 @@ public class App {
 
     public static void main(String... argv) {
         var app = new App();
-        // app.testURLs();
-        // app.readingFromUrl();
+        app.testURLs();
+        //app.readingFromUrl();
         // app.connectingToUrl();
         //app.echoSocket();
-        app.listNIFs();
+        //app.listNIFs();
     }
 }
