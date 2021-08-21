@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.http.HttpClient;
-import java.net.http.HttpClient.Version;
+
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandler;
@@ -48,6 +48,27 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.EnumSet;
 
+import java.io.InputStream;
+import java.util.Properties;
+
+class Version {
+    private static final Logger log = LoggerFactory.getLogger(Version.class);
+
+    private static final String PROPERTIES_FILENAME = "aiven-kafka-connect-http-version.properties";
+
+    static final String VERSION;
+
+    static {
+        final Properties props = new Properties();
+        try (final InputStream resourceStream =
+                 Version.class.getClassLoader().getResourceAsStream(PROPERTIES_FILENAME)) {
+            props.load(resourceStream);
+        } catch (final Exception e) {
+            log.warn("Error while loading {}: {}", PROPERTIES_FILENAME, e.getMessage());
+        }
+        VERSION = props.getProperty("version", "unknown").trim();
+    }
+}
 
 public class App {
     public static void println(String fmt, Object... args) {
@@ -383,8 +404,16 @@ public class App {
     }
 
     public void testLogging(){
-        var log = LoggerFactory.getLogger(App.class);
-        log.info("info logging"); // works nicely
+        org.slf4j.Logger logger = LoggerFactory.getLogger(App.class);
+        logger.info("info logging"); // works nicely
+        int newT = 15;
+        int oldT = 16;
+
+        // using traditional API
+        logger.debug("Temperature set to {}. Old temperature was {}.", newT, oldT);
+
+       
+       
     }
 
     public static void main(String[] args) {
