@@ -412,8 +412,9 @@ public class App {
         // using traditional API
         logger.debug("Temperature set to {}. Old temperature was {}.", newT, oldT);
 
-       
-       
+        var version = Version.VERSION;
+
+        logger.info("Version {}.", version);
     }
 
     public static void main(String[] args) {
