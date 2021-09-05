@@ -60,18 +60,24 @@ function connect() {
   })
 
   let seq;
+  let ic = 0;
+  let cc = 0;
+  let sc = 0;
   ws.on('message', (data) => {
     const dateStr = formatDate()
     let msg = JSON.parse(data)
     if (msg?.event === 'info') {
       info = msg;
+      ic++;
       return;
     }
     if (msg?.event === 'conf') {
       conf = msg;
+      cc++;
       return;
     }
     if (msg?.event === 'subscribed') {
+      sc++;
       return;
     }
     if (!Array.isArray(msg)) {
@@ -90,6 +96,7 @@ function connect() {
       console.log(`ERR: OUT OF SEQUENCE:${seq}-${sequence}, diff=${sequence - seq}`);
     }
     seq = sequence;
+    const prefix =  `${ic},${cc},${sc}`;
     if (msg[1] === 'hb') {
       if (!Number.isInteger(msg[2])) {
         console.error(`ERR: 'hb' doesnt have integer as payload ${data}`);
@@ -97,11 +104,11 @@ function connect() {
         return;
       }
       seq = msg[2];
-      console.log(`${seq},${channelId},${dateStr},hb`);   // heart beat??
+      console.log(`${prefix},${seq},${channelId},${dateStr},hb`);   // heart beat??
       return;
     }
     if (msg[1] === 'cs') {
-      console.log(`${seq},${channelId},${dateStr},cs,${msg[2]}`);
+      console.log(`${prefix},${seq},${channelId},${dateStr},cs,${msg[2]}`);
       return;
     }
 
@@ -115,7 +122,7 @@ function connect() {
       return;
     }
     const [orderid, price, amount] = payload;
-    console.log(`${seq},${channelId},${dateStr},${orderid},${price},${amount}`);
+    console.log(`${prefix},${seq},${channelId},${dateStr},${orderid},${price},${amount}`);
   });
 }
 connect();

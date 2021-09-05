@@ -1,0 +1,77 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,800,600,700,300|Raleway:400,900,800,700,600,500,300,200|Lato:400,300,100);
+@import url(https://fonts.googleapis.com/css?family=Ubuntu:700,500,400,300,300italic,400italic,500,500italic);
+@import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.css);
+
+:root {
+    --max-width-canvas: 600px;
+    --line-height-new-entry: 44px;
+    --line-height-new-entry-detail: 30px;
+}
+
+/* reset */
+/* reset */
+/* reset */
+
+html,
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+p,
+li,
+a,
+form,
+fieldset,
+input[type="text"],
+input[type="search"],
+blockquote,
+th,
+td {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    outline: none;
+    text-decoration: none;
+    color: #000;
+}
+
+
+*:before,
+*:after,
+* {
+    box-sizing: border-box;
+}
+
+button,
+input {
+    line-height: normal;
+    outline: none;
+    border: none;
+}
+
+html,
+body {
+  height: 100%;
+  width:100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+    background-image: radial-gradient(circle at bottom left, #07DD85 0%, #05B29E 50%, #025284 100%);
+    /* background: #1D1E22; */
+}
+
+/* end of css reset  */
+#svelte {
+   padding: 1em 0;
+   height: 100%;
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+}
