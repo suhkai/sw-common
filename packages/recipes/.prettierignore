@@ -1,0 +1,7 @@
+.jest-cache
+.svelte-kit
+.vscode
+build
+node_modules
+.gitignore
+.prettierignore

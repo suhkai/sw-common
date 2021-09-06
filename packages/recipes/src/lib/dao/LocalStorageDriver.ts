@@ -97,9 +97,9 @@ interface RecipeSerialized {
 }
 
 class StorageConnectorImpl implements StorageConnector<Recipe> {
-    #storage: LocalStorage;
+    #storage: LocalStorageDriver;
 
-    constructor(realStorage: LocalStorage) {
+    constructor(realStorage: LocalStorageDriver) {
         this.#storage = realStorage;
     }
 
@@ -112,8 +112,7 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
     }
 }
 
-
-export class LocalStorage {
+export class LocalStorageDriver {
 
     // private props
     #hasStorage: boolean = storageAvailable();
@@ -130,6 +129,18 @@ export class LocalStorage {
         rc.setName('Spagetti');
         this.#id++;
         this.#cache.push(rc);
+    }
+
+    hasStorage(): boolean {
+        return this.#hasStorage;
+    }
+
+    getId(): number {
+        return this.#id;
+    }
+
+    getCache(): Recipe[] {
+        return this.#cache;
     }
 
     // public methods
