@@ -11,6 +11,7 @@ describe('LocalStorageDriver', () => {
          //
          const lsd = new LocalStorageDriver();
          console.log(lsd.hasStorage());
-         console.log(globalThis.localStorage);
+         lsd.saveAll();
+         console.log(globalThis.localStorage.length);
      });
  })
