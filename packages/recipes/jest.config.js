@@ -4,7 +4,10 @@ export default {
     maxWorkers: "50%",
     collectCoverageFrom:[
         'src/lib/components/App.svelte',
-        'src/lib/dao/LocalStorageDriver.ts'
+        'src/lib/dao/LocalStorageDriver.ts',
+        'src/lib/recipe2Plain.ts',
+        'src/lib/Recipe.ts',
+        'src/lib/Ingredient.ts'
     ],
     coveragePathIgnorePatterns: [
         'node_modules',
@@ -14,8 +17,8 @@ export default {
         'static',
         '.vscode'
     ],
-    //coverageProvider: 'babel',
-    coverageProvider: 'babel', //"v8" is still experimental, but use "v8" for walk through debugging
+    coverageProvider: 'babel',
+    //coverageProvider: 'babel', //"v8" is still experimental, but use "v8" for walk through debugging
     coverageDirectory: 'coverage',
     coverageReporters: ['json', 'lcov', 'text', 'clover'],
    // preset: 'ts-jest',

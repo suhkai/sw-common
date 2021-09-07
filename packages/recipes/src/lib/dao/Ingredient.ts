@@ -5,8 +5,4 @@ export class Ingredient {
         this.id = id;
         this.name = name;
     }
-
-    toJSON(): unknown {
-        return { pk: this.id, state: 1, name: this.name };
-    }
 }

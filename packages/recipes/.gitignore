@@ -5,4 +5,5 @@ build/
 .jest-cache/
 .vscode/
 coverage/
+.metals/
 

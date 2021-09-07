@@ -1,23 +1,19 @@
 <script lang="ts" context="module">
-	export const prerender = true;
-	export enum ROLE {
-		NONE=0,
-		ADD,
-		MODIFY
-	};
+	export const prerender = false;
 </script>
 
 <script lang="ts">
+	import { INPUT_STATE } from './enums';
 	// style	
 	export let extend: boolean = false;
 	export let recipe: boolean = true;
-	export let role: ROLE = ROLE.NONE; 
+	export let role: INPUT_STATE = INPUT_STATE.NONE; 
 	export let value: string = '';
 	
 	const base = true;
 	$:placeHolder = recipe ? 'Enter New Recipe Name' : 'Enter Ingredient or Empty[Enter] to save' 
-	$:adding = role === ROLE.ADD;
-	$:modifying = role === ROLE.MODIFY;
+	const adding = role === INPUT_STATE.ADD;
+	const modifying = role === INPUT_STATE.MODIFY;
 </script>
 
 <input

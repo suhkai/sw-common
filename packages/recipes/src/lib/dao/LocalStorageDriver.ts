@@ -1,3 +1,4 @@
+import { recipesToPlainObj } from '$lib/recipe2Plain';
 import { Recipe } from './Recipe';
 import type { StorageConnector } from './StorageConnector';
 
@@ -110,6 +111,18 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
     saveAll(): void {
         this.#storage.saveAll();
     }
+
+    incrPk(){
+        return this.#storage.incrPk();
+    }
+
+    remove(id: number): boolean {
+        return this.#storage.remove(id);
+    }
+
+    add(r: Recipe): Recipe | undefined {
+        return this.#storage.add(r);
+    }
 }
 
 export class LocalStorageDriver {
@@ -124,7 +137,8 @@ export class LocalStorageDriver {
     // private methods
     #fixture(): void {
         this.#cache.splice(0);
-        const rc = new Recipe(this.#storageConnector);
+        this.#id = 1;
+        const rc = new Recipe();
         rc.setId(this.#id);
         rc.setName('Spagetti');
         this.#id++;
@@ -135,12 +149,22 @@ export class LocalStorageDriver {
         return this.#hasStorage;
     }
 
-    getId(): number {
+    getPk(): number {
         return this.#id;
+    }
+
+    incrPk(): number {
+        const prev = this.#id;
+        this.#id++;
+        return prev;
     }
 
     getCache(): Recipe[] {
         return this.#cache;
+    }
+
+    getConnector(): StorageConnector<Recipe> {
+        return this.#storageConnector;
     }
 
     // public methods
@@ -149,26 +173,51 @@ export class LocalStorageDriver {
             v.formatIds();
             v.setId(i + 1);
         });
-        this.#id = this.#cache.length;
+        this.#id = this.#cache.length + 1;
+    }
+
+    // Note: id is not the index, id's are also not in order perse
+    remove(id: number): boolean {
+        const idx = this.#cache.findIndex(r => r.id === id);
+        if (idx < 0){
+            return false;
+        }
+        this.#cache.splice(idx, 1);
+        return true;
+    }
+
+    add(recipe: Recipe): Recipe| undefined {
+        if (!recipe.name || recipe.name.trim() === ''){
+            return undefined;
+        }
+        if (!Number.isInteger(recipe.id) || recipe.id < 0){
+            recipe.setId(this.incrPk());
+        }
+        this.#cache.push(recipe);
+        return recipe;
     }
 
     //save everything
-    public saveAll(): void {
+    saveAll(): void {
         if (this.#hasStorage){
-            window.localStorage.setItem(this.#appKey, JSON.stringify(this.#cache));
+            const data = recipesToPlainObj(this.#cache);
+            window.localStorage.setItem(this.#appKey, JSON.stringify(data));
         }
     }
 
     // loads everything
-    public loadAll(): Recipe[] {
+    loadAll(): Recipe[] {
         if (!this.#appKey || !this.#hasStorage) {  // no persistance fake it
             if (this.#cache.length === 0){
                 this.#fixture();
             }
+            else {
+                this.formatIds();
+            }
             return this.#cache;
         }
         const data = window.localStorage.getItem(this.#appKey) || "";
-        if (data.trim().length == 0) {
+        if (data.trim().length === 0) {
             this.#fixture();
             this.saveAll();
             return this.#cache;
@@ -180,27 +229,27 @@ export class LocalStorageDriver {
         catch (e) { // json corrupt
             this.#fixture();
             this.saveAll();
-            return;
+            return this.#cache;
         }
         if (!Array.isArray(recipes)) {
             this.#fixture();
             this.saveAll();
-            this.loadAll(); // try again
-            return;
+            return this.#cache;
         }
         this.#cache.splice(0);
         for (const recipe of recipes) {
             // sanity checks
-            if (!recipe.name || recipe.name.trim() == '') {
+            if (!recipe.name || recipe.name?.trim() == '') {
                 continue;
             }
-            const model = new Recipe(new StorageConnectorImpl(this));
+            const model = new Recipe();
             try {
-                model.setName(recipe.name);
+                model.setName(recipe.name?.trim());
                 model.setId(recipe.recipe_id);
             }
             catch (err) {
-                console.error(`There was an error hydrating ${JSON.stringify(recipe)}`);
+                const rc = recipesToPlainObj([recipe as Recipe]);
+                console.error(`There was an error hydrating ${JSON.stringify(rc)}`);
                 continue;
             }
             this.#cache.push(model);
@@ -211,7 +260,7 @@ export class LocalStorageDriver {
                 continue;
             }
             for (const ingredient of recipe.ingredients) {
-                model.add(ingredient.name, ingredient.pk);
+                model.addIngredient(ingredient.name?.trim(), ingredient.pk);
             }
         }
         this.formatIds();

@@ -1,11 +1,10 @@
-import type { StorageConnector } from './StorageConnector';
 import { Ingredient } from './Ingredient';
+
 
 export class Recipe {
     name: string;
     id: number;
-    storage: StorageConnector<Recipe>;
-    
+  
     ingredientPk = 1;
     ingredients: Ingredient[] = [];
 
@@ -22,10 +21,10 @@ export class Recipe {
             this.id = id;
             return;
         }
-        throw new Error(`recipe name is invalid [${name}]`);
+        throw new Error(`recipe id is invalid [${id}]`);
     }
 
-    add(name: string, id?: number): Ingredient| undefined {
+    addIngredient(name: string, id?: number): Ingredient| undefined {
         if (!name || name.trim() === ''){
            return;
         }
@@ -42,15 +41,6 @@ export class Recipe {
         this.ingredients.forEach((v, i) => {
             v.id = i+1;
         });
-        this.ingredientPk = this.ingredients.length;
-    }
-
-    toJSON(): unknown {
-        return { recipe_id: this.id, name: this.name, ingredients: this.ingredients };
-    }
-
-    constructor(storage: StorageConnector<Recipe>){
-        /**/
-        this.storage = storage;
+        this.ingredientPk = this.ingredients.length + 1;
     }
 }

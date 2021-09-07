@@ -1,14 +1,10 @@
 <script lang="ts" context="module">
-	export const prerender = true;
-	export enum ROLE {
-		SMALL_BLACK,
-		SMALL_RED,
-		GREEN_PLUS,
-		RED_CROSS
-	}
+	export const prerender = false;
+	
 </script>
 
 <script lang="ts">
+    import { CROSS_STATE } from './enums';
 	// cross can be "+" or "x" (45 degrees rotated)
 	export let rotate = false;
 	
@@ -18,10 +14,10 @@
 	// 3: Green "+" to add new recipe at the top
 	// 4: Red 'x' cross to cancel addition of recipe
 
-	export let role: ROLE;
+	export let role: CROSS_STATE;
 
-	$:rotate = (role === ROLE.SMALL_BLACK || role === ROLE.SMALL_RED || role === ROLE.RED_CROSS);
-	$:small = (role === ROLE.SMALL_BLACK || role === ROLE.SMALL_RED);
+	$:rotate = (role === CROSS_STATE.SMALL_BLACK || role === CROSS_STATE.SMALL_RED || role === CROSS_STATE.RED_CROSS);
+	$:small = (role === CROSS_STATE.SMALL_BLACK || role === CROSS_STATE.SMALL_RED);
 
 </script>
 
