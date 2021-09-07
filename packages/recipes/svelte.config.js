@@ -17,11 +17,6 @@ const config = {
 		},
 		floc: false,
 		hydrate: true,
-		package: {
-		 	files: {
-		 		exclude: ['**/*.test.ts']
-		 	}
-		},
 		prerender: {
 			crawl: true,
 			enabled: true,
@@ -35,6 +30,9 @@ const config = {
 	},
 	preprocess: preprocess({
 		replace: [['process.env.NODE_ENV', JSON.stringify(process.env.NODE_ENV)]],
+		typescript: {
+			tsconfigFile: './tsconfig.app.json'
+		}
 	}),
 };
 

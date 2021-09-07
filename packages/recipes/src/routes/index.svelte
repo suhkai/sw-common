@@ -1,22 +1,16 @@
 <script context="module" lang="ts">
+	import { LocalStorageDriver } from '$lib/dao/LocalStorageDriver';
+
 	export const prerender = true;
+	// singletons so belongs here
 	const storageDriver = new LocalStorageDriver();
     const connector = storageDriver.getConnector();
-	let i = 1;
-	console.log(`${i++}:context module has run`);
 </script>
 
 <script lang="ts">
-	// 3rd party
-	import { onMount } from "svelte";
 	// app
-    import { LocalStorageDriver } from '$lib/dao/LocalStorageDriver';
     import App from '$lib/components/App.svelte';
 	
-	onMount(() => {
-	   console.log(`${i++}: onMount connector value: ${!!connector}`);
- 	   connector.loadAll();
-	});
 </script>
 
 <div class:inner-canvas={true}>
