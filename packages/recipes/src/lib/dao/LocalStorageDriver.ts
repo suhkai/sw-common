@@ -139,8 +139,8 @@ export class LocalStorageDriver {
         this.#cache.splice(0);
         this.#id = 1;
         const rc = new Recipe();
-        rc.setId(this.#id);
-        rc.setName('Spagetti');
+        rc.id = this.#id;
+        rc.name = '🍝 spaghetti';
         this.#id++;
         this.#cache.push(rc);
     }
@@ -171,7 +171,7 @@ export class LocalStorageDriver {
     formatIds(): void {
         this.#cache.forEach((v, i) => {
             v.formatIds();
-            v.setId(i + 1);
+            v.id = i + 1;
         });
         this.#id = this.#cache.length + 1;
     }
@@ -187,13 +187,10 @@ export class LocalStorageDriver {
     }
 
     add(recipe: Recipe): Recipe| undefined {
-        if (!recipe.name || recipe.name.trim() === ''){
-            return undefined;
-        }
         if (!Number.isInteger(recipe.id) || recipe.id < 0){
-            recipe.setId(this.incrPk());
+            recipe.id = this.incrPk();
         }
-        this.#cache.push(recipe);
+        this.#cache.unshift(recipe);
         return recipe;
     }
 
@@ -244,8 +241,8 @@ export class LocalStorageDriver {
             }
             const model = new Recipe();
             try {
-                model.setName(recipe.name?.trim());
-                model.setId(recipe.recipe_id);
+                model.name = recipe.name?.trim();
+                model.id = recipe.recipe_id;
             }
             catch (err) {
                 const rc = recipesToPlainObj([recipe as Recipe]);

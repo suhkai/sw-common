@@ -2,33 +2,41 @@ import { Ingredient } from './Ingredient';
 
 
 export class Recipe {
-    name: string;
-    id: number;
-  
+    #name: string;
+    #id: number;
+
     ingredientPk = 1;
     ingredients: Ingredient[] = [];
 
-    setName(name?: string): void {
-        if (name){
-            this.name = name.trim();
-            return;
-        }
-        throw new Error(`recipe name is invalid [${name}]`);
+    get id(): number {
+        return this.#id;
     }
 
-    setId(id?: number): void {
-        if (Number.isInteger(id) && id >= 0){
-            this.id = id;
+    set id(id: number) {
+        if (Number.isInteger(id) && id >= 0) {
+            this.#id = id;
             return;
         }
         throw new Error(`recipe id is invalid [${id}]`);
     }
 
-    addIngredient(name: string, id?: number): Ingredient| undefined {
-        if (!name || name.trim() === ''){
-           return;
+    get name(): string {
+        return this.#name;
+    }
+
+    set name(name: string) {
+        const tn = name.trim();
+        if (tn.length === 0) {
+            throw new Error(`recipe name is invalid [${name}]`);
         }
-        if (!Number.isInteger(id) || id < 0){
+        this.#name = tn;
+    }
+
+    addIngredient(name: string, id?: number): Ingredient | undefined {
+        if (!name || name.trim() === '') {
+            return;
+        }
+        if (!Number.isInteger(id) || id < 0) {
             id = this.ingredientPk;
             this.ingredientPk++;
         }
@@ -37,9 +45,9 @@ export class Recipe {
         return rc;
     }
 
-    formatIds(): void{
+    formatIds(): void {
         this.ingredients.forEach((v, i) => {
-            v.id = i+1;
+            v.id = i + 1;
         });
         this.ingredientPk = this.ingredients.length + 1;
     }

@@ -1,23 +1,42 @@
 export enum COMBO_STATE {
+    RCP_START = 0,
     RCP_NEW = 0,
     RCP_ADDING,
     RCP_SHOW,
     RCP_MODIFY,
     //
-    ING_ADDING,
+    ING_START = 10,
+    ING_ADDING = 10,
     ING_SHOW,
     ING_MODIFY
 };
 
 export enum CROSS_STATE {
-    SMALL_BLACK=0,
+    SMALL_BLACK = 0,
     SMALL_RED,
-    GREEN_PLUS,
-    RED_CROSS
+    BLACK,
+    GREEN,
+    RED,
+    // undef
+    UNDEF
 }
 
 export enum INPUT_STATE {
-    NONE=0,
+    NONE = 0,
     ADD,
-    MODIFY
+    MODIFY,
+    SHOW,
+    // undef 
+    UNDEF
 };
+
+export enum RUBBER_BAND_STATE {
+    NONE = 0,
+    EXTEND
+}
+
+export enum ARROW_STATE {
+    NONE = 0,
+    SHOW,
+    DOWN
+}

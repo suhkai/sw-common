@@ -1,28 +1,67 @@
 <script lang="ts" context="module">
 	export const prerender = false;
-	
+	const decisionTable = {
+        [CROSS_STATE.BLACK]: {
+            black: true,
+            rotate: true,
+        },
+        [CROSS_STATE.SMALL_BLACK]: {
+            black: true,
+            rotate: true,
+            small: true
+        },
+        [CROSS_STATE.RED]: {
+            red: true,
+            rotate: true
+        },
+        [CROSS_STATE.SMALL_RED]:{
+            small: true,
+            red: true,
+            rotate: true
+        },
+        [CROSS_STATE.GREEN]: {
+            green: true
+        },
+        [CROSS_STATE.UNDEF]: {
+            green: true,
+            small: true,
+            rotate: true
+        },
+        _default: {
+            black: false,
+            green: false,
+            red: false,
+            rotate: false,
+            small: false
+        }
+    };
 </script>
 
 <script lang="ts">
     import { CROSS_STATE } from './enums';
-	// cross can be "+" or "x" (45 degrees rotated)
-	export let rotate = false;
 	
-	// Cross can be in the context
-	// 1: x smaller black cross, to delete existing "recipe" OR "recipe ingredient"
-	// 2: Smaller red x cross, will rollup the ingredients list
-	// 3: Green "+" to add new recipe at the top
-	// 4: Red 'x' cross to cancel addition of recipe
+	export let state: CROSS_STATE;
 
-	export let role: CROSS_STATE;
+    let black: boolean;
+    let green: boolean;
+    let red: boolean;
+    let rotate: boolean;
+    let small: boolean;
 
-	$:rotate = (role === CROSS_STATE.SMALL_BLACK || role === CROSS_STATE.SMALL_RED || role === CROSS_STATE.RED_CROSS);
-	$:small = (role === CROSS_STATE.SMALL_BLACK || role === CROSS_STATE.SMALL_RED);
-
+    $:{
+        const st = Object.assign({}, decisionTable['_default'], decisionTable[state]);
+        small = st.small;
+        rotate = st.rotate;
+        black = st.black;
+        red = st.red;
+        green = st.green;
+        console.log({ small, rotate, black, red, state});
+    }
+	
 </script>
 
 
-<div class:cross={true} class:rotate class:small on:click>
+<div class:cross={true} class:rotate class:small class:green class:red class:black on:click>
 	<svg version="1.1" viewBox="0 0 42 42">
 		<line class="lcl" x1="21" y1="0" x2="21" y2="42"></line>
 		<line class="lcl" x1="42" y1="21" x2="0" y2="21"></line>
@@ -42,7 +81,12 @@
     flex-shrink: 0;
 }
 
-.cross>svg {
+.cross.small {
+    width: 30px;
+    height: 30px;
+}
+
+.cross > svg {
     position: absolute;
     left: 10%;
     top: 10%;
@@ -50,28 +94,38 @@
     height: 80%;
 }
 
-.cross>svg line.lcl {
+.cross.green >svg line.lcl {
     fill: none;
     stroke: #23A24D;
     stroke-width: 2px;
 }
 
-.cross.rotate > svg line.lcl {
+.cross.red > svg line.lcl {
+    fill: none;
     stroke: #C5411E;
+    stroke-width: 2px;
+}
+
+.cross.black > svg line.lcl {
+    fill: none;
+    stroke: #000;
+    stroke-width: 4px;
 }
 
 .cross.rotate > svg {
-  transform: rotate(90deg);
+  transform: rotate(45deg);
 }
 
-.cross.small > svg {
+
+.cross.black > svg {
     left: 20%;
     top: 20%;
     width: 60%;
     height: 60%;
 }
 
-.cross.thick-black > svg line.lcl {
+
+.cross.black > svg line.lcl {
     fill: none;
     stroke: #000;
     stroke-width: 4px;

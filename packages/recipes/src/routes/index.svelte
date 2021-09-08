@@ -10,12 +10,14 @@
 <script lang="ts">
 	// app
     import App from '$lib/components/App.svelte';
+	import { setContext } from 'svelte';
 	
+	setContext('connector', connector);
 </script>
 
 <div class:inner-canvas={true}>
 	<div class:recipe={true}>
-	  <App {connector} />
+	  <App />
 	</div>
 </div>
 

@@ -3,17 +3,16 @@
 </script>
 
 <script lang="ts">
-    import { onMount } from 'svelte';
+    //svelte
+    import { onMount} from 'svelte';
+    
+    //app
     import type { Recipe } from '../dao/Recipe';
-    import type { StorageConnector } from '../dao/StorageConnector';
-
     import ComboBox from './ComboBox.svelte';
     import { COMBO_STATE } from './enums';
-
-    // props
-    export let connector: StorageConnector<Recipe>;
-
-
+    import { connector } from './connector';
+       
+    
     // locals
     //1. All displayed ready to add new
     //2. editing a recipe name
@@ -24,14 +23,13 @@
     let showNewEntry = true;
 
     onMount(()=>{
-       console.log(`connector is defined: ${!!connector}`);
-       recipes = connector.loadAll();
+       recipes = connector().loadAll();
     });
 
 </script>
 
 {#if showNewEntry }
-    <ComboBox state={COMBO_STATE.RCP_NEW}/>
+    <ComboBox state={COMBO_STATE.RCP_SHOW} value={'hello world!'} recipe_id={9} ingr_id={2}/>
 {/if}
 
 

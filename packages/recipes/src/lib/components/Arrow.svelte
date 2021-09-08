@@ -3,10 +3,38 @@
 </script>
 
 <script lang="ts">
-	// arrows can be pointing the the left or downwards
-	export let rotate = false;
-	// arrow can be shown or hidden
-	export let show = true;
+    import { ARROW_STATE } from './enums';
+	    
+	const decisionTable = {
+		[ARROW_STATE.DOWN]: {
+            show: true,
+			rotate: true
+		},
+		[ARROW_STATE.NONE]: {
+			show: false,
+            rotate: false
+		},
+        [ARROW_STATE.SHOW]: {
+            show: true,
+            rotate: false
+        },
+		_default: {
+			show: false,
+            rotate: false
+		}
+	};
+
+    export let state: ARROW_STATE ;
+
+    let show: boolean;
+    let rotate: boolean;
+
+    $:{
+        const st = Object.assign({}, decisionTable['_default'], decisionTable[state]);
+        show = st.show;
+        rotate = st.rotate;
+    }
+	
 </script>
 
 <div class:arrow={true} class:show class:rotate on:click>
