@@ -81,10 +81,14 @@ describe('LocalStorageDriver', () => {
         expect(actual).toEqual(
             [
                 {
-                    recipe_id: 1,
-                    name: 'Spagetti',
-                    pk: 1,
-                    ingredients: []
+                    name: '🍝 Spaghetti', recipe_id: 1,
+                    pk: 5,
+                    ingredients: [
+                        { name: '🧅 Onions', pk: 1, state: 1 },
+                        { name: '🍄 Mushrooms', pk: 2, state: 1 },
+                        { name: '🧄 Garlic', pk: 3, state: 1 },
+                        { name: '🧀 Cheese', pk: 4, state: 1 }
+                    ]
                 }
             ]);
     });
@@ -96,14 +100,20 @@ describe('LocalStorageDriver', () => {
         expect(connector.remove(2)).toBe(true);
         // add recipe
         let recipe = new Recipe();
-        recipe.setName('Duck and BBQ Pork   ');
+        recipe.name = 'Duck and BBQ Pork   ';
         recipe = connector.add(recipe); // recipe has pk and trimmed name
         expect(recipe.id).toBe(3);
         expect(lsd.getPk()).toBe(4);
         connector.saveAll();
         // check directly in localStorage
-        const json = JSON.parse(globalThis.localStorage.getItem(appKey));
+        const raw = globalThis.localStorage.getItem(appKey);
+        const json = JSON.parse(raw);
         expect(json).toEqual([
+            {
+                recipe_id: 3,
+                name: 'Duck and BBQ Pork',
+                ingredients: []
+            },
             {
                 recipe_id: 1,
                 name: 'roasted pig',
@@ -113,18 +123,15 @@ describe('LocalStorageDriver', () => {
                     { pk: 3, state: 1, name: 'fire' },
                     { pk: 4, state: 1, name: 'pot' }
                 ]
-            },
-            {
-                recipe_id: 3,
-                name: 'Duck and BBQ Pork',
-                ingredients: []
             }
         ]);
         {
-            const recipes = connector.loadAll();
+            const recipes = connector.loadAll(); // reformats id's
             const json = recipesToPlainObj(recipes, 'recipe_id:id', 'pk:ingredientPk', 'name:name');
             expect(lsd.getPk()).toBe(3);
+            
             expect(json).toEqual([
+                { ingredients: [], recipe_id: 1, pk: 1, name: 'Duck and BBQ Pork' },
                 {
                     ingredients: [
                         { pk: 1, state: 1, name: 'pig' },
@@ -132,13 +139,11 @@ describe('LocalStorageDriver', () => {
                         { pk: 3, state: 1, name: 'fire' },
                         { pk: 4, state: 1, name: 'pot' }
                     ],
-                    recipe_id: 1,
+                    recipe_id: 2,
                     pk: 5,
                     name: 'roasted pig'
                 },
-                { ingredients: [], recipe_id: 2, pk: 1, name: 'Duck and BBQ Pork' }
-            ]
-            );
+            ]);
         }
     });
     it('disable localStorage (sec-It, or user disabled)', () => {
@@ -148,39 +153,50 @@ describe('LocalStorageDriver', () => {
         const connector = lsd.getConnector();
         const recipes = connector.loadAll();
         const plain = recipesToPlainObj(recipes);
-        expect(plain).toEqual([{ ingredients: [], name: 'Spagetti', recipe_id: 1 }]);
-        
-        // add recipe
+        expect(plain).toEqual([
+            { 
+                name: '🍝 Spaghetti',
+                recipe_id:1,
+                ingredients: [
+                    { name: '🧅 Onions', pk: 1, state: 1},
+                    { name: '🍄 Mushrooms', pk:2, state: 1 }, 
+                    { name: '🧄 Garlic', pk:3, state: 1 },
+                    { name: '🧀 Cheese', pk: 4, state: 1 }
+                ]
+            }
+        ]);
+
+        //add recipes
         [
-            'Duck and BBQ Pork   ',
-            'Eqq Fried rice',
-            'Okra fried garlic',
-            'Rice noodle rolls'
+            'Duck and BBQ Pork   ', // 2
+            'Eqq Fried rice',       // 3
+            'Okra fried garlic',    // 4
+            'Rice noodle rolls'    // 5
         ].forEach(name => {
             const recipe = new Recipe();
-            recipe.setName(name);
+            recipe.name = name;
             connector.add(recipe);
         });
-
-        connector.saveAll();
-
-        console.log(recipesToPlainObj(recipes));
-
+        connector.saveAll(); // should no nothing
         connector.remove(2);
         connector.remove(5);
+        connector.loadAll(); // will reformat id's
+        const plain2 = recipesToPlainObj(recipes);
+        expect(plain2).toEqual([
+            { ingredients:[], name :'Okra fried garlic', recipe_id:1},
+            { ingredients:[], name: 'Eqq Fried rice', recipe_id:2 },
+            { 
+                name: '🍝 Spaghetti',
+                recipe_id:3,
+                ingredients: [
+                    { name: '🧅 Onions', pk: 1, state: 1},
+                    { name: '🍄 Mushrooms', pk:2, state: 1 }, 
+                    { name: '🧄 Garlic', pk:3, state: 1 },
+                    { name: '🧀 Cheese', pk: 4, state: 1 }
+                ]
+            },
 
-        
-        connector.loadAll();
-        //
-        console.log(recipesToPlainObj(recipes));
-        
-
-        
-       
-
-        //
-        
-
-        //console.log(plain);
+        ]);
+        globalThis.localStorage = prev; // restore
     });
 });

@@ -4,4 +4,5 @@ export interface StorageConnector<T> {
    incrPk(): number;
    remove(id: number): boolean;
    add(t: T): T;
+   findIdxOfRecipe(id: number):[T, number]|[];
 }

@@ -18,73 +18,6 @@ function storageAvailable() {
     }
 }
 
-/* SAMPLE DB (ACTUAL)
-[
-    {
-        "recipe_id": 1,
-        "name": "roasted pig",
-        "ingredients": [
-            {
-                "pk": 1,
-                "state": 1,
-                "name": "pig"
-            },
-            {
-                "pk": 2,
-                "state": 1,
-                "name": "knife"
-            },
-            {
-                "pk": 3,
-                "state": 1,
-                "name": "fire"
-            },
-            {
-                "pk": 4,
-                "state": 1,
-                "name": "pot"
-            }
-        ]
-    },
-    {
-        "recipe_id": 2,
-        "name": "Spagetti Recipe",
-        "ingredients": [
-            {
-                "pk": 1,
-                "state": 1,
-                "name": "meatloaf"
-            },
-            {
-                "pk": 2,
-                "state": 1,
-                "name": "tomatoes"
-            },
-            {
-                "pk": 3,
-                "state": 1,
-                "name": "water"
-            },
-            {
-                "pk": 4,
-                "state": 1,
-                "name": "herbs"
-            },
-            {
-                "pk": 5,
-                "state": 1,
-                "name": "pasta"
-            },
-            {
-                "pk": 6,
-                "state": 1,
-                "name": "zeze    "
-            }
-        ]
-    }
-]
-*/
-
 interface IngredientSerialized {
     pk: number;
     state: number;
@@ -123,6 +56,20 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
     add(r: Recipe): Recipe | undefined {
         return this.#storage.add(r);
     }
+
+    findIdxOfRecipe(id: number): [Recipe, number]|[]{
+        const cache = this.#storage.getCache();
+        let found: Recipe;
+        const idx = -1; 
+        for (const r of cache){
+            if (r.id === id) {
+                  found = r;
+                  break;
+            }
+        }
+        if (id < 0) return [];
+        return [found, idx];
+    }
 }
 
 export class LocalStorageDriver {
@@ -140,9 +87,15 @@ export class LocalStorageDriver {
         this.#id = 1;
         const rc = new Recipe();
         rc.id = this.#id;
-        rc.name = '🍝 spaghetti';
+        rc.name = '🍝 Spaghetti';
         this.#id++;
         this.#cache.push(rc);
+        [
+            '🧅 Onions', 
+            '🍄 Mushrooms', 
+            '🧄 Garlic',
+            '🧀 Cheese'
+        ].forEach(ingr => rc.addIngredient(ingr));
     }
 
     hasStorage(): boolean {
