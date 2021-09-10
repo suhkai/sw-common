@@ -53,6 +53,10 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
         return this.#storage.remove(id);
     }
 
+    formatRowNumbers():void {
+        this.#storage.formatRowNumbers();
+    }
+
     add(r: Recipe): Recipe | undefined {
         return this.#storage.add(r);
     }
@@ -151,7 +155,7 @@ export class LocalStorageDriver {
         this.#cache.forEach(v => {
             rowNum++;
             v.rowNum = rowNum;
-            rowNum = v.formatIds(rowNum);
+            rowNum = v.formatNumbers(rowNum);
         });
     }
 

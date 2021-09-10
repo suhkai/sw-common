@@ -31,23 +31,33 @@ export class Recipe {
 
     set name(name: string) {
         const tn = name.trim();
-        if (tn.length === 0) {
+        if (tn.length === 0 && this.#id > 0) {
             throw new Error(`recipe name is invalid [${name}]`);
         }
         this.#name = tn;
     }
 
     addIngredient(name: string, id?: number): Ingredient | undefined {
-        if (!name || name.trim() === '') {
-            return;
+        if (id > 0){
+            if (!name || name.trim() === ''){
+                return;
+            }
         }
-        if (!Number.isInteger(id) || id < 0) {
+        if (!Number.isInteger(id)) {
             id = this.ingredientPk;
             this.ingredientPk++;
         }
         const rc = new Ingredient(id, name);
         this.ingredients.push(rc);
         return rc;
+    }
+
+    formatNumbers(rowNum: number): number {
+        this.ingredients.forEach(v => {
+            rowNum++;
+            v.rowNum = rowNum;
+        });
+        return rowNum;
     }
 
     formatIds(rowNum: number): number {
@@ -67,6 +77,16 @@ export class Recipe {
             }
         }
         throw new Error(`/Internal Error: ingredient with id=${id} not found in recipe=${this.#id}`);
+    }
+
+    removeIngredient(id: number): boolean {
+        for (let i = 0; i < this.ingredients.length; i++){
+            if (this.ingredients[i].id === id){
+                this.ingredients.splice(i,1);
+                return true;
+            }
+        }
+        return false;
     }
 
     constructor(){

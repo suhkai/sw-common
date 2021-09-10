@@ -6,4 +6,5 @@ export interface StorageConnector<T> {
    add(t: T): T;
    findIdxOfRecipe(id: number):[T, number];
    findIdxOfIngredient(recipeId: number, ingredientId: number): number;
+   formatRowNumbers(): void;
 }

@@ -18,7 +18,6 @@
 	import { Ingredient } from '$lib/dao/Ingredient';
 	import { Recipe } from '$lib/dao/Recipe';
 
-
 	const connector = connectorContext();
 
 	/* 
@@ -33,7 +32,6 @@
     */
 
 	export let id: string;
-	export let value: string;
 	export let seq: number;
 
 	const [recipeId, ingredientId] = id.split(':').map((v) => parseInt(v, 10));
@@ -41,50 +39,85 @@
 	const isRecipe = ingredientId === -1;
 
 	const recipe = recipeId > 0 ? connector.findIdxOfRecipe(recipeId)[0] : new Recipe();
-	const ingredient = ingredientId > 0 ? recipe.getIngredient(ingredientId) : ingredientId === 0 ? new Ingredient( 0, '') : undefined;
+	const ingredient =
+		ingredientId > 0
+			? recipe.getIngredient(ingredientId)
+			: ingredientId === 0
+			? new Ingredient(0, '')
+			: undefined;
 
 	// infer Arrow State
-	function setArrowState(_recipe: Recipe, _ingredient?: Ingredient){
-		if (!isRecipe){
+	function setArrowState(_recipe: Recipe, _ingredient?: Ingredient) {
+		if (_ingredient !== undefined) {
 			return ARROW_STATE.NONE;
 		}
-		if (_recipe.id === 0 && _recipe.ctx.focus === false){
+		if (_recipe.id === 0 && _recipe.ctx.focus === false) {
 			return ARROW_STATE.NONE;
 		}
 		let tState = ARROW_STATE.SHOW;
-		if (_recipe.ctx.expanded){
+		if (_recipe.ctx.expanded) {
 			tState |= ARROW_STATE.DOWN;
 		}
+		dispatch('message', { id: _recipe.id, s: tState });
 		return tState;
 	}
 
 	// infer Cross State
-	function setCrossState(_recipe: Recipe, _ingredient?: Ingredient){
-		if (_ingredient === undefined){
-			if (_recipe.id === 0){
-				if (_recipe.ctx.focus === false){
-					return CROSS_STATE.GREEN;
+	function setCrossState(_recipe: Recipe, _ingredient?: Ingredient) {
+		if (_ingredient === undefined) {
+			if (_recipe.id === 0) {
+				if (_recipe.ctx.focus === false) {
+					if (_recipe.ingredients.length === 0) {
+						_recipe.name = '';
+						return CROSS_STATE.GREEN;
+					}
+					//return CROSS_STATE.RED;
 				}
+				return CROSS_STATE.RED;
+			}
+			// recipe.id > 0
+			if (_recipe.ctx.focus) {
 				return CROSS_STATE.RED;
 			}
 			return CROSS_STATE.BLACK;
 		}
-		// ingredient
+		// this is an ingredient
 		let tempState = CROSS_STATE.SMALL;
-		if (_ingredient.ctx.focus){
-			tempState |= CROSS_STATE.RED;
-		}
-		else {
-			tempState |= CROSS_STATE.BLACK;
+		if (_ingredient.id === 0) {
+			if (_ingredient.ctx.focus) {
+				tempState |= CROSS_STATE.RED;
+			} else {
+				tempState |= CROSS_STATE.GREEN;
+			}
+		} else {
+			if (_ingredient.ctx.focus) {
+				tempState |= CROSS_STATE.RED;
+			} else {
+				tempState |= CROSS_STATE.BLACK;
+			}
 		}
 		return tempState;
 	}
 
 	// infer rubbber band state
 	function setRubberState(_recipe: Recipe, _ingredient?: Ingredient): number {
-		if (_ingredient === undefined && _recipe.id === 0){
-			if (_recipe.ctx.focus === false){
-				return RUBBER_BAND_STATE.EXTEND;
+		if (_ingredient === undefined) {
+			if (_recipe.id === 0) {
+				if (_recipe.ctx.focus === false) {
+					if (recipe.ingredients.length === 0) {
+						recipe.name = '';
+						return RUBBER_BAND_STATE.EXTEND;
+					}
+				}
+			}
+			//return RUBBER_BAND_STATE.NONE;
+		} else {
+			if (_ingredient.id === 0) {
+				if (_ingredient.ctx.focus === false) {
+					ingredient.name = '';
+					return RUBBER_BAND_STATE.EXTEND;
+				}
+				//return RUBBER_BAND_STATE.NONE;
 			}
 		}
 		return RUBBER_BAND_STATE.NONE;
@@ -92,39 +125,43 @@
 
 	// infer input state
 	function setInputState(_recipe: Recipe, _ingredient?: Ingredient): number {
-		if (_recipe.id === 0) {
-			if (_recipe.ctx.focus) {
-				return INPUT_STATE.ADD;
-			}
-			return INPUT_STATE.NONE;
-		}
-		if (_recipe.id > 0 ){
-			if (_ingredient === undefined){
+		if (ingredient === undefined) {
+			if (_recipe.id === 0) {
 				if (_recipe.ctx.focus) {
-					return INPUT_STATE.MODIFY;
-				}
-				return INPUT_STATE.SHOW;
-			}
-			if (_ingredient.id === 0){
-				if (_ingredient.ctx.focus){
 					return INPUT_STATE.ADD;
 				}
-				throw new Error(`Internal error: adding new ingredient (recipeId=${_recipe.id}) but it has no focus, should not exist`);
-			}
-			if (_ingredient.id > 0){
-				if (_ingredient.ctx.focus){
-					return INPUT_STATE.MODIFY;
+				if (_recipe.ingredients.length === 0) {
+					return INPUT_STATE.NONE;
 				}
 				return INPUT_STATE.SHOW;
+			} else {
+				if (_recipe.ctx.focus) {
+					return INPUT_STATE.MODIFY;
+				} else {
+					return INPUT_STATE.SHOW;
+				}
+			}
+		} else {
+			if (_ingredient.id === 0) {
+				if (_ingredient.ctx.focus) {
+					return INPUT_STATE.ADD;
+				} else {
+					return INPUT_STATE.NONE;
+				}
+			} else {
+				if (_ingredient.ctx.focus) {
+					return INPUT_STATE.MODIFY;
+				} else {
+					return INPUT_STATE.SHOW;
+				}
 			}
 		}
-		throw new Error(`Internal error: could not determine state for input recipid.id=${_recipe.id}, ingredient=${_ingredient?.id}`);
 	}
 
 	// set focus
 	function setForceFocus(_recipe: Recipe, _ingredient?: Ingredient): boolean {
-		if (_ingredient === undefined){
-			return recipe.ctx.focus;
+		if (_ingredient === undefined) {
+			return _recipe.ctx.focus;
 		}
 		return _ingredient.ctx.focus;
 	}
@@ -135,63 +172,105 @@
 	$: rubberState = setRubberState(recipe, ingredient);
 	$: forceFocus = setForceFocus(recipe, ingredient);
 
-
 	function handleSubmit(e: Event & { currentTarget: EventTarget & HTMLFormElement }) {
 		console.log('data submitted');
 	}
 
 	function handleCrossClick(e: MouseEvent) {
-		console.log('crossclick');
-		if (isRecipe && recipe.id === 0){
-			if (recipe.ctx.focus){
-				recipe.ctx.focus = false;
+		if (ingredient !== undefined) {
+			if (ingredient.id === 0) {
+				if (ingredient.ctx.focus) {
+					console.log('set focus ingredient to false');
+					ingredient.ctx.focus = false;
+				} else {
+					console.log('set focus ingredient to true');
+					ingredient.ctx.focus = true;
+				}
+			} else {
+				recipe.removeIngredient(ingredient.id);
 			}
-			else {
-				recipe.ctx.focus = true;
+		} else {
+			if (recipe.id === 0) {
+				if (recipe.ctx.focus) {
+					
+					recipe.ctx.focus = false;
+				} else {
+					
+					recipe.ctx.focus = true;
+				}
+			} else {
+				connector.remove(recipe.id);
 			}
-			return;
 		}
-		// all other functions delete the recipe
-		if (connector.remove(recipe.id)){
-			dispatch('message',{ id: recipe.id, a:'del', c:'recipe' });
-		}
+		dispatch('message', { id: recipe.id, a: 'del', c: 'recipe' });
 	}
 
 	function handleArrowClick(e: MouseEvent) {
-		console.log('arrowclick');
-	}
-
-	function onBlur(e: FocusEvent){
-		if (ingredient === undefined){
-			recipe.ctx.focus = false;
+		if (recipe.id === 0) {
 			return;
 		}
-		ingredient.ctx.focus = false;
+		if (recipe.ctx.expanded) {
+			if (recipe.removeIngredient(0)) {
+				connector.formatRowNumbers();
+			}
+			recipe.ctx.expanded = false;
+			return;
+		}
+		// add id=0 at the end if there is none
+		recipe.removeIngredient(0);
+		recipe.addIngredient('', 0);
+		connector.formatRowNumbers();
+		recipe.ctx.expanded = true;
 	}
 
-	function onFocus(e: FocusEvent){
+	function onBlur(e: FocusEvent) {
 		if (ingredient === undefined){
+			if (recipe.id === 0){
+				return;
+			}
+			recipe.ctx.focus = false;	
+		}
+		else {
+		    if (ingredient.id === 0){
+				return;
+			}
+			ingredient.ctx.focus = false;
+		}
+	}
+
+	function onFocus(e: FocusEvent) {
+		if (ingredient === undefined) {
 			recipe.ctx.focus = true;
 			return;
 		}
 		ingredient.ctx.focus = true;
 	}
-	
 
-	
+	type BindName = {
+		name: string;
+	};
+
+	//1. I need to use a reference to the object because "bind:value={}" doesnt work with expressions.
+	$: v = isRecipe ? recipe : ingredient;
 </script>
 
 <form class:plain={true} class:isRecipe={!isRecipe} on:submit|preventDefault={handleSubmit}>
 	<Cross state={crossState} on:click={handleCrossClick} />
-	<Input state={inputState} {isRecipe} {seq} {forceFocus} bind:value on:blur={onBlur} on:focus={onFocus}/>
-	{#if (recipe.id === 0) }
+	<Input
+		state={inputState}
+		{isRecipe}
+		{seq}
+		{forceFocus}
+		bind:value={v.name}
+		on:blur={onBlur}
+		on:focus={onFocus}
+	/>
+	{#if recipe.id === 0 || ingredient?.id === 0}
 		<RubberBand state={rubberState} />
 	{/if}
-	{#if (ingredient === undefined)}
+	{#if ingredient === undefined}
 		<Arrow bind:state={arrowState} on:click={handleArrowClick} />
 	{/if}
-	{arrowState}
-	{forceFocus}
 </form>
 
 <style>

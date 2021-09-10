@@ -36,10 +36,10 @@
 			update(newFocusValue: boolean) {
 				console.log(`Xupdate:${newFocusValue}`);
 				if (newFocusValue) {
-					console.log('Xsetting focus:'+newFocusValue);
+					console.log('Xsetting focus:' + newFocusValue);
 					node.focus();
 				} else {
-					console.log('Xsetting blur:'+newFocusValue);
+					console.log('Xsetting blur:' + newFocusValue);
 					node.blur();
 				}
 			}
@@ -73,6 +73,13 @@
 		padding: 0;
 		transition: all 0.2s linear;
 		background-color: transparent;
+		-webkit-touch-callout: none; /* iOS Safari */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 	}
 
 	.base:not(.extend) {
