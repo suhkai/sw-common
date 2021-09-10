@@ -1,67 +1,49 @@
 <script lang="ts" context="module">
 	export const prerender = false;
+
+	export const INPUT_STATE = {
+		NONE: 1, // do not show input box
+		ADD: 2, // show input box green background
+		MODIFY: 4, // show input box yellow background
+		SHOW: 8, // show input box transparent background
+		// undef
+		UNDEF: 16 // show input pink orange background
+	};
 </script>
 
 <script lang="ts">
-	import { INPUT_STATE } from './enums';
-	/*
-	    NONE=0,  // do not show input box
-    	ADD,     // show input box green background
-    	MODIFY   // show input box yellow background
-		SHOW     // show input box transparent background
-		UNDEF    // show input box orange background
-	*/
-	// style
-
-	export let state: INPUT_STATE;
+	export let state: number;
 	export let isRecipe: boolean;
 	export let value: string;
+	export let seq: number;
+	export let forceFocus: boolean;
 
-	const decisionTable = {
-		[INPUT_STATE.NONE]: {
-			adding: false,
-			extend: false,
-			modifying: false
-		},
-		[INPUT_STATE.ADD]: {
-			adding: true,
-			extend: true,
-			modifying: false
-		},
-		[INPUT_STATE.MODIFY]: {
-			adding: false,
-			extend: true,
-			modifying: true
-		},
-		[INPUT_STATE.SHOW]: {
-			adding: false,
-			extend: true,
-			modifying: false
-		},
-		[INPUT_STATE.UNDEF]: {
-			adding: true,
-			extend: true,
-			modifying: true
-		},
-		_default: {
-			adding: false,
-			extend: false,
-			modifying: false
+	$: adding = (state & (INPUT_STATE.ADD | INPUT_STATE.UNDEF)) > 0;
+	$: extend =
+		(state & (INPUT_STATE.ADD | INPUT_STATE.MODIFY | INPUT_STATE.SHOW | INPUT_STATE.UNDEF)) > 0;
+	$: modifying = (state & (INPUT_STATE.MODIFY | INPUT_STATE.UNDEF)) > 0;
+	$: placeHolder = isRecipe ? 'Enter New Recipe Name' : 'Enter Ingredient or Empty[Enter] to save';
+
+	function setFocus(node: HTMLInputElement, focusValue) {
+		if (focusValue) {
+			console.log('setting focus');
+			node.focus();
+		} else {
+			console.log('setting blur');
+			node.blur();
 		}
-	};
-
-	let placeHolder: string;
-	let extend: boolean;
-	let adding: boolean;
-	let modifying: boolean;
-
-	$: {
-		console.log(value);
-		const st = Object.assign({}, decisionTable['_default'], decisionTable[state]);
-		extend = st.extend;
-		adding = st.adding;
-		modifying = st.modifying;
-		placeHolder = isRecipe ? 'Enter New Recipe Name' : 'Enter Ingredient or Empty[Enter] to save';
+		return {
+			update(newFocusValue: boolean) {
+				console.log(`Xupdate:${newFocusValue}`);
+				if (newFocusValue) {
+					console.log('Xsetting focus:'+newFocusValue);
+					node.focus();
+				} else {
+					console.log('Xsetting blur:'+newFocusValue);
+					node.blur();
+				}
+			}
+		};
 	}
 </script>
 
@@ -73,16 +55,13 @@
 	class:adding
 	class:modifying
 	placeholder={placeHolder}
-	bind:value={value}
+	bind:value
+	tabindex={seq}
+	on:blur
+	on:focus
+	use:setFocus={forceFocus}
 />
 
-<!--
-	base: true
-	extended: true/false
-    recipe: true/false
-	adding: true/false
-	modify: true/false
--->
 <style>
 	.base {
 		font-family: 'Open Sans';
@@ -115,7 +94,7 @@
 	/* mutally exclusive, input is for recipe or ingredient */
 	.base:not(.isRecipe) {
 		line-height: var(--line-height-new-entry-detail);
-		font-size: calc(--var(--line-height-new-entry-detail) * 0.7);
+		font-size: calc(var(--line-height-new-entry-detail) * 0.7);
 		height: var(--line-height-new-entry-detail);
 	}
 

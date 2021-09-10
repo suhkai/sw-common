@@ -57,18 +57,31 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
         return this.#storage.add(r);
     }
 
-    findIdxOfRecipe(id: number): [Recipe, number]|[]{
+    findIdxOfRecipe(id: number): [Recipe, number]{
         const cache = this.#storage.getCache();
         let found: Recipe;
-        const idx = -1; 
+        let idx = -1; 
         for (const r of cache){
+            idx++;
             if (r.id === id) {
                   found = r;
                   break;
             }
         }
-        if (id < 0) return [];
+        if (id < 0) throw new Error(`/Internal error/ Recipe id:${id} not found`);
         return [found, idx];
+    }
+    findIdxOfIngredient(recipeId: number, ingredientId: number): number {
+        const [recipe, idx] = this.findIdxOfRecipe(recipeId);
+        let offset = -1;
+        for (const ingr of recipe.ingredients){
+            offset++;
+            if (ingr.id === ingredientId){
+                break;
+            }
+        }
+        if (offset < 0) throw new Error(`/Internal error/ IngredientId:${ingredientId} not found within recipe:${recipeId}`);
+        return idx+offset;
     }
 }
 
@@ -80,7 +93,7 @@ export class LocalStorageDriver {
     #cache: Recipe[] = [];
     #id = 1;
     #storageConnector = new StorageConnectorImpl(this);
-    
+        
     // private methods
     #fixture(): void {
         this.#cache.splice(0);
@@ -121,13 +134,28 @@ export class LocalStorageDriver {
     }
 
     // public methods
+    // format ids and rownums at the same time
     formatIds(): void {
+        let rowNum = 3;
         this.#cache.forEach((v, i) => {
-            v.formatIds();
+            rowNum++;
+            v.rowNum = rowNum;
+            rowNum = v.formatIds(rowNum);
             v.id = i + 1;
         });
         this.#id = this.#cache.length + 1;
     }
+
+    formatRowNumbers(): void {
+        let rowNum = 3;
+        this.#cache.forEach(v => {
+            rowNum++;
+            v.rowNum = rowNum;
+            rowNum = v.formatIds(rowNum);
+        });
+    }
+
+    
 
     // Note: id is not the index, id's are also not in order perse
     remove(id: number): boolean {

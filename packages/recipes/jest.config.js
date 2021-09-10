@@ -17,8 +17,8 @@ export default {
         'static',
         '.vscode'
     ],
-    coverageProvider: 'babel',
-    //coverageProvider: 'babel', //"v8" is still experimental, but use "v8" for walk through debugging
+    //coverageProvider: 'babel',
+    coverageProvider: 'v8', //"v8" is still experimental, but use "v8" for walk through debugging
     coverageDirectory: 'coverage',
     coverageReporters: ['json', 'lcov', 'text', 'clover'],
    // preset: 'ts-jest',

@@ -1,30 +1,14 @@
 <script lang="ts" context="module">
 	export const prerender = false;
+	export const RUBBER_BAND_STATE = {
+    	NONE: 1,
+    	EXTEND: 2
+	};
 </script>
 
 <script lang="ts">
-	import { RUBBER_BAND_STATE } from './enums';
-
-	const decisionTable = {
-		[RUBBER_BAND_STATE.EXTEND]: {
-			extend: true
-		},
-		[RUBBER_BAND_STATE.NONE]: {
-			extend: false
-		},
-		_default: {
-			extend: false
-		}
-	};
-
-    export let state: RUBBER_BAND_STATE;
-    let extend: boolean;
-
-    $: {
-        const st = Object.assign({}, decisionTable['_default'], decisionTable[state]);
-        extend = st.extend;
-    }
-
+	export let state: number;
+    $: extend = (state & RUBBER_BAND_STATE.EXTEND) > 0;
 </script>
    
 <div class:plain-filler={true} class:extend></div>

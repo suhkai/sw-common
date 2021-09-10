@@ -4,15 +4,16 @@
 	export const prerender = true;
 	// singletons so belongs here
 	const storageDriver = new LocalStorageDriver();
-    const connector = storageDriver.getConnector();
+    const storageConnector = storageDriver.getConnector();
 </script>
 
 <script lang="ts">
 	// app
     import App from '$lib/components/App.svelte';
-	import { setContext } from 'svelte';
+	import { connectorContext } from '$lib/components/connector';
+
+	connectorContext(storageConnector);
 	
-	setContext('connector', connector);
 </script>
 
 <div class:inner-canvas={true}>

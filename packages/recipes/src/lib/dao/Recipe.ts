@@ -5,7 +5,12 @@ export class Recipe {
     #name: string;
     #id: number;
 
+    ctx = { expanded: false, focus: false };
+
+    rowNum = 0;
+
     ingredientPk = 1;
+    
     ingredients: Ingredient[] = [];
 
     get id(): number {
@@ -45,10 +50,27 @@ export class Recipe {
         return rc;
     }
 
-    formatIds(): void {
+    formatIds(rowNum: number): number {
         this.ingredients.forEach((v, i) => {
+            rowNum++;
             v.id = i + 1;
+            v.rowNum = rowNum;
         });
         this.ingredientPk = this.ingredients.length + 1;
+        return rowNum;
+    }
+
+    getIngredient(id: number): Ingredient {
+        for (const ingr of this.ingredients){
+            if (ingr.id === id){
+                return ingr;
+            }
+        }
+        throw new Error(`/Internal Error: ingredient with id=${id} not found in recipe=${this.#id}`);
+    }
+
+    constructor(){
+        this.#id = 0;
+        this.#name = '';
     }
 }
