@@ -26,20 +26,19 @@
 
 	function setFocus(node: HTMLInputElement, focusValue) {
 		if (focusValue) {
-			console.log('setting focus');
+			console.log(`/setFocus/initial/node/${node.tabIndex}/true`);
 			node.focus();
 		} else {
-			console.log('setting blur');
+			console.log(`/setFocus/initial/node/${node.tabIndex}/false`);
 			node.blur();
 		}
 		return {
 			update(newFocusValue: boolean) {
-				console.log(`Xupdate:${newFocusValue}`);
 				if (newFocusValue) {
-					console.log('Xsetting focus:' + newFocusValue);
+					console.log(`/setFocus/update/node/${node.tabIndex}/true`);
 					node.focus();
 				} else {
-					console.log('Xsetting blur:' + newFocusValue);
+					console.log(`/setFocus/update/node/${node.tabIndex}/false`);
 					node.blur();
 				}
 			}

@@ -49,6 +49,10 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
         return this.#storage.incrPk();
     }
 
+    commit(): Recipe| undefined {
+        return this.#storage.commit();
+    }
+
     remove(id: number): boolean {
         return this.#storage.remove(id);
     }
@@ -159,8 +163,6 @@ export class LocalStorageDriver {
         });
     }
 
-    
-
     // Note: id is not the index, id's are also not in order perse
     remove(id: number): boolean {
         const idx = this.#cache.findIndex(r => r.id === id);
@@ -171,17 +173,28 @@ export class LocalStorageDriver {
         return true;
     }
 
-    add(recipe: Recipe): Recipe| undefined {
+    add(recipe: Recipe): Recipe {
         if (!Number.isInteger(recipe.id) || recipe.id < 0){
             recipe.id = this.incrPk();
         }
         this.#cache.unshift(recipe);
         return recipe;
     }
+    
+    commit(): Recipe| undefined {
+        const recipe = this.#cache.find(rp => rp.id === 0);
+        if (recipe !== undefined){
+            if (recipe.name.length > 0){
+                const pk = this.incrPk();
+                recipe.id = pk;
+            }
+        }
+        return recipe;
+    }
 
     //save everything
     saveAll(): void {
-        if (this.#hasStorage){
+        if (this.#hasStorage) {
             const data = recipesToPlainObj(this.#cache);
             window.localStorage.setItem(this.#appKey, JSON.stringify(data));
         }

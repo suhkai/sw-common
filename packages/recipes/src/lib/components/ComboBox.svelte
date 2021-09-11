@@ -33,6 +33,7 @@
 
 	export let id: string;
 	export let seq: number;
+	export let focus: boolean;
 
 	const [recipeId, ingredientId] = id.split(':').map((v) => parseInt(v, 10));
 	console.log(`recipeId=${recipeId}, ingredientId=${ingredientId}`);
@@ -170,7 +171,7 @@
 	$: crossState = setCrossState(recipe, ingredient);
 	$: inputState = setInputState(recipe, ingredient);
 	$: rubberState = setRubberState(recipe, ingredient);
-	$: forceFocus = setForceFocus(recipe, ingredient);
+	$: forceFocus = focus; //setForceFocus(recipe, ingredient);
 
 	function handleSubmit(e: Event & { currentTarget: EventTarget & HTMLFormElement }) {
 		console.log('data submitted');
@@ -214,13 +215,17 @@
 				connector.formatRowNumbers();
 			}
 			recipe.ctx.expanded = false;
+			recipe.ctx.focus = true; // bring focus to this component
 			return;
 		}
 		// add id=0 at the end if there is none
 		recipe.removeIngredient(0);
-		recipe.addIngredient('', 0);
+		const ingr = recipe.addIngredient('', 0);
 		connector.formatRowNumbers();
 		recipe.ctx.expanded = true;
+		// move focus to last ingredient
+		ingr.ctx.focus = true;
+		//dispatch('message', {});
 	}
 
 	function onBlur(e: FocusEvent) {
@@ -228,7 +233,7 @@
 			if (recipe.id === 0){
 				return;
 			}
-			recipe.ctx.focus = false;	
+			recipe.ctx.focus = false;
 		}
 		else {
 		    if (ingredient.id === 0){
@@ -236,6 +241,7 @@
 			}
 			ingredient.ctx.focus = false;
 		}
+		connector.saveAll(); // persist
 	}
 
 	function onFocus(e: FocusEvent) {

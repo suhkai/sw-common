@@ -29,6 +29,7 @@
 	<ComboBox
 		id={recipe.id + ':-1'}
 		seq={recipe.rowNum}
+		focus={recipe.ctx.focus}
 		on:message={handleMessageRecipe}
 	/>
 	{#if recipe.ctx.expanded}
@@ -37,6 +38,7 @@
 				id={recipe.id + ':' + ingredient.id}
 				on:message={handleMessageIngredient}
 				seq={ingredient.rowNum}
+				focus={ingredient.ctx.focus}
 			/>
 		{/each}
 	{/if}
