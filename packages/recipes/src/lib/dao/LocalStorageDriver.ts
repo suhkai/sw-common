@@ -1,3 +1,5 @@
+'use strict';
+
 import { recipesToPlainObj } from '$lib/recipe2Plain';
 import { Recipe } from './Recipe';
 import type { StorageConnector } from './StorageConnector';
@@ -49,8 +51,8 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
         return this.#storage.incrPk();
     }
 
-    commit(): Recipe| undefined {
-        return this.#storage.commit();
+    commit(rId: number, ingrId: number): boolean {
+        return this.#storage.commit(rId, ingrId);
     }
 
     remove(id: number): boolean {
@@ -61,13 +63,13 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
         this.#storage.formatRowNumbers();
     }
 
-    add(r: Recipe): Recipe | undefined {
+    add(r: Recipe): Recipe {
         return this.#storage.add(r);
     }
 
     findIdxOfRecipe(id: number): [Recipe, number]{
         const cache = this.#storage.getCache();
-        let found: Recipe;
+        let found: Recipe| undefined = undefined;
         let idx = -1; 
         for (const r of cache){
             idx++;
@@ -76,7 +78,7 @@ class StorageConnectorImpl implements StorageConnector<Recipe> {
                   break;
             }
         }
-        if (id < 0) throw new Error(`/Internal error/ Recipe id:${id} not found`);
+        if (found === undefined) throw new Error(`/Internal error/ Recipe id:${id} not found`);
         return [found, idx];
     }
     findIdxOfIngredient(recipeId: number, ingredientId: number): number {
@@ -118,6 +120,7 @@ export class LocalStorageDriver {
             '🧀 Cheese'
         ].forEach(ingr => rc.addIngredient(ingr));
     }
+
 
     hasStorage(): boolean {
         return this.#hasStorage;
@@ -181,15 +184,30 @@ export class LocalStorageDriver {
         return recipe;
     }
     
-    commit(): Recipe| undefined {
-        const recipe = this.#cache.find(rp => rp.id === 0);
+    commit(rId: number, ingrId: number): boolean {
+        const recipe = this.#cache.find(rp => rp.id === rId);
+        let flag = 0;
         if (recipe !== undefined){
+            recipe.name = recipe.name.trim();
             if (recipe.name.length > 0){
-                const pk = this.incrPk();
-                recipe.id = pk;
+                if (recipe.id === 0){
+                    recipe.id = this.incrPk();
+                    flag++;
+                }
+                if (ingrId >= 0){
+                    const ingredient = recipe.getIngredient(ingrId);
+                    ingredient.name = ingredient.name.trim();
+                    if (ingredient.name.length > 0){
+                        if (ingredient.id >= 0 && ingredient.id < 1){
+                            ingredient.id = recipe.ingredientPk;
+                            recipe.ingredientPk++;
+                            flag++;
+                        }
+                    }
+                }
             }
         }
-        return recipe;
+        return flag > 0;
     }
 
     //save everything
@@ -211,7 +229,8 @@ export class LocalStorageDriver {
             }
             return this.#cache;
         }
-        const data = window.localStorage.getItem(this.#appKey) || "";
+        const _data = window.localStorage.getItem(this.#appKey);
+        const data = _data === null ? '' : _data;
         if (data.trim().length === 0) {
             this.#fixture();
             this.saveAll();
@@ -234,13 +253,13 @@ export class LocalStorageDriver {
         this.#cache.splice(0);
         for (const recipe of recipes) {
             // sanity checks
-            if (!recipe.name || recipe.name?.trim() == '') {
+            if (recipe.name === undefined || recipe.name.trim() == '') {
                 continue;
             }
             const model = new Recipe();
             try {
                 model.name = recipe.name?.trim();
-                model.id = recipe.recipe_id;
+                model.id = recipe.recipe_id as number;
             }
             catch (err) {
                 const rc = recipesToPlainObj([recipe as Recipe]);
@@ -249,13 +268,14 @@ export class LocalStorageDriver {
             }
             this.#cache.push(model);
             if (
-                !recipe.ingredients
-                || !(Array.isArray(recipe.ingredients))
-                || recipe.ingredients.length === 0) {
+                !Array.isArray(recipe.ingredients)
+                ||
+                (Array.isArray(recipe.ingredients) && recipe.ingredients.length === 0)) {
                 continue;
             }
             for (const ingredient of recipe.ingredients) {
-                model.addIngredient(ingredient.name?.trim(), ingredient.pk);
+                const name = ingredient.name !== undefined ? ingredient.name.trim() : '';
+                model.addIngredient(name, ingredient.pk);
             }
         }
         this.formatIds();

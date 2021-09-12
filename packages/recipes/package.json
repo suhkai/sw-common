@@ -7,8 +7,7 @@
     "preview": "svelte-kit preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
-    "lint": "prettier --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
-    "format": "prettier --write --plugin-search-dir=. .",
+    "lint": "eslint --ignore-path .gitignore ./src",
     "test": "jest"
   },
   "//": "force install svelte-jester on version 1.8.2, 2.1.1 is broken and being fixed",
@@ -24,8 +23,6 @@
     "eslint-plugin-svelte3": "^3.2.0",
     "jest": "^27.1.0",
     "jest-localstorage-mock": "^2.4.17",
-    "prettier": "~2.2.1",
-    "prettier-plugin-svelte": "^2.2.0",
     "svelte": "^3.34.0",
     "svelte-check": "^2.0.0",
     "svelte-jester": "1.8.2",

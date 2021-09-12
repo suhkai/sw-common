@@ -7,22 +7,27 @@
 	import { connectorContext } from '$lib/components/connector';
 	import { Recipe } from '$lib/dao/Recipe';
 
-	let showNewEntry = true;
     let connector = connectorContext();
 	let recipes = connector.loadAll();
-
-	function handleMessageRecipe(e) {
-		recipes = recipes;
-	}
-
-	function handleMessageIngredient(e) {
-		recipes = recipes;
-	}
-
-	if (showNewEntry) {
 		recipes.unshift(new Recipe());
 		connector.formatRowNumbers();
+		connector.saveAll();
+	
+	
+	let cnt = 0;
+	function handleMessage(e) {
+		console.log(`/message/${cnt++}`,e.detail);
+		if (e.detail === "roll-up-recipe-check"){
+			if (recipes.find(r => r.ctx.expanded === true) === undefined){
+				if (recipes[0].id !== 0){
+					recipes.unshift(new Recipe());
+					connector.formatRowNumbers();
+				}
+			}
+		}
+		recipes = recipes;
 	}
+	
 </script>
 
 {#each recipes as recipe (recipe.id + ':-1')}
@@ -30,13 +35,13 @@
 		id={recipe.id + ':-1'}
 		seq={recipe.rowNum}
 		focus={recipe.ctx.focus}
-		on:message={handleMessageRecipe}
+		on:message={handleMessage}
 	/>
 	{#if recipe.ctx.expanded}
 		{#each recipe.ingredients as ingredient (recipe.id + ':' + ingredient.id)}
 			<ComboBox
 				id={recipe.id + ':' + ingredient.id}
-				on:message={handleMessageIngredient}
+				on:message={handleMessage}
 				seq={ingredient.rowNum}
 				focus={ingredient.ctx.focus}
 			/>

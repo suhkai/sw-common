@@ -106,7 +106,7 @@ describe('LocalStorageDriver', () => {
         expect(lsd.getPk()).toBe(3);
         connector.saveAll();
         // check directly in localStorage
-        const raw = globalThis.localStorage.getItem(appKey);
+        const raw = globalThis.localStorage.getItem(appKey) as string;
         const json = JSON.parse(raw);
         expect(json).toEqual([
             {
@@ -120,10 +120,10 @@ describe('LocalStorageDriver', () => {
                 ]
             }
         ]);
-        connector.commit();
+        connector.commit(0, -1);
         connector.saveAll();
         {
-            const raw = globalThis.localStorage.getItem(appKey);
+            const raw = globalThis.localStorage.getItem(appKey) as string;
             const json = JSON.parse(raw);
             expect(json).toEqual([
                 {
@@ -163,7 +163,12 @@ describe('LocalStorageDriver', () => {
     });
     it('disable localStorage (sec-It, or user disabled)', () => {
         const prev = globalThis.localStorage;
-        delete globalThis.localStorage;
+
+        type AnyLocalStorage = {
+            localStorage: any;
+        };
+        
+        delete (globalThis as unknown as AnyLocalStorage).localStorage;
         const lsd = new LocalStorageDriver();
         const connector = lsd.getConnector();
         const recipes = connector.loadAll();
@@ -192,7 +197,7 @@ describe('LocalStorageDriver', () => {
                 const recipe = new Recipe();
                 recipe.name = name;
                 connector.add(recipe);
-                connector.commit();
+                connector.commit(0, -1);
             });
             connector.saveAll(); // should no nothing
             connector.remove(2);

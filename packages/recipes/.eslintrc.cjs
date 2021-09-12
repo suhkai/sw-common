@@ -1,7 +1,7 @@
 module.exports = {
 	root: true,
 	parser: '@typescript-eslint/parser',
-	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
+	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended' /*, 'prettier'*/],
 	plugins: ['svelte3', '@typescript-eslint'],
 	ignorePatterns: ['*.cjs'],
 	overrides: [{ files: ['*.svelte'], processor: 'svelte3/svelte3' }],
@@ -10,7 +10,8 @@ module.exports = {
 	},
 	parserOptions: {
 		sourceType: 'module',
-		ecmaVersion: 2019
+		ecmaVersion: 2019,
+		project: './tsconfig.json'
 	},
 	env: {
 		browser: true,
@@ -18,6 +19,7 @@ module.exports = {
 		node: true
 	},
 	rules: {
-		'@typescript-eslint/no-empty-interface' : "off"
+		'@typescript-eslint/no-empty-interface' : "off",
+		'@typescript-eslint/strict-boolean-expressions': ["error", { "allowString": true }]
 	}
 };

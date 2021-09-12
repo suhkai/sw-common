@@ -3,22 +3,33 @@
 </script>
 
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	//svelte
+	import {
+		createEventDispatcher,
+		tick,
+		//	beforeUpdate,
+		//	afterUpdate,
+	} from "svelte";
+	//app
+	import { connectorContext } from "./connector";
+
+	import Arrow, { ARROW_STATE } from "./Arrow.svelte";
+	import Input, { INPUT_STATE } from "./Input.svelte";
+	import Cross, { CROSS_STATE } from "./Cross.svelte";
+	import RubberBand, { RUBBER_BAND_STATE } from "./RubberBand.svelte";
+
+	import type { Ingredient } from "$lib/dao/Ingredient";
+	import type { Recipe } from "$lib/dao/Recipe";
+
 	const dispatch = createEventDispatcher();
 
-	//app
-	import { connectorContext } from './connector';
-
-	import Arrow, { ARROW_STATE } from './Arrow.svelte';
-	import Input, { INPUT_STATE } from './Input.svelte';
-	import Cross, { CROSS_STATE } from './Cross.svelte';
-	import RubberBand, { RUBBER_BAND_STATE } from './RubberBand.svelte';
-
-	import { Ingredient } from '$lib/dao/Ingredient';
-	import { Recipe } from '$lib/dao/Recipe';
-
 	const connector = connectorContext();
+
+	let upd = 0;
+
+	function isNewIngredient(id?: number): boolean {
+		return id !== undefined && id >= 0 && id < 1;
+	}
 
 	/* 
 	   States this edit line can be in 
@@ -35,23 +46,53 @@
 	export let seq: number;
 	export let focus: boolean;
 
-	const [recipeId, ingredientId] = id.split(':').map((v) => parseInt(v, 10));
-	console.log(`recipeId=${recipeId}, ingredientId=${ingredientId}`);
+	let loseFocusBecauseBlur = false;
+
+	let [recipeId, ingredientId] = id.split(":").map((v) => parseFloat(v));
+	//console.log(`recipeId=${recipeId}, ingredientId=${ingredientId}`);
+
 	const isRecipe = ingredientId === -1;
 
-	const recipe = recipeId > 0 ? connector.findIdxOfRecipe(recipeId)[0] : new Recipe();
-	const ingredient =
-		ingredientId > 0
-			? recipe.getIngredient(ingredientId)
-			: ingredientId === 0
-			? new Ingredient(0, '')
-			: undefined;
+	function Xrecipe() {
+		return connector.findIdxOfRecipe(recipeId)[0];
+	}
+
+	function Xingredient(_recipe?: Recipe) {
+		if (ingredientId === -1) {
+			return undefined;
+		}
+		return _recipe
+			? _recipe.getIngredient(ingredientId)
+			: Xrecipe().getIngredient(ingredientId);
+	}
+
+	
+	function setName(r:Recipe, i?: Ingredient){
+		if (i!==undefined){
+			if (trimmed === ''){
+				input = i.name;
+			}
+			else {
+				i.name = input;
+			}
+		}
+		else {
+			if (trimmed === ''){
+				input = r.name;
+			}
+			else {
+				r.name = input;
+			}
+		}
+	}
 
 	// infer Arrow State
-	function setArrowState(_recipe: Recipe, _ingredient?: Ingredient) {
-		if (_ingredient !== undefined) {
+	function setArrowState() {
+		if (ingredientId >= 0) {
 			return ARROW_STATE.NONE;
 		}
+		const _recipe = Xrecipe();
+
 		if (_recipe.id === 0 && _recipe.ctx.focus === false) {
 			return ARROW_STATE.NONE;
 		}
@@ -59,12 +100,14 @@
 		if (_recipe.ctx.expanded) {
 			tState |= ARROW_STATE.DOWN;
 		}
-		dispatch('message', { id: _recipe.id, s: tState });
 		return tState;
 	}
 
 	// infer Cross State
-	function setCrossState(_recipe: Recipe, _ingredient?: Ingredient) {
+	function setCrossState() {
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+
 		if (_ingredient === undefined) {
 			if (_recipe.id === 0) {
 				if (_recipe.ctx.focus === false) {
@@ -84,7 +127,7 @@
 		}
 		// this is an ingredient
 		let tempState = CROSS_STATE.SMALL;
-		if (_ingredient.id === 0) {
+		if (isNewIngredient(_ingredient.id)) {
 			if (_ingredient.ctx.focus) {
 				tempState |= CROSS_STATE.RED;
 			} else {
@@ -101,21 +144,24 @@
 	}
 
 	// infer rubbber band state
-	function setRubberState(_recipe: Recipe, _ingredient?: Ingredient): number {
+	function setRubberState(): number {
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+
 		if (_ingredient === undefined) {
 			if (_recipe.id === 0) {
 				if (_recipe.ctx.focus === false) {
-					if (recipe.ingredients.length === 0) {
-						recipe.name = '';
+					if (_recipe.ingredients.length === 0) {
+						_recipe.name = '';
 						return RUBBER_BAND_STATE.EXTEND;
 					}
 				}
 			}
 			//return RUBBER_BAND_STATE.NONE;
 		} else {
-			if (_ingredient.id === 0) {
+			if (isNewIngredient(_ingredient.id)) {
 				if (_ingredient.ctx.focus === false) {
-					ingredient.name = '';
+					_ingredient.name = '';
 					return RUBBER_BAND_STATE.EXTEND;
 				}
 				//return RUBBER_BAND_STATE.NONE;
@@ -125,8 +171,11 @@
 	}
 
 	// infer input state
-	function setInputState(_recipe: Recipe, _ingredient?: Ingredient): number {
-		if (ingredient === undefined) {
+	function setInputState(): number {
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+
+		if (_ingredient === undefined) {
 			if (_recipe.id === 0) {
 				if (_recipe.ctx.focus) {
 					return INPUT_STATE.ADD;
@@ -143,7 +192,7 @@
 				}
 			}
 		} else {
-			if (_ingredient.id === 0) {
+			if (isNewIngredient(_ingredient.id)) {
 				if (_ingredient.ctx.focus) {
 					return INPUT_STATE.ADD;
 				} else {
@@ -159,122 +208,312 @@
 		}
 	}
 
-	// set focus
-	function setForceFocus(_recipe: Recipe, _ingredient?: Ingredient): boolean {
-		if (_ingredient === undefined) {
-			return _recipe.ctx.focus;
+	let arrowState: number;
+	let crossState: number;
+	let inputState: number;
+	let rubberState: number;
+
+	$: {
+		arrowState = setArrowState();
+		crossState = setCrossState();
+		inputState = setInputState();
+		rubberState = setRubberState();
+		upd; // triggers re-evaluation of vars
+	}
+
+	async function handleSubmit(
+		e?: Event & { currentTarget: EventTarget & HTMLFormElement }
+	) {
+		// if you committed on an empty newline close the recipe
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+
+		setName(_recipe, _ingredient);
+
+		/*console.log(
+			`onsubmit start recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+		);*/
+		if (_ingredient && _ingredient.id >= 1) {
+			const idx = _recipe.getIngredientIdx(ingredientId);
+			const target = _recipe.ingredients[idx + 1];
+			
+			_ingredient.ctx.focus = false;
+			target.ctx.focus = true;
+			upd++;
+			dispatch("message", "handleSubmit ingredient > 1");
+			return;
 		}
-		return _ingredient.ctx.focus;
-	}
 
-	$: arrowState = setArrowState(recipe, ingredient);
-	$: crossState = setCrossState(recipe, ingredient);
-	$: inputState = setInputState(recipe, ingredient);
-	$: rubberState = setRubberState(recipe, ingredient);
-	$: forceFocus = focus; //setForceFocus(recipe, ingredient);
+		if (isNewIngredient(_ingredient?.id)) {
+			if ((<Ingredient>_ingredient).name === "") {
+				_recipe.removeIngredient(0);
+				_recipe.ctx.expanded = false;
+				_recipe.ctx.focus = true;
+				dispatch("message", "roll-up-recipe-check");
+			} else if (connector.commit(recipeId, ingredientId)) {
+				connector.saveAll();
+				recipeId = _recipe.id;
+				ingredientId =
+					_recipe.ingredients[_recipe.ingredients.length - 1].id;
+				console.log("data comitted");
+				_recipe.removeIngredient(0);
+				const ingr = _recipe.addIngredient(
+					"",
+					Math.random()
+				) as Ingredient;
+				connector.formatRowNumbers();
+				dispatch("message", "add new ingredient 01");
+				await tick();
+				ingr.ctx.focus = true;
+				await tick();
+				dispatch("message", "add new ingredient 02");
+			}
+			upd++;
+			return;
+		}
+		/*console.log(
+			`onsubmit/w2/start recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+		);*/
 
-	function handleSubmit(e: Event & { currentTarget: EventTarget & HTMLFormElement }) {
-		console.log('data submitted');
-	}
-
-	function handleCrossClick(e: MouseEvent) {
-		if (ingredient !== undefined) {
-			if (ingredient.id === 0) {
-				if (ingredient.ctx.focus) {
-					console.log('set focus ingredient to false');
-					ingredient.ctx.focus = false;
-				} else {
-					console.log('set focus ingredient to true');
-					ingredient.ctx.focus = true;
-				}
-			} else {
-				recipe.removeIngredient(ingredient.id);
+		if (_recipe.id === 0) {
+			if (connector.commit(recipeId, ingredientId)) {
+				connector.saveAll();
+				recipeId = _recipe.id;
+				console.log("data comitted");
+				_recipe.ctx.expanded = true;
+				_recipe.ctx.focus = false;
+				_recipe.removeIngredient(0);
+				const inId = Math.random();
+				const ingr = _recipe.addIngredient("", inId) as Ingredient;
+				connector.formatRowNumbers();
+				dispatch("message", "add new ingredient 01");
+				await tick();
+				ingr.ctx.focus = true;
+				await tick();
+				dispatch("message", "add new ingredient 02");
+				await tick();
 			}
 		} else {
-			if (recipe.id === 0) {
-				if (recipe.ctx.focus) {
-					
-					recipe.ctx.focus = false;
-				} else {
-					
-					recipe.ctx.focus = true;
-				}
+			connector.saveAll();
+			_recipe.ctx.focus = false;
+			if (_recipe.ctx.expanded) {
+				_recipe.ingredients[_recipe.ingredients.length - 1].ctx.focus =
+					true;
+				dispatch("message", "move focus to new ingredient");
 			} else {
-				connector.remove(recipe.id);
+				_recipe.ctx.expanded = true;
+				_recipe.removeIngredient(0);
+				const ingr = _recipe.addIngredient(
+					"",
+					Math.random()
+				) as Ingredient;
+				connector.formatRowNumbers();
+				dispatch("message", "add new ingredient 01");
+				await tick();
+				ingr.ctx.focus = true;
+				await tick();
+				dispatch("message", "add new ingredient 02");
+				await tick();
 			}
 		}
-		dispatch('message', { id: recipe.id, a: 'del', c: 'recipe' });
+		upd++;
 	}
 
-	function handleArrowClick(e: MouseEvent) {
-		if (recipe.id === 0) {
+	/*afterUpdate(() => {
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+		console.log(
+			`afterupdate recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+		);
+	});*/
+
+	/*beforeUpdate(() => {
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+		console.log(
+			`beforeupdate recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+		);
+	});*/
+
+	async function handleCrossClick(e?: MouseEvent) {
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+		
+		setName(_recipe, _ingredient);
+
+		if (_ingredient !== undefined) {
+			if (isNewIngredient(_ingredient.id)) {
+				if (loseFocusBecauseBlur) {
+					loseFocusBecauseBlur = false;
+					return;
+				}
+				if (_ingredient.ctx.focus) {
+					console.log("set focus ingredient to false");
+					_ingredient.ctx.focus = false;
+				} else {
+					console.log("set focus ingredient to true");
+					_ingredient.ctx.focus = true;
+				}
+				upd++;
+			} else {
+				_recipe.removeIngredient(_ingredient.id);
+			}
+		} else {
+			if (_recipe.id === 0) {
+				if (loseFocusBecauseBlur) {
+					loseFocusBecauseBlur = false;
+					return;
+				}
+				if (_recipe.ctx.focus) {
+					_recipe.ctx.focus = false;
+				} else {
+					_recipe.ctx.focus = true;
+				}
+				await tick();
+				//console.log(`/click/cross/recipe=0, focus=${_recipe.ctx.focus}`);
+				upd++;
+			} else {
+				connector.remove(_recipe.id);
+				connector.saveAll();
+			}
+		}
+		dispatch(
+			"message",
+			`update cross click recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+		);
+	}
+
+	async function handleArrowClick(e?: MouseEvent) {
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+
+		setName(_recipe, _ingredient);
+
+		loseFocusBecauseBlur = false;
+
+		if (_recipe.id === 0) {
 			return;
 		}
-		if (recipe.ctx.expanded) {
-			if (recipe.removeIngredient(0)) {
+		if (_recipe.ctx.expanded) {
+			if (_recipe.removeIngredient(0)) {
 				connector.formatRowNumbers();
 			}
-			recipe.ctx.expanded = false;
-			recipe.ctx.focus = true; // bring focus to this component
-			return;
+			_recipe.ctx.expanded = false;
+			_recipe.ctx.focus = true; // bring focus to this component
+		} else {
+			// add id=0 at the end if there is none
+			_recipe.ctx.expanded = true;
+			_recipe.removeIngredient(0);
+			const ingr = _recipe.addIngredient("", Math.random()) as Ingredient;
+			connector.formatRowNumbers();
+			dispatch("message", "add new ingredient 01");
+			await tick();
+			ingr.ctx.focus = true;
+			await tick();
+			dispatch("message", "add new ingredient 02");
+			await tick();
 		}
-		// add id=0 at the end if there is none
-		recipe.removeIngredient(0);
-		const ingr = recipe.addIngredient('', 0);
-		connector.formatRowNumbers();
-		recipe.ctx.expanded = true;
-		// move focus to last ingredient
-		ingr.ctx.focus = true;
-		//dispatch('message', {});
+		upd++;
+		dispatch("message", "roll-up-recipe-check");
 	}
 
-	function onBlur(e: FocusEvent) {
-		if (ingredient === undefined){
-			if (recipe.id === 0){
-				return;
-			}
-			recipe.ctx.focus = false;
+	function onBlur(e?: FocusEvent) {
+		let _recipe: Recipe;
+		let _ingredient: Ingredient;
+
+		
+
+		try {
+			_recipe = Xrecipe();
+			_ingredient = Xingredient(_recipe) as Ingredient;
+		} catch (err) {
+			// was deleted do nothing
+			console.error(
+				`Internal warning: recipe=${recipeId}, ingredient=${ingredientId}`
+			);
+			return;
 		}
-		else {
-		    if (ingredient.id === 0){
-				return;
+
+		setName(_recipe, _ingredient);
+
+		if (_ingredient === undefined) {
+			if (_recipe.id === 0) {
+				loseFocusBecauseBlur = true;
+				setTimeout(() => {
+					loseFocusBecauseBlur = false;
+				}, 200);
 			}
-			ingredient.ctx.focus = false;
+			_recipe.ctx.focus = false;
+		} else {
+			if (isNewIngredient(_ingredient?.id)) {
+				loseFocusBecauseBlur = true;
+				setTimeout(() => {
+					loseFocusBecauseBlur = false;
+				}, 200);
+			}
+			_ingredient.ctx.focus = false;
 		}
+		upd++;
+		//console.log(`/onblur/recipe=${_recipe.id} ingredient=${_ingredient?.id}`);
 		connector.saveAll(); // persist
+		dispatch(
+			"message",
+			`unBlur recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+		);
 	}
 
 	function onFocus(e: FocusEvent) {
-		if (ingredient === undefined) {
-			recipe.ctx.focus = true;
-			return;
+		const _recipe = Xrecipe();
+		const _ingredient = Xingredient(_recipe);
+
+		loseFocusBecauseBlur = false;
+		if (_ingredient === undefined) {
+			//console.log(`/onfocus/recipe=${_recipe.id} to true`);
+			_recipe.ctx.focus = true;
+		} else {
+			_ingredient.ctx.focus = true;
+			/*console.log(
+				`/onfocus/false/recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+			);*/
 		}
-		ingredient.ctx.focus = true;
+		upd++;
+		dispatch(
+			"message",
+			`onFocus recipe=${_recipe.id} ingredient=${_ingredient?.id}`
+		);
 	}
 
-	type BindName = {
+	/*type BindName = {
 		name: string;
 	};
 
+	let v: { name: string } = isRecipe ? Xrecipe() : Xingredient() as Ingredient;
+	*/
+	let input: string = (isRecipe ? Xrecipe() : Xingredient() as Ingredient).name;
+	$: trimmed = input.trim();
+
 	//1. I need to use a reference to the object because "bind:value={}" doesnt work with expressions.
-	$: v = isRecipe ? recipe : ingredient;
 </script>
 
-<form class:plain={true} class:isRecipe={!isRecipe} on:submit|preventDefault={handleSubmit}>
+<form
+	class:plain={true}
+	class:isRecipe={!isRecipe}
+	on:submit|preventDefault={handleSubmit}
+>
 	<Cross state={crossState} on:click={handleCrossClick} />
 	<Input
 		state={inputState}
 		{isRecipe}
 		{seq}
-		{forceFocus}
-		bind:value={v.name}
+		forceFocus={focus}
+		bind:value={input}
 		on:blur={onBlur}
 		on:focus={onFocus}
 	/>
-	{#if recipe.id === 0 || ingredient?.id === 0}
+	{#if isNewIngredient(Xingredient()?.id) || Xrecipe().id === 0}
 		<RubberBand state={rubberState} />
 	{/if}
-	{#if ingredient === undefined}
+	{#if Xingredient() === undefined}
 		<Arrow bind:state={arrowState} on:click={handleArrowClick} />
 	{/if}
 </form>

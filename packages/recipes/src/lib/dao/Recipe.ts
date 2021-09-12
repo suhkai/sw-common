@@ -5,15 +5,18 @@ export class Recipe {
     #name: string;
     #id: number;
 
-    ctx = { expanded: false, focus: false };
+    ctx = { 
+        expanded: false, 
+        focus: false,
+    };
 
     rowNum = 0;
 
     ingredientPk = 1;
-    
+
     ingredients: Ingredient[] = [];
 
-    get id(): number {
+     get id(): number {
         return this.#id;
     }
 
@@ -30,22 +33,21 @@ export class Recipe {
     }
 
     set name(name: string) {
-        const tn = name.trim();
-        if (tn.length === 0 && this.#id > 0) {
-            throw new Error(`recipe name is invalid [${name}]`);
-        }
-        this.#name = tn;
+        this.#name = name.trim();
     }
 
     addIngredient(name: string, id?: number): Ingredient | undefined {
-        if (id > 0){
-            if (!name || name.trim() === ''){
-                return;
-            }
-        }
-        if (!Number.isInteger(id)) {
+        if (id === undefined) {
             id = this.ingredientPk;
             this.ingredientPk++;
+        }
+        if (id < 0){
+            return;
+        } 
+        if (id >= 1) {
+            if (!name || name.trim() === '') {
+                return;
+            }
         }
         const rc = new Ingredient(id, name);
         this.ingredients.push(rc);
@@ -71,25 +73,47 @@ export class Recipe {
     }
 
     getIngredient(id: number): Ingredient {
-        for (const ingr of this.ingredients){
-            if (ingr.id === id){
-                return ingr;
-            }
+        const found = this.ingredients.find(ing => ing.id === id);
+        if (found === undefined){
+            throw new Error(`/Internal Error: ingredient with id=${id} not found in recipe=${this.#id}`);
         }
-        throw new Error(`/Internal Error: ingredient with id=${id} not found in recipe=${this.#id}`);
+        return found;
     }
 
-    removeIngredient(id: number): boolean {
-        for (let i = 0; i < this.ingredients.length; i++){
-            if (this.ingredients[i].id === id){
-                this.ingredients.splice(i,1);
-                return true;
-            }
+    getIngredientIdx(id: number): number {
+        const idx = this.ingredients.findIndex(ing => ing.id === id);
+        if (idx < 0){
+            throw new Error(`/Internal Error: ingredient with id=${id} not found in recipe=${this.#id}`);
+        }
+        return idx;
+    }
+
+    #testIdForNew(id: number): boolean {
+        if (id >= 0 && id < 1) {
+            return true;
         }
         return false;
     }
 
-    constructor(){
+    #testExistingId(id1: number, id2: number): boolean {
+        return id1 === id2;
+    }
+
+    hasNewIngredient(): boolean {
+        return this.ingredients.find(ingr => this.#testIdForNew(ingr.id)) !== undefined;
+    }
+
+    removeIngredient(id: number): boolean {
+        const fn = this.#testIdForNew(id) ? (v: Ingredient) => this.#testIdForNew(v.id) : (v: Ingredient) => this.#testExistingId(id, v.id);
+        const idx = this.ingredients.findIndex(fn);
+        if (idx >= 0) {
+            this.ingredients.splice(idx, 1);
+            return true;
+        }
+        return false;
+    }
+
+    constructor() {
         this.#id = 0;
         this.#name = '';
     }
