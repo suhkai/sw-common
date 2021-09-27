@@ -2,7 +2,6 @@ import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-static';
 
 const config = {
-
 	kit: {
 		adapter: adapter(),
 		amp: false,
@@ -29,7 +28,9 @@ const config = {
 		trailingSlash: 'never'
 	},
 	preprocess: preprocess({
-		replace: [['process.env.NODE_ENV', JSON.stringify(process.env.NODE_ENV)]],
+		replace: [
+			['process.env.NODE_ENV', JSON.stringify(process.env.NODE_ENV)]
+		],
 		typescript: {
 			tsconfigFile: './tsconfig.app.json'
 		}
