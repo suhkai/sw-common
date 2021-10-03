@@ -165,7 +165,7 @@ describe('LocalStorageDriver', () => {
         const prev = globalThis.localStorage;
 
         type AnyLocalStorage = {
-            localStorage: any;
+            localStorage: unknown;
         };
         
         delete (globalThis as unknown as AnyLocalStorage).localStorage;
