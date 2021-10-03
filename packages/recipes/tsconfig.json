@@ -33,12 +33,7 @@
 		"node_modules"
 	],
 	"include": [
-		"src/**/*.d.ts",
-		"src/**/*.js",
 		"src/**/*.ts",
-		"src/**/*.svelte",
-		"src/lib/old_code.tsx",
-		"src/routes/old.js.text"
-	],
-	"root":"./"
+		"src/**/*.svelte"
+	]
 }
