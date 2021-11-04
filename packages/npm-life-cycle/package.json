@@ -3,17 +3,19 @@
   "version": "1.0.1",
   "description": "",
   "main": "index.js",
-  "files": [
-    "prepare.js"
-  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "node prepare.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "lib-r-math.js": "^1.0.89"
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.11.0",
+    "tslib": "^2.3.1",
+    "ttypescript": "^1.5.12",
+    "typescript": "^4.5.0-beta"
   }
 }
