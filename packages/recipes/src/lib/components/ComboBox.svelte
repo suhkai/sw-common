@@ -222,7 +222,7 @@
 	}
 
 	async function handleSubmit(
-		e?: Event & { currentTarget: EventTarget & HTMLFormElement }
+		/*e?: Event & { currentTarget: EventTarget & HTMLFormElement }*/
 	) {
 		// if you committed on an empty newline close the recipe
 		const _recipe = Xrecipe();
@@ -335,7 +335,7 @@
 		);
 	});*/
 
-	async function handleCrossClick(e?: MouseEvent) {
+	async function handleCrossClick(/*e?: MouseEvent*/) {
 		const _recipe = Xrecipe();
 		const _ingredient = Xingredient(_recipe);
 		
@@ -383,7 +383,7 @@
 		);
 	}
 
-	async function handleArrowClick(e?: MouseEvent) {
+	async function handleArrowClick(/*e?: MouseEvent*/) {
 		const _recipe = Xrecipe();
 		const _ingredient = Xingredient(_recipe);
 
@@ -417,7 +417,7 @@
 		dispatch("message", "roll-up-recipe-check");
 	}
 
-	function onBlur(e?: FocusEvent) {
+	function onBlur(/*e?: FocusEvent*/) {
 		let _recipe: Recipe;
 		let _ingredient: Ingredient;
 
@@ -462,7 +462,7 @@
 		);
 	}
 
-	function onFocus(e: FocusEvent) {
+	function onFocus(/*e: FocusEvent*/) {
 		const _recipe = Xrecipe();
 		const _ingredient = Xingredient(_recipe);
 

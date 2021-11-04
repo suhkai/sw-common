@@ -1,0 +1,19 @@
+{
+  "name": "@jacobbogers/npm-life-cycle",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.js",
+  "files": [
+    "prepare.js"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "node prepare.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lib-r-math.js": "^1.0.89"
+  }
+}

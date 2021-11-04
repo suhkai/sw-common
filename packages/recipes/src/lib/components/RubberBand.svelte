@@ -1,8 +1,8 @@
 <script lang="ts" context="module">
 	export const prerender = false;
 	export const RUBBER_BAND_STATE = {
-    	NONE: 1,
-    	EXTEND: 2
+		NONE: 1,
+		EXTEND: 2
 	};
 </script>
 
