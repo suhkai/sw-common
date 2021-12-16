@@ -1,4 +1,4 @@
-[css level 3](https://www.w3.org/TR/css-grid-2/#background)
+[css level 2](https://www.w3.org/TR/css-grid-2/#background)
 
 ```css
 /*
