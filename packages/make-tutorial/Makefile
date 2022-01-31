@@ -102,3 +102,136 @@
 
 #page 16
 # Using Boolean Values
+
+#VAR = hello
+#ifdef VAR
+#$(info VAR is defined)
+#else
+#$(info VAR is undefined)
+#endif
+
+# 2x interpolation?
+
+#VAR_NAME = VAR
+#VAR = some value
+#ifdef $(VAR_NAME)
+#$(info VAR is defined)
+
+# make any truthy string "T"
+#make-truth = $(if $1,$2,$3)
+#foo: @echo $(call make-truth, ) # this is still "T" because there is an empty space between "," and ")"
+#foo: @echo $(call make-truth,) # is "F"
+#foo: ; @echo $(call make-truth,a,b,c) # becomes b
+#foo: ; @echo $(call make-truth,,b,c) # becomes c
+
+# page 19
+
+#DO NOT USE "or" (reserved?) use "orZ" or "orWhatever"
+
+#orZ = $(if $1$2,T,F)
+#or = $(call make-truth,x,)
+#foo: ; @echo $(call orZ,x,y) # will give T
+#foo: ; @echo $(call orZ,,y) # will give T
+#foo: ; @echo $(call orZ,,) # will give F
+
+#andZ = $(if $1, $(if $2, T, F), F)
+#foo: ; @echo $(call andZ,,) # will give F
+#foo: ; @echo $(call andZ,x,y) # will give T
+#foo: ; @echo $(call andZ,,y) # will give F
+
+
+#page 20
+#have_native_and := $(and T,T)
+#have_native_or := $(or T,T)
+
+#ifneq ($(have_nativ_and), T)
+#and = $(if $1,$(if $2,T))
+#endif
+#ifneq ($(have_native_or),T)
+#or = $(if $1$2,T,F)
+#endif
+
+#$(info This will be T: $(call and,T,T)) # = true
+
+#HAVE_CURL := $(shell which curl)
+#ifndef HAVE_CURL
+#$(error curl is missing)
+#endif
+#
+#$(info $(HAVE_CURL)) # /usr/bin/birl
+
+#page 22
+#assert-command-present = $(if $(shell which $1),,$(error '$1' missing and needed for this build))
+#$(info $(call assert-command-present, curl))
+#download: export _check = $(call assert-command-present,curl)
+#download: ; @echo Download stuff...
+
+# Delayed variable assignment
+
+#BAR = before  
+#FOO = $(BAR) the rain # "=" defines a recursive variable
+#BAR = after
+
+#$(info $(FOO)) ## lazy eval (recursive) at this point BAR=after
+
+#SHALIST =$(eval SHALIST:= $(shell find ./lib1 -name '*.c' | xargs shasum))$(SHALIST)
+
+#$(info Before use SHALIST is: $(value SHALIST))
+#$(info SHALIST is: $(SHALIST))
+#$(info After use SHALIST is: $(value SHALIST))
+
+#$(info $(firstword $(SHALIST))) # first word
+#$(info $(words $(value SHALIST))) # word count
+#$(info $(wordlist $(SHALIST)))
+#$(info $(foreach $(SHALIST)))
+
+#MY_LIST = a program for directed compilation
+#$(info the first word of the list is "$(firstword $(MY_LIST))")
+#lastwordC = $(if $1,$(word $(words $1), $1))
+#wordCount = $(words $1)
+#partialC = $(if $1, $(word $(words $1), $1),empty)
+# $(info the first word of the list is "$(lastwordC $(MY_LIST))")
+#$(info by index: "$(call partialC,)")
+
+# $(wordlist 2, $(words $1), $1)
+
+#subrange = $(wordlist 2,$(words $1), $1)
+#DATA=a program for directed compilation
+#$(info $(call subrange,))
+
+
+
+# notlast = $(wordlist 2,$(words $1), dummy $1) # cool trick
+# step 1 the string is prefixed with a dummy word  "dummy hello world"
+# step 2 the get rid of the last word just limit to the original wordcount
+# 	the string has now become "dummy hello"
+#   to get ridd of the original dull do we start cutting at index 2
+# 
+#  in javascript the logic would look like this
+
+#var originalString = "...."
+#var augmented = dummy + originalString
+#var result = augmented.slice(2, originalString.length)
+
+# $(info $(call notlast,))
+
+# Page 25/26
+# User defined functions
+# The Basics
+#make_date = $1/$2/$3
+#today := $(call make_date,5,5,2014)
+#$(info $(today))
+
+
+#unix_to_dos = $(subst /,\,$1)
+#$(info $(call unix_to_dos,"some/long/path"))
+
+#page 26
+#Argument-Handling Gotchas
+
+#page 27
+#Calling Built-in Functions
+
+
+
+
