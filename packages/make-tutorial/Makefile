@@ -19,16 +19,74 @@
 #$(info $(call env_shell,FOO,printenv | grep FOO))
 #all: ; @printenv | grep FOO
 
-.PHONY: all foo bar baz
+#.PHONY: all foo bar baz
 
-VAR = global scope
-all: foo bar
-all: ; @echo In $@ VAR is $(VAR)
+#VAR = global scope
+#all: foo bar
+#all: ; @echo In $@ VAR is $(VAR)
 
-foo: ; @echo In $@ VAR is $(VAR)
+#foo: ; @echo In $@ VAR is $(VAR)
 
-bar: VAR = local scope
-bar: baz
-bar: ; @echo In $@ VAR is $(VAR)
+#bar: VAR += local scope
+#bar: baz
+#bar: ; @echo In $@ VAR is $(VAR)
 
-baz: ; @echo In $@ VAR is $(VAR)
+#baz: ; @echo In $@ VAR is $(VAR)
+
+#f%: VAR = starts with f
+
+
+#.PHONY: all
+
+#lib1_SRCS := $(wildcard lib1/*.c)
+#lib2_SRCS := $(wildcard lib2/*.c)
+
+#all: ; @echo In $@ lib1 is $(lib1_SRCS)
+#all: ; @echo In $@ lib2 is $(lib2_SRCS)
+
+#lib1_OBJS := $(lib1_SRCS:.c=.o)
+#lib2_OBJS := $(lib2_SRCS:.c=.o)
+
+#lib1/special.o: CPPFLAGS += -Wcomment
+#lib1/%.o: CPPFLAGS += -fast
+#all: $(lib1_OBJS) $(lib2_OBJS)
+
+#all: ; @echo $(lib1_OBJS) $(lib2_OBJS)
+
+#%.o: %.c ; @$(COMPILE.C) -o $@ $<
+
+#page 13
+# Version checking
+#.PHONY: all
+#all: ; @echo $(MAKE_VERSION)
+
+#page 14
+
+#need := 3.80
+#ok := $(filter $(need),$(firstword $(sort $(MAKE_VERSION) $(need))))
+
+#all: ; @echo $(ok)
+
+#foo: ; @echo $(lastword $(sort $(MAKE_VERSION) $(need)))
+
+
+#baz: ; @echo $(sort $(.FEATURES))
+
+
+# the Tx is a dummy, anything is good
+#is_feature = $(if $(filter $1,$(.FEATURES)),Tx)
+
+
+#.PHONY: all
+#all: ; @echo archives are $(if $(call is_feature,archives),, not)available
+#foo: ; @echo $(origin .FEATURES)
+
+
+#.PHONY: foo
+
+#var1 := hello
+#var2 := world
+
+#has_features := $(if $(filter default,$(origin .FEATURES)),$(if $(.FEATURES),T))
+
+#foo: ; @echo $(if $(var1), $(if $(var2), T))
