@@ -231,6 +231,39 @@
 
 #page 27
 #Calling Built-in Functions
+#$(call info, "message")
+
+#map = $(foreach a,$2,$(call $1,$a))
+# $1="print-variable" function
+# $2="foo, $(var1) bar ding bats, baz
+
+#print-variable = $(info $1 [$(value $1)]->[$($1)] )
+
+#print-variables = $(call map, print-variable, $1)
+# $1= foo, $(var1) bar ding bats, baz
+
+#main
+
+#VAR1=foo
+#VAR2=$(VAR1) bar ding bats
+#VAR3=baz
+
+#$(info $(value VAR2))
+
+#$(call print-variables,VAR1 VAR2 VAR3)
+
+# recursive calls
+
+# first some elementary functions
+
+# strip will trim whitespace and normalize whitespace
+#$(info $(strip a  b  c   d   ))
+
+# filter will "filter" regexp or literal strings
+#$(info $(filter hello,hellox world)) # will find nothing
+#$(info $(filter hello,hello world)) # will find hello
+#$(info $(filter he%,hello world)) # will find hello
+
 
 
 
