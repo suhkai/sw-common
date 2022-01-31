@@ -90,3 +90,15 @@
 #has_features := $(if $(filter default,$(origin .FEATURES)),$(if $(.FEATURES),T))
 
 #foo: ; @echo $(if $(var1), $(if $(var2), T))
+
+#$(eval eval_available := T)
+
+#ifeq ($(eval_available),T)
+#ifneq ($(eval_available),T)
+#$(error This makefule only works with "make program that supports $$(eval))
+#endif
+
+#foo: ; @echo $(eval_available)
+
+#page 16
+# Using Boolean Values
