@@ -265,6 +265,30 @@
 #$(info $(filter he%,hello world)) # will find hello
 
 
+check_uniq =$(info chku=($1,$2))$(if $(filter $1,$2), $2, $2 $1)
+
+sub_arr = $(wordlist 3, $(words $1 z), $1 $1)
+
+$(info words $(words a b c d))
+#$(info sub_arr $(call sub_arr,a b c d a x y z))
+concat = $1 $2
+$(info $(call concat,a,b))
+#                                     $2= unsorted string
+#                                                if $2 is non empty
+#                                                            $1=check_uniq
+#														         $2= rest of worldlist with first element stripped
+#																							         $3=  check_uniq (first word, )	
+#                                                                                                                                    #end recursive reduce
+#                                                                                                                                       #final result
+reduce = $(info REDUCE 1=$1,2=$2,3=$3)$(if $(strip $2),$(call reduce,$1,$(wordlist 2,$(words $2),$2), $(call $1,$(firstword $2),$3)   ),end=$3)
+reduce2 = $(call $1,$(firstword $2),$3)),$3)
+uniq = $(call reduce,check_uniq,$1) #$1 = check_uniq $2 =($1 = c b a a c c b a c b a)
+$(info result=$(call uniq,c b a a c c b a c b a))
+
+foo: ; @echo $(strip $(call uniq,c b a a c c b a c b a))
+
+$(info result=$(sort c b a a c c b a c b a))
+
 
 
 
