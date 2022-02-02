@@ -233,6 +233,65 @@
 #Calling Built-in Functions
 
 
+#$(call info, "message")
+
+#map = $(foreach a,$2,$(call $1,$a))
+# $1="print-variable" function
+# $2="foo, $(var1) bar ding bats, baz
+
+#print-variable = $(info $1 [$(value $1)]->[$($1)] )
+
+#print-variables = $(call map, print-variable, $1)
+# $1= foo, $(var1) bar ding bats, baz
+
+#main
+
+#VAR1=foo
+#VAR2=$(VAR1) bar ding bats
+#VAR3=baz
+
+#$(info $(value VAR2))
+
+#$(call print-variables,VAR1 VAR2 VAR3)
+
+# recursive calls
+
+# first some elementary functions
+
+# strip will trim whitespace and normalize whitespace
+#$(info $(strip a  b  c   d   ))
+
+# filter will "filter" regexp or literal strings
+#$(info $(filter hello,hellox world)) # will find nothing
+#$(info $(filter hello,hello world)) # will find hello
+#$(info $(filter he%,hello world)) # will find hello
+
+
+#check_uniq =$(info chku=($1,$2))$(if $(filter $1,$2), $2, $2 $1)
+
+#sub_arr = $(wordlist 3, $(words $1 z), $1 $1)
+
+#$(info words $(words a b c d))
+#$(info sub_arr $(call sub_arr,a b c d a x y z))
+#concat = $1 $2
+#$(info $(call concat,a,b))
+#                                     $2= unsorted string
+#                                                if $2 is non empty
+#                                                            $1=check_uniq
+#														         $2= rest of worldlist with first element stripped
+#																							         $3=  check_uniq (first word, )	
+#                                                                                                                                    #end recursive reduce
+#                                                                                                                                       #final result
+#reduce = $(info REDUCE 1=$1,2=$2,3=$3)$(if $(strip $2),$(call reduce,$1,$(wordlist 2,$(words $2),$2), $(call $1,$(firstword $2),$3)   ),end=$3)
+#reduce2 = $(call $1,$(firstword $2),$3)),$3)
+#uniq = $(call reduce,check_uniq,$1) #$1 = check_uniq $2 =($1 = c b a a c c b a c b a)
+#$(info result=$(call uniq,c b a a c c b a c b a))
+#
+#foo: ; @echo $(strip $(call uniq,c b a a c c b a c b a))
+#
+#$(info result=$(sort c b a a c c b a c b a))
+
+
 #page 30
 #.SECONDEXPANSION:
 
@@ -243,17 +302,144 @@
 #FOO = bar						# $$(FOO) will be bar
 
 #page 31
-$(info include_dir:  $(.INCLUDE_DIRS))
-$(info features: $(.FEATURES))
-$(info default_goal: $(.DEFAULT_GOAL))
-$(info make_restarts: $(MAKE_RESTARTS))
-$(info lastword: $(lastword a b c d e f g))
+#$(info include_dir:  $(.INCLUDE_DIRS))
+#$(info features: $(.FEATURES))
+#$(info default_goal: $(.DEFAULT_GOAL))
+#$(info make_restarts: $(MAKE_RESTARTS))
+#$(info lastword: $(lastword a b c d e f g))
 
-REC = foo
-SIM := foo
-$(info REC is $(flavor REC))
-$(info SIM is $(flavor SIM))
-$(info A or B or C.  $(or a,b,c))
-$(info A and B and C.  $( $(and a,b,x)))
-all: ; @true
+#REC = foo
+#SIM := foo
+#$(info REC is $(flavor REC))
+#$(info SIM is $(flavor SIM))
+#$(info A or B or C.  $(or a,b,c))
+#$(info A and B and C.  $( $(and a,b,x)))
+#all: ; @true
+#$(info $(abspath foo/bar)) # will be $cwd/foo/bar
+#$(info $(abspath /foo/bar)) # will be /foo/bar
+#$(info $(abspath dingbats)) # will be $cwd/dingbats
+#$(info $(realpath dingbats)) # will be /tmp/dingbats (resolved symlink)
+#.RECIPEPREFIX = >
+#$(info .RECIPEPREFIX=[$(.RECIPEPREFIX)])
+#$(info @echo $(.SHELLFLAGS))
+#all:
+#> @echo @true # instead of TAB
+
+#.ONESHELL:
+#.RECIPEPREFIX = >
+#all:
+#> @cd /tmp
+#> @pwd
+#> @ls -alh
+
+#SPECIAL_FLAGS := xyz
+#$(info SPECIAL_FLAGS [$(SPECIAL_FLAGS)])
+#undefine SPECIAL_FLAGS # UNDEFINED 
+#$(info SPECIAL_FLAGS [$(SPECIAL_FLAGS)])
+
+#EMPTY :=
+#$(info empty $(flavor EMPTY))   # simple
+#EMPTY = $(something)
+#$(info empty $(flavor EMPTY))   # recursive
+
+#page 38
+#FILE = foo.c
+
+#define COMMANDS
+#wc -l $(FILE)
+#shasum $(FILE)
+#endef
+#
+#define COMMANDS +=
+#
+#wc -c $(FILE)
+#endef
+#
+#$(info COMMANDS=[$(COMMANDS)]) # will show first in output
+#
+#all: ; $(COMMANDS)  # now it will run all commands
+
+# this is not working not sure why
+#$(if $(guile (access? "/tmp2/foo.c" R_OK)),$(info foo.c exists),$(info does not exist))
+#$(info guile-result $(guile (access? "/tmp2/foo.c" R_OK))) # this did not work
+
+#all: one two three four
+#one two:
+#	@echo $@ line start
+#	@sleep 0.1s
+#	@echo $@ line middle
+#	@echo $@ line finish
+#three four:
+#	@echo $@ line start
+#	@sleep 0.2s
+#	@echo $@ line middle
+#	@echo $@ line finish
+
+# RESULTS
+#make -j4 
+
+#one line start
+#two line start
+#three line start
+#four line start
+
+#one line middle
+#two line middle
+#one line finish
+#two line finish
+
+#three line middle
+#four line middle
+#three line finish
+#four line finish	
+
+#make -j4 -Otarget (no real difference with "make -j4")
+
+#one line start
+#two line start
+#three line start
+#four line start
+
+#one line middle
+#two line middle
+#one line finish
+#two line finish
+
+#three line middle
+#four line middle
+#three line finish
+#four line finish
+
+#all: part-one part-two
+#part-one: part-three
+#	@echo Make $@   # because of all
+#part-two:
+#	@echo Make $@   # because of all
+#part-three:
+#	@echo Make $@   # because of part-one
+
+#CURRENTLY != date
+
+#$(info $(CURRENTLY) [$(flavor CURRENTLY)])
+
+#LOG = make.logic
+
+#$(file > $(LOG), Start)
+
+#all: part-one part-two
+
+#part-one: part-three
+#	@$(file >> $(LOG),$@)
+#	@echo Make $@
+#part-two:
+#	@$(file >> $(LOG),$@)
+#	@echo Make $@
+#part-three:
+#	@$(file >> $(LOG),$@)
+#	@echo Make $@
+
+#$(info  $(MAKE_TERMOUT))
+#$(info  $(MAKE_TERMERR))
+
+
 
