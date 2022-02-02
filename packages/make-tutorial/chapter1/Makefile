@@ -231,11 +231,6 @@
 
 #page 27
 #Calling Built-in Functions
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 5fd2d9538cfde8382cc4f692479c59d0803df1c6
 #$(call info, "message")
 
 #map = $(foreach a,$2,$(call $1,$a))
@@ -443,6 +438,3 @@
 
 #$(info  $(MAKE_TERMOUT))
 #$(info  $(MAKE_TERMERR))
-
-
-
