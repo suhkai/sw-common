@@ -124,17 +124,35 @@
 #page 58
 
 # INTERACTIVE GNU DEBUGGER NEEDS gmd (gmd depends on gmsl)
+#include gmsl
+#include gmd
+
+#.PHONY: all foo bar
+#MYVAR1 = hello
+#MYVAR2 = $(MYVAR1) everyone
+
+#all: MYVAR3 = $(MYVAR2)
+#all: foo bar
+#	$(__BREAKPOINT)
+#	@echo Finally making $@
+#foo bar:
+#	@echo Building $@
+#
+#all.
+
+
 include gmsl
 include gmd
 
-.PHONY: all foo bar
 $(__BREAKPOINT)
-MYVAR1 = hello
-MYVAR2 = $(MYVAR1) everyone
 
-all: MYVAR3 = $(MYVAR2)
-all: foo bar
-	$(__BREAKPOINT)
-	@echo Finally making $@
-foo bar:
-	@echo Building $@
+all: foo.x bar.x
+
+%.x: FOO=foo
+%.x: %.y
+	@echo Building $@ from $<...
+
+foo.y:
+bar.y:
+
+
