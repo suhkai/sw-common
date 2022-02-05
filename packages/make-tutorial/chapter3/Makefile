@@ -1,22 +1,23 @@
-# page 78
+# page 79
+#all: foo.o bar.o
+#foo.o: foo.c
+#	$(COMPILE.C) -DDEBUG=$(DEBUG) -o $@ $<
+#bar.o: bar.c
+#	$(COMPILE.C) -o $@ $<
+
+# BEST TO RE-WRITE SIGNATURE YOURSELF, THERE IS A "PROTOTYPE" IN THE BOOK, try to understand
+# EVERY LINE
+
 include signature
 
-.PHONY: clean all
-
-all: clean foo.o bar.o
-
-clean:
-	@rm -rf *.o
-
-logger = $(info logging $1,$2,$3)
-
+all: foo.o bar.o
 foo.o: foo.c
-	$(call logger,$@,$<,$?)
-	$(COMPILE.C) -DDEBUG=$(DEBUG) -o $@ $<
+	$(call do,$$(COMPILE.C) -DDEBUG=$$(DEBUG) -o $$@ $$<)
 
 bar.o: bar.c
-	$(call logger,$@,$<,$?)
-	$(COMPILE.C) -o $@ $<
+	$(call do,$$(COMPILE.C) -o $$@ $$<)
+
+-include foo.o.sig bar.o.sig
 
 
 
@@ -24,4 +25,4 @@ bar.o: bar.c
 
 
 
-
+# DO NOT DELETE
