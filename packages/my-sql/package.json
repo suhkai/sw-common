@@ -11,7 +11,7 @@
   "author": "jacob.bogers <Jacob.Bogers@doclerholding.com>",
   "license": "ISC",
   "dependencies": {
-    "colors": "^1.4.0",
+    "colors": "1.4.0",
     "mysql": "^2.17.1",
     "mysql2": "^2.0.1",
     "tape": "^4.11.0",
