@@ -86,22 +86,16 @@ class ServerSocket extends EventEmitter {
 					self._closeEmitted = true;
 					this.emit('close');
 				}
-				if (wasListening) {
-					if (cb) {
-						defer(() => cb.call(self));
-					}
+				let err = undefined;
+				if (!wasListening){
+					err = new NetworkError('ERR_SERVER_NOT_RUNNING', '', '[ERR_SERVER_NOT_RUNNING]: Server not running');
 				}
-				else {
-					if (cb) {
-						defer(() => {
-							const err = new NetworkError('ERR_SERVER_NOT_RUNNING', '', '[ERR_SERVER_NOT_RUNNING]: Server not running');
-							cb.call(self, err)
-						})
-					}
+				if (cb){
+					defer(() => cb.call(self, err));
 				}
 			},
 			args: [cb, wasListening]
-		})
+		});
 	}
 
 	getConnections(fn) {
@@ -131,7 +125,7 @@ class ServerSocket extends EventEmitter {
 		socket._connecting = true; // a bit useless in this context but lets set it
 		socket._pending = false;
 		socket._cp = remoteSocket;
-		this._connections.add;
+		this._connections.add(socket);
 		defer(fn, false, socket); // sync
 	}
 
