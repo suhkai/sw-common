@@ -1,30 +1,32 @@
-//const http = require('http');
-const express= require('express');
-const cookie_parser = require('cookie-parser');
+var ws = require('ws')
 
-const app = express();
-const port = 3000
-app.use(cookie_parser());
 
-// order of registration of middel-ware matters
+var cookieSession = require('cookie-session')
+var express = require('express')
 
-app.get('*', (req, res, next) => {
-    console.log('app.get("*") fired');
-    next();
+var app = express()
+
+require('express-ws')(app);
+
+app.set('trust proxy', 1) // trust first proxy
+
+app.use(cookieSession({
+    name: 'session',
+    keys: ['key1']
+}))
+
+app.get('/', function (req, res, next) {
+    // Update views
+    req.session.views = (req.session.views || 0) + 1
+
+    // Write response
+    res.end(req.session.views + ' views')
+})
+
+app.ws('/echo', function (ws, req) {
+    ws.on('message', function (msg) {
+        ws.send(msg);
+    });
 });
 
-app.post('*', (req, res, next) => {
-    console.log('app.post("*") fired');
-    next();
-});
-
-app.get('/', (req, res, next) => {
-    res.send('Hello Multiverse!');
-    console.log('app.get("/")');
-    next();
-});
-
-
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
+app.listen(3000)
