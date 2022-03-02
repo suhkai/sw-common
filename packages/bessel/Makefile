@@ -1,4 +1,9 @@
 
+kbess: kb.o
+	cc -o $@ $< -lm
 
-bess_k: bess_k.c
-	$(CC) -c $(CFLAGS) $< -o $@
+kb.o: kb.c
+	cc -c kb.c
+
+
+	
