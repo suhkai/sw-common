@@ -268,6 +268,7 @@ static void K_bessel(double *x, double *alpha, int *nb,
 	    k = 1;
 	    nu -= 1.;
 	}
+	// i am here
 	twonu = nu + nu;
 	iend = *nb + k - 1;
 	c = nu * nu;
