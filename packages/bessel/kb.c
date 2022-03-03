@@ -24,10 +24,9 @@
 //#define DBL_EPSILON 2.220446049250313e-16 
 //#define ML_WARN_return_NAN { ML_WARNING(ME_DOMAIN, ""); return ML_NAN; }
 
-const static double estm[] = { 52.0583,5.7607,2.7782,14.4303,185.3004, 9.3715 };
-const static double estf[] = { 41.8341,7.1075,6.4306,42.511,1.35633,84.5096,20.};
 
-static void K_bessel(double *x, double *alpha, int *nb, bool *ize, double *bk, int *ncalc)
+
+static void K_bessel(double *x, double *alpha, int *nb, int *ize, double *bk, int *ncalc)
 {
     /*-------------------------------------------------------------------
 
@@ -147,7 +146,8 @@ static void K_bessel(double *x, double *alpha, int *nb, bool *ize, double *bk, i
 	    .16666666666666666446 };
     /*---------------------------------------------------------------------*/
    
-
+const static double estm[] = { 52.0583,5.7607,2.7782,14.4303,185.3004, 9.3715 };
+const static double estf[] = { 41.8341,7.1075,6.4306,42.511,1.35633,84.5096,20.};
     /* Local variables */
     int iend, i, j, k, m, ii, mplus1;
     double x2by4, twox, c, blpha, ratio, wminf;
@@ -161,16 +161,18 @@ static void K_bessel(double *x, double *alpha, int *nb, bool *ize, double *bk, i
     *ncalc = min0(*nb,0) - 2;
 
     if (!(*nb > 0 && (0. <= nu && nu < 1.) && (1 <= *ize && *ize <= 2))) {
+        warning("1/early abort\n");
         return;
     }
 
     if(ex <= 0 || (*ize == 1 && ex > xmax_BESS_K))
     {
+        warning("2/early abort\n");
         if(ex <= 0)
         {
             if(ex < 0)
             {
-                warning("K_bessel is out of range");
+                warning("K_bessel is out of range\n");
             } 
             for(i=0; i < *nb; i++)
             {
@@ -201,22 +203,9 @@ static void K_bessel(double *x, double *alpha, int *nb, bool *ize, double *bk, i
 	iend = *nb + k - 1;
 	c = nu * nu;
 	d3 = -c;
-
-    if (DBL_EPSILON * ex > 1.)
+    if ( ex <= 1.)
     {
-        //-------------------------------------------------
-	    //  X > 1./EPS
-	    //-------------------------------------------------
-	    *ncalc = *nb;
-	    bk1 = 1. / (M_SQRT_2dPI * sqrt(ex));
-	    for (i = 0; i < *nb; ++i)
-        {
-		    bk[i] = bk1;
-        }
-	    return;
-    }
-    else if ( ex <= 1.)
-    {
+        warning("ex=%e\n", ex);
         // ------------------------------------------------------------
 	    //   Calculation of P0 = GAMMA(1+ALPHA) * (2/X)**ALPHA
 		//	      Q0 = GAMMA(1-ALPHA) * (X/2)**ALPHA
@@ -314,10 +303,12 @@ static void K_bessel(double *x, double *alpha, int *nb, bool *ize, double *bk, i
                 ratio = twonu;
 		    }
 		    *ncalc = 1;
+            warning("jump out\n");
 		    goto L420;
 	    }
         else
         {
+            warning("w10\n");
             /* ------------------------------------------------------
             10^-10 < X <= 1.0
             ------------------------------------------------------ */
@@ -356,8 +347,23 @@ static void K_bessel(double *x, double *alpha, int *nb, bool *ize, double *bk, i
 		    wminf = estf[0] * ex + estf[1];
 	    }
     }
+    else if (DBL_EPSILON * ex > 1.)
+    {
+        warning("2/This regime\n");
+        //-------------------------------------------------
+	    //  X > 1./EPS
+	    //-------------------------------------------------
+	    *ncalc = *nb;
+	    bk1 = 1. / (M_SQRT_2dPI * sqrt(ex));
+	    for (i = 0; i < *nb; ++i)
+        {
+		    bk[i] = bk1;
+        }
+	    return;
+    }
     else // ex > 1.)
     {
+         warning("3/This regime:%e\n", ex);
         /* -------------------------------------------------------
 	       X > 1.0
 	       ------------------------------------------------------- */
@@ -513,7 +519,7 @@ L420:
 	}
 }
 
-double bessel_k(double x, double alpha, bool expo)
+double bessel_k(double x, double alpha, int expo)
 {
     if (isnan(x) || isnan(alpha))
     {
@@ -536,12 +542,14 @@ double bessel_k(double x, double alpha, bool expo)
         return E_BESSEL_K_ALLOC_MEM;
     }
 
+    printf("allocated: %ld\n", sizeof(double)*nb );
+
     int ncalc;
     K_bessel(&x, &alpha, &nb, &expo, bk, &ncalc);
 
     if(ncalc != nb)
     {/* error input */
-        if(ncalc < 0)
+            if(ncalc < 0)
         {
             warning("bessel_k(%g): ncalc (=%d) != nb (=%d); alpha=%g. Arg. out of range?\n",
 			 x, ncalc, nb, alpha);
@@ -563,8 +571,9 @@ int main(){
    // from R
    //  >besselK(0.3, 0)
    //  >[1] 1.37246
-   double answer = bessel_k(0.3, 0.0, true);
-   printf("bessel => %f\n", answer);
+   // expon scaled is either 1 (false) or 2(true) (nothing else)
+   double answer = bessel_k(0.3, 10000, 2);
+   printf("bessel => %e\n", answer);
    answer = bessel_k(NAN, 0.0, true);
    printf("bessel NaN input=> %f\n", answer);
    void *ptr = calloc(10, sizeof(int));
@@ -574,6 +583,8 @@ int main(){
    printf("sizeof double:%lu\n", sizeof(double));
    printf("sizeof long double:%lu\n", sizeof(long double));
    printf("sizeof float:%lu\n", sizeof(float));
+   double inf = INFINITY;
+   printf("INFINITY=%e\n", inf);
    free(ptr);
    return 0;
 }

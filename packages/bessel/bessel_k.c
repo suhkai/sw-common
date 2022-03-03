@@ -251,10 +251,11 @@ static void K_bessel(double *x, double *alpha, int *nb,
     *ncalc = min0(*nb,0) - 2;
     if (*nb > 0 && (0. <= nu && nu < 1.) && (1 <= *ize && *ize <= 2)) {
 	if(ex <= 0 || (*ize == 1 && ex > xmax_BESS_K)) {
-	    if(ex <= 0) {
-		if(ex < 0) ML_WARNING(ME_RANGE, "K_bessel");
-		for(i=0; i < *nb; i++)
-		    bk[i] = ML_POSINF;
+	    if(ex <= 0)
+		{
+			if(ex < 0) ML_WARNING(ME_RANGE, "K_bessel");
+			for(i=0; i < *nb; i++)
+				bk[i] = ML_POSINF;
 	    } else /* would only have underflow */
 		for(i=0; i < *nb; i++)
 		    bk[i] = 0.;
