@@ -512,8 +512,8 @@ const static double estf[] = { 41.8341,7.1075,6.4306,42.511,1.35633,84.5096,20.}
 
 L420:
 	for (i = *ncalc; i < *nb; ++i) { /* i == *ncalc */
-    if (bk[i-1] >= DBL_MAX / bk[i])
-		return;
+   // if (bk[i-1] >= DBL_MAX / bk[i])
+//		return;
     bk[i] *= bk[i-1];
     (*ncalc)++;
 	}
@@ -565,26 +565,8 @@ double bessel_k(double x, double alpha, int expo)
     return x;
 }
 
-
 // test the function
 int main(){
-   // from R
-   //  >besselK(0.3, 0)
-   //  >[1] 1.37246
-   // expon scaled is either 1 (false) or 2(true) (nothing else)
-   double answer = bessel_k(0.3, 10000, 2);
-   printf("bessel => %e\n", answer);
-   answer = bessel_k(NAN, 0.0, true);
-   printf("bessel NaN input=> %f\n", answer);
-   void *ptr = calloc(10, sizeof(int));
-   printf("sizeof long:%lu\n", sizeof(long));
-   printf("sizeof int:%lu\n", sizeof(int));
-   printf("sizeof long long:%lu\n", sizeof(long long));
-   printf("sizeof double:%lu\n", sizeof(double));
-   printf("sizeof long double:%lu\n", sizeof(long double));
-   printf("sizeof float:%lu\n", sizeof(float));
-   double inf = INFINITY;
-   printf("INFINITY=%e\n", inf);
-   free(ptr);
-   return 0;
+   double answer = bessel_k(0.3, 10, 1);
+   printf("answer%")
 }
