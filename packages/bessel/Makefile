@@ -1,8 +1,8 @@
 
-besselk: bessel_k2_standalone.o
+besselk: bessel_k_standalone.o
 	cc -o $@ $< -lm
 
-bessel_k2_standalone.o: bessel_k2_standalone.c
+bessel_k_standalone.o: bessel_k_standalone.c
 	cc -c $<
 
 

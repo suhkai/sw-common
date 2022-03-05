@@ -593,3 +593,21 @@ static void K_bessel(double * x, double * alpha, int * nb,
         }
     }
 }
+
+int main() {
+    double answer = bessel_k(0.3, 10000, 1.0 + (double) true);
+    printf("bessel => %e\n", answer);
+    answer = bessel_k(NAN, 0.0, 1 + (double) true);
+    printf("bessel NaN input=> %f\n", answer);
+    void * ptr = calloc(10, sizeof(int));
+    printf("sizeof long:%lu\n", sizeof(long));
+    printf("sizeof int:%lu\n", sizeof(int));
+    printf("sizeof long long:%lu\n", sizeof(long long));
+    printf("sizeof double:%lu\n", sizeof(double));
+    printf("sizeof long double:%lu\n", sizeof(long double));
+    printf("sizeof float:%lu\n", sizeof(float));
+    double inf = INFINITY;
+    printf("INFINITY=%e\n", inf);
+    free(ptr);
+    return 0;
+}
