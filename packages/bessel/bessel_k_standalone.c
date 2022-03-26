@@ -146,6 +146,7 @@ double bessel_k(double x, double alpha, double expo) {
     bk = (double * ) calloc(nb, sizeof(double));
     if (!bk) {
         MATHLIB_ERROR("%s", "bessel_k allocation error");
+        return;
     }
 
     K_bessel( & x, & alpha, & nb, & ize, bk, & ncalc);
