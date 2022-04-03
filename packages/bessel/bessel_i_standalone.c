@@ -62,6 +62,7 @@ static void I_bessel(double * x, double * alpha, int * nb,
     int * ize, double * bi, int * ncalc);
 
 double bessel_i(double x, double alpha, double expo) {
+
     int nb, ncalc, ize;
     double na, * bi;
 
