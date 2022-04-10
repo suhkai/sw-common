@@ -40,7 +40,8 @@
 #define xmax_BESS_K 705.342
 #define sqxmin_BESS_K 1.49e-154
 #define M_SQRT_2dPI 0.797884560802865355879892119869 // sqrt(2/pi)
-#define ME_RANGE_NAN 0x7FF8000000000001
+#define ME_NAN_RANGE_ERROR 0x7FF8000000000001
+#define ME_NAN_MEM_ALLOCATION_ERROR 0x7FF8000000000001
 
 #define min0(x, y)(((x) <= (y)) ? (x) : (y))
 #define max0(x, y)(((x) <= (y)) ? (y) : (x))
@@ -133,7 +134,7 @@ double bessel_k(double x, double alpha, double expo) {
 
     if (x < 0) {
         ML_WARNING(ME_RANGE, "bessel_k");
-        return ME_RANGE_NAN;
+        return ME_NAN_RANGE_ERROR;
     }
 
     ize = (int) expo;
@@ -146,7 +147,7 @@ double bessel_k(double x, double alpha, double expo) {
     bk = (double * ) calloc(nb, sizeof(double));
     if (!bk) {
         MATHLIB_ERROR("%s", "bessel_k allocation error");
-        return;
+        return ME_NAN_MEM_ALLOCATION_ERROR;
     }
 
     K_bessel( & x, & alpha, & nb, & ize, bk, & ncalc);
@@ -174,7 +175,7 @@ double bessel_k_ex(double x, double alpha, double expo, double * bk) {
 
     if (x < 0) {
         ML_WARNING(ME_RANGE, "bessel_k");
-        return ME_RANGE_NAN;
+        return ME_NAN_RANGE_ERROR;
     }
     ize = (int) expo;
     if (alpha < 0)

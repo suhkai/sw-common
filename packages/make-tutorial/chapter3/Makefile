@@ -20,9 +20,4 @@ bar.o: bar.c
 -include foo.o.sig bar.o.sig
 
 
-
-
-
-
-
 # DO NOT DELETE
