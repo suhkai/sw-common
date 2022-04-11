@@ -61,10 +61,12 @@ double R_pow_di(double x, int n);
 static void I_bessel(double * x, double * alpha, int * nb,
     int * ize, double * bi, int * ncalc);
 
-double bessel_i(double x, double alpha, double expo) {
+double bessel_i(double x, double alpha, bool expon_scaled) {
 
     int nb, ncalc, ize;
     double na, * bi;
+
+    const int expo = expon_scaled ? 2 : 1;
 
     // NaNs propagated correctly
     if (isnan(x) || isnan(alpha)) {

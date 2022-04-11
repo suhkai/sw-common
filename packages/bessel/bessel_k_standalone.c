@@ -31,6 +31,8 @@
 
 #include <float.h>
 
+#include <stdbool.h>
+
 #define ME_RANGE "range error"
 #define ML_WARNING(x, y) printf("%s %s\n", x, y)
 #define MATHLIB_ERROR(x, y) printf(x, y);
@@ -124,9 +126,11 @@ const static double estf[7] = {
 static void K_bessel(double * x, double * alpha, int * nb,
     int * ize, double * bk, int * ncalc);
 
-double bessel_k(double x, double alpha, double expo) {
+double bessel_k(double x, double alpha, bool expon_scaled) {
     int nb, ncalc, ize;
     double * bk;
+
+    const int expo = expon_scaled ? 1 : 2;
 
     if (isnan(x) || isnan(alpha)) {
         return x + alpha; /* NaN metainformation propagated correctly */
