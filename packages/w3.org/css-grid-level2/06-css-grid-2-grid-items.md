@@ -71,14 +71,13 @@ See svelte component `06.05-css-grid-2-z-axis-ordering.svelte`
 - else
   - automatic minimum size (min-width/max-width) = (0,0)
 
-- `content-based  minimum size` (of a grid item)
-    - = `specified size suggestion` |
-        - `transferred size suggestion` |
-          - `content size suggestion` 
-    
-- if
-  - spans only grid tracks with
-  - max track sizing function minmax(..., length % or definite)
+---
+- `content-based  minimum size` (of a grid item) is equal to:
+    - `specified size suggestion` (if exist) OR `transferred size suggestion` | (if exist) OR
+       `content size suggestion` 
+---    
+- if (in a given dimension) the grid item
+  - spans only `grid tracks` that have `fixed <max track sizing function> = minmax(..., length % or definite)`
 - then
   - `specified size suggestion`
   - `content size suggestion`
@@ -86,11 +85,10 @@ See svelte component `06.05-css-grid-2-z-axis-ordering.svelte`
   -  all above values are clamped to `stretch-fit` 
   -  (additionally) all size suggestion is clamped with `max-length`,`max-width` if definite
   
-For a content based minimum size (`content based minimim size`) will cause the box size to be indefinite, even if the width was explicitly `definite`. precentages calculated against this size will behave like auto
+For calculating an `intrinsic size of the box` (= `min-content-size`) a `content based minimum size` will cause the box size (in that axis) to be indefinite, even if the width was explicitly `definite`. precentages calculated against this size will behave like auto
 
 Note: Sizing on content is difficult for the layout engine, it has to scan all grid-items and (within grid-item nested tags) to compute min/max content. This computation can be expensive on large grids. **Better the set the width of the box through the use of a indefinite aka `font-size: 12ex`
 
-Better 
 
 
 
