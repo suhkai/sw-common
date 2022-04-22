@@ -56,8 +56,8 @@
     /**
 		understand:
 		
-		1. align-items/align-self (inline-axis alignment)
-		2. justify-items/justify-self (block-axis alignment)
+		1. align-items/align-self (cross-axis, block-axis alignment)
+		2. justify-items/justify-self: Inline-axis alignment, we dont speak of "main-axis" (a flexbox term) because it is not used there.
 		
 		// aligning the grid
 		
@@ -102,10 +102,6 @@
     grid-row: 3;
     justify-self: center;
     background: rgba(192, 0, 192, 0.2);
-    width: auto;
-    z-index: 1;
-    /*width: 100%;
-  height: 100%;*/
   }
 
   /* these are to only show the grid cells, they do not impact sizing of the grid */
