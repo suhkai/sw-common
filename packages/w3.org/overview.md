@@ -38,7 +38,10 @@
 | [resource timing level 2][resource-timing-l2]               |      |         |          |
 | [user timing][user-timing]                                  |      |         |          |
 | [image resource][image-resource]                            |      |         |          |
-
+| [High Resolution Time][high-resolution-time]                |      |         |          |
+| [Performance Timeline level 2][performance-timeline-l2]     |      |         |          |
+| [WebGPU shading langauge][webgpu-shading]                   |      |         |          |
+| [WebGPU][webgpu]                                            |      |         |          |
 
 [css-text-decor-l3]: https://www.w3.org/TR/css-text-decor-3/
 [selectors-l4]: https://www.w3.org/TR/2018/WD-selectors-4-20181121/
@@ -69,3 +72,7 @@
 [resource-timing-l2]: https://www.w3.org/TR/resource-timing-2/
 [user-timing]: https://www.w3.org/TR/user-timing/
 [image-resource]: https://www.w3.org/TR/image-resource/
+[high-resolution-time]: https://www.w3.org/TR/hr-time-3/
+[performance-timeline-l2]: https://w3c.github.io/performance-timeline/#bib-hr-time-3
+[webgpu-shading]: https://gpuweb.github.io/gpuweb/wgsl/
+[webgpu]: https://www.w3.org/TR/webgpu/
