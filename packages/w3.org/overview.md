@@ -42,7 +42,9 @@
 | [Performance Timeline level 2][performance-timeline-l2]     |      |         |          |
 | [WebGPU shading langauge][webgpu-shading]                   |      |         |          |
 | [WebGPU][webgpu]                                            |      |         |          |
+| [font level 4][webgpu]                                            |      |         |          |
 
+[font-l4]: https://drafts.csswg.org/css-fonts
 [css-text-decor-l3]: https://www.w3.org/TR/css-text-decor-3/
 [selectors-l4]: https://www.w3.org/TR/2018/WD-selectors-4-20181121/
 [overflow-l3]: https://www.w3.org/TR/2021/WD-css-overflow-3-20211223/
