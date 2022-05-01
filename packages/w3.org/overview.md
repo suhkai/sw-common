@@ -1,14 +1,11 @@
 # Reading List
 
-## Articles
-
-- [The tale of 2 viewports (part1)](https://www.quirksmode.org/mobile/viewports.html)
-- [The tale of 2 viewports (part2)](https://www.quirksmode.org/mobile/viewports2.html)
-
 ## All Standards and Drafts
 
+### already read
+
 | css module topic                                            | done | started | finished |
-| ----------------------------------------------------------- | ---- | ------- | -------- |
+|-------------------------------------------------------------|------|---------|----------|
 | [text decoration level 3][css-text-decor-l3]                | ✓    | NA      | NA       |
 | [selectors level 4][selectors-l4]                           | ✓    | NA      | NA       |
 | [overflow level 3][overflow-l3]                             | ✓    | NA      | NA       |
@@ -23,7 +20,6 @@
 | [writing modes level 3][writing-modes-l3]                   | ✓    | NA      | NA       |
 | [inline layout level 3][inline-l3]                          | ✓    | NA      | NA       |
 | [pseudo-elements level 4][pseudo-l4]                        | ✓    | NA      | NA       |
-| [template layout level 4][template-layout-l4]               |      |         |          |
 | [color level 4][color-l4]                                   | ✓    | NA      | NA       |
 | [grid level 2][grid-l2]                                     | ✓    | NA      | NA       |
 | [display level 3][display-l3]                               | ✓    | NA      | NA       |
@@ -32,17 +28,24 @@
 | [flexbox level 1][flexbox-l1]                               | ✓    | NA      | NA       |
 | [web application manifest][web-app-manifest]                | ✓    | NA      | NA       |
 | [values and units level 3][values-l3]                       | ✓    | NA      | NA       |
-| [box alignment level 3][align-l3]                           |      |         |          |
-| [box sizing level 4][sizing-l4]                             |      |         |          |
-| [color adjustment level 1][color-adjustment-l1]             |      |         |          |
-| [resource timing level 2][resource-timing-l2]               |      |         |          |
-| [user timing][user-timing]                                  |      |         |          |
-| [image resource][image-resource]                            |      |         |          |
-| [High Resolution Time][high-resolution-time]                |      |         |          |
-| [Performance Timeline level 2][performance-timeline-l2]     |      |         |          |
-| [WebGPU shading langauge][webgpu-shading]                   |      |         |          |
-| [WebGPU][webgpu]                                            |      |         |          |
-| [font level 4][webgpu]                                            |      |         |          |
+
+
+### not yet read
+
+| css module topic                                        | done (%) | started | finished |
+|---------------------------------------------------------|----------|---------|----------|
+| [template layout level 4][template-layout-l4]           |          |         |          |
+| [box alignment level 3][align-l3]                       |          |         |          |
+| [box sizing level 4][sizing-l4]                         |          |         |          |
+| [color adjustment level 1][color-adjustment-l1]         |          |         |          |
+| [resource timing level 2][resource-timing-l2]           |          |         |          |
+| [user timing][user-timing]                              |          |         |          |
+| [image resource][image-resource]                        |          |         |          |
+| [High Resolution Time][high-resolution-time]            |          |         |          |
+| [Performance Timeline level 2][performance-timeline-l2] |          |         |          |
+| [WebGPU shading langauge][webgpu-shading]               |          |         |          |
+| [WebGPU][webgpu]                                        |          |         |          |
+| [font level 4][webgpu]                                  |          |         |          |
 
 [font-l4]: https://drafts.csswg.org/css-fonts
 [css-text-decor-l3]: https://www.w3.org/TR/css-text-decor-3/
