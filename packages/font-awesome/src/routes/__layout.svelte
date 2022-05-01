@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Decorated Input Control</title>
+	<title>font-awesome-extravaganza</title>
 </svelte:head>
 
 <slot></slot>
