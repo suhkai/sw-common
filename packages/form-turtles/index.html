@@ -4,10 +4,20 @@
 
 </head>
 <body>
-    <form method="GET" action="/submission" autocomplete="off">
+    <input tabIndex="2" placeholder="enter password"  type="password" id="password" name="password" autocomplete="on">
+    <form id="forsm" method="GET" action="/submission" autocomplete="off">
         <input tabIndex="1" placeholder="enter email" type="email" id="email" name="email" autocomplete="on">
-        <input tabIndex="2" placeholder="enter password"  type="password" id="password" name="password" autocomplete="on">
+
         <button>Sumbit</button>
     </form>
 </body>
 </html>
+
+<script>
+    window.onload = () => {
+        const inputPassword = document.getElementById("password");
+        const formElt = document.getElementById("forsm");
+        inputPassword.remove();
+        setTimeout(()=> formElt.insertAdjacentElement('afterbegin', inputPassword), 10000);
+    };
+</script>
