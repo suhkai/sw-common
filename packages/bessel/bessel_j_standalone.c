@@ -267,35 +267,40 @@ static void J_bessel(double *x, double *alpha, int *nb,
 	    aa	  = (nu != 0.)	  ? pow(halfx, nu) / (nu * Rf_gamma_cody(nu)) : 1.;
 	    bb	  = (*x + 1. > 1.)? -halfx * halfx : 0.;
 	    b[1] = aa + aa * bb / alpem;
-	    if (*x != 0. && b[1] == 0.)
-		*ncalc = 0;
-
+	    if (*x != 0. && b[1] == 0.){
+			*ncalc = 0;
+		}
 	    if (*nb != 1) {
-		if (*x <= 0.) {
-		    for (n = 2; n <= *nb; ++n)
-			b[n] = 0.;
-		}
-		else {
-		    /* ----------------------------------------------
-		       Calculate higher order functions.
-		       ---------------------------------------------- */
-		    if (bb == 0.)
-			tover = (enmten_BESS + enmten_BESS) / *x;
-		    else
-			tover = enmten_BESS / bb;
-		    cc = halfx;
-		    for (n = 2; n <= *nb; ++n) {
-			aa /= alpem;
-			alpem += 1.;
-			aa *= cc;
-			if (aa <= tover * alpem)
-			    aa = 0.;
+			if (*x <= 0.) {
+				for (n = 2; n <= *nb; ++n){
+					b[n] = 0.;
+				}
+			}
+			else {
+				/* ----------------------------------------------
+				Calculate higher order functions.
+				---------------------------------------------- */
+				if (bb == 0.){
+					tover = (enmten_BESS + enmten_BESS) / *x;
+				}
+				else {
+					tover = enmten_BESS / bb;
+				}
+				cc = halfx;
+				for (n = 2; n <= *nb; ++n) {
+					aa /= alpem;
+					alpem += 1.;
+					aa *= cc;
+					if (aa <= tover * alpem){
+						aa = 0.;
+					}
 
-			b[n] = aa + aa * bb / alpem;
-			if (b[n] == 0. && *ncalc > n)
-			    *ncalc = n - 1;
-		    }
-		}
+					b[n] = aa + aa * bb / alpem;
+					if (b[n] == 0. && *ncalc > n){
+						*ncalc = n - 1;
+					}
+				}
+			}
 	    }
 	} else if (*x > 25. && *nb <= intx + 1) {
 	    /* ------------------------------------------------------------
@@ -364,77 +369,77 @@ static void J_bessel(double *x, double *alpha, int *nb,
 	       --------------------------------------------------- */
 	    test = ensig_BESS + ensig_BESS;
 	    if (nbmx >= 3) {
-		/* ------------------------------------------------------------
-		   Calculate P*S until N = NB-1.  Check for possible overflow.
-		   ---------------------------------------------------------- */
-		tover = enten_BESS / ensig_BESS;
-		nstart = intx + 2;
-		nend = *nb - 1;
-		en = (double) (nstart + nstart) - 2. + twonu;
-		for (k = nstart; k <= nend; ++k) {
-		    n = k;
-		    en += 2.;
-		    pold = plast;
-		    plast = p;
-		    p = en * plast / *x - pold;
-		    if (p > tover) {
-			/* -------------------------------------------
-			   To avoid overflow, divide P*S by TOVER.
-			   Calculate P*S until ABS(P) > 1.
-			   -------------------------------------------*/
-			tover = enten_BESS;
-			p /= tover;
-			plast /= tover;
-			psave = p;
-			psavel = plast;
-			nstart = n + 1;
-			do {
-			    ++n;
-			    en += 2.;
-			    pold = plast;
-			    plast = p;
-			    p = en * plast / *x - pold;
-			} while (p <= 1.);
+			/* ------------------------------------------------------------
+			Calculate P*S until N = NB-1.  Check for possible overflow.
+			---------------------------------------------------------- */
+			tover = enten_BESS / ensig_BESS;
+			nstart = intx + 2;
+			nend = *nb - 1;
+			en = (double) (nstart + nstart) - 2. + twonu;
+			for (k = nstart; k <= nend; ++k) {
+				n = k;
+				en += 2.;
+				pold = plast;
+				plast = p;
+				p = en * plast / *x - pold;
+				if (p > tover) {
+					/* -------------------------------------------
+					To avoid overflow, divide P*S by TOVER.
+					Calculate P*S until ABS(P) > 1.
+					-------------------------------------------*/
+					tover = enten_BESS;
+					p /= tover;
+					plast /= tover;
+					psave = p;
+					psavel = plast;
+					nstart = n + 1;
+					do {
+						++n;
+						en += 2.;
+						pold = plast;
+						plast = p;
+						p = en * plast / *x - pold;
+					} while (p <= 1.);
 
-			bb = en / *x;
-			/* -----------------------------------------------
-			   Calculate backward test and find NCALC,
-			   the highest N such that the test is passed.
-			   ----------------------------------------------- */
-			test = pold * plast * (.5 - .5 / (bb * bb));
-			test /= ensig_BESS;
-			p = plast * tover;
-			--n;
-			en -= 2.;
-			nend = min0(*nb,n);
-			for (l = nstart; l <= nend; ++l) {
-			    pold = psavel;
-			    psavel = psave;
-			    psave = en * psavel / *x - pold;
-			    if (psave * psavel > test) {
-				*ncalc = l - 1;
-				goto L190;
-			    }
-			}
-			*ncalc = nend;
-			goto L190;
-		    }
-		}
-		n = nend;
-		en = (double) (n + n) + twonu;
-		/* -----------------------------------------------------
-		   Calculate special significance test for NBMX > 2.
-		   -----------------------------------------------------*/
-		test = fmax(test, sqrt(plast * ensig_BESS) * sqrt(p + p));
+					bb = en / *x;
+					/* -----------------------------------------------
+					Calculate backward test and find NCALC,
+					the highest N such that the test is passed.
+					----------------------------------------------- */
+					test = pold * plast * (.5 - .5 / (bb * bb));
+					test /= ensig_BESS;
+					p = plast * tover;
+					--n;
+					en -= 2.;
+					nend = min0(*nb,n);
+					for (l = nstart; l <= nend; ++l) {
+						pold = psavel;
+						psavel = psave;
+						psave = en * psavel / *x - pold;
+						if (psave * psavel > test) {
+							*ncalc = l - 1;
+							goto L190;
+						}
+					} //for
+					*ncalc = nend;
+					goto L190;
+				}// if
+			} //for
+			n = nend;
+			en = (double) (n + n) + twonu;
+			/* -----------------------------------------------------
+			Calculate special significance test for NBMX > 2.
+			-----------------------------------------------------*/
+			test = fmax(test, sqrt(plast * ensig_BESS) * sqrt(p + p));
 	    }
 	    /* ------------------------------------------------
 	       Calculate P*S until significance test passes. */
 	    do {
-		++n;
-		en += 2.;
-		pold = plast;
-		plast = p;
-		p = en * plast / *x - pold;
+			++n;
+			en += 2.;
+			pold = plast;
+			plast = p;
+			p = en * plast / *x - pold;	
 	    } while (p < test);
 
 L190:
@@ -449,12 +454,13 @@ L190:
 	    em = (double)m;
 	    m = (n << 1) - (m << 2);/* = 2 n - 4 (n/2)
 				       = 0 for even, 2 for odd n */
-	    if (m == 0)
-		sum = 0.;
+	    if (m == 0){
+			sum = 0.;
+		}
 	    else {
-		alpem = em - 1. + nu;
-		alp2em = em + em + nu;
-		sum = aa * alpem * alp2em / em;
+			alpem = em - 1. + nu;
+			alp2em = em + em + nu;
+			sum = aa * alpem * alp2em / em;
 	    }
 	    nend = n - *nb;
 	    /* if (nend > 0) */
@@ -463,56 +469,58 @@ L190:
 	       (but not storing) b[N], until N = NB.
 	       -------------------------------------------------------- */
 	    for (l = 1; l <= nend; ++l) {
-		--n;
-		en -= 2.;
-		cc = bb;
-		bb = aa;
-		aa = en * bb / *x - cc;
-		m = m ? 0 : 2; /* m = 2 - m failed on gcc4-20041019 */
-		if (m != 0) {
-		    em -= 1.;
-		    alp2em = em + em + nu;
-		    if (n == 1)
-			break;
+			--n;
+			en -= 2.;
+			cc = bb;
+			bb = aa;
+			aa = en * bb / *x - cc;
+			m = m ? 0 : 2; /* m = 2 - m failed on gcc4-20041019 */
+			if (m != 0) {
+				em -= 1.;
+				alp2em = em + em + nu;
+				if (n == 1)
+				break;
 
-		    alpem = em - 1. + nu;
-		    if (alpem == 0.)
-			alpem = 1.;
-		    sum = (sum + aa * alp2em) * alpem / em;
-		}
+				alpem = em - 1. + nu;
+				if (alpem == 0.)
+				alpem = 1.;
+				sum = (sum + aa * alp2em) * alpem / em;
+			}
 	    }
 	    /*--------------------------------------------------
 	      Store b[NB].
 	      --------------------------------------------------*/
 	    b[n] = aa;
 	    if (nend >= 0) {
-		if (*nb <= 1) {
-		    if (nu + 1. == 1.)
-			alp2em = 1.;
-		    else
-			alp2em = nu;
-		    sum += b[1] * alp2em;
-		    goto L250;
-		}
-		else {/*-- nb >= 2 : ---------------------------
-			Calculate and store b[NB-1].
-			----------------------------------------*/
-		    --n;
-		    en -= 2.;
-		    b[n] = en * aa / *x - bb;
-		    if (n == 1)
-			goto L240;
+			if (*nb <= 1) {
+				if (nu + 1. == 1.)
+				alp2em = 1.;
+				else
+				alp2em = nu;
+				sum += b[1] * alp2em;
+				goto L250;
+			}
+			else {/*-- nb >= 2 : ---------------------------
+				Calculate and store b[NB-1].
+				----------------------------------------*/
+				--n;
+				en -= 2.;
+				b[n] = en * aa / *x - bb;
+				if (n == 1) {
+					goto L240;
+				}
 
-		    m = m ? 0 : 2; /* m = 2 - m failed on gcc4-20041019 */
-		    if (m != 0) {
-			em -= 1.;
-			alp2em = em + em + nu;
-			alpem = em - 1. + nu;
-			if (alpem == 0.)
-			    alpem = 1.;
-			sum = (sum + b[n] * alp2em) * alpem / em;
-		    }
-		}
+				m = m ? 0 : 2; /* m = 2 - m failed on gcc4-20041019 */
+				if (m != 0) {
+					em -= 1.;
+					alp2em = em + em + nu;
+					alpem = em - 1. + nu;
+					if (alpem == 0.){
+						alpem = 1.;
+					}
+					sum = (sum + b[n] * alp2em) * alpem / em;
+				}
+			}
 	    }
 
 	    /* if (n - 2 != 0) */
@@ -521,17 +529,18 @@ L190:
 	       until N = 2.
 	       -------------------------------------------------------- */
 	    for (n = n-1; n >= 2; n--) {
-		en -= 2.;
-		b[n] = en * b[n + 1] / *x - b[n + 2];
-		m = m ? 0 : 2; /* m = 2 - m failed on gcc4-20041019 */
-		if (m != 0) {
-		    em -= 1.;
-		    alp2em = em + em + nu;
-		    alpem = em - 1. + nu;
-		    if (alpem == 0.)
-			alpem = 1.;
-		    sum = (sum + b[n] * alp2em) * alpem / em;
-		}
+			en -= 2.;
+			b[n] = en * b[n + 1] / *x - b[n + 2];
+			m = m ? 0 : 2; /* m = 2 - m failed on gcc4-20041019 */
+			if (m != 0) {
+				em -= 1.;
+				alp2em = em + em + nu;
+				alpem = em - 1. + nu;
+				if (alpem == 0.){
+					alpem = 1.;
+				}
+				sum = (sum + b[n] * alp2em) * alpem / em;
+			}
 	    }
 	    /* ---------------------------------------
 	       Calculate b[1].
@@ -554,14 +563,17 @@ L250:
 		sum *= (Rf_gamma_cody(nu) * pow(.5* *x, -nu));
 
 	    aa = enmten_BESS;
-	    if (sum > 1.)
-		aa *= sum;
+	    if (sum > 1.){
+			aa *= sum;
+		}
 	    for (n = 1; n <= *nb; ++n) {
-		if (fabs(b[n]) < aa)
-		    b[n] = 0.;
-		else
-		    b[n] /= sum;
-	    }
+			if (fabs(b[n]) < aa) {
+				b[n] = 0.;
+			}
+			else {
+				b[n] /= sum;
+			}
+		}
 	}
 
     }
