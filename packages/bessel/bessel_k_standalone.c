@@ -130,7 +130,7 @@ double bessel_k(double x, double alpha, bool expon_scaled) {
     int nb, ncalc, ize;
     double * bk;
 
-    const int expo = expon_scaled ? 1 : 2;
+    const int expo = expon_scaled ? 2 : 1;
 
     if (isnan(x) || isnan(alpha)) {
         return x + alpha; /* NaN metainformation propagated correctly */

@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <argp.h>
-
-#include <stdlib.h>
 #include <stdio.h>
-
+#include <string.h>
+#include <stdint.h>
+#include <ctype.h>
+#include <regex.h> 
 
 
 double bessel_i(double x, double alpha, bool expon_scaled);
@@ -14,137 +14,254 @@ double bessel_j(double x, double alpha);
 double bessel_k(double x, double alpha, bool expon_scaled);
 double bessel_y(double x, double alpha);
 
-struct sequence_cli {
-      double sequence_start;
-      double sequence_end;
-      unsigned long sequence_steps;
-};
 
-/**
-  bessel --besselI -i  -xb -xe --scaled|-sc
-  bessel --besselJ -j  -xb -xe -sc
-  bessel --besselk -k  
-  bessel --besselY -y
-*/
+typedef double (*fn_3_arg)(double x, double alpha, bool scale);
+typedef double (*fn_2_arg)(double x, double alpha);
 
-const char *argp_program_bug_address = "jkfbogers@gmail.com";
-const char *argp_program_version = "version 1.0.0 © Jacob Bogers 2022";
 
-#define ERR_OVERFLOW_NAN 0x7FF8000000000002
-#define ERR_UNDERFLOW_NAN 0x7FF8000000000003
-#define ERR_USER_INIT_NAN 0x7FF8000000000004
-#define ERR_PARSE_ERROR 0x7FF8000000000005
+static char const * STR_TRUE = "TRUE";
+static char const * STR_FALSE = "FALSE";
 
-unsigned long parse_long(char *str){
-      return strtoul(str, NULL, 10);
+bool partiallyComp(char *truthy, char const * dict){
+    int len = strlen(truthy);
+    for (int s = 0; s < strlen(truthy) && s < strlen(dict); s++){
+        if (
+            toupper(dict[s]) != toupper(truthy[s])
+           ){
+            return false;
+        }
+    }   
+    return true;
 }
 
-double parse_double(char *str){
-      const double v = strtod(str, NULL);
-      // overflow
-      if (v == HUGE_VAL || v == -HUGE_VAL){
-            return ERR_OVERFLOW_NAN;
-      }
-      // underflow
-      printf("errno=%d\n", errno);
-      if (v == 0 && errno == ERANGE){
-            return ERR_PARSE_ERROR;
-      }
-      return v;
+bool isTrue(char *thruthy){
+    return partiallyComp(thruthy, STR_TRUE);
 }
 
-// 0 = fully specified
-// 1 = no options specified
-// 2 = partially specified
-int validate_sequence(const struct sequence_cli *const seq){
-      
-      int count = 0;
-
-      if (seq->sequence_start == ERR_USER_INIT_NAN){
-            count++;
-      }
-      if (seq->sequence_end == ERR_USER_INIT_NAN){
-            count++;
-      }
-      if (seq->sequence_steps == 0) {
-            count++;
-      }
-      if (count == 0) { // complete
-            return 0;
-      }
-      if (count == 3) { // sequence options untouched
-            return 1;
-      }
-      return 2; // sequence options partially specified
+bool isFalse(char *thruthy){
+    return partiallyComp(thruthy, STR_FALSE);
 }
 
-// void argp_failure (const struct argp_state *state, int status, int errnum, const char *fmt, …)
-static int parse_opt(int key, char *arg, struct argp_state *state)
-{
-      struct sequence_cli *const seq = state->input;
-      switch(key)
-      {
-            case 'b':
-                  //printf("-b option and argument [%s]\n", arg );
-                  seq->sequence_start = parse_double(arg);
-                  //printf("-b option and argument [%s] -> [%f]\n", arg, seq->sequence_start );                                 ;
-                  break;
-            case 'e':
-                  //printf("-e option and argument [%s]\n", arg );                                 ;
-                  seq->sequence_end = parse_double(arg);
-                  //printf("-e option and argument [%s] -> [%f]\n", arg, seq->sequence_end );                                 ;
-                  break;                  
-            case 'd':
-                  //printf("-d option and argument [%s]\n", arg);                                 ;
-                  seq->sequence_steps = parse_long(arg);      
-                  //printf("-d option and argument [%s] -> [%lu]\n", arg, seq->sequence_steps);                                 ;
-                  break;
-            case ARGP_KEY_ARG:
-                  //printf("ARGP_KEY_ARG (sequence) domain [%s]\n", arg);
-                  // error
-                  break;
-            case ARGP_KEY_END:
-                  // processed last argument (or no argument at all?)
-                  printf("ARGP_KEY_END (sequence) domain\n");
-                  const int result = validate_sequence(seq);
-                  printf("result of parsing cli: [%d]\n", result );
-                  break;
-      }
-      return 0;
+char getOption(char *str){
+    if (str == NULL){
+        return 0;
+    }
+    if (!(str[0] == '-' && (str[2] == '=' || str[2] == 0))){
+        return 0;
+    }
+    return str[1];
 }
 
-static struct argp_option options[] = {
-     // { "besselJ", 'j', 0, 0, "K(nu), Bessel function of the first kind", 1 },
-     // { "besselY", 'y', 0, 0, "Y(nu), Bessel function of the second kind" },
-     // { "besselI", 'i', 0, 0, "I(nu), modifed Bessel function of the first kind"},
-     // { "besselK", 'k', 0, 0, "K(nu), modifed Bessel function of the third kind" },
-     // { 0, 'x', "NUM", 0, "use singular nu value (do not use with -b, -e, -d)", 25},
-      { "begin", 'b', "NUM", 0, "start of nu domain (inclusive)", 50},
-      { "end", 'e', "NUM", 0, "end of nu domain (inclusive)"},
-      { "delta", 'd', "NUM", 0, "number of steps between -b and -e value" },
-     
-     // { "expon", 777, "'T' or 'F'", 0,"Only for I(nu) and K(nu), scale results exponentially ('T'rue or 'F'alse) default is 'F'alse"},
-      { 0 }
-};
+char *getOptionArgument(char *str){
+    if (!getOption(str)){
+        return NULL;
+    }
+    if (str[2] != '='){
+        return NULL;
+    }
+    return str+3;
+}
 
-// 0=contradiction, 
-// 1 = singular, 
-// 2 = sequence,
-// -1 = neither singular or sequence defined,
-// -2 = sequence partially defined
-// int checkSingularOrSequence()
+ bool parseScaleArgument(int nrArgs, char **cli, bool * exponentScale){
+    if (nrArgs < 1){
+        fprintf(stderr, "number of arguments for bessel is incorrect, nrArgs=[%d]\n", nrArgs + 3);
+        return false;
+    }
+    if (getOption(cli[0]) != 's'){
+        fprintf(stderr, "-s option not found\n");
+        return false;
+    }
+    char * scaleArgument = getOptionArgument(cli[0]);
 
-static struct argp argp = {
-      options,
-      parse_opt,
-      //"hello\nworld world2",
-      //"something->\velse"
-};
+    
+    if (!isTrue(scaleArgument) && !isFalse(scaleArgument)){
+        fprintf(stderr, "-s argument should have value \"true\" or \"false\", instead it is [%s]\n", scaleArgument);
+        return false;
+    }
+    *exponentScale = isTrue(scaleArgument) ? true : false;
+    //printf("scaleArgument = [%d]\n", *exponentScale);
+    return true;
+ }
 
+bool parse2Arguments(int nrArgs, char **cli, double *xStart, double *xStop,  double *xDelta, double *alpha){
+    char xstartStringData[150];
+    char * xstartStringEndPointer;
+    char xstopStringData[150];
+    char * xstopStringEndPointer;
+    char xdeltaStringData[150];
+    char * xdeltaStringEndPointer;
+    char alphaStringData[150];
+    char * alphaStringEndPointer;
+
+    if (nrArgs < 2){
+        fprintf(stderr, "number of arguments for bessel is incorrect, nrArgs=[%d]\n", nrArgs + 1);
+        return false;
+    }
+    if ( getOption(cli[0]) != 'x'){
+        fprintf(stderr, "-x argument option not found\n");
+        return false;
+    }
+
+    // parse -x option argument
+
+    char * xArguments = getOptionArgument(cli[0]);
+    
+    regex_t regex;
+    
+    int reti = regcomp(&regex, "^([^,]+),([^,]+)?,([^,]+)?$", REG_ICASE|REG_EXTENDED);
+    if (reti) {
+        fprintf(stderr, "Could not compile regex\n");
+        return -10;
+    }
+
+    regmatch_t pmatch[4];    
+
+    int status = regexec(&regex, xArguments, 4, pmatch, 0);
+    regfree(&regex);
+    if (status) {
+        char errorBuffer[150];
+        regerror(status, &regex, errorBuffer, 150); 
+        fprintf(stderr, "exec status = [%d], [%s]\n", status, errorBuffer);
+        return -11;
+    }
+    int lenXStart = pmatch[1].rm_eo-pmatch[1].rm_so;
+    int lenXStop =  pmatch[2].rm_eo-pmatch[2].rm_so;
+    int lenXDelta =  pmatch[3].rm_eo-pmatch[3].rm_so;
+
+
+
+    memcpy(xstartStringData, xArguments, lenXStart);//+pmatch[1].rm_so, pmatch[1].rm_eo-pmatch[1].rm_so);
+    xstartStringData[lenXStart] = 0;
+    
+    memcpy(xstopStringData, xArguments + pmatch[2].rm_so, lenXStop);
+    xstopStringData[lenXStop] = 0;
+    
+    memcpy(xdeltaStringData, xArguments + pmatch[3].rm_so, lenXDelta);
+    xdeltaStringData[lenXDelta] = 0;
+
+    strncpy(xdeltaStringData, xArguments+pmatch[3].rm_so, pmatch[3].rm_eo-pmatch[3].rm_so);
+       
+    printf("xArguments=[%s]\n", xArguments);
+    printf("[%d],[%d]\n", pmatch[0].rm_so, pmatch[0].rm_eo);
+    printf("[%d],[%d]\n", pmatch[1].rm_so, pmatch[1].rm_eo);
+    printf("[%d],[%d]\n", pmatch[2].rm_so, pmatch[2].rm_eo);
+    printf("[%d],[%d]\n", pmatch[3].rm_so, pmatch[3].rm_eo);
+
+    printf("xstartStringData=[%s]\n", xstartStringData);
+    printf("xstopStringData=[%s]\n", xstopStringData);
+    printf("xdeltaStringData=[%s]\n", xdeltaStringData);
+  
+
+    *xStart = strtod(xstartStringData, &xstartStringEndPointer);
+    *xStop = strtod(xstopStringData, &xstopStringEndPointer);
+    *xDelta = strtod(xdeltaStringData, &xdeltaStringEndPointer);
+
+    printf("after strtod=%.23lf,%.23lf,%.23lf\n", *xStart, *xStop, *xDelta);
+
+    
+    if (*xStop < *xStart){
+        fprintf(stderr, "Bessel cannot have an [xStop]=[%.23lf] smaller then [xStart]=[%.23lf]\n", *xStop, *xStart);
+        return false;
+    }
+
+    if (*xDelta > (*xStop - *xStart)){
+        fprintf(stderr, "Bessel cannot have an [xDelta]=[%.23lf] bigger then [xStop-xStart]=([%.23lf]-[%.23lf])=[%.23lf]\n", *xDelta, *xStop, *xStart, (*xStop-*xStart));
+        return false;
+    }
+    // parse -a option argument
+
+    if (getOption(cli[1]) != 'a'){
+         fprintf(stderr, "-a argument option not found\n");
+         return false;
+    }
+
+    char * alphaArguments = getOptionArgument(cli[1]);
+    //printf("alpha=[%s]\n",alphaArguments);
+    *alpha = strtod(alphaArguments, &alphaStringEndPointer);
+    printf("alpha=[%.23lf]\n", *alpha);
+    return true;
+}
 
 
 int main(int argc, char **argv) {
-      struct sequence_cli seq = {  ERR_USER_INIT_NAN, ERR_USER_INIT_NAN, 0 };
-      return argp_parse(&argp, argc, argv, 0, 0, &seq);
-}
 
+    fn_2_arg fn_2 = NULL;
+
+    fn_3_arg fn_3 = NULL;
+
+    if (!(argc == 4 || argc == 5)) {
+        fprintf(stderr, "Wrong number of arguments\n");
+        fflush(stderr);
+        return -1;
+    }
+    
+    /**
+        int const * x;       // pointer to constant int   (int const) * x
+        int * const x;       // constant pointer to int   int (* const x)
+        int const * const x; // constant pointer to constant int  (int const) (* const x)
+    */
+
+    // argv[1] must be 
+    // 1 "-j" besselJ, | -j -x=0,100,0.1 -a=0.23           |3+1
+    // 2 "-i" besselI  | -i -x=0,100,0.1 -a=0.23 -s=false  |4+1
+    // 3 "-y" besselY  | -y -x=0,100,0.1 -a=0.23           |3+1
+    // 4 "-k" besselK  | -k -x=0,100,0.1 -a=0.23 -s=true   |4+1
+
+    char besselType = getOption(argv[1]);
+    if (!besselType){
+        fprintf(stderr, "the first argument must be an option -j, -i, -y, -k\n");
+        return -2;
+    }
+
+    double xstart;
+    double xstop;
+    double xdelta;
+    double alpha;
+    bool  exponentScale;
+
+    switch(besselType){
+        case 'i':
+        case 'k':
+            // -1 (for argv[0]), -1 for B. option, -1 (for x) -1 for alpha
+            if (!parseScaleArgument(argc - 4, argv + 4, &exponentScale)){
+              return -6;
+            };
+            fn_3 = besselType == 'i' ? bessel_i : bessel_k;
+            fn_2 = NULL;
+        case 'y':
+        case 'j':
+           // -1 (for argv[0]), -1 for B. option, (0 for exponentScale optional, so does not count)
+           if (!parse2Arguments(argc - 2, argv + 2, &xstart, &xstop, &xdelta, &alpha)){
+              return -4;
+           }
+           if (fn_3 == NULL){
+              fn_2 = besselType == 'y' ? bessel_y : bessel_j;
+           }
+           break;
+        default:
+            fprintf(stderr, "first option should be the one of -i,-j,-y,-k\n");
+            return -3;
+    }
+
+    // now we have everything we need
+    double answ;
+    int i = 1;
+    for (double x = xstart; x <= xstop ; x+=xdelta, i++){
+        switch(besselType){
+            case 'i':
+            case 'k':
+                answ = fn_3(x, alpha, exponentScale);
+                printf("%d,%.22e,%.22e,%c,%.22e\n", i, x, alpha, exponentScale ? 't':'f', answ);
+                break;
+            case 'y':
+            case 'j':
+                answ = fn_2(x, alpha);
+                printf("%d,%.22e,%.22e,%.22e\n", i, x, alpha, answ);
+        }
+        if (x == xstop){
+            break;
+        }
+    }
+
+    return 0;
+}
