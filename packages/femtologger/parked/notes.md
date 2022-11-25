@@ -4,14 +4,14 @@
 
 ```javascript
 import ms from 'ms';
-console.log(ms(3600*1000))
+console.log(ms(3600 * 1000));
 // ->
 ```
 
 ## detection of tty and colors
 
 ```javascript
-const tty = process.stdout.tty
+const tty = process.stdout.tty;
 console.log(process.stdout.isTTY);
 console.log(process.stdout.getColorDepth());
 console.log(process.stdout.hasColors());
