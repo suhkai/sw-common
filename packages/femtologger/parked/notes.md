@@ -21,3 +21,4 @@ console.log(process.stdout.hasColors());
 
 - [link1](https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html)
 - [link2](https://pisquare.osisoft.com/s/Blog-Detail/a8r1I000000GvXBQA0/console-things-getting-24bit-color-working-in-terminals)
+- [link3](https://www.ditig.com/256-colors-cheat-sheet)
