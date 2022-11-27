@@ -2,10 +2,10 @@ function dummyFunction() {
     return getLineInfo();
 }
 
-import getLineInfo from "../getLineInfo.js";
+import getLineInfo from "../getLineInfo";
 import { basename } from 'node:path';
-import type { LineInfo } from "../getLineInfo.js";
-import { globalInfo } from './fixture.js';
+import type { LineInfo } from "../getLineInfo";
+import { globalInfo } from './fixture';
 
 
 describe('getLineInfo', () => {
@@ -17,6 +17,7 @@ describe('getLineInfo', () => {
         expect(basename(info.pathname)).toBe('getLineInfo.test.ts');
     });
     it("line info from module global", () => {
+        expect(basename(globalInfo.pathname)).toBe('fixture.ts');
         console.log(globalInfo);
         
     });

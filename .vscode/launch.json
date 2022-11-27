@@ -70,7 +70,19 @@
             "program": "${workspaceFolder}/packages/bitfinex/index.js",
             "internalConsoleOptions": "openOnSessionStart",
             "cwd": "${workspaceFolder}/packages/bitfinex/"
-        }
-    ]
-    ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "jest debug femtologger",
+            //"env": { "NODE_ENV": "test" },
+            "program": "${workspaceFolder}/packages/femtologger/node_modules/.bin/jest",
+            "console": "integratedTerminal",
+            "disableOptimisticBPs": true,
+            "cwd": "${workspaceFolder}/packages/femtologger/",
+            "windows": {
+              "program": "${workspaceFolder}/packages/femtologger/node_modules/jest/bin/jest"
+            }
+          }
+        ]
 }
