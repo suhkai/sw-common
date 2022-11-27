@@ -2,10 +2,10 @@ function dummyFunction() {
     return getLineInfo();
 }
 
-import getLineInfo from "./getLineInfo";
+import getLineInfo from "../getLineInfo.js";
 import { basename } from 'node:path';
-import type { LineInfo } from "./getLineInfo";
-import { globalInfo } from './fixture';
+import type { LineInfo } from "../getLineInfo.js";
+import { globalInfo } from './fixture.js';
 
 
 describe('getLineInfo', () => {

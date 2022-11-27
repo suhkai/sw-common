@@ -3,8 +3,9 @@ import type { LineInfo } from './getLineInfo';
 import isBrowser from './utils/isBrowser';
 import trueOrFalse from './utils/trueOrfalse';
 import isNSSelected from './utils/nsSelected';
-import { getNodeConfig, setNodeConfig} from './config';
-
+import { getNodeConfig, setNodeConfig } from './config';
+import { createColorSelector, createGetColorScheme, createOutputDevice } from './detectOutputDevice';
+import { formatToString, addDate, addTimeDiff } from './utils/formatters';
 
 // types and interfaces
 
@@ -14,11 +15,12 @@ interface Formatters {
 
 // run all inits again
 
-
 export interface NSInfo {
     enabled: boolean
     reInit: () => void
-    color: number // index into 256 palette
+    lastTime?: number
+    diff?: number
+    color?: string // undefined if it is monochrome (ansi2 color), or the color value (ansi color code or css color value)
 }
 interface Printer {
     (formatter: string, ...args: any[]): void;
@@ -33,8 +35,10 @@ interface Printer {
 }
 
 
-// globals
+// global assembly
 const nsMap = new Map<string, NSInfo>();
+const getColorScheme = createGetColorScheme(isBrowser);
+const colorPicker = createColorSelector(getColorScheme);
 
 export function evalAllNS() {
     for (const info of nsMap.values()) {
@@ -42,137 +46,238 @@ export function evalAllNS() {
     }
 }
 
-
-
 function createNs(ns: string): Printer {
 
     // closure vars
-    let nsInfo: NSInfo | undefined;
-    let lastTime: number = 0;
-    let showDate: boolean;
-    let useColors: boolean;
+    let nsInfo: NSInfo | undefined; // disclosed to "public"
+    // stored in NSInfo
+    let showDate = false;
+    let useColors = true;
+    let nsSelected = false;
+
+    // constants never change
     const web = isBrowser();
+    const regExp = /(?<!%)%(?<formatSpec>[A-Za-z])/g;
+    
 
+    // initially set but never changed afterwards
+    let selectedColor: string | undefined; // pick a unique color for this namespace
 
-    function isEnabled(): boolean {
-        showDate = false;
+    // logic
+    // because init() runs evaluateConfig()
+    //      evaluateConfig() runs evalAllNS() 
+    //          evalAllNS() runs all init() from nsMap
+    //              (stop this loop) init runs evaluateConfig()
+    let runningThisInit = false;
+
+    function evaluateConfig() {
+        let configParamsChanged = 0;
+        // run in client contect (we dont use mem cache, we use localStorage only)
         if (web) {
-            let nsSelection = isNSSelected(ns, globalThis.localStorage.getItem('DEBUG')); // namespace comma separated list
-            let hideDate = trueOrFalse(globalThis.localStorage.getItem('DEBUG_HIDE_DATE'), true);
-            useColors = trueOrFalse(globalThis.localStorage.getItem('DEBUG_COLORS'), true);
-
-            // don't use date with colors
-            if (hideDate === false) {
-                useColors = false;
+            const nsSelectedTemp = isNSSelected(ns, globalThis.localStorage.getItem('DEBUG')); // namespace comma separated list
+            if (nsSelectedTemp !== nsSelected) {
+                nsSelected = nsSelectedTemp;
+                configParamsChanged++;
             }
-            showDate = !hideDate;
-            return nsSelection;
+            const showDateTemp = !trueOrFalse(globalThis.localStorage.getItem('DEBUG_HIDE_DATE'), true);
+            if (showDateTemp !== showDate) {
+                showDate = showDateTemp;
+                configParamsChanged++;
+            }
+            const useColorsTemp = trueOrFalse(globalThis.localStorage.getItem('DEBUG_COLORS'), true);
+            if (showDateTemp === true) {
+                if (useColors !== false) {
+                    useColors = false;
+                    configParamsChanged++;
+                }
+            }
+            else if (useColorsTemp !== useColors) {
+                useColors = useColorsTemp;
+                if (useColors && selectedColor === undefined && getColorScheme() !== 'ansi2') {
+                    selectedColor = colorPicker();
+                }
+                configParamsChanged++;
+            }
+            // signal all others to check their configs, if config changed
+            if (configParamsChanged) {
+                evalAllNS();
+            }
+            return; // done
         }
         else {
-            // node, 
+            // this runs server side in nodejs
+            // 1. was it previously copied from env vars into mem?
             const config = getNodeConfig();
-            // we take from memory first
-            if (config.namespaces !== '') {
-                let nsSelection = isNSSelected(ns, config.namespaces);
+            if (config.namespaces !== '') { // yes already copied to mem, use this instead
+                const nsSelectionTemp = isNSSelected(ns, config.namespaces);
+                if (nsSelectionTemp !== nsSelected) {
+                    nsSelected = nsSelectionTemp;
+                    configParamsChanged++;
+                }
+                if (config.showDate !== showDate) {
+                    config.showDate = showDate;
+                    configParamsChanged++;
+                }
                 if (config.showDate === true) {
+                    if (useColors === true) {
+                        configParamsChanged++;
+                    }
+                    config.useColors = false;
                     useColors = false;
                 }
-                return nsSelection;
+                if (config.useColors !== useColors) {
+                    useColors = config.useColors;
+                    if (useColors && selectedColor === undefined && getColorScheme() !== 'ansi2') {
+                        selectedColor = colorPicker();
+                    }
+                    configParamsChanged++;
+                }
+                if (configParamsChanged) {
+                    evalAllNS();
+                }
+                return;
             }
-            // otherwise check env vars
-            const nsSelectionPattern = process.env['DEBUG'];
-            let nsSelection = isNSSelected(ns, process.env['DEBUG']); // namespace comma separated list
-            let hideDate = trueOrFalse(process.env['DEBUG_HIDE_DATE'], true);
-            useColors = trueOrFalse(process.env['DEBUG_COLORS'], true);
-            if (hideDate === false) {
-                useColors = false;
-            }
-            showDate = !hideDate;
-            // update cache from readonly env vars
-            setNodeConfig({ namespaces: nsSelectionPattern, showDate, useColors });
-            return nsSelection;
+            // otherwise copy env vars to mem and rerun evaluateConfig
+            const nsSelectionPatternTemp = process.env['DEBUG'];
+            // showDate is the inverse of DEBUG_HIDE_DATE
+            const showDateTemp = !trueOrFalse(process.env['DEBUG_HIDE_DATE'], true);
+            const useColorsTemp = trueOrFalse(process.env['DEBUG_COLORS'], true);
+            setNodeConfig({
+                namespaces: nsSelectionPatternTemp,
+                showDate: showDateTemp,
+                useColors: useColorsTemp
+            });
+            evaluateConfig();
         }
     }
 
     function init(): void {
-        const enabled = isEnabled();
-        nsInfo = nsMap.get(ns);
-        // first time being called
-        if (nsInfo === undefined) {
-            nsInfo = {
-                enabled,
-                reInit: () => init(),
-                color: 5 // use random color from 256 color palette
-            };
-            Object.defineProperty(nsInfo, 'color', {
-                configurable: false,
-                enumerable: true,
-                value: nsInfo.color,
-                writable: false
-            });
-            nsMap.set(ns, nsInfo);
+        // prevent circular execution, see above
+        if (runningThisInit) {
             return;
         }
-        // subsequent updates via calling "reInit"
-        if (nsInfo.enabled !== enabled) {
-            nsInfo.enabled = enabled;
+        runningThisInit = true;
+        evaluateConfig();
+        runningThisInit = false;
+
+        // first time being called?
+        if (nsInfo === undefined) { // run this section only once
+            const nsInfoTemp = nsMap.get(ns);
+            if (nsInfoTemp === undefined) {
+                nsInfo = {
+                    enabled: nsSelected,
+                    reInit: () => init(),
+                    color: selectedColor // previously selected color
+                };
+                nsMap.set(ns, nsInfo);
+            }
+            else {
+                nsInfo = nsInfoTemp; // this namespace was defined elsewhere in the code before
+            }
+            return;
         }
+        // if you are here then it is because of an "update" to config parameters
+        // subsequent calls are updates via calling "reInit" in function evalAllNS()
+        nsInfo.enabled = nsSelected;
+        nsInfo.color = selectedColor;
+        // note: we don't have to set it back to nsMap because we keep a local reference to the map value in the closure
     }
 
-
-    init();
-
-    const regExp = /(%[A-Za-z]{1})/g;
-
     function createPrinter(): Printer {
-        let diff = 0;
-        
-        function printer(formatter: string, ...args: any[]): void {
-            const now = Date.now();
-            if (lastTime > 0) {
-                diff = now - lastTime;
-            }
-            lastTime = now;
-            if (false === (nsInfo as NSInfo).enabled) {
+        const outputDevice = createOutputDevice(
+            getColorScheme, 
+            console.log,
+            addTimeDiff,
+            showDate ? addDate : undefined
+        );
+        function printer(format: string, ...args: any[]): void {
+            const lineInfo = getLineInfo();
+            console.log(lineInfo);
+            if (nsInfo === undefined){
                 return; // skip
             }
-            // use
-            // nsInfo.color
-            // interpolate
-            const matches = Array.from(formatter.matchAll(regExp));
-            if (matches.length !== args.length) {
-                throw new Error('Number of variable arguments must match number of format specifiers (%)');
+            if (nsInfo.enabled !== true){
+                return;
             }
+            const now = Date.now();
+            if (nsInfo.lastTime === undefined){
+                nsInfo.lastTime = now;
+                nsInfo.diff = 0;
+            }
+            else {
+                nsInfo.diff = now - nsInfo.lastTime;
+                nsInfo.lastTime = now;
+            }
+            // matches all % interpolates...
+            const matches = Array.from(format.matchAll(regExp));
+            // normally matches.length should be equal to ars.length, but we want to be nice
+            //  if a %s (example) is not matched by an argument then leave it as is
+            //  if there are many more arguments then "%x" format specs then ignore those arguments
+            //  NOTE: if there where no matches then still an arry is returned but EMPTY
+            if (matches.length === 0){
+                return outputDevice(ns, format, nsInfo.color, nsInfo.lastTime, nsInfo.diff);
+            }
+            const nrArguments = Math.min(matches.length, args.length); 
             const interpolated: string[] = [];
             let i = 0;
             do {
                 const start: number = i > 0 ? (matches[i - 1]?.index || 0 as number) + 2 : 0;
                 const stop: number = (matches[i]?.index) as number;
                 if (start !== stop) {
-                    interpolated.push(formatter.slice(start, stop));
+                    interpolated.push(format.slice(start, stop));
                 }
+                const regExpMatch = matches[i] as RegExpExecArray;
+                // formatSpec exist if you are here, force it to string type
+                const formatSpec = regExpMatch?.groups?.formatSpec as string;
+                interpolated.push(formatToString(formatSpec, args[i]));
                 // push stringified value from args[i] according to matches[i]  
                 i++;
-            } while (i < matches.length);
+            } while (i < nrArguments);
             // is there a piece of text after the last (%.)?
-            const last: number = (matches[matches.length]?.index as number || 0 as number) + 2;
-            if (formatter.length > last) {
-                interpolated.push(formatter.slice(last, formatter.length));
+            const last: number = (matches[nrArguments]?.index as number || 0 as number) + 2;
+            if (format.length > last) {
+                interpolated.push(format.slice(last, format.length));
             }
             const output = interpolated.join('');
+            return outputDevice(ns, format, nsInfo.color, nsInfo.lastTime, nsInfo.diff);
 
-        }; // printer object needs
-        // TODO: add these properties
-        // color: string;
-        //      specific color for this namespace
-        // diff: number;
-        //      last time this namespace was used
-        //  enabled (getter/setter)
-        //      if this namespace is enabled or not
-        // namespace of this printer
-        //      actual namespace of this printer
+        }; // printer 
+        // add some properties
+        Object.defineProperties(printer, {
+            color:{
+                get(){
+                    return nsInfo?.color;
+                },
+                writable: false,
+                enumerable: true
+            },
+            diff:{
+                get(){
+                    return nsInfo?.diff;
+                },
+                writable: false,
+                enumerable: true
+            },
+            enabled: {
+                get(){
+                    return nsInfo?.enabled
+                },
+                writable: false,
+                enumerable: true
+            },
+            lastTime:{
+                get(){
+                    return nsInfo?.lastTime
+                },
+                writable: false,
+                enumerable: true
+            }
+        })
         return printer as Printer;
     }
+
+    // start execution in this function
+    init();
     return createPrinter();
 }
 

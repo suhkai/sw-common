@@ -75,12 +75,13 @@ export function createColorSelector(getScheme: () => ColorScheme) {
 export function createOutputDevice(
     getScheme: () => ColorScheme,
     output = console.log,
+    // addTimeDiff and addDate are mutually exclusive, if addDate is defined addTimeDiff is ignored
     addTimeDiff: (diff: number) => string,
     addDate?: (ts: number) => string,
 ) {
     const colorScheme = getScheme();
 
-    return function outputDevice(ns: string, text: string, assignedColor: string, ts: number, diff: number) {
+    return function outputDevice(ns: string, text: string, assignedColor: string | undefined, ts: number, diff: number) {
         if (colorScheme === 'ansi2') {
             // just print it
             if (addDate) {
