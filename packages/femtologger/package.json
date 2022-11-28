@@ -49,7 +49,6 @@
     ]
   },
   "devDependencies": {
-    "@types/debug": "4.1.7",
     "@types/jest": "27.0.1",
     "@vercel/style-guide": "3.0.0",
     "eslint": "8.12.0",
@@ -60,8 +59,5 @@
     "ts-jest": "27.0.5",
     "ts-jest-resolver": "2.0.0",
     "typescript": "4.6.3"
-  },
-  "dependencies": {
-    "debug": "4.3.4"
   }
 }

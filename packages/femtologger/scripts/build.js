@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // @ts-check
-// console.log('start');
+
 
 import { mkdirSync, readFileSync, rmdirSync } from 'fs';
 import { writeFile } from 'fs/promises';
@@ -12,9 +12,7 @@ const DIR = './dist';
 // Delete and recreate the output directory.
 try {
   rmdirSync(DIR, { recursive: true });
-  // console.log('waypoint2');
 } catch (error) {
-  // console.log('waypoint3');
   if (error.code !== 'ENOENT') throw error;
 }
 mkdirSync(DIR);

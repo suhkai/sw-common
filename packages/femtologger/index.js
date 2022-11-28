@@ -26,7 +26,7 @@ function getGlobalCall(line){
 function getInFunctionCall(line){
 	const regExp = /^\s+at\s(.*)\s\((.*):([\d]+):([\d]+)\)$/
 	const matched = line.match(regExp);
-	console.log(matched);
+	
 	if (matched === null){
 		return undefined;
 	}
@@ -45,33 +45,6 @@ function getInFunctionCall(line){
 	  catch(err){
 		throw new Error(`internal error #002: (see ReadMe) please file an issue: [${err.message}]`);	
 	 }
-}
-
-function somefunction () {
-		const err = new Error('hello world');
-		//console.log(err.stack);
-		//console.log(err.message);
-		//console.log(Object.getOwnPropertyDescriptors(err));
-
-		// chop the error into lines
-		const lines = err.stack.split('\n');
-		//console.log(lines);
-		// called in a module global way?
-		const globalUsage =  getGlobalCall(lines[2]);
-		if (globalUsage){
-			console.log('globalUsage:',globalUsage);
-		}
-		else {
-			console.log('infncall:',getInFunctionCall(lines[2]));
-		}
-	//console.log("target", lines[2]);
-}
-
-somefunction();
-
-function anotherfunction(){
-
-	somefunction();
 }
 
 anotherfunction();

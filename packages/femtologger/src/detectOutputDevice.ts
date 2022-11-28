@@ -1,9 +1,8 @@
 
-// colors for "css" colorScheme
-
 import getColorDepth from "./utils/getColorDepth";
 import isTTY from "./utils/isTTY";
 
+// colors for "css" colorScheme
 const cssColors = [
     '#008000',
     '#808000',
@@ -63,7 +62,6 @@ export function createColorSelector(getScheme: () => ColorScheme) {
         if (colorScheme === 'ansi2') {
             return undefined; // no color, just monochrome
         }
-
         // ansi16 or ansi256
         prevColorIndex = (prevColorIndex + 1) % 16;
         if (prevColorIndex === 0) {

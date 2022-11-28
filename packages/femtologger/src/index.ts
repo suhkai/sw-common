@@ -183,8 +183,6 @@ function createNs(ns: string): Printer {
             showDate ? addDate : undefined
         );
         function printer(format: string, ...args: any[]): void {
-            //const lineInfo = getLineInfo();
-            //console.log(lineInfo);
             if (nsInfo === undefined){
                 return; // skip
             }

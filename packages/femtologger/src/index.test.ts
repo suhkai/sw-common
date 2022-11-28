@@ -12,7 +12,6 @@ describe('femto', () => {
     describe("invalied input and edge cases", () => {
         it("no namespace", async () => {
             const printer = debug('');
-            console.log(printer);
             printer('hello world');
             const printer2 = debug('some namespace');
             printer2('1 this should work');
