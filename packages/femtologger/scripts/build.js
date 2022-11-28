@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 // @ts-check
 
-
 import { mkdirSync, readFileSync, rmdirSync } from 'fs';
 import { writeFile } from 'fs/promises';
-import { join, basename } from 'path';
+import { join, relative, dirname } from 'path';
 import ts from 'typescript';
 
 const DIR = './dist';
@@ -22,12 +21,14 @@ const { config } = ts.readConfigFile('tsconfig.json', (fileName) =>
   readFileSync(fileName).toString(),
 );
 
+const sourceDir = join('src');
 const sourceFile = join('src', 'index.ts');
 
 // Build CommonJS module.
 compile([sourceFile], { module: ts.ModuleKind.CommonJS });
 
 // Build an ES2015 module and type declarations.
+
 compile([sourceFile], {
   module: ts.ModuleKind.ES2020,
   declaration: true,
@@ -45,8 +46,12 @@ function compile(files, options) {
 
   host.writeFile = (fileName, contents) => {
     const isDts = fileName.endsWith('.d.ts');
+    const relativeToSourceDir = relative(sourceDir, fileName);
+    const subDir = join(DIR, dirname(relativeToSourceDir));
 
-    let path = join(DIR, basename(fileName));
+    mkdirSync(subDir, { recursive: true});
+
+    let path = join(DIR, relativeToSourceDir);
     if (!isDts) {
       switch (compilerOptions.module) {
         case ts.ModuleKind.CommonJS: {
@@ -67,6 +72,7 @@ function compile(files, options) {
       }
     }
 
+    // writeFile from "fs/promises"
     writeFile(path, contents)
       .then(() => {
         // eslint-disable-next-line no-console
