@@ -1,5 +1,9 @@
 
 // colors for "css" colorScheme
+
+import getColorDepth from "./utils/getColorDepth";
+import isTTY from "./utils/isTTY";
+
 const cssColors = [
     '#008000',
     '#808000',
@@ -29,10 +33,10 @@ export function createGetColorScheme(isWeb: () => boolean): () => ColorScheme {
             return 'css';
         }
         // node
-        if (false === process.stdout.isTTY) {
+        if (false === isTTY()) {
             return 'ansi2';
         }
-        const depth = process.stdout.getColorDepth();
+        const depth = getColorDepth();
         switch (depth) {
             case 1:
                 return 'ansi2';
@@ -93,10 +97,26 @@ export function createOutputDevice(
             return;
         }
         if (colorScheme === 'css') {
-            output('%c%s %c%s %c+%s', assignedColor, ns, 'color:black', assignedColor, addTimeDiff(diff));
+            if (assignedColor){
+                output('%c%s %c%s %c+%s', assignedColor, ns, 'color:black', assignedColor, addTimeDiff(diff));
+            }
+            else if (addDate) {
+                output('%s %s %s', addDate(ts), ns, text);
+            }
+            else {
+                output('%s %s +%s', ns, addTimeDiff(diff));
+            }
             return
         }
         // color is 16 or 256
-        output('%s%s%s %s %s+%s%s', assignedColor, ns, '\u001b[0m', text, assignedColor, addTimeDiff(diff), '\u001b[0m');
+        if (assignedColor){
+            output('%s%s%s %s %s+%s%s', assignedColor, ns, '\u001b[0m', text, assignedColor, addTimeDiff(diff), '\u001b[0m');
+        }
+        else if (addDate) {
+            output('%s %s %s', addDate(ts), ns, text);
+        }
+        else {
+            output('%s %s +%s', ns, text, addTimeDiff(diff));
+        }
     }
 }

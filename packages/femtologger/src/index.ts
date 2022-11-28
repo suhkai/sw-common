@@ -1,17 +1,11 @@
-import getLineInfo from './getLineInfo';
-import type { LineInfo } from './getLineInfo';
+//import getLineInfo from './utils/getLineInfo';
+//import type { LineInfo } from './utils/getLineInfo';
 import isBrowser from './utils/isBrowser';
 import trueOrFalse from './utils/trueOrfalse';
 import isNSSelected from './utils/nsSelected';
 import { getNodeConfig, setNodeConfig } from './config';
 import { createColorSelector, createGetColorScheme, createOutputDevice } from './detectOutputDevice';
 import { formatToString, addDate, addTimeDiff } from './utils/formatters';
-
-// types and interfaces
-
-interface Formatters {
-    [formatter: string]: (v: any) => string;
-}
 
 // run all inits again
 
@@ -33,7 +27,6 @@ interface Printer {
     // namespace of this printer
     namespace: string;
 }
-
 
 // global assembly
 const nsMap = new Map<string, NSInfo>();
@@ -108,29 +101,28 @@ function createNs(ns: string): Printer {
             // this runs server side in nodejs
             // 1. was it previously copied from env vars into mem?
             const config = getNodeConfig();
-            if (config.namespaces !== '') { // yes already copied to mem, use this instead
+            if (config.namespaces !== undefined) { // yes already copied to mem, use this instead
                 const nsSelectionTemp = isNSSelected(ns, config.namespaces);
                 if (nsSelectionTemp !== nsSelected) {
                     nsSelected = nsSelectionTemp;
                     configParamsChanged++;
                 }
                 if (config.showDate !== showDate) {
-                    config.showDate = showDate;
+                    showDate = config.showDate;
                     configParamsChanged++;
                 }
                 if (config.showDate === true) {
                     if (useColors === true) {
                         configParamsChanged++;
                     }
-                    config.useColors = false;
                     useColors = false;
                 }
-                if (config.useColors !== useColors) {
+                else if (config.useColors !== useColors) {
                     useColors = config.useColors;
-                    if (useColors && selectedColor === undefined && getColorScheme() !== 'ansi2') {
-                        selectedColor = colorPicker();
-                    }
                     configParamsChanged++;
+                }
+                if (useColors && selectedColor === undefined && getColorScheme() !== 'ansi2') {
+                    selectedColor = colorPicker();
                 }
                 if (configParamsChanged) {
                     evalAllNS();
@@ -138,7 +130,7 @@ function createNs(ns: string): Printer {
                 return;
             }
             // otherwise copy env vars to mem and rerun evaluateConfig
-            const nsSelectionPatternTemp = process.env['DEBUG'];
+            const nsSelectionPatternTemp = process.env['DEBUG'] || null;
             // showDate is the inverse of DEBUG_HIDE_DATE
             const showDateTemp = !trueOrFalse(process.env['DEBUG_HIDE_DATE'], true);
             const useColorsTemp = trueOrFalse(process.env['DEBUG_COLORS'], true);
@@ -191,8 +183,8 @@ function createNs(ns: string): Printer {
             showDate ? addDate : undefined
         );
         function printer(format: string, ...args: any[]): void {
-            const lineInfo = getLineInfo();
-            console.log(lineInfo);
+            //const lineInfo = getLineInfo();
+            //console.log(lineInfo);
             if (nsInfo === undefined){
                 return; // skip
             }
@@ -248,28 +240,24 @@ function createNs(ns: string): Printer {
                 get(){
                     return nsInfo?.color;
                 },
-                writable: false,
                 enumerable: true
             },
             diff:{
                 get(){
                     return nsInfo?.diff;
                 },
-                writable: false,
                 enumerable: true
             },
             enabled: {
                 get(){
                     return nsInfo?.enabled
                 },
-                writable: false,
                 enumerable: true
             },
             lastTime:{
                 get(){
                     return nsInfo?.lastTime
                 },
-                writable: false,
                 enumerable: true
             }
         })

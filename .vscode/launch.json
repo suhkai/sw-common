@@ -82,6 +82,11 @@
             "cwd": "${workspaceFolder}/packages/femtologger/",
             "windows": {
               "program": "${workspaceFolder}/packages/femtologger/node_modules/jest/bin/jest"
+            },
+            "env": {
+                "DEBUG": "*",
+                "DEBUG_COLORS": "F",
+                "DEBUG_HIDE_DATE": "F"
             }
           }
         ]

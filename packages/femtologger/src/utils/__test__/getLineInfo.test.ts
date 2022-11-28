@@ -18,7 +18,5 @@ describe('getLineInfo', () => {
     });
     it("line info from module global", () => {
         expect(basename(globalInfo.pathname)).toBe('fixture.ts');
-        console.log(globalInfo);
-        
     });
 });

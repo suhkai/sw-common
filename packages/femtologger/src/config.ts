@@ -1,26 +1,32 @@
 import isBrowser from './utils/isBrowser';
 import { evalAllNS } from './index';
 
+export type NodeConfig ={
+    namespaces?: string | null
+    showDate: boolean
+    useColors: boolean
+    web: boolean
+}
 // globals
-const nodeConfig = {
-    namespaces: '', // what namespaces to show;
+const nodeConfig: NodeConfig = {
+    namespaces: undefined, // what namespaces to show;
     showDate: false,
     useColors: true,
     web: isBrowser(),
 }
 
-export function setNodeConfig(options: Partial<typeof nodeConfig>) {
+export function setNodeConfig(options: Partial<NodeConfig>) {
     let changed = 0; 
-    if (options?.namespaces && nodeConfig.namespaces !== options?.namespaces){
+    if (options.namespaces !== undefined && nodeConfig.namespaces !== options.namespaces){
         // validate namespaces before altering
         nodeConfig.namespaces = options.namespaces;
         changed++;
     }
-    if (options?.showDate && nodeConfig.showDate !== options?.showDate){
+    if (options.showDate !== undefined && nodeConfig.showDate !== options.showDate){
         nodeConfig.showDate = options.showDate;
         changed++;
     }
-    if (options?.useColors && nodeConfig.useColors !== options?.useColors){
+    if (options.useColors !== undefined && nodeConfig.useColors !== options.useColors){
         nodeConfig.useColors = options.useColors;
         changed++;
     }
@@ -30,25 +36,11 @@ export function setNodeConfig(options: Partial<typeof nodeConfig>) {
     return changed > 0;
 }
 
+export function getNodeConfig(): NodeConfig {
+    const rc = Object.create(null);
 
-export function getNodeConfig(): typeof nodeConfig {
-    const rc = {};
-    Object.defineProperties(rc, {
-        namespaces: {
-            enumerable: true,
-            writable: false,
-            value: nodeConfig.namespaces
-        },
-        showDate: {
-            enumerable: true,
-            writable: false,
-            value: nodeConfig.showDate
-        },
-        web: {
-            enumerable: true,
-            writable: false,
-            value: nodeConfig.web
-        }
-    });
-    return rc as unknown as typeof nodeConfig;
+    for (const [key, value] of Object.entries(nodeConfig)){
+        Object.defineProperty(rc, key, { enumerable: true, writable: false, value: value});
+    }
+    return rc as unknown as NodeConfig;
 }
