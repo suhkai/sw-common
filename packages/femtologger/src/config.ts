@@ -1,5 +1,5 @@
-import isBrowser from './utils/isBrowser';
-import { evalAllNS } from './index';
+import isBrowser from './utils/isBrowser.js';
+import { evalAllNS } from './index.js';
 
 export type NodeConfig ={
     namespaces?: string | null
