@@ -64,7 +64,7 @@ function compile(files, targetDIR, options) {
         case ts.ModuleKind.CommonJS: {
           // Adds backwards-compatibility for Node.js.
           // eslint-disable-next-line no-param-reassign
-          contents += `module.exports = exports.default;\nmodule.exports.default = exports.default;\n`;
+          contents += `module.exports = exports;\n`;
           // Use the .cjs file extension.
           const astTree = parse(contents, {
             ecmaVersion: 'latest',
@@ -78,8 +78,8 @@ function compile(files, targetDIR, options) {
           ); 
           // loop over all .js and change then
           for (const node of selectedNodes){
-             node.value = node.value.replace(/\..?js/,'');
-             node.raw = node.raw.replace(/\..?js/,'');
+             node.value = node.value.replace(/\..?js/,'.cjs');
+             node.raw = node.raw.replace(/\..?js/,'.cjs');
           }
           contents = generate(astTree);
           //console.log(Array.from(data));
