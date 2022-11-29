@@ -3,14 +3,14 @@
   "version": "0.0.1-alpha",
   "description": "super tiny and fast logger inspired by debug",
   "repository": "/jacobbogers/sw-common",
-  "main": "./dist/index.cjs",
+  "main": "./dist/commonjs/index.cjs",
   "type": "module",
   "exports": {
-    "import": "./dist/index.mjs",
-    "require": "./dist/index.cjs"
+    "import": "./dist/esm/index.mjs",
+    "require": "./dist/commonjs/index.cjs"
   },
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/esm/index.d.ts",
   "sideEffects": true,
   "license": "MIT",
   "engines": {
@@ -49,8 +49,10 @@
     ]
   },
   "devDependencies": {
+    "@mangos/jxpath": "1.0.13",
     "@types/jest": "27.0.1",
     "@vercel/style-guide": "3.0.0",
+    "escodegen": "2.0.0",
     "eslint": "8.12.0",
     "husky": "7.0.2",
     "jest": "27.1.1",
