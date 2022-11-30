@@ -1,4 +1,4 @@
-import getLineInfo from "../getLineInfo";
+import getLineInfo from '../getLineInfo';
 
 const globalInfo = getLineInfo();
 

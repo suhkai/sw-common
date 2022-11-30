@@ -9,10 +9,9 @@ import { parse } from 'acorn';
 import jxpath from '@mangos/jxpath';
 import { generate } from 'escodegen';
 
-
 const DIR = './dist';
 const DIR_COMMONJS = './dist/commonjs';
-const DIR_ESM = './dist/esm'
+const DIR_ESM = './dist/esm';
 
 // Delete and recreate the output directory.
 try {
@@ -20,8 +19,8 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
 }
-mkdirSync(DIR_COMMONJS, { recursive: true});
-mkdirSync(DIR_ESM, { recursive: true});
+mkdirSync(DIR_COMMONJS, { recursive: true });
+mkdirSync(DIR_ESM, { recursive: true });
 // Read the TypeScript config file.
 const { config } = ts.readConfigFile('tsconfig.json', (fileName) =>
   readFileSync(fileName).toString(),
@@ -31,14 +30,17 @@ const sourceDir = join('src');
 const sourceFile = join('src', 'index.ts');
 
 // Build CommonJS module.
-compile([sourceFile], DIR_COMMONJS, { module: ts.ModuleKind.CommonJS, declaration: false });
+compile([sourceFile], DIR_COMMONJS, {
+  module: ts.ModuleKind.CommonJS,
+  declaration: false,
+});
 
 // Build an ES2015 module and type declarations.
 
 compile([sourceFile], DIR_ESM, {
   module: ts.ModuleKind.ES2020,
   declaration: true,
-  declarationDir: './types' // this becomes ./dist/types
+  declarationDir: './types', // this becomes ./dist/types
 });
 
 /**
@@ -56,7 +58,7 @@ function compile(files, targetDIR, options) {
     const relativeToSourceDir = relative(sourceDir, fileName);
     const subDir = join(targetDIR, dirname(relativeToSourceDir));
 
-    mkdirSync(subDir, { recursive: true});
+    mkdirSync(subDir, { recursive: true });
     let path = join(targetDIR, relativeToSourceDir);
 
     if (!isDts) {
@@ -70,20 +72,20 @@ function compile(files, targetDIR, options) {
             ecmaVersion: 'latest',
             sourceType: 'module',
             ranges: true,
-            locations: false
+            locations: false,
           });
           const selectedNodes = jxpath(
-            '/**/[type=CallExpression]/callee/[type=Identifier]/[name=require]/../arguments/[type=Literal]/[value=/\..?js$/]/',
-            astTree
-          ); 
+            '/**/[type=CallExpression]/callee/[type=Identifier]/[name=require]/../arguments/[type=Literal]/[value=/..?js$/]/',
+            astTree,
+          );
           // loop over all .js and change then
-          for (const node of selectedNodes){
-             node.value = node.value.replace(/\..?js/,'.cjs');
-             node.raw = node.raw.replace(/\..?js/,'.cjs');
+          for (const node of selectedNodes) {
+            node.value = node.value.replace(/\..?js/, '.cjs');
+            node.raw = node.raw.replace(/\..?js/, '.cjs');
           }
           contents = generate(astTree);
           //console.log(Array.from(data));
-          
+
           // with jxpath we wcould do like this
           //  /**/[type=CallExpression]/callee/[type=Identifier]/[name=require]/../arguments/[type=Literal]/[value=something.js]
 
@@ -104,7 +106,7 @@ function compile(files, targetDIR, options) {
             optional: false
           }
           */
-          
+
           path = path.replace(/\.js$/, '.cjs');
           break;
         }
