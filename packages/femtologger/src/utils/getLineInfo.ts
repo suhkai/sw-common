@@ -78,19 +78,21 @@ function getInFunctionCall(errLine: string): LineInfo | never | undefined {
   }
 }
 
-function getLineInfo(): LineInfo | never {
+function getLineInfo(n?: number): LineInfo | never {
   const err = new Error('dummy');
   const lines = (err.stack || '').split('\n');
-  if (lines[2] === undefined) {
+  const n2 = n === undefined ? 2 : n;
+  if (lines[n2] === undefined) {
     throw new Error(
       `internal error #003: (see ReadMe) please file an issue: [${
         (err as unknown as Error).message
       }]`,
     );
   }
-  let info = getGlobalCall(lines[2]);
+
+  let info = getGlobalCall(lines[n2] as string);
   if (!info) {
-    info = getInFunctionCall(lines[2]);
+    info = getInFunctionCall(lines[n2] as string);
   }
   if (!info) {
     throw new Error('internal error #004: (see ReadMe) please file an issue');
