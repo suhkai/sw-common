@@ -1,6 +1,6 @@
 {
   "name": "@mangos/debug",
-  "version": "0.0.1-alpha",
+  "version": "0.0.3-alpha",
   "description": "super tiny and fast logger inspired by debug",
   "repository": "/jacobbogers/sw-common",
   "main": "./dist/commonjs/index.cjs",
@@ -22,6 +22,7 @@
   "scripts": {
     "test": "npm run test-nodejs",
     "test-nodejs": "jest --env node",
+    "test-web": "jest --env jsdom",
     "build": "node scripts/build.mjs",
     "prepublishOnly": "npm run build",
     "prettier-check": "prettier --check .",
@@ -45,7 +46,7 @@
       "prettier --ignore-unknown --write"
     ],
     "*.{js,jsx,ts,tsx}": [
-      "eslint --max-warnings=0 --fix"é
+      "eslint --max-warnings=0 --fix"
     ]
   },
   "devDependencies": {
