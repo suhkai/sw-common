@@ -1,13 +1,13 @@
-import isBrowser from './utils/isBrowser.js';
-import trueOrFalse from './utils/trueOrfalse.js';
-import isNSSelected from './utils/nsSelected.js';
-import { getNodeConfig, setNodeConfig } from './config.js';
+import isBrowser from './utils/isBrowser';
+import trueOrFalse from './utils/trueOrfalse';
+import isNSSelected from './utils/nsSelected';
+import { getNodeConfig, setNodeConfig } from './config';
 import {
   createColorSelector,
   createGetColorScheme,
   createOutputDevice,
-} from './detectOutputDevice.js';
-import { formatToString, addDate, addTimeDiff } from './utils/formatters.js';
+} from './detectOutputDevice';
+import { formatToString, addDate, addTimeDiff } from './utils/formatters';
 
 // run all inits again
 

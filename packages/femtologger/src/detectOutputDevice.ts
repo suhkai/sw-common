@@ -1,5 +1,5 @@
-import getColorDepth from './utils/getColorDepth.js';
-import isTTY from './utils/isTTY.js';
+import getColorDepth from './utils/getColorDepth';
+import isTTY from './utils/isTTY';
 
 // colors for "css" colorScheme
 const cssColors = [

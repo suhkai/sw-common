@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // @ts-check
 
-import { mkdirSync, readFileSync, rmdirSync } from 'node:fs';
+import { readdirSync, lstatSync, mkdirSync, readFileSync, rmdirSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
-import { join, relative, dirname, isAbsolute } from 'node:path';
+import { join, relative, dirname, extname, resolve } from 'node:path';
 import ts from 'typescript';
 import { parse } from 'acorn';
 import jxpath from '@mangos/jxpath';
@@ -32,8 +32,8 @@ const sourceFile = join('src', 'index.ts');
 // Build CommonJS module.
 compile([sourceFile], DIR_COMMONJS, {
   module: ts.ModuleKind.CommonJS,
+  moduleResolution: ts.ModuleResolutionKind.NodeJs,
   declaration: false,
-  allowSyntheticDefaultImports: false,
 });
 
 // Build an ES2015 module and type declarations.
@@ -56,6 +56,7 @@ function compile(files, targetDIR, options) {
 
   host.writeFile = (fileName, contents) => {
     const isDts = fileName.endsWith('.d.ts');
+
     const relativeToSourceDir = relative(sourceDir, fileName);
     const subDir = join(targetDIR, dirname(relativeToSourceDir));
 
@@ -72,10 +73,6 @@ function compile(files, targetDIR, options) {
 
       switch (compilerOptions.module) {
         case ts.ModuleKind.CommonJS: {
-          // Adds backwards-compatibility for Node.js.
-          // eslint-disable-next-line no-param-reassign
-          // contents += `module.exports = exports;\n`;
-          // Use the .cjs file extension.
           const selectedNodes = jxpath(
             '/**/[type=CallExpression]/callee/[type=Identifier]/[name=require]/../arguments/[type=Literal]/',
             astTree,
@@ -83,34 +80,10 @@ function compile(files, targetDIR, options) {
           // loop over all .js and change then
 
           for (const node of selectedNodes) {
-            node.value = node.value.replace(/\..?js/, '.cjs');
-            node.raw = node.raw.replace(/\..?js/, '.cjs');
+            node.value = resolveToFullPath(fileName, node.value, '.cjs');
           }
           contents = generate(astTree);
-          //console.log(Array.from(data));
-
-          // with jxpath we wcould do like this
-          //  /**/[type=CallExpression]/callee/[type=Identifier]/[name=require]/../arguments/[type=Literal]/[value=something.js]
-
-          /*Node {
-            type: 'CallExpression',
-            start: 10,
-            end: 33,
-            callee: Node { type: 'Identifier', start: 10, end: 17, name: 'require' },
-            arguments: [
-              Node {
-                type: 'Literal',
-                start: 18,
-                end: 32,
-                value: 'something.js',
-                raw: "'something.js'"
-              }
-            ],
-            optional: false
-          }
-          */
-
-          path = path.replace(/\.js$/, '.cjs');
+          path = extname(path) === '' ? path + '.cjs' : path.slice(0, -extname(path).length)+'.cjs';
           break;
         }
         case ts.ModuleKind.ES2020: {
@@ -119,12 +92,11 @@ function compile(files, targetDIR, options) {
             astTree,
           );
           for (const node of selectedNodes) {
-            node.value = node.value.replace(/\..?js/, '.mjs');
-            node.raw = node.raw.replace(/\..?js/, '.mjs');
+            node.value = resolveToFullPath(fileName, node.value, '.mjs');
           }
           contents = generate(astTree);
           // Use the .mjs file extension.
-          path = path.replace(/\.js$/, '.mjs');
+          path = extname(path) === '' ? path + '.mjs' : path.slice(0, -extname(path).length)+'.mjs';
           break;
         }
         default:
@@ -148,3 +120,47 @@ function compile(files, targetDIR, options) {
 
   program.emit();
 }
+
+// note: this is *.ts source code so...
+function resolveToFullPath(module, importStatement, forceExt){
+  if (!importStatement.startsWith('./') && !importStatement.startsWith('../')){
+    // dont change, this is a npm module import
+    return importStatement;
+  }
+  // possible physical location of a file
+  const candidate = resolve(dirname(module), importStatement);
+  // is it a dir ? 
+  let lstat =  { isDirectory(){ return false; } };
+  try {
+    lstat = lstatSync(candidate);
+  }
+  catch(err){
+     // nothing
+  }
+
+  if (lstat.isDirectory()) {
+    // try index import
+    const dirEntries = readdirSync(candidate);
+    let indexFileExists = '';
+    for (const dirEntry of dirEntries){
+       if (dirEntry === 'index.ts'){
+        indexFileExists = dirEntry;
+        break;
+       }
+    }
+    if (!indexFileExists){
+      throw new Error(`file does not exist: ${join(candidate,'index.ts')}`);
+    }
+    return importStatement + '/index' + forceExt;
+  }
+  // strip optionally the extension
+  const ext = extname(candidate);
+  const fileNameWithTSExt = (ext === '' ? candidate : candidate.slice(0, -ext.length)) + '.ts';
+  lstat = lstatSync(fileNameWithTSExt);
+  if (!lstat.isFile()){
+    throw new Error(`file does not exist: ${fileNameWithTSExt}`);
+  }
+  // must return without extension 
+  return (ext === '' ? importStatement : importStatement.slice(0, -ext.length)) + forceExt;
+}
+
