@@ -12,7 +12,7 @@ describe('getLineInfo', () => {
     const info = dummyFunction();
     expect(info.fnName).toBe('dummyFunction');
     expect(info.line).toBe(2);
-    expect(info.column).toBe(23);
+    expect(info.column).toBe(21);
     expect(basename(info.pathname)).toBe('getLineInfo.test.ts');
   });
   it('line info from module global', () => {

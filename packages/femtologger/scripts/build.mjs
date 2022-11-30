@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // @ts-check
 
-import { mkdirSync, readFileSync, rmdirSync } from 'fs';
-import { writeFile } from 'fs/promises';
-import { join, relative, dirname } from 'path';
+import { mkdirSync, readFileSync, rmdirSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
+import { join, relative, dirname, isAbsolute } from 'node:path';
 import ts from 'typescript';
 import { parse } from 'acorn';
 import jxpath from '@mangos/jxpath';
@@ -33,6 +33,7 @@ const sourceFile = join('src', 'index.ts');
 compile([sourceFile], DIR_COMMONJS, {
   module: ts.ModuleKind.CommonJS,
   declaration: false,
+  allowSyntheticDefaultImports: false,
 });
 
 // Build an ES2015 module and type declarations.
@@ -62,23 +63,25 @@ function compile(files, targetDIR, options) {
     let path = join(targetDIR, relativeToSourceDir);
 
     if (!isDts) {
+      const astTree = parse(contents, {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ranges: true,
+        locations: false,
+      });
+
       switch (compilerOptions.module) {
         case ts.ModuleKind.CommonJS: {
           // Adds backwards-compatibility for Node.js.
           // eslint-disable-next-line no-param-reassign
-          contents += `module.exports = exports;\n`;
+          // contents += `module.exports = exports;\n`;
           // Use the .cjs file extension.
-          const astTree = parse(contents, {
-            ecmaVersion: 'latest',
-            sourceType: 'module',
-            ranges: true,
-            locations: false,
-          });
           const selectedNodes = jxpath(
-            '/**/[type=CallExpression]/callee/[type=Identifier]/[name=require]/../arguments/[type=Literal]/[value=/..?js$/]/',
+            '/**/[type=CallExpression]/callee/[type=Identifier]/[name=require]/../arguments/[type=Literal]/',
             astTree,
           );
           // loop over all .js and change then
+
           for (const node of selectedNodes) {
             node.value = node.value.replace(/\..?js/, '.cjs');
             node.raw = node.raw.replace(/\..?js/, '.cjs');
@@ -111,6 +114,15 @@ function compile(files, targetDIR, options) {
           break;
         }
         case ts.ModuleKind.ES2020: {
+          const selectedNodes = jxpath(
+            '/**/[type=ImportDeclaration]/source/',
+            astTree,
+          );
+          for (const node of selectedNodes) {
+            node.value = node.value.replace(/\..?js/, '.mjs');
+            node.raw = node.raw.replace(/\..?js/, '.mjs');
+          }
+          contents = generate(astTree);
           // Use the .mjs file extension.
           path = path.replace(/\.js$/, '.mjs');
           break;

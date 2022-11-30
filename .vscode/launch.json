@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "femtologger build script",
-            "program": "${workspaceFolder}/packages/femtologger/scripts/build.js",
+            "program": "${workspaceFolder}/packages/femtologger/scripts/build.mjs",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -14,8 +14,6 @@
             "type": "node",
             "cwd": "${workspaceFolder}/packages/femtologger"
         },
-    
-
         {
             "type": "java",
             "name": "(Debug) Java Program",

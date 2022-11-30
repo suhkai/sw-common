@@ -22,7 +22,7 @@
   "scripts": {
     "test": "npm run test-nodejs",
     "test-nodejs": "jest --env node",
-    "build": "node scripts/build.js",
+    "build": "node scripts/build.mjs",
     "prepublishOnly": "npm run build",
     "prettier-check": "prettier --check .",
     "type-check": "tsc --noEmit",

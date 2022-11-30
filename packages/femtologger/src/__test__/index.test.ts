@@ -1,4 +1,4 @@
-import { debug } from './index';
+import { debug } from '../index';
 
 jest.setTimeout(10e3);
 
