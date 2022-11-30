@@ -9,6 +9,12 @@ import {
 } from './detectOutputDevice';
 import { formatToString, addDate, addTimeDiff } from './utils/formatters';
 
+import type { LineInfo } from './utils/getLineInfo';
+import getLineInfo from './utils/getLineInfo';
+
+export { type LineInfo };
+export { getLineInfo };
+
 // run all inits again
 
 export interface NSInfo {
@@ -18,7 +24,7 @@ export interface NSInfo {
   diff?: number;
   color?: string; // undefined if it is monochrome (ansi2 color), or the color value (ansi color code or css color value)
 }
-interface Printer {
+export interface Printer {
   (formatter: string, ...args: any[]): void;
   // assigned color
   color: string;
@@ -295,4 +301,5 @@ function createNs(ns: string): Printer {
 }
 
 export { createNs as debug };
+export { setNodeConfig, getNodeConfig };
 export default createNs;
