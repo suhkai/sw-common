@@ -1,5 +1,5 @@
 {
-  "name": "femtologger",
+  "name": "@mangos/debug",
   "version": "0.0.1-alpha",
   "description": "super tiny and fast logger inspired by debug",
   "repository": "/jacobbogers/sw-common",
@@ -14,7 +14,7 @@
   "sideEffects": true,
   "license": "MIT",
   "engines": {
-    "node": ">=12.13"
+    "node": ">=16.18.1"
   },
   "files": [
     "dist"
