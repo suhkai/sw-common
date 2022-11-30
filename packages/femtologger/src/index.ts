@@ -12,7 +12,7 @@ import { formatToString, addDate, addTimeDiff } from './utils/formatters';
 import type { LineInfo } from './utils/getLineInfo';
 import getLineInfo from './utils/getLineInfo';
 
-export { type LineInfo };
+export type { LineInfo };
 export { getLineInfo };
 
 // run all inits again

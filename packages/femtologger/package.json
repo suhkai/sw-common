@@ -1,6 +1,6 @@
 {
   "name": "@mangos/debug",
-  "version": "0.0.5-alpha",
+  "version": "0.0.6-alpha",
   "description": "super tiny and fast logger inspired by debug",
   "repository": "/jacobbogers/sw-common",
   "main": "./dist/commonjs/index.cjs",
