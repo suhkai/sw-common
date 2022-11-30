@@ -10,17 +10,47 @@ export default function isNSSelected(
   ) {
     return false;
   }
-  // TODO: rules to match namespaces
-  // for now only return true (all ns are enabled)
-  // 1. wildcard '*' everything is allowed
-  // 2. comma separated list (can contain wildcards)
-  // 2. prefix '-' means NOT equal to specified patter
 
-  // scan for cvs list (no commas means 1 item)
-  //   list: "-*, hello-word" -> means  disable everything (?) and allow for hello world, means don't show anything
-  //  data* -> compiles to /^data.*$/
-  //  hello Mr *, how are you -> compiles to /^hello Mr .*, how are you$/
-  //  -hello* -> compiles to /^hello.*$/ but should match negatively
+  let enabled = false;
 
-  return true;
+  const expressions = pattern
+    .split(',')
+    .map((t) => t.trim())
+    .filter((f) => !!f);
+
+  for (const expr of expressions) {
+    let not = 0;
+    // from the more general to the more specific
+    //match everything
+    if (expr === '*') {
+      enabled = true;
+      continue;
+    }
+    // be more selective
+    if (expr.startsWith('-')) {
+      not = 1;
+    }
+    const match1 = expr.slice(not).match(/^(?<prefix>[^*]+)\*$/); // "*" prefixed with some text
+    if (match1) {
+      const prefix = match1.groups?.prefix as string;
+      if (ns.startsWith(prefix)) {
+        enabled = not === 0 ? true : false; // only a match can (re)set it to explicit false if there is an explicit "NOT" used
+        continue;
+      }
+    }
+
+    const match2 = expr.slice(not).match(/^\*(?<suffix>[^*]+)$/); // "*" suffixed with some text
+    if (match2) {
+      const suffix = match2.groups?.suffix as string;
+      if (ns.endsWith(suffix)) {
+        enabled = not === 0 ? true : false; // only a match can (re)set it to explicit false if there is an explicit "NOT" used
+        continue;
+      }
+    }
+
+    if (expr.slice(not) === ns) {
+      enabled = not === 0 ? true : false;
+    }
+  }
+  return enabled;
 }

@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 // @ts-check
 
-import { readdirSync, lstatSync, mkdirSync, readFileSync, rmdirSync } from 'node:fs';
+import {
+  readdirSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  rmdirSync,
+} from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { join, relative, dirname, extname, resolve } from 'node:path';
 import ts from 'typescript';
@@ -83,7 +89,10 @@ function compile(files, targetDIR, options) {
             node.value = resolveToFullPath(fileName, node.value, '.cjs');
           }
           contents = generate(astTree);
-          path = extname(path) === '' ? path + '.cjs' : path.slice(0, -extname(path).length)+'.cjs';
+          path =
+            extname(path) === ''
+              ? path + '.cjs'
+              : path.slice(0, -extname(path).length) + '.cjs';
           break;
         }
         case ts.ModuleKind.ES2020: {
@@ -96,7 +105,10 @@ function compile(files, targetDIR, options) {
           }
           contents = generate(astTree);
           // Use the .mjs file extension.
-          path = extname(path) === '' ? path + '.mjs' : path.slice(0, -extname(path).length)+'.mjs';
+          path =
+            extname(path) === ''
+              ? path + '.mjs'
+              : path.slice(0, -extname(path).length) + '.mjs';
           break;
         }
         default:
@@ -122,45 +134,51 @@ function compile(files, targetDIR, options) {
 }
 
 // note: this is *.ts source code so...
-function resolveToFullPath(module, importStatement, forceExt){
-  if (!importStatement.startsWith('./') && !importStatement.startsWith('../')){
+function resolveToFullPath(module, importStatement, forceExt) {
+  if (!importStatement.startsWith('./') && !importStatement.startsWith('../')) {
     // dont change, this is a npm module import
     return importStatement;
   }
   // possible physical location of a file
   const candidate = resolve(dirname(module), importStatement);
-  // is it a dir ? 
-  let lstat =  { isDirectory(){ return false; } };
+  // is it a dir ?
+  let lstat = {
+    isDirectory() {
+      return false;
+    },
+  };
   try {
     lstat = lstatSync(candidate);
-  }
-  catch(err){
-     // nothing
+  } catch (err) {
+    // nothing
   }
 
   if (lstat.isDirectory()) {
     // try index import
     const dirEntries = readdirSync(candidate);
     let indexFileExists = '';
-    for (const dirEntry of dirEntries){
-       if (dirEntry === 'index.ts'){
+    for (const dirEntry of dirEntries) {
+      if (dirEntry === 'index.ts') {
         indexFileExists = dirEntry;
         break;
-       }
+      }
     }
-    if (!indexFileExists){
-      throw new Error(`file does not exist: ${join(candidate,'index.ts')}`);
+    if (!indexFileExists) {
+      throw new Error(`file does not exist: ${join(candidate, 'index.ts')}`);
     }
     return importStatement + '/index' + forceExt;
   }
   // strip optionally the extension
   const ext = extname(candidate);
-  const fileNameWithTSExt = (ext === '' ? candidate : candidate.slice(0, -ext.length)) + '.ts';
+  const fileNameWithTSExt =
+    (ext === '' ? candidate : candidate.slice(0, -ext.length)) + '.ts';
   lstat = lstatSync(fileNameWithTSExt);
-  if (!lstat.isFile()){
+  if (!lstat.isFile()) {
     throw new Error(`file does not exist: ${fileNameWithTSExt}`);
   }
-  // must return without extension 
-  return (ext === '' ? importStatement : importStatement.slice(0, -ext.length)) + forceExt;
+  // must return without extension
+  return (
+    (ext === '' ? importStatement : importStatement.slice(0, -ext.length)) +
+    forceExt
+  );
 }
-
