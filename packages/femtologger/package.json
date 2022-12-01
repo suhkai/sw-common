@@ -1,6 +1,6 @@
 {
   "name": "@mangos/debug",
-  "version": "0.0.8-alpha",
+  "version": "0.0.9-alpha",
   "description": "super tiny and fast logger inspired by debug",
   "repository": {
       "type": "git",
@@ -12,7 +12,6 @@
     "import": "./dist/esm/index.mjs",
     "require": "./dist/commonjs/index.cjs"
   },
-  "module": "./dist/esm/index.mjs",
   "types": "./dist/types/index.d.ts",
   "sideEffects": true,
   "license": "MIT",
