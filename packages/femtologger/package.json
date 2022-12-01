@@ -1,9 +1,8 @@
 {
   "name": "@mangos/debug",
-  "version": "0.0.6-alpha",
+  "version": "0.0.7-alpha",
   "description": "super tiny and fast logger inspired by debug",
-  "repository": "/jacobbogers/sw-common",
-  "main": "./dist/commonjs/index.cjs",
+  "repository": "/jacobbogers/sw-common/femtologger",
   "type": "module",
   "exports": {
     "import": "./dist/esm/index.mjs",
@@ -17,7 +16,9 @@
     "node": ">=16.18.1"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "license.md"
   ],
   "scripts": {
     "test": "npm run test-nodejs",

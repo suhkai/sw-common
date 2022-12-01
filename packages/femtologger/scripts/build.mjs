@@ -40,6 +40,7 @@ compile([sourceFile], DIR_COMMONJS, {
   module: ts.ModuleKind.CommonJS,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
   declaration: false,
+  sourceMap: false,
 });
 
 // Build an ES2015 module and type declarations.
@@ -48,6 +49,7 @@ compile([sourceFile], DIR_ESM, {
   module: ts.ModuleKind.ES2020,
   declaration: true,
   declarationDir: './types', // this becomes ./dist/types
+  sourceMap: false,
 });
 
 /**
