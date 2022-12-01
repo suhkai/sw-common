@@ -1,8 +1,12 @@
 {
   "name": "@mangos/debug",
-  "version": "0.0.7-alpha",
+  "version": "0.0.8-alpha",
   "description": "super tiny and fast logger inspired by debug",
-  "repository": "/jacobbogers/sw-common/femtologger",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/jacobbogers/sw-common.git",
+      "directory": "packages/femtologger"
+  },
   "type": "module",
   "exports": {
     "import": "./dist/esm/index.mjs",
