@@ -257,6 +257,57 @@ function createNs(ns: string): Printer {
         interpolated.push(format.slice(last, format.length));
       }
       const output = interpolated.join('');
+      // here we can intercept and create a throttler
+      // use the whole output itself as a key (for now)
+      // TODO: scenarios
+      // 1.
+      // TIME     (In the same microtask)
+      // +
+      // |      LOG START
+      // |
+      // |
+      // |      SOME LONG RUNNING PROCESS (NO LOGS GENERATED)
+      // |
+      // v      LOG STOP
+      //
+      //  This can only be handled if the evaluation is outside
+      //  this microtask running in parallel (Web-workers?)
+      // 2.
+      // TIME     (In the same microtask)
+      // +
+      // |      LOG START
+      // |
+      // |      FOR ....
+      // |
+      // |         LOG SOMETHING (LOTS OF LOGS GENERATED)
+      // |
+      // v      LOG STOP
+      //
+      // We have opportunity to handle this within the micro task itself, but it is not ideal
+      // there may be pauses between huge log bursts and without some time based cleanup we cannot
+      // flush logs at the tail end of a burst
+      //
+      // 3.
+      // TIME     (Spanning several microtasks/microtasks)
+      // |      LOG START
+      // |
+      // |      FOR....
+      // |
+      // |         AWAIT...
+      // |         LOG SOMETHING (LOGS SPREAD OVER MICROTASK/MACROTASKS)
+      // |
+      // v      LOG STOP
+      //
+      // This we can solve with a combination of setTimeout and
+      // a solution of cleaning up logs within a single microtask
+
+      // Conclusion:
+      // Only scenario (1) would need a true parallel process to collapse logs
+      // Scenario 2 might miss the tail end of a collapse if we only use collapse within a microtask
+      //   //-> combining it with an macrotask based cleanup will only work partially, we will need to wait till
+      //    a microtask/macrotask is finished to see the tail of the batch of logs
+      // Scenario 3 will work well if we have cleanup with a microtask and macrotask combined
+      //   // -> (although problems described in Scenario 2 will not be solved)
       return outputDevice(
         ns,
         output,
