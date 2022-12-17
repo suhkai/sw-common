@@ -1,3 +1,5 @@
+packages/test-femtologger
+
 #distribution dirs
 dist/
 package-lock.json
