@@ -1,3 +1,8 @@
+blender tutorials
+https://www.youtube.com/@LevelPixelLevel/videos
+https://www.youtube.com/@TheRoyalSkies/playlists
+
+
 // https://hackernoon.com/building-and-publishing-a-module-with-typescript-and-rollup-js-faa778c85396
 // ^this one looks good
 // following https://github.com/Microsoft/TypeScript-Babel-Starter#using-rollup
