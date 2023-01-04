@@ -1,7 +1,7 @@
 import isBrowser from './utils/isBrowser';
 import trueOrFalse from './utils/trueOrfalse';
 import isNSSelected from './utils/nsSelected';
-import { getNodeConfig, setNodeConfig } from './config';
+import { getConfig, setConfig } from './config';
 import {
   createColorSelector,
   createGetColorScheme,
@@ -117,7 +117,7 @@ function createNs(ns: string): Printer {
     } else {
       // this runs server side in nodejs
       // 1. was it previously copied from env vars into mem?
-      const config = getNodeConfig();
+      const config = getConfig();
       if (config.namespaces !== undefined) {
         // yes already copied to mem, use this instead
         const nsSelectionTemp = isNSSelected(ns, config.namespaces);
@@ -155,7 +155,7 @@ function createNs(ns: string): Printer {
       // showDate is the inverse of DEBUG_HIDE_DATE
       const showDateTemp = !trueOrFalse(process.env['DEBUG_HIDE_DATE'], true);
       const useColorsTemp = trueOrFalse(process.env['DEBUG_COLORS'], true);
-      setNodeConfig({
+      setConfig({
         namespaces: nsSelectionPatternTemp,
         showDate: showDateTemp,
         useColors: useColorsTemp,
@@ -352,5 +352,5 @@ function createNs(ns: string): Printer {
 }
 
 export { createNs as debug };
-export { setNodeConfig, getNodeConfig };
+export { setConfig, getConfig };
 export default createNs;
