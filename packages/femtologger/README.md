@@ -69,13 +69,13 @@ env DEBUG=* node index.js
 | printer   | a instance of a logger scoped by a namespace name on creation of the printer |
 | namespace | a human identifiable name partitioning logging in your program               |
 
-### Namespaces
+### Namespace & Printer
 
-A logger is always associated with a namespace, and is created via the function `debug`.
+A printer is always associated with a namespace, and is created via the function `debug`.
 
-A logger is of an implementation of interface `Printer`.
+A printer is an implementation of interface `Printer`.
 
-How to create a logger
+How to create a printer
 
 ```typescript
 function debug(ns: string): Printer;
@@ -107,7 +107,7 @@ Properties on `Printer`:
 
 **NOTE**: The single namespace can have multiple `Printer` instances, they all refer to the same `Printer`.
 
-_index.mjs_
+_index.js_
 
 ```typescript
 import debug from '@mango/debug';
@@ -131,64 +131,159 @@ assert(printer1.namespace === printer2.namespace);
 <div>output:</div>
 <img src="./screenshot-02.png" style="width: calc( 382px * 0.7 ); height: calc( 103px * 0.7 ); image-rendering: pixelated;">
 
-### Configuration
+## Configuration
 
-#### During runtime
+### `DEBUG`
 
-Configure enable/disable of logging via `setConfig`. You can always change the configuration at runtime after specifying it via environment variables (node) or `localStorage` (web)
+specify as:
+
+- shell environment variable `DEBUG`
+- entry in localStorage in `window.localStorage.setItem("DEBUG", "*,-queue")`
+
+Contains a list of comma separated names or patterns of namespaces to allow logging for.
+
+| value | description                                                  |
+| ----- | ------------------------------------------------------------ |
+| `*`   | wildcard:                                                    |
+|       | `*` matches everything                                       |
+|       | `worker*` matches namespaces starting with `worker`          |
+|       | `*.disk` matches namespaces ending with `.disk`              |
+| `-`   | negation:                                                    |
+|       | `-accounts` does not match namespaces ending with `accounts` |
+
+Example: allow all logging for all namespaces, except the ones ending with "accounts"
+
+```bash
+env DEBUG="*,-accounts" node index.js
+```
+
+#### Runtime override (web)
+
+Change the value of `DEBUG` in localStorage and call the function `evalAllNS()` to re-evaluate the enabling of all existing printers.
+
+```typescript
+import { evalAllNS } from '@mango/debug';
+
+window.localStorage.setItem('DEBUG', '*,-login'); // or do this manually in dev console
+// must call this afterwards to effect changes
+evalAllNS(); // re-evaluate currently existing Printers/Namespaces
+```
+
+#### Runtime override (node)
+
+The `DEBUG` environment variable value is copied to an internal state at process startup. This internal value can be changed via `setConfig`
+
+```typescript
+import { setConfig } from '@mango/debug';
+
+setConfig({ namespaces: '*,!-blog123' }); //this will override the value of "DEBUG".
+```
+
+### `DEBUG_COLORS`
+
+Printers should use ansi colors (tty) or css colors (web dev console)
+
+specify as:
+
+- shell environment variable `DEBUG_COLORS`
+- entry in localStorage in `window.localStorage.setItem("DEBUG_COLORS", "F")`
+
+the value is a boolean string
+
+Value will be regarded as true if it matches **case insensitive** comparison `"T"`, `"TRUE"` and false if it matches **case insensitive** comparison `"F"`, `"FALSE"`.
+
+If `DEBUG_HIDE_DATE` is false, setting this value will have no effect.
+
+The default value of `DEBUG_COLORS` will be taken as "true".
+
+#### Runtime override (web)
+
+Change the value of `DEBUG_COLORS` in localStorage and call the function `evalAllNS()` to re-evaluate the enabling of all existing printers.
+
+```typescript
+import { evalAllNS } from '@mango/debug';
+
+window.localStorage.setItem('DEBUG_COLORS', 'F'); // or do this manually in dev console
+
+// must call this afterwards to effect changes
+evalAllNS(); // re-evaluate currently existing Printers/Namespaces
+```
+
+#### Runtime override (node)
+
+The `DEBUG_COLORS` environment variable value is copied to an internal state at process startup. This internal value can be changed via `setConfig`.
+
+```typescript
+import { setConfig } from '@mango/debug';
+
+setConfig({ useColors: false }); //this will override the value of "DEBUG_COLORS".
+```
+
+### `DEBUG_HIDE_DATE`
+
+Printers should prefix any logging line with an ISO 8601 string.
+
+specify as:
+
+- shell environment variable `DEBUG_HIDE_DATEZ`
+- entry in localStorage in `window.localStorage.setItem("DEBUG_HIDE_DATE", "F")`
+
+the value is a boolean string
+
+Value will be regarded as true if it matches **case insensitive** comparison `"T"`, `"TRUE"` and false if it matches **case insensitive** comparison `"F"`, `"FALSE"`.
+
+#### Runtime override (web)
+
+Change the value of `DEBUG_HIDE_DATE` in localStorage and call the function `evalAllNS()` to re-evaluate the enabling of all existing printers.
+
+```typescript
+import { evalAllNS } from '@mango/debug';
+
+window.localStorage.setItem('DEBUG_HIDE_DATE', 'F'); // or do this manually in dev console
+
+// must call this afterwards to effect changes
+evalAllNS(); // re-evaluate currently existing Printers/Namespaces
+```
+
+#### Runtime override (node)
+
+The `DEBUG_HIDE_DATE` environment variable value is copied to an internal state at process startup. This internal value can be changed via `setConfig`.
+
+```typescript
+import { setConfig } from '@mango/debug';
+
+// equal to DEBUG_HIDE_DATE=true
+setConfig({ showDate: false }); //this will override the value of "DEBUG_COLORS".
+```
+
+#### Query actively used config
+
+Use the function `getConfig` to query the actively used config, (including runtime overrides)
 
 ```typescript
 type Config = {
-  namespaces: string; // what namespaces to show;
-  showDate: boolean;
-  useColors: boolean;
-  web: boolean;  // not used when setting config variables
+  namespaces: string; // see DEBUG
+  showDate: boolean; // see DEBUG_HIDE_DATE
+  useColors: boolean; // see DEBUG_COLORS
+  web: boolean;
 };
 
-function setConfig(options: Partial<Omit<Config, 'web'>>): boolean;
 function getConfig(): Config;
 ```
-
-Arguments:
-- options.namespaces: specify namespaces to activate logging for, see [ns patterns]().
-- options.showDate: prefix log line with ISO 8601 string
-- options.useColors: use ansi or css colors
-- options.web: does not exist on argument to `setConfig` will be returned by `getConfig`
 
 Example:
 
 ```typescript
-import debug from '@mango/debug';
+import { setConfig, getConfig } from '@mango/debug';
 
-const printer = debug('worker1234');
+setConfig({ namespace: 'worker*' });
 
-setConfig({ namespaces: null});
-printer('you will NOT see this line');
-
-setConfig({ namespaces: 'worker*' });
-printer('you will see this line');
-```
-
-
-
-DEBUG
-DEBUG_HIDE_DATE
-DEBUG_COLORS
-
-export interface Printer {
-(formatter: string, ...args: any[]): void;
-// assigned color
-color: string;
-// time difference for this printer
-diff: number;
-// enabled (getter/setter)
-enabled: boolean;
-// namespace of this printer
-namespace: string;
-}
-
-function getLineInfo(n = 2): LineInfo | never {
-
-```
-
+getConfig();
+// ->
+// {
+//  namespaces: 'worker*',
+//  showDate: false,
+//  useColors: true,
+//  web: false
+// }
 ```
