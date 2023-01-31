@@ -1,6 +1,21 @@
 const canvas = document.querySelector("canvas.mycanvas");
 const ctx = canvas.getContext("2d");
 ctx.clearRect(0, 0, 300, 150);
+// Create a conic gradient
+// The start angle is 0
+// The center position is 100, 100
+const gradient = ctx.createConicGradient(0, 100, 100);
+
+// Add five color stops
+gradient.addColorStop(0, "red");
+gradient.addColorStop(0.25, "orange");
+gradient.addColorStop(0.5, "yellow");
+gradient.addColorStop(0.75, "green");
+gradient.addColorStop(1, "blue");
+
+// Set the fill style and draw a rectangle
+ctx.fillStyle = gradient;
+ctx.fillRect(20, 20, 200, 200);
 
 const text = "Q³[{?fqFTjyµç";
 const baseLinePosition = 50;
@@ -8,7 +23,7 @@ const offsetX = 5;
 
 ctx.fillStyle="black";
 ctx.direction = "ltr";
-ctx.font = "48px serif";
+ctx.font = "40px serif";
 ctx.textAlign = "left";
 
 const textMetric = ctx.measureText(text);
@@ -31,10 +46,22 @@ const totalWidth = actualBoundingBoxRight - actualBoundingBoxLeft
 const endOfBox = Math.round(offsetX + totalWidth);
 //+ width 
  //+ actualBoundingBoxRight;
-console.log(`actualBoundingBoxLeft ${actualBoundingBoxLeft}`);
-console.log(`actualBoundingBoxRight ${actualBoundingBoxRight}`);
-console.log(`width ${width}`);
-console.log(`total width is ${totalWidth}px`); // this is the total width
+//console.log(`actualBoundingBoxLeft ${actualBoundingBoxLeft}`);
+//console.log(`actualBoundingBoxRight ${actualBoundingBoxRight}`);
+//console.log(`width ${width}`);
+//console.log(`total width is ${totalWidth}px`); // this is the total width
+
+for (let fontSize = 14; fontSize < 50; fontSize++  ){
+    ctx.font = `${fontSize}px serif`;
+    const tm = ctx.measureText(text);
+    
+    // height2 is around 10% higher of the fontSize mentioned in ctx.font
+    const height2 = tm.fontBoundingBoxAscent + tm.fontBoundingBoxDescent;
+
+    // height is around 90% of the fontSize mentioned in the ctx.font
+    const height = tm.actualBoundingBoxAscent + tm.actualBoundingBoxDescent;
+    console.log(`fontSize: ${fontSize}, measured font size: ${height2}, smeasured box size:${height}, ratio:${height/fontSize}, ratio2:${height2/fontSize}`);
+}
 
 // draw baseline (its one pixel below the baseline, to prevent overwriting the text)
 ctx.beginPath();
@@ -77,7 +104,7 @@ ctx.fillRect(0,0,1,1);
    fontBoundingBoxDescent = 10 // not on my firefox
 */
 const imageData = ctx.getImageData(0,0,10,10);
-console.log(imageData.data);
+
 // lets set a color
 imageData.data[0] = 255;
 imageData.data[2] = 255;
@@ -87,8 +114,6 @@ imageData.data[5+40] = 255;
 imageData.data[6+40] = 128;
 imageData.data[7+40] = 128;
 
-
-console.log(imageData.data);
 
 ctx.putImageData(imageData,0,0);
 

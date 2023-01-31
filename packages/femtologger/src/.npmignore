@@ -1,9 +1,0 @@
-src
-coverage
-node_modules
-scripts
-.eslintrc.cjs
-.gitignore
-.prettierignore
-package-lock.json
-tsconfig
