@@ -4,7 +4,8 @@ ctx.clearRect(0, 0, 300, 150);
 // Create a conic gradient
 // The start angle is 0
 // The center position is 100, 100
-const gradient = ctx.createConicGradient(0, 100, 100);
+ctx.save();
+/*const gradient = ctx.createConicGradient(0, 100, 100);
 
 // Add five color stops
 gradient.addColorStop(0, "red");
@@ -16,6 +17,8 @@ gradient.addColorStop(1, "blue");
 // Set the fill style and draw a rectangle
 ctx.fillStyle = gradient;
 ctx.fillRect(20, 20, 200, 200);
+*/
+ctx.restore();
 
 const text = "Q³[{?fqFTjyµç";
 const baseLinePosition = 50;
@@ -105,7 +108,7 @@ ctx.fillRect(0,0,1,1);
 */
 const imageData = ctx.getImageData(0,0,10,10);
 
-// lets set a color
+//lets set a color
 imageData.data[0] = 255;
 imageData.data[2] = 255;
 imageData.data[3] = 128;
