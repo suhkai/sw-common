@@ -1,0 +1,1319 @@
+article,
+/*a self-contained, independent piece of content that can be syndicated independently from the rest of the page.
+It is used to mark up content such as blog posts, articles, forums, 
+and similar types of content that could be syndicated or reused.
+*/
+aside,
+/*
+aside is used to mark up content that is tangentially related to the main content of the page.
+This content could be a sidebar,
+pull quote, or any other type of content that is separate from the main content, but still related to it.
+
+<aside><h1>Related news..</h1></aside>
+*/
+details,
+/*
+is used to create an interactive widget that the user can open and close to view or hide additional content.
+It is often used to create things like accordions, FAQs, or content that can be expanded and contracted.
+<details>
+<summary>The function does xyz</summary>
+<p>How to use it...<p>
+</details>
+*/
+figcaption,
+/*
+ used to provide a caption or description for a <figure> element.
+ The <figure> element is used to mark up content, such as images, diagrams, code snippets,
+ <figure>
+  <img src="..." >
+  <figcaption>Figure1: ...</figcaption>
+ </figure>
+*/
+figure,
+/* tag in HTML represents self-contained content, such as illustrations, diagrams, photos, code snippets, etc.
+, that is referenced within the main content of an HTML document. 
+*/
+footer,
+/* is usually placed at the bottom of a web page or section of a web page and contains content that is less important than the main content.
+The footer content can contain text, images, links, lists, and other HTML elements.
+*/
+
+header,
+/*
+represents the introductory content or a group of navigational links for a web page or a section of a web page.
+ It typically contains a logo, a title, and one or more navigation menus.
+*/
+
+/*
+hgroup,
+removed from html5 spec
+*/
+
+/*
+The purpose of the "nav" tag is to semantically indicate that the content within the tag is a navigation block
+nav {
+    display: block;
+}
+*/
+
+nav,
+/*
+ it provides a semantic meaning to the navigation links on a web page,
+  which makes the page more accessible and easier to understand for both users and search engines.
+*/
+
+section
+/*
+semantics, better then div, but try to use main, footer etc
+
+https://www.w3.org/TR/2011/WD-html5-20110525/sections.html#headings-and-sections
+
+Original w3 doc
+a standalone section of a web page that contains a distinct piece of content,
+ such as a header (here h1-h6) is meant, a footer, a main content area, or a sidebar.
+*/
+
+    {
+    display: block;
+}
+
+/*
+USER AGENT CHROME STYLE
+
+audio {
+    width: 300px;
+    height: 54px;
+}
+
+Example using audio
+<figure>
+    <figcaption>Listen to the T-Rex:</figcaption>
+    <audio
+        controls
+        src="/media/cc0-audio/t-rex-roar.mp3">
+            <a href="/media/cc0-audio/t-rex-roar.mp3">
+                Download audio
+            </a>
+    </audio>
+</figure>
+*/
+audio,
+/*
+CHROME USER AGENT
+canvas {
+    overflow-clip-margin: content-box;
+    overflow: clip;
+}
+
+FIREFOX USER AGENT
+
+canvas {
+  user-select: none;
+}
+*/
+canvas,
+/*
+FIREFOX USER AGENT
+video {
+  object-fit: contain;
+}
+
+CHROME USER AGENT
+video {
+    object-fit: contain;
+    overflow-clip-margin: content-box;
+    overflow: clip;
+}
+*/
+video {
+    display: inline-block;
+    /* normally this is just "display: inline" */
+}
+
+audio:not([controls]) {
+    /* do i want this? */
+    display: none;
+}
+
+/* anything that is hidden should not be displayed*/
+[hidden] {
+    display: none;
+}
+
+/*not really needed, tag + hidden attribute removed from flow*/
+
+/* 
+USER AGENT CHROME 
+USER AGENT FIREFOX
+html {
+    display: block;
+}
+*/
+html {
+    font-size: 100%;
+    text-size-adjust: 100%;
+    /* do not inflate */
+    -ms-text-size-adjust: 100%;
+}
+
+html,
+
+/* CHROME USER AGENT
+button {
+    appearance: auto;
+    writing-mode: horizontal-tb !important;  // writing mode 
+    text-rendering: auto;
+    color: buttontext;
+    letter-spacing: normal;  // this is initial value anyway, why is it here?
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: center;
+    align-items: flex-start;
+    cursor: default;
+    box-sizing: border-box;
+    background-color: buttonface;
+    margin: 0em;
+    padding: 1px 6px;
+    border-width: 2px;
+    border-style: outset;
+    border-color: buttonborder;
+    border-image: initial;   // this means default 
+}
+*/
+button,
+
+/*
+BOTH ARE CHROME USER AGENT CSS, one for general INPUT, other for INPUT specific TEXT
+
+
+input[type="text" i] {   // THE "i" means case insensitive text comparison
+    padding: 1px 2px;
+}
+
+input {
+    writing-mode: horizontal-tb !important;
+    font-style: ;
+    font-variant-ligatures: ;
+    font-variant-caps: ;
+    font-variant-numeric: ;
+    font-variant-east-asian: ;
+    font-weight: ;
+    font-stretch: ;
+    font-size: ;
+    font-family: ;
+    text-rendering: auto;
+    color: fieldtext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+    appearance: auto;
+    -webkit-rtl-ordering: logical;
+    cursor: text;
+    background-color: field;
+    margin: 0em;
+    padding: 1px 2px;
+    border-width: 2px;
+    border-style: inset;
+    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+    border-image: initial;
+}
+*/
+input,
+/*
+CHROME USER AGENT
+
+select:not(:-internal-list-box) {
+    overflow: visible !important;
+    overflow-x: ;
+    overflow-y: ;
+}
+
+select {
+    writing-mode: horizontal-tb !important;
+    font-style: ;
+    font-variant-ligatures: ;
+    font-variant-caps: ;
+    font-variant-numeric: ;
+    font-variant-east-asian: ;
+    font-weight: ;
+    font-stretch: ;
+    font-size: ;
+    font-family: ;
+    text-rendering: auto;
+    color: fieldtext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+    appearance: auto;
+    box-sizing: border-box;
+    align-items: center;
+    white-space: pre;
+    -webkit-rtl-ordering: logical;
+    background-color: field;
+    cursor: default;
+    margin: 0em;
+    border-width: 1px;
+    border-style: solid;
+    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+    border-image: initial;
+    border-radius: 0px;
+}
+*/
+
+select,
+
+/*
+Use vertical-align: bottom; or vertical-align: top
+to get rid of the gap just below texarea.
+
+CHROME USER-AGENT
+
+textarea:focus-visible {
+    outline-offset: 0px;
+}
+
+:focus-visible {
+    outline: -webkit-focus-ring-color auto 1px;
+}
+
+textarea {
+    writing-mode: horizontal-tb !important;
+    font-style: ;
+    font-variant-ligatures: ;
+    font-variant-caps: ;
+    font-variant-numeric: ;
+    font-variant-east-asian: ;
+    font-weight: ;
+    font-stretch: ;
+    font-size: ;
+    font-family: monospace;
+    text-rendering: auto;
+    color: fieldtext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+    appearance: auto;
+    -webkit-rtl-ordering: logical;
+    resize: auto;
+    cursor: text;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    background-color: field;
+    column-count: initial !important;
+    margin: 0em;
+    border-width: 1px;
+    border-style: solid;
+    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+    border-image: initial;
+    padding: 2px;
+}
+*/
+textarea {
+    font-family: sans-serif;
+    color: #222;
+}
+
+/*
+CHROME USER AGENT
+body {
+    display: block;
+    margin: 8px;
+}
+*/
+body {
+    margin: 0;
+    /* https://www.w3.org/TR/css-values-3/#font-relative-lengths */
+    font-size: 1em;
+    /* this is 1x the font-size of the body element */
+
+    line-height: 1.4;
+    /* without dimension it is multiplied by font-size,
+    https://www.w3.org/TR/css-inline-3/#line-height-property
+*/
+}
+
+a {
+    color: #00e;
+}
+
+/* visited, hover, focus, hover, are https://www.w3.org/TR/2018/REC-selectors-3-20181106/#dynamic-pseudos*/
+a:visited {
+    color: #551a8b;
+}
+
+a:hover {
+    color: #06e;
+}
+
+a:focus {
+    outline: thin dotted;
+}
+
+a:hover,
+a:active {
+    outline: 0;
+}
+
+/* its like <a> but gives a tooltip if you hover over it with the mouse <abbr title="World Health Organization">WHO</abbr> */
+abbr[title] {
+    border-bottom: 1px dotted;
+}
+
+/* b and strong are kindof the same */
+b,
+strong {
+    font-weight: bold;
+}
+
+
+/* User agent stylesheet from Chrome
+
+blockquote {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
+}
+
+*/
+blockquote {
+    margin: 1em 40px;
+}
+
+/*
+
+Definition, its like `` in markdown
+
+ User agent stylesheet from Chrome
+ dfn {
+    font-style: italic;
+}
+*/
+
+dfn {
+    font-style: italic;
+}
+
+/* horizontal separation line, old style? 
+
+User agent CSS (Chrome)
+hr {
+    display: block;
+    unicode-bidi: isolate;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
+    overflow: hidden;
+    border-style: inset;
+    border-width: 1px;
+}
+*/
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+/*
+The <ins> tag defines a text that has been inserted into a document. Browsers will usually underline inserted text.
+
+User agent style
+ins {
+    text-decoration: underline;
+}
+
+*/
+ins {
+    background: #ff9;
+    color: #000;
+    text-decoration: none;
+}
+
+/*
+like marking text like with a yellow marker
+mark {
+    background-color: mark;  // this seems to be yellow
+    color: marktext; //this seems to be #000 (from computed styles)
+}
+*/
+mark {
+    background: #ff0;
+    color: #000;
+    font-style: italic;
+    font-weight: bold;
+}
+
+/*
+Chrome user Agent:
+pre {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1em 0px;
+}
+*/
+pre,
+
+/*
+User agent Chrome
+code {
+    font-family: monospace;
+}
+*/
+code,
+
+/*
+User Agent Chrome
+kbd {
+    font-family: monospace;
+}
+*/
+kbd,
+
+/*
+USER AGENT CHROME
+samp {
+    font-family: monospace;
+}
+*/
+samp {
+    font-family: monospace, serif;
+    font-size: 1em;
+    /* relative to the parents font size*/
+}
+
+/*
+FIREFOX
+xmp, pre, plaintext {
+  display: block;
+  font-family: -moz-fixed;
+  white-space: pre;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+}
+CHROME:
+pre {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1em 0px;
+}
+
+*/
+pre {
+    white-space: pre;
+    /*
+      "pre-wrap": Sequences of white space are preserved.
+      Lines are broken at newline characters, at <br>,
+      and as necessary to fill line boxes.
+    */
+    white-space: pre-wrap;
+
+    word-wrap: break-word;
+    /* how long words are broken */
+}
+
+/*
+Chrome User agent
+q {
+    display: inline;
+}
+q::before {
+    content: open-quote;
+}
+q::after {
+    content: open-quote;
+}
+*/
+q {
+    quotes: none;
+}
+
+q:before,
+q:after {
+    content: "";
+    content: none;
+}
+
+/*
+Chrome user agent
+small {
+    font-size: smaller;
+}
+*/
+small {
+    font-size: 85%;
+}
+
+/*
+sub {
+    vertical-align: sub;
+    font-size: smaller;
+}
+*/
+sub,
+/*
+sup {
+    vertical-align: super;
+    font-size: smaller;
+}
+*/
+sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+sup {
+    top: -0.5em;
+}
+
+sub {
+    bottom: -0.25em;
+}
+
+/*
+ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+}
+*/
+ul,
+/*
+Chrome user agent
+ol {
+    display: block;
+    list-style-type: decimal;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+}
+*/
+ol {
+    margin: 1em 0;
+    padding: 0 0 0 40px;
+}
+
+/*
+<dl>
+  <dt>Coffee</dt>
+  <dd>Black hot drink</dd>
+  <dt>Milk</dt>
+  <dd>White cold drink</dd>
+</dl>
+
+Will look like
+
+Coffee --> <dt></dt> element
+    Black hot drink   --> <dd></dd> element
+Milk
+    White cold drink
+
+dl = description list
+dt = description term
+dd = "Definition Description"
+
+
+Chrome Agent CSS
+dd {
+    display: block;
+    margin-inline-start: 40px;
+}
+*/
+dd {
+    margin: 0 0 0 40px;
+}
+
+/* so for ul and ol under nav, clear them out*/
+nav ul,
+nav ol {
+    list-style: none;
+    list-style-image: none;
+    margin: 0;
+    padding: 0;
+}
+
+/*
+FIREFOX
+ img::before {
+  content: -moz-alt-content !important;
+  unicode-bidi: isolate;
+}
+
+CHROME
+
+img {
+    overflow-clip-margin: content-box;
+    overflow: clip;
+}
+
+*/
+img {
+    border: 0;
+    -ms-interpolation-mode: bicubic;
+    /* ms specific, fuzzed up, nearest neighbor = keep pixels */
+    vertical-align: middle;
+}
+
+/*
+Firefox User Agent
+
+svg:not(:root) it is not the root element (its embedded in html)
+{
+  overflow: hidden;
+}
+
+Chrome USER Agent
+svg:not(:root) {
+    overflow-clip-margin: content-box;
+    overflow: hidden;
+}
+
+*/
+
+svg:not(:root) {
+    overflow: hidden;
+}
+
+/*
+2nd time we do something for <figure>
+Chrome User Agent
+figure {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
+}
+*/
+figure {
+    margin: 0;
+}
+
+
+/*
+form {
+    display: block;
+    margin-top: 0em;
+}
+*/
+form {
+    margin: 0;
+}
+
+/*CHROME USER AGENT
+fieldset {
+    display: block;
+    margin-inline-start: 2px;
+    margin-inline-end: 2px;
+    padding-block-start: 0.35em;
+    padding-inline-start: 0.75em;
+    padding-inline-end: 0.75em;
+    padding-block-end: 0.625em;
+    min-inline-size: min-content;
+    border-width: 2px;
+    border-style: groove;
+    border-color: rgb(192, 192, 192);
+    border-image: initial;
+}
+
+
+*/
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/*
+UA CSS chrome
+label {
+    cursor: default;
+}*/
+label {
+    cursor: pointer;
+}
+
+/*
+USER AGENT CHROME
+legend {
+    display: block;
+    padding-inline-start: 2px;
+    padding-inline-end: 2px;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+}
+*/
+legend {
+    border: 0;
+    *margin-left: -7px;
+    padding: 0;
+    white-space: normal;
+}
+
+/* already done */
+button,
+/* already done */
+input,
+/* already done */
+select,
+/* already done */
+textarea {
+    font-size: 100%;
+    margin: 0;
+    vertical-align: baseline;
+    *vertical-align: middle;
+}
+
+/* already done */
+button,
+/* already done */
+input {
+    line-height: normal;
+}
+
+/* already done */
+button,
+input[type="button"],
+/* clears out input form fields */
+input[type="reset"],
+/* already done */
+input[type="submit"] {
+    cursor: pointer;
+}
+
+button[disabled],
+input[disabled] {
+    cursor: default;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    box-sizing: border-box;
+    padding: 0;
+}
+
+/*
+input[type="search" i] {
+    appearance: auto;
+    box-sizing: border-box;
+    padding: 1px 2px;
+}
+
+there is a generic input user agent css, (for all values of "type" attribute)
+*/
+input[type="search"] {
+    /*-webkit-appearance: textfield;*/
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
+
+/*
+"::-moz-focus-inner" is a pseudo-element specific to the Mozilla Firefox web browser
+ that targets the inner border or padding around an element when it receives focus.
+ It is used to apply specific styles to the inner focus outline, separate from the outer focus outline.
+ This pseudo-element is not part of the CSS standard
+ and should be used with caution as it may not be supported by all web browsers
+*/
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+textarea {
+    overflow: auto;
+    vertical-align: top;
+    resize: vertical;
+    /* how tex area is resized */
+}
+
+input:valid,
+textarea:valid {
+    content: "this is just a placeholder for vscode IDE not to mark it as error"
+}
+
+/* there is no user agent css for these pseudo classes :valid and :invalid 
+*/
+input:invalid,
+textarea:invalid {
+    background-color: #f0dddd;
+}
+
+/* user agent
+table {
+    display: table;
+    border-collapse: separate;
+    box-sizing: border-box;
+    text-indent: initial;
+    border-spacing: 2px;
+    border-color: grey;
+}
+*/
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/*
+user agent
+td {
+    display: table-cell;
+    vertical-align: inherit;
+}
+
+
+*/
+td {
+    vertical-align: top;
+}
+
+/*
+user agent
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+*/
+tr {
+    display: init
+}
+
+html,
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+fieldset,
+input,
+textarea,
+p,
+blockquote,
+/*user agent
+th {
+    display: table-cell;
+    vertical-align: inherit;
+    font-weight: bold;
+    text-align: -internal-center;
+}
+*/
+th,
+
+/*
+user agent
+address {
+    display: block;
+    font-style: italic;
+}
+*/
+address,
+
+/* 
+user agent
+caption {
+    display: table-caption;
+    text-align: -webkit-center;
+}
+
+style with "caption-side" and "text-align".
+*/
+caption,
+/*
+Chrome User agent
+cite {
+    font-style: italic;
+}
+*/
+cite,
+/*
+UA CSS
+code {
+    font-family: monospace;
+}
+*/
+code,
+
+/*
+A <dfn> means a word definition (like a cdecl) in the context of a sentence
+dfn {
+    font-style: italic;
+}
+*/
+dfn,
+/* UA Chrome
+When you want to stress (like in vocal) a word
+em {
+    font-style: italic;
+}
+*/
+em,
+/*
+Chrome UA
+Strong is to draw attention to a text, it should be user as "weaker" em, more in the context of a warning
+strong {
+    font-weight: bold;
+}
+*/
+strong,
+/*
+already defined
+*/
+th,
+
+/*
+UA css chrome
+var {
+    font-style: italic;
+}
+*/
+var {
+    content: "this is just to disable css(emptyRules)"
+}
+
+/* already done */
+ol,
+/* already done */
+ul {
+    list-style: none;
+}
+
+/* already done */
+caption,
+/* already done */
+th {
+    text-align: left;
+}
+
+/*
+h1 {
+    display: block;
+    font-size: 2em;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+*/
+h1,
+/*
+h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+*/
+h2,
+/*
+h3 {
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+*/
+h3,
+/*
+h4 {
+    display: block;
+    margin-block-start: 1.33em;
+    margin-block-end: 1.33em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+*/
+h4,
+/*
+h5 {
+    display: block;
+    font-size: 0.83em;
+    margin-block-start: 1.67em;
+    margin-block-end: 1.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+*/
+h5,
+/*
+h6 {
+    display: block;
+    font-size: 0.67em;
+    margin-block-start: 2.33em;
+    margin-block-end: 2.33em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+*/
+h6 {
+    font-weight: normal;
+}
+
+/* UA CSS
+q {
+    display: inline;
+}
+q::before {
+    content: open-quote;
+}
+q::after {
+    content: close-quote;
+}
+*/
+q:before,
+q:after {
+    content: '';
+}
+
+/*
+UA for chrome and UA for firefox
+abbr[title] {
+    text-decoration: underline dotted;
+}
+*/
+abbr,
+/* deprecated in html5
+confirmed deprecated in https://developer.mozilla.org/en-US/docs/Web/HTML/Element/acronym
+
+acronym {
+    border: 0;
+}
+*/
+
+/*
+FIREFOX
+li {
+  display: list-item;
+  text-align: match-parent;
+}
+CHROME
+li {
+    display: list-item;
+    text-align: -webkit-match-parent;
+}
+*/
+li {
+    padding: 0;
+}
+
+/*
+FIREFOX
+::marker {
+  text-align: end;
+  text-transform: none;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+}
+CHROME
+::marker {
+    text-align: start !important;
+    text-transform: none;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+    
+    text-indent: 0px !important;
+    text-align-last: start !important;
+}
+*/
+li::marker {
+    content: "dummy css value, to not have in empty {}"
+}
+
+/*  xmlsn attribute could be "http://www.w3.org/1999/xhtml" for html5 standard
+CHROME and FIREFOX
+html {
+    display: block;
+}
+*/
+html[xmlns] .clearfix {
+    display: block
+}
+
+/*
+CHROME
+a:-webkit-any-link {
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+}
+FIREFOX
+:link {
+  color: LinkText;
+}
+
+any <a> in the doc
+:any-link {
+  cursor: pointer;
+}
+
+:visited <-- visited links
+:link  <-- unvisted links
+*/
+a {
+    text-decoration: none;
+    color: #000;
+}
+
+/*
+FIREFOX AND CHROME
+head {
+    display: none;
+}
+
+*/
+head {
+    o display: block;
+}
+
+/* already done */
+a {
+    outline: 0;
+}
+
+/*
+already done
+*/
+
+*,
+input,
+/* this is not needed chrome/firefox does select "input" with "*" */
+
+/*
+FIREFOX
+
+select {
+    text-align: initial;
+text-indent: initial;
+text-shadow: initial;
+text-transform: initial;
+word-spacing: initial;
+letter-spacing: initial;
+
+padding-block: 1px;
+padding-inline: 4px;
+background-color: -moz-Combobox;
+color: -moz-ComboboxText;
+vertical-align: baseline;
+appearance: auto;
+
+user-select: none;
+border-width: 2px;
+border-style: inset;
+overflow: clip;
+display: inline-block;
+page-break-inside: avoid;
+
+margin: 0;
+border-color: ButtonBorder;
+font: -moz-list;
+white-space: nowrap !important;
+word-wrap: normal !important;
+cursor: default;
+}
+
+CHROME
+select {
+    writing-mode: horizontal-tb !important;
+    font-style: ;
+    font-variant-ligatures: ;
+    font-variant-caps: ;
+    font-variant-numeric: ;
+    font-variant-east-asian: ;
+    font-weight: ;
+    font-stretch: ;
+    font-size: ;
+    font-family: ;
+    text-rendering: auto;
+    color: fieldtext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+    appearance: auto;
+    box-sizing: border-box;
+    align-items: center;
+    white-space: pre;
+    -webkit-rtl-ordering: logical;
+    background-color: field;
+    cursor: default;
+    margin: 0em;
+    border-width: 1px;
+    border-style: solid;
+    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+    border-image: initial;
+    border-radius: 0px;
+}
+*/
+select {
+    box-sizing: border-box;
+}
+
+/* Reset Tools */
