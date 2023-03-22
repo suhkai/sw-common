@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import css from 'css';
+	// @ts-ignore
 	import jxpath from '@mangos/jxpath';
 	import cssText from '$lib/css';
 
