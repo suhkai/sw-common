@@ -6,4 +6,4 @@
 	<title>font-awesome-extravaganza</title>
 </svelte:head>
 
-<slot></slot>
+<slot />
