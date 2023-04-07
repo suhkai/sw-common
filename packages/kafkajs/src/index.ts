@@ -1,11 +1,5 @@
-import { Kafka, CompressionTypes, logLevel, ResourceConfigQuery, Message } from 'kafkajs';
-
-import limitOrderSchema from './shared/limit-order-schema.js';
-
-import {
-    SchemaRegistry,
-    readAVSCAsync
-} from "@kafkajs/confluent-schema-registry";
+import { Kafka } from 'kafkajs';
+import { SchemaRegistry, SchemaType } from '@kafkajs/confluent-schema-registry';
 
 const SASL_USER_NAME = process.env.SASL_USER_NAME;
 const SASL_USER_PASSWORD = process.env.SASL_USER_PASSWORD;
@@ -22,35 +16,30 @@ const registry = new SchemaRegistry({
     host: 'https://psrc-8vyvr.eu-central-1.aws.confluent.cloud',
 });
 
-const registerSchema = async () => {
+const schema = `
+  {
+    "type": "record",
+    "name": "RandomTest",
+    "namespace": "examples",
+    "fields": [{ "type": "string", "name": "fullName" }]
+  }
+`
 
-    const { id } = await registry.register(limitOrderSchema as any);
-    return id;
 
-};
+// nothing else is returned
+const { id } = await registry.register({ type: SchemaType.AVRO, schema });
 
-const registryId = await registerSchema();
 
-if (!registryId) {
-    console.error(`Failed to register schema`);
-    process.exit(1);
-}
+//console.log('id, answer', id, answer);
 
-const data: Message[] = Array.from({ length: 1000 });
-const base = Date.now();
-for (let i = 0; i < 1000; i++) {
-    const outgoingMessage = {
-        key: `${i}`,
-        value: await registry.encode(registryId, {
-            tag: 'bitfinex-btc-usd',
-            id: i,
-            amount: Math.trunc(Math.random() * 100),
-            price: Math.random() * 1E6,
-            timestamp: Date.now() - base
-        })
-    };
-    data[i] = outgoingMessage;
-}
+const payload = { fullName: 'John Doe' }
+const result = await registry.encode(id, payload);
+
+//console.log(result.toString());
+
+const backTopayload = await registry.decode(result)
+//console.log(Object.getPrototypeOf(backTopayload), JSON.stringify(backTopayload));
+
 
 
 
@@ -89,36 +78,39 @@ async function init() {
     const admin = kafka.admin();
     await admin.connect();
     console.log('...connected');
+    console.log('querying topics....');
     const allTopics = await admin.listTopics();
+    console.log('Number of topics found:' + allTopics.length);
+
+    const groups = await admin.listGroups();
+    console.log('consumer groups', groups);
+
+    const describeCluster = await admin.describeCluster();
+    console.log('cluster config', JSON.stringify(describeCluster, null, 4));
+
+    for (const { nodeId } of describeCluster.brokers) {
+        const describeConfigBroker = await admin.describeConfigs(
+            {
+                includeSynonyms: false,
+                resources: [{
+                    type: 4,
+                    name: String(nodeId)
+                }]
+            });
+        const { configEntries } = describeConfigBroker.resources[0];
+        configEntries.forEach(ce => console.log(`config for broker ${nodeId}`, ce.configName));
+    }
+
 
     for (const topic of allTopics) {
-        //console.log(`topic:${topic}`);
+        console.log(`info for topic:${topic}`);
         const fetchTopicOffsets = await admin.fetchTopicOffsets(topic);
-        //console.log(fetchTopicOffsets);
+        console.log('\ttopic offset', fetchTopicOffsets);
 
         const fetchTopicOffsetsByTimestamp = await admin.fetchTopicOffsetsByTimestamp(topic);
-        //console.log(fetchTopicOffsetsByTimestamp);
+        console.log('\ttopic offset by ts', fetchTopicOffsetsByTimestamp);
 
-        const groups = await admin.listGroups();
-        //console.log(groups);
-
-        const describeCluster = await admin.describeCluster();
-        //console.log(JSON.stringify(describeCluster, null, 4));
-
-        for (const { nodeId } of describeCluster.brokers) {
-            const describeConfigBroker = await admin.describeConfigs(
-                {
-                    includeSynonyms: false,
-                    resources: [{
-                        type: 4,
-                        name: String(nodeId)
-                    }]
-                });
-            const { configEntries } = describeConfigBroker.resources[0];
-            //configEntries.forEach(ce => console.log(ce.configName));
-        }
-
-        const describeConfig = await admin.describeConfigs(
+        const { resources: topicConfigs } = await admin.describeConfigs(
             {
                 includeSynonyms: false,
                 resources: [{
@@ -132,24 +124,52 @@ async function init() {
                     name: topic
                 }]
             });
-        //console.log(describeConfig);
+        for (const config of topicConfigs) {
+            const { errorCode, errorMessage, resourceType, resourceName, configEntries: entries } = config;
+            const kv = entries.map(({ configName, configValue }) => {
+                return `${configName}=${configValue}`;
+            });
+            kv.sort();
+            console.log(kv.join('\n'));
+        }
     }
+
+
+    //console.log('\ttopic configuration', JSON.stringify(describeConfig, null, 4));
+
     /*
-export interface ProducerConfig {
-  createPartitioner?: ICustomPartitioner
-  retry?: RetryOptions
-  metadataMaxAge?: number
-  allowAutoTopicCreation?: boolean
-  idempotent?: boolean
-  transactionalId?: string
-  transactionTimeout?: number
-  maxInFlightRequests?: number
-}
+    export interface ProducerConfig {
+    createPartitioner?: ICustomPartitioner
+    retry?: RetryOptions
+    metadataMaxAge?: number
+    allowAutoTopicCreation?: boolean
+    idempotent?: boolean
+    transactionalId?: string
+    transactionTimeout?: number
+    maxInFlightRequests?: number
+    }
     */
+    console.log('creating producer....')
     const producer = kafka.producer({
         allowAutoTopicCreation: false,
         //retry: { retries: 4 },
     });
+
+    console.log('connecting the producer...');
+
+    await producer.connect();
+
+    console.log('sending message...'); schema
+    const sendResult = await producer.send({
+        topic: 'limit-order-bitfinex', messages: [{
+            key: 'some-key',
+            value: result
+        }]
+    });
+
+    console.log('sendResult:', sendResult);
+
+
 
     /*
     export interface ProducerRecord {
@@ -170,23 +190,8 @@ export interface ProducerConfig {
       timestamp?: string
     }
     */
-    const metaData = await producer.send({
-        topic: 'limit-order-bitfinex',
-        acks: 1,
-        messages: [{
-            value: await registry.encode(registryId as number, {
-                tag: 'bitfinex-btc-usd',
-                id: 3,
-                amount: Math.trunc(Math.random() * 100),
-                price: Math.random() * 1E6,
-                timestamp: Date.now() - base
-            })
-        }]
-    });
 
-    console.log('send.......');
 
-    console.log('metaData>>', metaData);
     //await producer.sendBatch({ topicMessages: [{ topic: 'limit-order-bitfinex', messages: data }] });
 
 
@@ -255,6 +260,6 @@ export interface ProducerConfig {
 
 }
 
-init().then(() => {
-    console.log("started");
-});
+init()
+    .then(() => console.log("started"))
+    .catch(e => console.error("there was an error", e));
