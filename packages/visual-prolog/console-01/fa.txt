@@ -1,0 +1,8 @@
+﻿clauses
+    person("Judith",female).
+    person("Bill",male).
+    person("John",male).
+    person("Pam",female).
+    parent("John","Judith").
+    parent("Bill","John").
+    parent("Pam","Bill").
