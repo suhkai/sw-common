@@ -1,0 +1,19 @@
+{
+  "name": "rambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tsx": "3.12.6",
+    "typescript": "5.0.4"
+  },
+  "dependencies": {
+    "rambda": "7.5.0"
+  }
+}
