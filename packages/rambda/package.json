@@ -10,10 +10,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/ramda": "0.29.1",
+    "prettier": "2.8.8",
     "tsx": "3.12.6",
     "typescript": "5.0.4"
   },
   "dependencies": {
-    "rambda": "7.5.0"
+    "rambda": "7.5.0",
+    "ramda": "0.29.0"
   }
 }
