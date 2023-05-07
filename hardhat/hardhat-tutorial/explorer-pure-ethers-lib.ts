@@ -1,6 +1,4 @@
-import { InfuraProvider, Wallet, decodeBase58, formatEther } from 'ethers';
-
-import type { Typed } from 'ethers';
+import { InfuraProvider, Wallet } from 'ethers';
 
 const PRIVATE_KEY =
     '46cfd416b45c2c443a5a6929fc75e1d3183ec3ea0a45494907fc92eed0bda9a2';
@@ -33,8 +31,6 @@ async function main() {
     });
 
     // ethers.utils
-    const bytes32 = utils.
-
 }
 
 main().catch(console.log);
