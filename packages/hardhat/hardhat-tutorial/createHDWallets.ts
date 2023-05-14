@@ -52,6 +52,12 @@ function hierarchyWallets() {
         "m/44'/60'/0'/0" // one 0 shorter then above
     );
 
+    console.log(
+        `seed from ganach passphrase: ${parent.mnemonic?.computeSeed()}`
+    );
+
+    console.log(`entropy from ganach passphrase: ${parent.mnemonic?.entropy}`);
+
     console.log(`parent path and depth: ${parent.path}, ${parent.depth}`);
 
     // derive all nine ganach accounts
