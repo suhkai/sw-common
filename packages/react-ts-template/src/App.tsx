@@ -1,5 +1,5 @@
 /* vender */
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import classNames from 'classnames';
 
 /* styles */
@@ -23,6 +23,7 @@ export default function App() {
 
     return (
         <div className={className}>
+            Hello World!
         </div>
     );
 }
