@@ -1,0 +1,13 @@
+node_modules
+.jest-cache
+.vscode
+build
+dist
+coverage
+.eslint-ignore
+.gitignore
+.prettierrc
+LICENSE.txt
+CHANGELOG.md
+README.md
+Dockerfile
