@@ -17,6 +17,13 @@
     "tsx": "3.12.7"
   },
   "dependencies": {
+    "@ethereumjs/block": "4.2.2",
+    "@ethereumjs/blockchain": "6.2.2",
+    "@ethereumjs/common": "3.1.2",
+    "@ethereumjs/tx": "4.1.2",
+    "@ethereumjs/util": "8.0.6",
+    "@ethereumjs/vm": "6.4.2",
+    "@ethersproject/abi": "5.7.0",
     "ethers": "6.3.0"
   }
 }
