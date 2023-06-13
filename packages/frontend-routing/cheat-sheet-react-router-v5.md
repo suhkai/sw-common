@@ -1,4 +1,259 @@
-### [`Route`][route-v5]
+https://dev.to/mandrasch/rich-harris-explains-why-sveltekit-pushes-for-server-side-rendering-and-against-spa-5flj
+
+### Hooks
+
+#### `useHistory`
+
+Accesses the {history} object normally associated  with `withRouter` or (parent) `<Route>`.
+
+#### `useLocation`
+
+Accesses the {location} object normally associated with `withRouter` or (parent) `<Route>`.
+
+#### `useParams`
+
+Accesses the object with key value params reflecting the url params used by (parent) `<Route>`
+
+#### `useRouteMatch`
+
+Accesses the {match} object normally associated with `withRouter` or (parent) `<Route>`.
+
+
+### `<BrowserRouter>`
+
+`<Router>` that uses the HTML 5 history api. `pushState`, `replaceState` and `popState` to keep UI in sync with URL.
+
+
+### `<HashRouter>`
+
+Distinguishes different routes by the suffix after `#`
+Legacy used for older browsers without an `window.history` api.
+
+
+### `<Link>`
+
+#### `to` (string)
+
+- /about
+- courses?sort=name
+
+
+#### `to` (object)
+
+Object with props:
+
+- pathname: A string representing the path to link to.
+- search: A string representation of query parameters.
+- hash: A hash to put in the URL, e.g. #a-hash.
+- state: State to persist to the location.
+
+
+#### `to` (function)
+
+current location is passed as an argument, return new location (string or object)
+
+#### `replace` (bool)
+
+Replace current entry in the history instead of adding new one
+
+#### `innnerRef`: (function)
+
+(not needed if you use React 16), just take it from the provided "ref" property.
+
+### `<NavLink>`
+
+Special version of `<Link>` to add css styling
+
+
+### `<Prompt>`
+
+Used to prompt user before navigation away from page
+
+(Also check out the history object "block" method, not part of any WebAPi)
+
+
+### `<MemoryRouter>`
+
+Does not write url to the address bar, usefull in non browser environments like `React Native` or headless test environments.
+
+
+### [`Redirect`][redirect-v5]
+
+Navigate to new location. The new location will override the current location in the history stack.
+New location Overwrites the old one, this is what happens also with a server 3xx redirect.
+
+
+
+#### `to` [(string)][path-to-regexp]
+
+Redirect to the string (can be a [path-to-regexp][path-to-regexp].
+
+#### `to` [location object](#location)
+
+```javascript
+{
+  key: 'ac3df4', // not with HashHistory!
+  pathname: '/somewhere',
+  search: '?some=search-string',
+  hash: '#howdy',
+  state: {
+    [userDefined]: true
+  }
+}
+```
+
+#### `push` (bool)
+
+Push a new entry to the history instead of replacing the current one.
+
+#### `from` (string)
+
+```jsx
+<Switch>
+  <Redirect from="/users/:id" to="/users/profile/:id" />  // redirect users who are still using '/users/:id'
+  <Route path="/users/profile/:id">
+    <Profile />
+  </Route>
+</Switch>
+```
+
+#### `exact` (bool)
+
+same as `Route.exact` property
+
+Makes only sense if also `from` property is defined.
+
+#### `sensative` (bool)
+
+Same as `Route.sensative`
+
+Makes only sense if also `from` property is defined.
+
+
+### [`<Route>`][route-v5]
+
+1. Route is always technically rendered,  (its output is just "null" when nothing matches)
+2. If "path" property matches it will render its "children" prop
+3. Re-using the `<Route>` as a subnode will make it be the same `<Route>` component
+
+Render methods:
+
+- "component" prop on the `<Route>`
+- "render" prop on the `<Route>`
+- "children" prop on the `<Route>`
+
+All 3 render methods will pass the same 3 props
+
+- "match": (object)
+- "location": (object)
+- "history": "
+
+#### `component`
+
+The component specified in the `<Route>` props will be used to render
+
+```jsx
+ <Router>
+    <Route path="/user/:username" component={User} />
+  </Router>
+```
+
+#### `render` (function)
+
+```jsx
+<Router>
+    <Route path="/home" render={({ match, location, history }) => <div>.....</div>} />
+</Router>
+```
+
+#### `children` (function)
+
+The difference between `children` (function) and `render` (function) is that `children` is always rendered even if the 
+route does not match.
+
+```jsx
+<Route
+  children={({ match, ...rest }) => (
+    {/* Animate will always render, so you can use lifecycles
+        to animate its child in and out */}
+    <Animate>
+      {match && <Something {...rest}/>}
+    </Animate>
+  )}
+/>
+```
+
+#### `path` string, string[]
+
+So if it is an array, then one of those paths must match
+
+Matches partially (the prefix) if "exact" = false
+
+/path1/one/two will match if `path={'/path1'}
+
+
+#### `exact` boolean
+
+Path must match exactly (taking into account, 
+
+/path1/one/two will NOT match if `path={'/path1'}
+
+#### `strict` boolean
+
+strict rules, (NOT the same as exact = true prop).
+
+| path  | location.pathname | matches? |
+|-------|-------------------|----------|
+| /one/ | /one              | no       |
+| /one/ | /one/             | yes      |
+| /one/ | /one/two          | yes      |
+
+
+#### `location` object
+
+
+#### `sensative` bool
+
+Path matching is case sensative, if true
+
+Examples:
+
+```jsx
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
+
+ReactDOM.render(
+  <Router>
+    <div>
+      <Route exact path="/"> // if route "/" then its <Home />
+        <Home />
+      </Route>
+      <Route path="/news">
+        <NewsFeed />        // if route "/news" (this will allow for a query string through) then its <NewsFeed />
+      </Route>
+    </div>
+  </Router>,
+  node
+);
+```
+
+```jsx
+<div>
+  <Home />
+  <!-- react-empty: 2 -->
+</div>
+```
+
+```jsx
+<div>
+  <!-- react-empty: 1 -->
+  <NewsFeed />
+</div>
+```
+1
+
+
 
 ### [`Router`][router-v5]
 
@@ -142,12 +397,16 @@ generatePath("/user/:id/:entity(posts|comments)", {
   entity: "posts"
 });
 // Will return /user/1/posts
-``
+```
 
 
 ### [`history`][history-npm-v5]
 
 `react router` depends on the package [`remix-run/history`](https://github.com/remix-run/history)
+
+- Mutable object, dont trust history for location url, use  `location` object
+- Can make your own history object, this way you can integrate Router with redux for example (or other things)
+
 
 ### [`location`][location-v5]
 
@@ -255,7 +514,7 @@ If you want to pass the wrapped component as a `ref` use the `wrappedComponentRe
 
 
 
-
+[redirect-v5]: https://v5.reactrouter.com/web/api/Redirect
 [route-v5]: https://v5.reactrouter.com/web/api/Route
 [router-v5]: https://v5.reactrouter.com/web/api/Router
 [static-router-v5]: https://v5.reactrouter.com/web/api/StaticRouter
@@ -266,4 +525,5 @@ If you want to pass the wrapped component as a `ref` use the `wrappedComponentRe
 [match-path-router-v5]: https://v5.reactrouter.com/web/api/matchPath
 [location-v5]: https://v5.reactrouter.com/web/api/location
 [history-npm-v5]: https://v5.reactrouter.com/web/api/history
+[path-to-regexp]: https://github.com/pillarjs/path-to-regexp/tree/v1.7.0
 
