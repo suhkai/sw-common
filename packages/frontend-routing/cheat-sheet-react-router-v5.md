@@ -1,5 +1,3 @@
-https://dev.to/mandrasch/rich-harris-explains-why-sveltekit-pushes-for-server-side-rendering-and-against-spa-5flj
-
 ### Hooks
 
 #### `useHistory`
