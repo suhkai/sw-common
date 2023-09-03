@@ -15,6 +15,7 @@
     "serve": "14.1.2"
   },
   "dependencies": {
+    "@mangos/debug-frontend": "0.0.4",
     "esbuild": "0.19.2"
   }
 }

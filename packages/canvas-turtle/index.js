@@ -1,12 +1,43 @@
 (() => {
+  // node_modules/@mangos/debug-frontend/dist/index.js
+  var a = {
+    send(e, t, ...n) {
+    },
+    isEnabled(e) {
+      return false;
+    }
+  };
+  var r = a;
+  function u(e, t) {
+    return r = e(t), r;
+  }
+  function s(e) {
+    function t(n, ...l) {
+      r.isEnabled(e) && r.send(e, n, ...l);
+    }
+    return Object.defineProperties(t, {
+      enabled: {
+        get() {
+          return r.isEnabled(e);
+        },
+        enumerable: true
+      },
+      namespace: {
+        value: e,
+        enumerable: true,
+        writable: false
+      }
+    }), t;
+  }
+
   // tools.ts
   var { max, round } = Math;
-  ImageData.prototype.setColor = function setColor(x, y, r, g, b, a = 255) {
+  ImageData.prototype.setColor = function setColor(x, y, r2, g, b, a2 = 255) {
     const offset = y * this.width + x << 2;
-    this.data[offset + 0] = r;
+    this.data[offset + 0] = r2;
     this.data[offset + 1] = g;
     this.data[offset + 2] = b;
-    this.data[offset + 3] = a;
+    this.data[offset + 3] = a2;
   };
   ImageData.prototype.drawHLine = function drawHLine(y, colors2) {
     const width = this.width;
@@ -95,7 +126,17 @@
     "hsla(90, 100%, 50%)",
     "hsla(120, 100%, 50%)"
   ];
+  var debugRO = s("resize-observer");
+  u((prefix) => ({
+    send(namespace, formatter, ...args) {
+      console.info(namespace + ", " + formatter, ...args);
+    },
+    isEnabled(namespace) {
+      return true;
+    }
+  }));
   var observer = new ResizeObserver((entries) => {
+    debug("resize observer fired");
     if (entries.length !== 1) {
       debug("[there is not exactly 1 entry: %d", entries.length);
       return;
@@ -107,17 +148,20 @@
     const width = entry.borderBoxSize[0].inlineSize;
     entry.target.width = physicalPixelWidth;
     entry.target.height = physicalPixelHeight;
-    debug("canvas bitmap size set to width =%d, height=%d", physicalPixelWidth, physicalPixelHeight);
+    const detail = { physicalPixelWidth, physicalPixelHeight, height, width };
+    debug("canvas size: %o", detail);
     entry.target.dispatchEvent(
       new CustomEvent("cresize", {
-        detail: { physicalPixelWidth, physicalPixelHeight, height, width }
+        detail
       })
     );
   });
   observer.observe(canvas, { box: "device-pixel-content-box" });
+  var debugResize = s("canvas-cresize-event-handler");
   canvas.addEventListener("cresize", (e) => {
     const detail = e.detail;
-    console.log(detail);
+    const { physicalPixelHeight, height } = detail;
+    debugResize("height [canvas pixel height]/[css pixel height]: %s", physicalPixelHeight / height);
     const ctx = canvas.getContext("2d");
     const topLine = 10;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);

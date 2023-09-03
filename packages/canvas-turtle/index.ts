@@ -1,4 +1,7 @@
+import createNS, { register } from '@mangos/debug-frontend';
 import { getTextMetrics, max, round } from './tools';
+
+import { bresenham } from './bresenham';
 
 window.addEventListener('error',err => console.error('global error received:', err));
 
@@ -12,7 +15,20 @@ const colors = [
     "hsla(120, 100%, 50%)",
 ]
 
+const debugRO = createNS('resize-observer');
+
+register(prefix => ({
+    send(namespace, formatter, ...args) {
+        console.info(namespace + ', ' + formatter, ...args);
+    },
+    isEnabled(namespace){
+        return true;
+    }
+}))
+
+
 const observer = new ResizeObserver((entries) => {
+    debug('resize observer fired');
     if (entries.length !== 1) {
         debug('[there is not exactly 1 entry: %d', entries.length);
         return;
@@ -24,19 +40,24 @@ const observer = new ResizeObserver((entries) => {
     const width = entry.borderBoxSize[0].inlineSize;
     entry.target.width = physicalPixelWidth;
     entry.target.height = physicalPixelHeight;
-    debug('canvas bitmap size set to width =%d, height=%d', physicalPixelWidth, physicalPixelHeight);
+    const detail ={ physicalPixelWidth, physicalPixelHeight, height, width }
+
+    debug('canvas size: %o', detail);
     entry.target.dispatchEvent(
         new CustomEvent('cresize', {
-           detail: { physicalPixelWidth, physicalPixelHeight, height, width }
+           detail
         })
     );
 });
 
 observer.observe(canvas, { box: 'device-pixel-content-box' });
 
+const debugResize = createNS('canvas-cresize-event-handler');
+
 canvas.addEventListener('cresize', (e: Event) => {
     const detail: { physicalPixelWidth, physicalPixelHeight, height, width } =  (e as any).detail;
-    console.log(detail);
+    const { physicalPixelHeight , height } = detail;
+    debugResize('height [canvas pixel height]/[css pixel height]: %s', physicalPixelHeight/height )
     const ctx = canvas.getContext("2d")!;
     // patching
     const topLine = 10;
