@@ -1,123 +1,188 @@
-const canvas = document.querySelector("canvas.mycanvas");
-const ctx = canvas.getContext("2d");
-ctx.clearRect(0, 0, 300, 150);
-// Create a conic gradient
-// The start angle is 0
-// The center position is 100, 100
-ctx.save();
-/*const gradient = ctx.createConicGradient(0, 100, 100);
+(() => {
+  // tools.ts
+  var { max, round } = Math;
+  ImageData.prototype.setColor = function setColor(x, y, r, g, b, a = 255) {
+    const offset = y * this.width + x << 2;
+    this.data[offset + 0] = r;
+    this.data[offset + 1] = g;
+    this.data[offset + 2] = b;
+    this.data[offset + 3] = a;
+  };
+  ImageData.prototype.drawHLine = function drawHLine(y, colors2) {
+    const width = this.width;
+    for (let i = 0; i < width; i++) {
+      const color = colors2[i % colors2.length];
+      this.setColor(i, y, ...color);
+    }
+  };
+  ImageData.prototype.drawVLine = function drawVLine(x, colors2) {
+    const height = this.height;
+    for (let i = 0; i < height; i++) {
+      const color = colors2[i % colors2.length];
+      this.setColor(x, i, ...color);
+    }
+  };
+  ImageData.prototype.drawGrid = function drawGrid(dx, dy, color) {
+    for (let i = 0; i < this.height; i += dy) {
+      this.drawHLine(i - 1, ...color);
+    }
+    for (let i = 0; i < this.width; i += dx) {
+      this.drawVLine(i - 1, ...color);
+    }
+  };
+  function getTextMetrics(ctx, text) {
+    const textMetric = ctx.measureText(text);
+    const {
+      //the width of a segment of inline text in CSS pixels.
+      width,
+      /*
+      Returns the distance from the horizontal line indicated by the
+          CanvasRenderingContext2D.textBaseline attribute to the top of the 
+          bounding rectangle used to render the text, in CSS pixels.
+          */
+      actualBoundingBoxAscent: ascent,
+      /*
+      Returns the distance from the horizontal line indicated by the
+      CanvasRenderingContext2D.textBaseline attribute to the bottom 
+      of the bounding rectangle used to render the text, in CSS pixels.
+      */
+      actualBoundingBoxDescent: descent,
+      /*
+          Distance parallel to the baseline from the alignment point given 
+          by the CanvasRenderingContext2D.textAlign property
+          to the left side of the bounding rectangle of the given text,
+          in CSS pixels; positive numbers indicating a distance going left from 
+          the given alignment point.
+          */
+      actualBoundingBoxLeft: left,
+      /**
+       * 
+       * Returns the distance from the alignment point given by the 
+       * CanvasRenderingContext2D.textAlign property to the right side of the
+       *  bounding rectangle of the given text, in CSS pixels.
+       *  The distance is measured parallel to the baseline.
+       */
+      actualBoundingBoxRight: right,
+      /*
+      The read-only fontBoundingBoxAscent property of the TextMetrics interface returns
+      the distance from the horizontal line indicated by the 
+      CanvasRenderingContext2D.textBaseline attribute,
+      to the top of the highest bounding rectangle of 
+      all the fonts used to render the text, in CSS pixels.
+      */
+      fontBoundingBoxAscent: fontAscent,
+      /*
+      The read-only fontBoundingBoxDescent property of the TextMetrics interface returns 
+      the distance from the horizontal line indicated by the CanvasRenderingContext2D.textBaseline attribute to the bottom of the bounding rectangle of all the fonts used to render the text, in CSS pixels.
+      */
+      fontBoundingBoxDescent: fontDescent
+      // not generally supported
+      //emHeightAscent, // https://caniuse.com/?search=emHeightAscent%20
+      //emHeightDescent, // https://caniuse.com/?search=emHeightDescent
+      //hangingBaseline, // https://caniuse.com/?search=hangingBaseline%20
+      //alphabeticBaseline, // https://caniuse.com/?search=alphabeticBaseline
+      //ideographicBaseline, // https://caniuse.com/?search=ideographicBaseline
+    } = textMetric;
+    return { width, ascent, descent, fontAscent, fontDescent, left, right };
+  }
 
-// Add five color stops
-gradient.addColorStop(0, "red");
-gradient.addColorStop(0.25, "orange");
-gradient.addColorStop(0.5, "yellow");
-gradient.addColorStop(0.75, "green");
-gradient.addColorStop(1, "blue");
-
-// Set the fill style and draw a rectangle
-ctx.fillStyle = gradient;
-ctx.fillRect(20, 20, 200, 200);
-*/
-ctx.restore();
-
-const text = "Q³[{?fqFTjyµç";
-const baseLinePosition = 50;
-const offsetX = 5;
-
-ctx.fillStyle="black";
-ctx.direction = "ltr";
-ctx.font = "40px serif";
-ctx.textAlign = "left";
-
-const textMetric = ctx.measureText(text);
-console.log(textMetric);
-
-const {  
-    width,
-    actualBoundingBoxAscent,
-    actualBoundingBoxDescent,
-    actualBoundingBoxLeft,
-    actualBoundingBoxRight,
-    fontBoundingBoxAscent,
-    fontBoundingBoxDescent,
-} = textMetric
-ctx.baseLinePosition = "alphabetic";
-ctx.fillText(text, offsetX, baseLinePosition);
-
-
-const totalWidth = actualBoundingBoxRight - actualBoundingBoxLeft
-const endOfBox = Math.round(offsetX + totalWidth);
-//+ width 
- //+ actualBoundingBoxRight;
-//console.log(`actualBoundingBoxLeft ${actualBoundingBoxLeft}`);
-//console.log(`actualBoundingBoxRight ${actualBoundingBoxRight}`);
-//console.log(`width ${width}`);
-//console.log(`total width is ${totalWidth}px`); // this is the total width
-
-for (let fontSize = 14; fontSize < 50; fontSize++  ){
-    ctx.font = `${fontSize}px serif`;
-    const tm = ctx.measureText(text);
-    
-    // height2 is around 10% higher of the fontSize mentioned in ctx.font
-    const height2 = tm.fontBoundingBoxAscent + tm.fontBoundingBoxDescent;
-
-    // height is around 90% of the fontSize mentioned in the ctx.font
-    const height = tm.actualBoundingBoxAscent + tm.actualBoundingBoxDescent;
-    console.log(`fontSize: ${fontSize}, measured font size: ${height2}, smeasured box size:${height}, ratio:${height/fontSize}, ratio2:${height2/fontSize}`);
-}
-
-// draw baseline (its one pixel below the baseline, to prevent overwriting the text)
-ctx.beginPath();
-ctx.strokeStyle = "hsla(45, 100%, 50%, 0.5)";
-ctx.strokeWidth = 1;
-ctx.moveTo(offsetX,  baseLinePosition + 0.5);
-ctx.lineTo(endOfBox, baseLinePosition + 0.5);
-ctx.closePath();
-ctx.stroke(); // Render the path
-
-// draw ascent (1 pixel above the ascent line )
-const ascentLine =  Math.round(baseLinePosition - actualBoundingBoxAscent) - 0.5;
-ctx.beginPath();
-ctx.strokeStyle = "hsla(90, 100%, 50%, 0.5)";
-ctx.strokeWidth = 1;
-// 
-ctx.moveTo(offsetX, ascentLine);
-ctx.lineTo(endOfBox, ascentLine);
-ctx.closePath();
-ctx.stroke(); // Render the path
-
-// draw descent (1 pixel below the descent line )
-const descentLine =  Math.round(baseLinePosition + actualBoundingBoxDescent) + 0.5;
-ctx.beginPath();
-ctx.strokeStyle = "hsla(120, 100%, 50%, 0.5)";
-ctx.strokeWidth = 1;
-// 
-ctx.moveTo(offsetX, descentLine);
-ctx.lineTo(endOfBox, descentLine);
-ctx.closePath();
-ctx.stroke(); // Render the path
-ctx.fillRect(0,0,1,1);
-/*
-   width = 63.984375
-   actualBoundingBoxAscent = 34
-   actualBoundingBoxDescent = 0
-   actualBoundingBoxLeft = 0
-   actualBoundingBoxRight = 59
-   fontBoundingBoxAscent = 43  // not on my firefox
-   fontBoundingBoxDescent = 10 // not on my firefox
-*/
-const imageData = ctx.getImageData(0,0,10,10);
-
-//lets set a color
-imageData.data[0] = 255;
-imageData.data[2] = 255;
-imageData.data[3] = 128;
-
-imageData.data[5+40] = 255;
-imageData.data[6+40] = 128;
-imageData.data[7+40] = 128;
-
-
-ctx.putImageData(imageData,0,0);
-
-
+  // index.ts
+  window.addEventListener("error", (err) => console.error("global error received:", err));
+  var canvas = document.querySelector("canvas.mycanvas");
+  var debug = console.info;
+  var colors = [
+    "hsla(45, 100%, 50%)",
+    "hsla(90, 100%, 50%)",
+    "hsla(120, 100%, 50%)"
+  ];
+  var observer = new ResizeObserver((entries) => {
+    if (entries.length !== 1) {
+      debug("[there is not exactly 1 entry: %d", entries.length);
+      return;
+    }
+    const entry = entries[0];
+    const physicalPixelWidth = entry.devicePixelContentBoxSize[0].inlineSize;
+    const physicalPixelHeight = entry.devicePixelContentBoxSize[0].blockSize;
+    const height = entry.borderBoxSize[0].blockSize;
+    const width = entry.borderBoxSize[0].inlineSize;
+    entry.target.width = physicalPixelWidth;
+    entry.target.height = physicalPixelHeight;
+    debug("canvas bitmap size set to width =%d, height=%d", physicalPixelWidth, physicalPixelHeight);
+    entry.target.dispatchEvent(
+      new CustomEvent("cresize", {
+        detail: { physicalPixelWidth, physicalPixelHeight, height, width }
+      })
+    );
+  });
+  observer.observe(canvas, { box: "device-pixel-content-box" });
+  canvas.addEventListener("cresize", (e) => {
+    const detail = e.detail;
+    console.log(detail);
+    const ctx = canvas.getContext("2d");
+    const topLine = 10;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.direction = "ltr";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "black";
+    const text1 = "Q\xB3[{?fqFTjy\xB5\xE7GZI\u209B";
+    let offsety = 5;
+    let offsetx = 6;
+    for (let fontSize = 8; fontSize <= 44; fontSize += 2) {
+      const fontShort = `${fontSize}px sans-serif`;
+      offsety = drawTextAndGuides(fontShort, fontShort, ctx, offsetx, offsety, 5);
+    }
+    return;
+  });
+  function drawTextAndGuides(fontShortHand, text, ctx, offsetx, offsety, spacing) {
+    ctx.font = fontShortHand;
+    const metrics = getTextMetrics(ctx, text);
+    const { ascent, descent, fontAscent, fontDescent, left, right } = metrics;
+    const maxHeight = round(max(fontAscent, ascent) + max(fontDescent, descent));
+    const baseLine = round(ascent);
+    const imd = new ImageData(4, maxHeight);
+    imd.setColor(3, baseLine, 255, 0, 0, 192);
+    imd.setColor(2, baseLine, 255, 0, 0, 192);
+    imd.setColor(1, baseLine, 255, 0, 0, 192);
+    imd.setColor(0, baseLine, 255, 0, 0, 192);
+    for (let i = 1; i < round(max(ascent, fontAscent)); i++) {
+      if (i % 6 === 0) {
+        imd.setColor(3, baseLine - i, 0, 0, 0, 192);
+        imd.setColor(2, baseLine - i, 0, 0, 0, 192);
+        imd.setColor(1, baseLine - i, 0, 0, 0, 192);
+        imd.setColor(0, baseLine - i, 0, 0, 0, 192);
+        continue;
+      }
+      if (i % 2 === 0) {
+        imd.setColor(3, baseLine - i, 0, 0, 0, 128);
+        imd.setColor(2, baseLine - i, 0, 0, 0, 128);
+        continue;
+      }
+    }
+    for (let i = 1; i < maxHeight - 1 - round(max(ascent, fontAscent)); i++) {
+      if (i % 6 === 0) {
+        imd.setColor(3, baseLine + i, 0, 0, 0, 192);
+        imd.setColor(2, baseLine + i, 0, 0, 0, 192);
+        imd.setColor(1, baseLine + i, 0, 0, 0, 192);
+        imd.setColor(0, baseLine + i, 0, 0, 0, 192);
+        continue;
+      }
+      if (i % 2 === 0) {
+        imd.setColor(3, baseLine + i, 0, 0, 0, 128);
+        imd.setColor(2, baseLine + i, 0, 0, 0, 128);
+        continue;
+      }
+    }
+    ctx.putImageData(imd, offsetx, offsety);
+    ctx.fillText(text, offsetx + 4 - left, baseLine + offsety);
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.moveTo(offsetx + 4 - left, baseLine + offsety + 0.5);
+    ctx.strokeStyle = colors[0];
+    ctx.lineTo(ctx.canvas.width, baseLine + +offsety + 0.5);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+    return offsety + maxHeight + spacing;
+  }
+})();

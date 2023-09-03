@@ -3,25 +3,39 @@
 }
 html {
     border: 4px solid orange;
-    height: fit-content;
-    width: fit-content;
+    height: 100%;
+    width: 100%;
+    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
 }
 
 body {
     border: 4px solid purple;
     margin: 0;
-    height:fit-content;
-    width: fit-content;
+    height: 100%;
+    width: 100%;
 }
 
-canvas.mycanvas {
+#container {
+    width: 100%;
+    height: 100%;
+    border: 4px green dashed;
+    display: flex;
+    flex-direction: column;
+}
+
+canvas {
+    min-height: 0px;
     /*writing-mode: vertical-lr;*/
     image-rendering: pixelated;
     image-rendering: optimizeSpeed;
     border: 4px solid red;
     aspect-ratio: 1 / 1;
     /* 16:9 aspect ratio */
-    width: calc(var(--canvas-width) * 2);
-    height: calc(var(--canvas-height) * 2);
+    width: 100%;
+    height: 100%;
+    flex-basis: 0;
+    flex-grow: 1;
     display: block;
+    shape-rendering: pixelated;
 }
