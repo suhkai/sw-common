@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "tsx memcache",
+            "program": "${workspaceFolder}/packages/memcached/runme.mjs",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
             "name": "femtologger build script",
             "program": "${workspaceFolder}/packages/femtologger/scripts/build.mjs",
             "request": "launch",
