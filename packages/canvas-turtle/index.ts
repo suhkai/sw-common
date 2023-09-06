@@ -7,15 +7,13 @@ window.addEventListener('error',err => console.error('global error received:', e
 
 const canvas = document.querySelector<HTMLCanvasElement>("canvas.mycanvas")!;
 
-const debug = console.info;
-
 const colors = [
     "hsla(45, 100%, 50%)",
     "hsla(90, 100%, 50%)",
     "hsla(120, 100%, 50%)",
 ]
 
-const debugRO = createNS('resize-observer');
+
 
 register(prefix => ({
     send(namespace, formatter, ...args) {
@@ -26,11 +24,11 @@ register(prefix => ({
     }
 }))
 
-
+const debugRO = createNS('resize-observer');
 const observer = new ResizeObserver((entries) => {
-    debug('resize observer fired');
+    debugRO('resize observer fired');
     if (entries.length !== 1) {
-        debug('[there is not exactly 1 entry: %d', entries.length);
+        debugRO('[there is not exactly 1 entry: %d', entries.length);
         return;
     }
     const entry: ResizeObserverEntry & { target: HTMLCanvasElement }= entries[0] as any;  // its always there
@@ -42,7 +40,7 @@ const observer = new ResizeObserver((entries) => {
     entry.target.height = physicalPixelHeight;
     const detail ={ physicalPixelWidth, physicalPixelHeight, height, width }
 
-    debug('canvas size: %o', detail);
+    debugRO('canvas size: %o', detail);
     entry.target.dispatchEvent(
         new CustomEvent('cresize', {
            detail
