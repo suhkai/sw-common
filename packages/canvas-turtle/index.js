@@ -120,13 +120,11 @@
   // index.ts
   window.addEventListener("error", (err) => console.error("global error received:", err));
   var canvas = document.querySelector("canvas.mycanvas");
-  var debug = console.info;
   var colors = [
     "hsla(45, 100%, 50%)",
     "hsla(90, 100%, 50%)",
     "hsla(120, 100%, 50%)"
   ];
-  var debugRO = s("resize-observer");
   u((prefix) => ({
     send(namespace, formatter, ...args) {
       console.info(namespace + ", " + formatter, ...args);
@@ -135,10 +133,11 @@
       return true;
     }
   }));
+  var debugRO = s("resize-observer");
   var observer = new ResizeObserver((entries) => {
-    debug("resize observer fired");
+    debugRO("resize observer fired");
     if (entries.length !== 1) {
-      debug("[there is not exactly 1 entry: %d", entries.length);
+      debugRO("[there is not exactly 1 entry: %d", entries.length);
       return;
     }
     const entry = entries[0];
@@ -149,7 +148,13 @@
     entry.target.width = physicalPixelWidth;
     entry.target.height = physicalPixelHeight;
     const detail = { physicalPixelWidth, physicalPixelHeight, height, width };
-    debug("canvas size: %o", detail);
+    debugRO(
+      "physicalPixelWidth: %s,	physicalPixelHeight: %s,	width: %s,	height: %s",
+      String(physicalPixelWidth).padStart(5, "0"),
+      String(physicalPixelHeight).padStart(5, "0"),
+      String(height).padStart(5, "0"),
+      String(width).padStart(5, "0")
+    );
     entry.target.dispatchEvent(
       new CustomEvent("cresize", {
         detail

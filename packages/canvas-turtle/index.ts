@@ -40,7 +40,12 @@ const observer = new ResizeObserver((entries) => {
     entry.target.height = physicalPixelHeight;
     const detail ={ physicalPixelWidth, physicalPixelHeight, height, width }
 
-    debugRO('canvas size: %o', detail);
+        debugRO('physicalPixelWidth: %s,\tphysicalPixelHeight: %s,\twidth: %s,\theight: %s', 
+      String(physicalPixelWidth).padStart(5,'0'),
+      String(physicalPixelHeight).padStart(5,'0'),
+      String(height).padStart(5,'0'),
+      String(width).padStart(5,'0'),  
+    );
     entry.target.dispatchEvent(
         new CustomEvent('cresize', {
            detail

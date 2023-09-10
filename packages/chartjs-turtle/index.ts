@@ -1,4 +1,3 @@
-import Chart from 'chart.js/auto';
 import createNS, { register } from '@mangos/debug-frontend';
 
 const canvas = document.querySelector('canvas')!;
@@ -14,7 +13,7 @@ register(prefix => ({
 }));
  
 const debugRO = createNS('resize-observer');
-/*
+
 const observer = new ResizeObserver((entries) => {
     debugRO('resize observer fired');
     if (entries.length !== 1) {
@@ -30,7 +29,12 @@ const observer = new ResizeObserver((entries) => {
     entry.target.height = physicalPixelHeight;
     const detail ={ physicalPixelWidth, physicalPixelHeight, height, width }
 
-    debugRO('canvas size: %o', detail);
+    debugRO('physicalPixelWidth: %s,\tphysicalPixelHeight: %s,\twidth: %s,\theight: %s', 
+      String(physicalPixelWidth).padStart(5,'0'),
+      String(physicalPixelHeight).padStart(5,'0'),
+      String(height).padStart(5,'0'),
+      String(width).padStart(5,'0'),  
+    );
     entry.target.dispatchEvent(
         new CustomEvent('cresize', {
            detail
@@ -39,23 +43,3 @@ const observer = new ResizeObserver((entries) => {
 });
 
 observer.observe(canvas, { box: 'device-pixel-content-box' });
-*/
-
-  new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-      datasets: [{
-        label: '# of Votes',
-        data: [12, 19, 3, 5, 2, 3],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
