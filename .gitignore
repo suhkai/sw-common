@@ -11,6 +11,8 @@ dist
 build
 coverage
 node_modules
+.vscode
+.metals
 
 # Logs
 logs
