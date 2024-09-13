@@ -33,8 +33,6 @@
   font-size: 15px;
 }
 
-
-
 body {
   height: 100%;
   border: 4px red solid;
@@ -77,3 +75,7 @@ body {
     background-color: #f9f9f9;
   }
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
