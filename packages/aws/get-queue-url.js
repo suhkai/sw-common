@@ -19,6 +19,6 @@ export const main = async (queueName = SQS_QUEUE_NAME) => {
 // snippet-end:[sqs.JavaScript.queues.getQueueUrlV3]
 
 // Invoke main function if this file was run directly.
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] === fileURL   ToPath(import.meta.url)) {
   main();
 }
