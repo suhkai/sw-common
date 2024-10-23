@@ -1,4 +1,5 @@
 import styles from './svg.module.css';
+import './svg.css';
 
 export type SVGProperties = {
   style: Record<string, string>;
@@ -6,9 +7,11 @@ export type SVGProperties = {
 
 export default function SVGPPlIcon(props: SVGProperties) {
   console.log('prop passing: %o', Object.fromEntries(Object.entries(props.style)));
+  
   console.log('svg styles: %o', Object.fromEntries(Object.entries(styles)));
+  
     return (
-<svg className={styles.svgpeopleIcon} focusable="false" color="transparent" aria-hidden="true" viewBox="0 0 20 20">
+<svg style={props.style} className={`${styles.svgpeopleIcon} ${styles['abc:hover']}`} focusable="false" color="transparent" aria-hidden="true" viewBox="0 0 20 20">
   <path d="M12.82 13.8574C14.06 12.6366 15.76 11.8762 17.64 11.8762C17.68 11.8762 17.73 11.8862 17.77 11.8862" 
       stroke="#1436D3" strokeLinecap="round" strokeLinejoin="round"></path>
   <path d="M16.33 5.12195C15.57 5.57223 15.06 6.39274 15.06 7.34334C15.06 8.77423 16.22 9.93496 17.65 9.93496C17.77 9.93496 17.89 9.91494 18 9.89493" stroke="#1436D3" strokeLinecap="round" strokeLinejoin="round"></path>

@@ -10,7 +10,7 @@ function ShipperSearchListBox() {
 function App() {
   return (
     <>
-        <SVGPPlIcon style={{ width: '24px' }}/>
+        <SVGPPlIcon style={{ width: '1.5rem' }}/>
         <ShipperSearchListBox />
     </>
   )
